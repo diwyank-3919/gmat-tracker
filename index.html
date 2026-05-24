@@ -679,7 +679,8 @@ function render(){
   document.getElementById('m-total-sub').textContent=sd+' days studied';
   document.getElementById('total-chip').textContent=fmtH(tot);
 
-  let streak=0,cur=new Date(today);
+  // If today has no session yet, start from yesterday so streak isn't broken prematurely
+  let streak=0,cur=minsOn(dateStr(today))>0?new Date(today):addDays(today,-1);
   while(true){const ds=dateStr(cur);if(minsOn(ds)>0){streak++;cur=addDays(cur,-1);}else break;}
   document.getElementById('streak-chip').textContent=streak;
   document.getElementById('streak-count').textContent=streak;
