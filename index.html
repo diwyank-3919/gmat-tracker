@@ -5,494 +5,570 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GMAT Study Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root {
-  --ink: #0f0e0c;
-  --ink-2: #3a3830;
-  --ink-3: #7a7670;
-  --paper: #faf8f3;
-  --paper-2: #f2efe7;
-  --paper-3: #e8e4d8;
-  --accent: #c8471a;
-  --accent-2: #e87a45;
-  --green: #2d7a4f;
-  --green-light: #d6f0e2;
-  --red: #c0392b;
-  --red-light: #fde8e6;
-  --amber: #b06a00;
-  --amber-light: #fef3d8;
-  --blue: #1a4f8a;
-  --blue-light: #dbeafe;
-  --border: rgba(15,14,12,0.1);
-  --border-2: rgba(15,14,12,0.18);
-  --radius: 10px;
-  --radius-lg: 16px;
-  --shadow: 0 1px 3px rgba(15,14,12,0.08), 0 4px 16px rgba(15,14,12,0.06);
-  --shadow-lg: 0 4px 8px rgba(15,14,12,0.08), 0 12px 40px rgba(15,14,12,0.1);
+  --bg: #0c0c0e;
+  --bg-2: #131316;
+  --bg-3: #1a1a1f;
+  --bg-4: #222228;
+  --line: rgba(255,255,255,0.07);
+  --line-2: rgba(255,255,255,0.12);
+  --text: #f0eff4;
+  --text-2: #9998a8;
+  --text-3: #5c5b6e;
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.15);
+  --green-border: rgba(34,197,94,0.3);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --red-border: rgba(239,68,68,0.25);
+  --amber: #f59e0b;
+  --amber-dim: rgba(245,158,11,0.12);
+  --accent: #7c6af7;
+  --accent-dim: rgba(124,106,247,0.15);
+  --accent-border: rgba(124,106,247,0.35);
+  --radius: 8px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{
+  font-family:'Geist',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  line-height:1.5;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── LAYOUT ── */
+.shell{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+@media(max-width:860px){.shell{grid-template-columns:1fr}}
 
-html { font-size: 16px; scroll-behavior: smooth; }
+/* ── SIDEBAR ── */
+.sidebar{
+  background:var(--bg-2);
+  border-right:1px solid var(--line);
+  padding:1.5rem 1.25rem;
+  display:flex;flex-direction:column;gap:0;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+@media(max-width:860px){.sidebar{display:none}}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:2rem;padding-bottom:1.25rem;border-bottom:1px solid var(--line)}
+.logo-icon{
+  width:34px;height:34px;border-radius:9px;
+  background:var(--accent);display:flex;align-items:center;justify-content:center;
+  font-size:16px;color:#fff;flex-shrink:0;
+  box-shadow:0 0 0 1px var(--accent-border),0 4px 12px rgba(124,106,247,0.3);
+}
+.logo-text{font-family:'Instrument Serif',serif;font-size:17px;color:var(--text);line-height:1.1}
+.logo-sub{font-size:10px;color:var(--text-3);margin-top:1px;letter-spacing:0.04em;text-transform:uppercase}
 
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--paper);
-  color: var(--ink);
-  min-height: 100vh;
-  line-height: 1.6;
+.nav-section{margin-bottom:1.5rem}
+.nav-label{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);margin-bottom:8px;padding:0 8px}
+.nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:7px 10px;border-radius:var(--radius);
+  font-size:13px;color:var(--text-2);cursor:pointer;
+  transition:all 0.12s;margin-bottom:2px;
 }
+.nav-item:hover{background:var(--bg-3);color:var(--text)}
+.nav-item.active{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border)}
+.nav-item .ti{font-size:15px}
 
-/* Background texture */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    radial-gradient(ellipse 80% 50% at 20% 10%, rgba(200,71,26,0.04) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(26,79,138,0.04) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
-}
+.sidebar-stats{margin-top:auto;padding-top:1.25rem;border-top:1px solid var(--line)}
+.sidebar-stat{margin-bottom:12px}
+.sidebar-stat-label{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-3);margin-bottom:4px}
+.sidebar-stat-val{font-size:20px;font-family:'Instrument Serif',serif;color:var(--text)}
+.sidebar-stat-sub{font-size:11px;color:var(--text-3);margin-top:1px}
+.mini-bar{height:3px;background:var(--bg-4);border-radius:2px;margin-top:6px;overflow:hidden}
+.mini-bar-fill{height:100%;border-radius:2px;transition:width 0.5s cubic-bezier(.4,0,.2,1)}
 
-/* ── Layout ── */
-.app { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+/* ── MAIN ── */
+.main{background:var(--bg);overflow-x:hidden}
 
-/* ── Header ── */
-.header {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  gap: 1rem; margin-bottom: 2.5rem; padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border);
-  flex-wrap: wrap;
+/* ── TOP BAR ── */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 2rem;border-bottom:1px solid var(--line);
+  position:sticky;top:0;background:var(--bg);z-index:10;
+  backdrop-filter:blur(12px);
 }
-.header-brand { display: flex; align-items: center; gap: 14px; }
-.brand-icon {
-  width: 48px; height: 48px; border-radius: 12px;
-  background: var(--accent); display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 22px; flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(200,71,26,0.3);
+.topbar-left{display:flex;align-items:center;gap:8px}
+.topbar-title{font-size:14px;font-weight:500;color:var(--text)}
+.topbar-date{font-size:13px;color:var(--text-3)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.chip{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;padding:4px 10px;border-radius:100px;
+  border:1px solid var(--line-2);color:var(--text-2);
+  background:var(--bg-3);
 }
-.brand-title {
-  font-family: 'DM Serif Display', serif;
-  font-size: 26px; line-height: 1.1; color: var(--ink);
-}
-.brand-sub { font-size: 13px; color: var(--ink-3); margin-top: 2px; }
-.header-badges { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding-top: 4px; }
-.badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 12px; padding: 5px 11px;
-  border-radius: 100px; border: 1px solid var(--border-2);
-  background: var(--paper-2); color: var(--ink-2);
-  font-weight: 400;
-}
-.badge .ti { font-size: 14px; }
-.badge.streak { border-color: rgba(200,71,26,0.3); background: rgba(200,71,26,0.06); color: var(--accent); }
-.badge.weekly { border-color: rgba(45,122,79,0.3); background: rgba(45,122,79,0.06); color: var(--green); }
+.chip.green{border-color:var(--green-border);background:var(--green-dim);color:var(--green)}
+.chip.purple{border-color:var(--accent-border);background:var(--accent-dim);color:var(--accent)}
 
-/* ── Metrics ── */
-.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 2rem; }
-.metric-card {
-  background: var(--paper-2); border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  padding: 1.1rem 1.25rem; position: relative; overflow: hidden;
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-.metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-.metric-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: var(--accent); opacity: 0.6; border-radius: 3px 3px 0 0;
-}
-.metric-card.green::before { background: var(--green); }
-.metric-card.blue::before { background: var(--blue); }
-.metric-label {
-  font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em;
-  color: var(--ink-3); margin-bottom: 8px;
-  display: flex; align-items: center; gap: 5px;
-}
-.metric-label .ti { font-size: 13px; }
-.metric-value { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--ink); line-height: 1; }
-.metric-sub { font-size: 12px; color: var(--ink-3); margin-top: 6px; }
-.metric-value.met { color: var(--green); }
+/* ── CONTENT ── */
+.content{padding:2rem}
 
-/* ── Section title ── */
-.section-title {
-  font-family: 'DM Serif Display', serif;
-  font-size: 18px; color: var(--ink); margin-bottom: 1rem;
-  display: flex; align-items: center; gap: 8px;
+/* ── HERO METRICS ── */
+.hero-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:2rem}
+@media(max-width:700px){.hero-metrics{grid-template-columns:repeat(2,1fr)}}
+.hm-card{
+  background:var(--bg-2);border:1px solid var(--line);
+  border-radius:var(--radius-lg);padding:1.25rem;
+  position:relative;overflow:hidden;
+  transition:border-color 0.15s,transform 0.15s;
+  cursor:default;
 }
-.section-title .ti { font-size: 18px; color: var(--accent); }
+.hm-card:hover{border-color:var(--line-2);transform:translateY(-1px)}
+.hm-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);
+}
+.hm-icon{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;margin-bottom:14px;
+}
+.hm-icon.purple{background:var(--accent-dim);color:var(--accent)}
+.hm-icon.green{background:var(--green-dim);color:var(--green)}
+.hm-icon.red{background:var(--red-dim);color:var(--red)}
+.hm-icon.amber{background:var(--amber-dim);color:var(--amber)}
+.hm-label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px}
+.hm-value{font-family:'Instrument Serif',serif;font-size:28px;color:var(--text);line-height:1}
+.hm-value.met{color:var(--green)}
+.hm-sub{font-size:11px;color:var(--text-3);margin-top:6px}
+.hm-bar{height:2px;background:var(--bg-4);border-radius:1px;margin-top:10px;overflow:hidden}
+.hm-bar-fill{height:100%;border-radius:1px;transition:width 0.6s cubic-bezier(.4,0,.2,1)}
 
-/* ── Filters ── */
-.filters {
-  display: flex; gap: 6px; align-items: center;
-  margin-bottom: 1.5rem; flex-wrap: wrap;
-}
-.filter-btn {
-  font-size: 13px; font-family: 'DM Sans', sans-serif;
-  padding: 6px 14px; border: 1px solid var(--border-2);
-  border-radius: 100px; background: transparent;
-  color: var(--ink-2); cursor: pointer; transition: all 0.15s;
-}
-.filter-btn:hover { border-color: var(--ink-3); color: var(--ink); }
-.filter-btn.active {
-  background: var(--ink); color: var(--paper); border-color: var(--ink);
-}
-.filter-sep { width: 1px; height: 20px; background: var(--border-2); margin: 0 4px; }
-.filter-nav {
-  display: flex; align-items: center; gap: 6px; margin-left: auto;
-}
-.filter-nav .filter-btn { padding: 6px 10px; }
-.range-label { font-size: 13px; color: var(--ink-3); min-width: 120px; text-align: center; }
+/* ── TWO COLUMN ── */
+.two-col{display:grid;grid-template-columns:1fr 340px;gap:1rem;margin-bottom:1rem}
+@media(max-width:900px){.two-col{grid-template-columns:1fr}}
 
-/* ── Log panel ── */
-.log-panel { display: grid; grid-template-columns: 360px 1fr; gap: 1rem; margin-bottom: 1.75rem; }
-@media (max-width: 740px) { .log-panel { grid-template-columns: 1fr; } }
-
-.card {
-  background: #fff; border-radius: var(--radius-lg);
-  border: 1px solid var(--border); padding: 1.25rem 1.4rem;
-  box-shadow: var(--shadow);
+/* ── PANEL ── */
+.panel{
+  background:var(--bg-2);border:1px solid var(--line);
+  border-radius:var(--radius-lg);padding:1.25rem 1.5rem;
 }
-.card-title {
-  font-size: 13px; font-weight: 500; color: var(--ink-2);
-  margin-bottom: 1rem; display: flex; align-items: center; gap: 7px;
-  text-transform: uppercase; letter-spacing: 0.06em;
+.panel-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1.25rem;
 }
-.card-title .ti { font-size: 15px; color: var(--accent); }
-
-.form-grid { display: flex; flex-direction: column; gap: 10px; }
-.form-row { display: flex; gap: 8px; align-items: center; }
-.form-row label { font-size: 12px; color: var(--ink-3); min-width: 52px; }
-.form-row input, .form-row select {
-  flex: 1; height: 34px; font-size: 13px; font-family: 'DM Sans', sans-serif;
-  padding: 0 10px; border: 1px solid var(--border-2);
-  border-radius: var(--radius); background: var(--paper);
-  color: var(--ink); outline: none; transition: border-color 0.15s;
+.panel-title{
+  font-size:13px;font-weight:500;color:var(--text-2);
+  display:flex;align-items:center;gap:7px;
+  text-transform:uppercase;letter-spacing:0.06em;
 }
-.form-row input:focus, .form-row select:focus { border-color: var(--accent); }
-.form-row .time-inputs { display: flex; gap: 6px; align-items: center; flex: 1; }
-.form-row .time-inputs input { width: 56px; flex: none; text-align: center; }
-.form-row .time-inputs span { font-size: 12px; color: var(--ink-3); }
+.panel-title .ti{font-size:14px;color:var(--accent)}
 
-.add-btn {
-  width: 100%; margin-top: 12px; padding: 9px;
-  font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500;
-  border: 1px solid var(--accent); border-radius: var(--radius);
-  background: var(--accent); color: #fff; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  transition: all 0.15s;
+/* ── LOG FORM ── */
+.form-stack{display:flex;flex-direction:column;gap:10px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em}
+.field input,.field select{
+  height:36px;font-size:13px;font-family:'Geist',sans-serif;
+  padding:0 12px;border:1px solid var(--line-2);
+  border-radius:var(--radius);background:var(--bg-3);
+  color:var(--text);outline:none;transition:border-color 0.15s;
+  appearance:none;-webkit-appearance:none;
 }
-.add-btn:hover { background: #b03d15; }
-.add-btn .ti { font-size: 15px; }
-
-/* Session list */
-.sessions-list { display: flex; flex-direction: column; gap: 7px; max-height: 230px; overflow-y: auto; }
-.sessions-list::-webkit-scrollbar { width: 4px; }
-.sessions-list::-webkit-scrollbar-track { background: var(--paper-2); border-radius: 2px; }
-.sessions-list::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
-
-.session-item {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 9px 11px; border-radius: var(--radius);
-  background: var(--paper-2); border: 1px solid var(--border);
-  font-size: 13px;
+.field input:focus,.field select:focus{border-color:var(--accent)}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239998a8' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dur-row{display:flex;gap:6px;align-items:center}
+.dur-row input{width:60px;text-align:center;flex:none}
+.dur-row span{font-size:12px;color:var(--text-3)}
+.log-btn{
+  width:100%;margin-top:4px;padding:10px;
+  font-size:13px;font-family:'Geist',sans-serif;font-weight:500;
+  border:1px solid var(--accent);border-radius:var(--radius);
+  background:var(--accent);color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:all 0.15s;letter-spacing:0.02em;
 }
-.session-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-right: 8px; }
-.session-info { display: flex; align-items: center; flex: 1; }
-.session-topic { color: var(--ink-2); }
-.session-dur { font-weight: 500; color: var(--ink); margin-left: auto; margin-right: 10px; }
-.del-btn {
-  background: none; border: none; cursor: pointer;
-  color: var(--ink-3); font-size: 14px; padding: 2px 4px;
-  border-radius: 4px; transition: color 0.15s;
+.log-btn:hover{background:#6b5ae0;border-color:#6b5ae0}
+.log-btn:active{transform:scale(0.98)}
+
+/* ── SESSIONS LIST ── */
+.sessions-scroll{display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto}
+.sessions-scroll::-webkit-scrollbar{width:3px}
+.sessions-scroll::-webkit-scrollbar-track{background:transparent}
+.sessions-scroll::-webkit-scrollbar-thumb{background:var(--bg-4);border-radius:2px}
+.sess-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:var(--radius);
+  background:var(--bg-3);border:1px solid var(--line);
+  transition:border-color 0.12s;
 }
-.del-btn:hover { color: var(--red); }
+.sess-item:hover{border-color:var(--line-2)}
+.sess-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sess-topic{font-size:13px;color:var(--text-2);flex:1}
+.sess-dur{font-size:13px;font-weight:500;color:var(--text);margin-right:8px}
+.sess-del{background:none;border:none;cursor:pointer;color:var(--text-3);font-size:14px;padding:2px;border-radius:4px;transition:color 0.12s}
+.sess-del:hover{color:var(--red)}
+.empty{font-size:12px;color:var(--text-3);padding:20px 0;text-align:center}
 
-.empty-state { font-size: 12px; color: var(--ink-3); padding: 16px 0; text-align: center; }
-
-/* ── Chart ── */
-.chart-card {
-  background: #fff; border-radius: var(--radius-lg);
-  border: 1px solid var(--border); padding: 1.25rem 1.4rem;
-  box-shadow: var(--shadow); margin-bottom: 1rem;
+/* ── FILTERS ── */
+.filters{display:flex;gap:6px;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap}
+.fbtn{
+  font-size:12px;font-family:'Geist',sans-serif;
+  padding:5px 13px;border:1px solid var(--line-2);
+  border-radius:100px;background:transparent;
+  color:var(--text-3);cursor:pointer;transition:all 0.12s;
 }
-.chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; flex-wrap: wrap; gap: 8px; }
-.chart-legend { display: flex; gap: 14px; font-size: 12px; color: var(--ink-3); }
-.chart-legend span { display: flex; align-items: center; gap: 5px; }
-.legend-box { width: 10px; height: 10px; border-radius: 2px; }
+.fbtn:hover{color:var(--text);border-color:var(--line-2)}
+.fbtn.active{background:var(--accent-dim);color:var(--accent);border-color:var(--accent-border)}
+.fbar-sep{width:1px;height:16px;background:var(--line-2);margin:0 2px}
+.fnav{display:flex;align-items:center;gap:4px;margin-left:auto}
+.fnav .fbtn{padding:5px 9px}
+.frange{font-size:12px;color:var(--text-3);min-width:100px;text-align:center}
 
-/* ── Bottom row ── */
-.bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-@media (max-width: 640px) { .bottom-row { grid-template-columns: 1fr; } }
+/* ── CHART ── */
+.chart-legend{display:flex;gap:14px;font-size:11px;color:var(--text-3)}
+.chart-legend span{display:flex;align-items:center;gap:5px}
+.leg-box{width:8px;height:8px;border-radius:2px}
 
-/* ── Day grid ── */
-.day-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 7px; }
-.day-cell {
-  border-radius: var(--radius); padding: 10px 6px 8px;
-  text-align: center; border: 1px solid var(--border);
-  background: var(--paper-2); cursor: pointer; transition: all 0.15s;
+/* ── TOPIC PILLS ── */
+.topic-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.topic-pill{display:flex;align-items:center;gap:5px;font-size:11px;padding:4px 9px;border-radius:100px;border:1px solid;color:var(--text-2)}
+
+/* ── CALENDAR GRID ── */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-head-row{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
+.cal-head{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-3);text-align:center;padding:4px 0}
+.cal-cell{
+  aspect-ratio:1;border-radius:var(--radius);
+  border:1px solid var(--line);background:var(--bg-3);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;transition:all 0.12s;position:relative;overflow:hidden;
+  padding:4px;
 }
-.day-cell:hover { border-color: var(--ink-3); transform: translateY(-1px); }
-.day-cell.selected { border-color: var(--accent); border-width: 1.5px; }
-.day-cell.met { background: var(--green-light); border-color: rgba(45,122,79,0.25); }
-.day-cell.missed { background: var(--red-light); border-color: rgba(192,57,43,0.2); }
-.day-name { font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); margin-bottom: 5px; }
-.ring-wrap { position: relative; width: 40px; height: 40px; margin: 0 auto 4px; }
-.ring-wrap svg { position: absolute; top: 0; left: 0; }
-.ring-pct { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 9px; font-weight: 500; }
-.day-date { font-size: 10px; font-weight: 500; color: var(--ink-2); }
-.day-hrs { font-size: 9px; color: var(--ink-3); margin-top: 1px; }
+.cal-cell:hover{border-color:var(--line-2);background:var(--bg-4)}
+.cal-cell.met{background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.2)}
+.cal-cell.missed{background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.18)}
+.cal-cell.today-cell{border-color:var(--accent-border);box-shadow:0 0 0 1px var(--accent-border) inset}
+.cal-num{font-size:11px;font-weight:500;color:var(--text-2)}
+.cal-hrs{font-size:9px;margin-top:2px}
+.cal-dot{width:4px;height:4px;border-radius:50%;margin-top:3px}
+.cal-cell.empty-day{opacity:0.3;pointer-events:none}
 
-/* ── Streak bar ── */
-.streak-wrap { display: flex; flex-wrap: wrap; gap: 5px; }
-.streak-dot {
-  width: 20px; height: 20px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 9px; transition: transform 0.1s;
+/* ── STREAK ── */
+.streak-grid{display:flex;flex-wrap:wrap;gap:4px}
+.s-dot{
+  width:22px;height:22px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;cursor:default;transition:transform 0.1s;
 }
-.streak-dot:hover { transform: scale(1.2); }
-.streak-dot.met { background: var(--green-light); color: var(--green); }
-.streak-dot.missed { background: var(--red-light); color: var(--red); }
-.streak-dot.empty { background: var(--paper-3); color: var(--ink-3); }
-.streak-label { font-size: 11px; color: var(--ink-3); margin-top: 8px; }
+.s-dot:hover{transform:scale(1.2)}
+.s-dot.met{background:rgba(34,197,94,0.2);color:var(--green)}
+.s-dot.missed{background:rgba(239,68,68,0.15);color:var(--red)}
+.s-dot.empty{background:var(--bg-4);color:var(--text-3)}
+.streak-legend{display:flex;gap:12px;margin-top:10px;font-size:10px;color:var(--text-3)}
+.streak-legend span{display:flex;align-items:center;gap:5px}
 
-/* ── Topic chart ── */
-.topic-legends { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.topic-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ink-2); }
-.topic-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+/* ── TOPIC BAR CHART (horizontal) ── */
+.topic-bars{display:flex;flex-direction:column;gap:10px}
+.tb-row{display:flex;flex-direction:column;gap:4px}
+.tb-label{display:flex;justify-content:space-between;font-size:12px}
+.tb-name{color:var(--text-2)}
+.tb-val{color:var(--text-3)}
+.tb-track{height:4px;background:var(--bg-4);border-radius:2px;overflow:hidden}
+.tb-fill{height:100%;border-radius:2px;transition:width 0.6s cubic-bezier(.4,0,.2,1)}
 
-/* ── Responsive ── */
-@media (max-width: 480px) {
-  .header-brand .brand-title { font-size: 20px; }
-  .metrics { grid-template-columns: 1fr 1fr; }
-  .metric-value { font-size: 20px; }
+/* ── MOTIVATION BANNER ── */
+.banner{
+  background:var(--accent-dim);border:1px solid var(--accent-border);
+  border-radius:var(--radius-lg);padding:1rem 1.25rem;
+  display:flex;align-items:center;gap:12px;margin-bottom:1rem;
 }
+.banner .ti{font-size:20px;color:var(--accent);flex-shrink:0}
+.banner-text{font-size:13px;color:var(--text-2);line-height:1.5}
+.banner-text strong{color:var(--text);font-weight:500}
 
-/* ── Animations ── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.card, .metric-card, .chart-card {
-  animation: fadeUp 0.4s ease both;
-}
-.metrics .metric-card:nth-child(1) { animation-delay: 0.05s; }
-.metrics .metric-card:nth-child(2) { animation-delay: 0.10s; }
-.metrics .metric-card:nth-child(3) { animation-delay: 0.15s; }
-.metrics .metric-card:nth-child(4) { animation-delay: 0.20s; }
-
-/* ── Today progress bar ── */
-.progress-track {
-  height: 5px; background: var(--paper-3); border-radius: 3px;
-  margin-top: 8px; overflow: hidden;
-}
-.progress-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.hm-card{animation:fadeUp 0.4s ease both}
+.hm-card:nth-child(1){animation-delay:0.05s}
+.hm-card:nth-child(2){animation-delay:0.10s}
+.hm-card:nth-child(3){animation-delay:0.15s}
+.hm-card:nth-child(4){animation-delay:0.20s}
+.panel{animation:fadeUp 0.4s ease 0.1s both}
 </style>
 </head>
 <body>
-<div class="app">
+<div class="shell">
 
-  <!-- Header -->
-  <header class="header">
-    <div class="header-brand">
-      <div class="brand-icon"><i class="ti ti-brain"></i></div>
-      <div>
-        <div class="brand-title">GMAT Study Tracker</div>
-        <div class="brand-sub">Log sessions · track targets · aim for 700+</div>
-      </div>
-    </div>
-    <div class="header-badges">
-      <div class="badge streak"><i class="ti ti-flame"></i><span id="streak-count">0</span> day streak</div>
-      <div class="badge weekly"><i class="ti ti-target"></i><span id="weekly-pct">0</span>% this week</div>
-      <div class="badge"><i class="ti ti-calendar"></i><span id="header-date"></span></div>
-    </div>
-  </header>
-
-  <!-- Metrics -->
-  <div class="metrics">
-    <div class="metric-card">
-      <div class="metric-label"><i class="ti ti-clock"></i> today</div>
-      <div class="metric-value" id="m-today">0h 0m</div>
-      <div class="metric-sub" id="m-today-sub">Target: 3h (weekday)</div>
-      <div class="progress-track">
-        <div class="progress-fill" id="today-bar" style="width:0%;background:var(--accent)"></div>
-      </div>
-    </div>
-    <div class="metric-card green">
-      <div class="metric-label"><i class="ti ti-calendar-week"></i> this week</div>
-      <div class="metric-value" id="m-week">0h 0m</div>
-      <div class="metric-sub" id="m-week-sub">0 / 27h target</div>
-      <div class="progress-track">
-        <div class="progress-fill" id="week-bar" style="width:0%;background:var(--green)"></div>
-      </div>
-    </div>
-    <div class="metric-card blue">
-      <div class="metric-label"><i class="ti ti-chart-line"></i> this month</div>
-      <div class="metric-value" id="m-month">0h 0m</div>
-      <div class="metric-sub" id="m-month-sub">0 sessions logged</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-label"><i class="ti ti-trophy"></i> all time</div>
-      <div class="metric-value" id="m-total">0h 0m</div>
-      <div class="metric-sub" id="m-total-sub">0 days studied</div>
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon"><i class="ti ti-brain"></i></div>
+    <div>
+      <div class="logo-text">GMAT Tracker</div>
+      <div class="logo-sub">Study OS</div>
     </div>
   </div>
 
-  <!-- Log + today sessions -->
-  <div class="section-title"><i class="ti ti-edit"></i> log a session</div>
-  <div class="log-panel">
-    <div class="card">
-      <div class="card-title"><i class="ti ti-plus-circle"></i> new session</div>
-      <div class="form-grid">
-        <div class="form-row">
-          <label>Date</label>
-          <input type="date" id="inp-date">
+  <div class="nav-section">
+    <div class="nav-label">Overview</div>
+    <div class="nav-item active"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+    <div class="nav-item"><i class="ti ti-chart-bar"></i> Analytics</div>
+    <div class="nav-item"><i class="ti ti-calendar"></i> Calendar</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Topics</div>
+    <div class="nav-item"><i class="ti ti-math"></i> Quant</div>
+    <div class="nav-item"><i class="ti ti-book-2"></i> RC</div>
+    <div class="nav-item"><i class="ti ti-brain"></i> CR</div>
+    <div class="nav-item"><i class="ti ti-chart-dots"></i> DI</div>
+    <div class="nav-item"><i class="ti ti-clipboard-check"></i> Mock test</div>
+  </div>
+
+  <div class="sidebar-stats">
+    <div class="sidebar-stat">
+      <div class="sidebar-stat-label">Today's target</div>
+      <div class="sidebar-stat-val" id="sb-today">0h 0m</div>
+      <div class="sidebar-stat-sub" id="sb-today-sub">of 3h</div>
+      <div class="mini-bar"><div class="mini-bar-fill" id="sb-today-bar" style="width:0%;background:var(--accent)"></div></div>
+    </div>
+    <div class="sidebar-stat">
+      <div class="sidebar-stat-label">Week progress</div>
+      <div class="sidebar-stat-val" id="sb-week">0%</div>
+      <div class="sidebar-stat-sub" id="sb-week-sub">0h of 27h</div>
+      <div class="mini-bar"><div class="mini-bar-fill" id="sb-week-bar" style="width:0%;background:var(--green)"></div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-title">Dashboard</span>
+      <span style="color:var(--text-3);font-size:13px">/</span>
+      <span class="topbar-date" id="topbar-date"></span>
+    </div>
+    <div class="topbar-right">
+      <div class="chip purple"><i class="ti ti-flame" style="font-size:12px"></i> <span id="streak-chip">0</span>d streak</div>
+      <div class="chip green"><i class="ti ti-target" style="font-size:12px"></i> <span id="week-chip">0</span>% week</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Hero Metrics -->
+    <div class="hero-metrics">
+      <div class="hm-card">
+        <div class="hm-icon purple"><i class="ti ti-clock"></i></div>
+        <div class="hm-label">Today</div>
+        <div class="hm-value" id="m-today">0h 0m</div>
+        <div class="hm-sub" id="m-today-sub">Target: 3h · 0% done</div>
+        <div class="hm-bar"><div class="hm-bar-fill" id="today-bar" style="width:0%;background:var(--accent)"></div></div>
+      </div>
+      <div class="hm-card">
+        <div class="hm-icon green"><i class="ti ti-calendar-week"></i></div>
+        <div class="hm-label">This week</div>
+        <div class="hm-value" id="m-week">0h 0m</div>
+        <div class="hm-sub" id="m-week-sub">0h / 27h target</div>
+        <div class="hm-bar"><div class="hm-bar-fill" id="week-bar" style="width:0%;background:var(--green)"></div></div>
+      </div>
+      <div class="hm-card">
+        <div class="hm-icon amber"><i class="ti ti-chart-line"></i></div>
+        <div class="hm-label">This month</div>
+        <div class="hm-value" id="m-month">0h 0m</div>
+        <div class="hm-sub" id="m-month-sub">0 sessions</div>
+      </div>
+      <div class="hm-card">
+        <div class="hm-icon red"><i class="ti ti-trophy"></i></div>
+        <div class="hm-label">All time</div>
+        <div class="hm-value" id="m-total">0h 0m</div>
+        <div class="hm-sub" id="m-total-sub">0 days studied</div>
+      </div>
+    </div>
+
+    <!-- Banner -->
+    <div class="banner" id="banner">
+      <i class="ti ti-rocket"></i>
+      <div class="banner-text" id="banner-text">
+        <strong>Start your GMAT journey today.</strong> Log your first session below — weekday target is 3h, weekend is 6h.
+      </div>
+    </div>
+
+    <!-- Log + Sessions -->
+    <div class="two-col" style="margin-bottom:1rem">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><i class="ti ti-plus-circle"></i> Log session</div>
         </div>
-        <div class="form-row">
-          <label>Topic</label>
-          <select id="inp-topic">
-            <option>Quant</option>
-            <option>RC</option>
-            <option>CR</option>
-            <option>DI</option>
-            <option>Mock test</option>
-            <option>Review</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label>Duration</label>
-          <div class="time-inputs">
-            <input type="number" id="inp-hours" min="0" max="12" placeholder="0">
-            <span>h</span>
-            <input type="number" id="inp-mins" min="0" max="59" placeholder="0">
-            <span>m</span>
+        <div class="form-stack">
+          <div class="field-row">
+            <div class="field">
+              <label>Date</label>
+              <input type="date" id="inp-date">
+            </div>
+            <div class="field">
+              <label>Topic</label>
+              <select id="inp-topic">
+                <option>Quant</option>
+                <option>RC</option>
+                <option>CR</option>
+                <option>DI</option>
+                <option>Mock test</option>
+                <option>Review</option>
+              </select>
+            </div>
           </div>
+          <div class="field">
+            <label>Duration</label>
+            <div class="dur-row">
+              <input type="number" id="inp-hours" min="0" max="12" placeholder="0">
+              <span>hours</span>
+              <input type="number" id="inp-mins" min="0" max="59" placeholder="0">
+              <span>min</span>
+            </div>
+          </div>
+          <button class="log-btn" onclick="addSession()"><i class="ti ti-plus"></i> Add session</button>
         </div>
       </div>
-      <button class="add-btn" onclick="addSession()"><i class="ti ti-plus"></i> Add session</button>
-    </div>
 
-    <div class="card">
-      <div class="card-title"><i class="ti ti-list"></i> today's sessions</div>
-      <div class="sessions-list" id="sessions-list">
-        <div class="empty-state">No sessions logged yet today</div>
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><i class="ti ti-list"></i> Today's sessions</div>
+          <div style="font-size:11px;color:var(--text-3)" id="today-total-label"></div>
+        </div>
+        <div class="sessions-scroll" id="sessions-list">
+          <div class="empty">No sessions yet today</div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Filters -->
-  <div class="filters">
-    <button class="filter-btn active" onclick="setView('week')" id="f-week">Week</button>
-    <button class="filter-btn" onclick="setView('month')" id="f-month">Month</button>
-    <button class="filter-btn" onclick="setView('all')" id="f-all">All time</button>
-    <div class="filter-sep"></div>
-    <div class="filter-nav">
-      <button class="filter-btn" onclick="goDate(-1)"><i class="ti ti-chevron-left"></i></button>
-      <span class="range-label" id="f-range-label">This week</span>
-      <button class="filter-btn" onclick="goDate(1)"><i class="ti ti-chevron-right"></i></button>
-    </div>
-  </div>
-
-  <!-- Main chart -->
-  <div class="chart-card">
-    <div class="chart-header">
-      <div class="section-title" style="margin-bottom:0"><i class="ti ti-chart-bar"></i> study hours</div>
-      <div class="chart-legend">
-        <span><span class="legend-box" style="background:#639922"></span>Target met</span>
-        <span><span class="legend-box" style="background:#E24B4A"></span>Below target</span>
-        <span><span class="legend-box" style="border:1.5px dashed #c0392b;background:transparent;width:18px;height:4px;border-radius:0;margin-top:3px"></span>Target line</span>
+    <!-- Filters -->
+    <div class="filters">
+      <button class="fbtn active" onclick="setView('week')" id="f-week">Week</button>
+      <button class="fbtn" onclick="setView('month')" id="f-month">Month</button>
+      <button class="fbtn" onclick="setView('all')" id="f-all">All time</button>
+      <div class="fbar-sep"></div>
+      <div class="fnav">
+        <button class="fbtn" onclick="goDate(-1)"><i class="ti ti-chevron-left"></i></button>
+        <span class="frange" id="f-range-label">This week</span>
+        <button class="fbtn" onclick="goDate(1)"><i class="ti ti-chevron-right"></i></button>
       </div>
     </div>
-    <div style="position:relative;width:100%;height:240px">
-      <canvas id="mainChart" role="img" aria-label="Bar chart of daily study hours vs target"></canvas>
-    </div>
-  </div>
 
-  <!-- Bottom row -->
-  <div class="bottom-row">
-    <!-- Topic donut -->
-    <div class="chart-card" style="margin-bottom:0">
-      <div class="section-title"><i class="ti ti-chart-donut"></i> by topic</div>
-      <div style="position:relative;width:100%;height:160px">
-        <canvas id="topicChart" role="img" aria-label="Donut chart of study hours by topic"></canvas>
+    <!-- Main chart -->
+    <div class="panel" style="margin-bottom:1rem">
+      <div class="panel-head">
+        <div class="panel-title"><i class="ti ti-chart-bar"></i> Study hours</div>
+        <div class="chart-legend">
+          <span><span class="leg-box" style="background:var(--green)"></span>On target</span>
+          <span><span class="leg-box" style="background:var(--red)"></span>Below</span>
+          <span><span style="font-size:10px;letter-spacing:2px;color:var(--text-3)">- -</span> Target</span>
+        </div>
       </div>
-      <div class="topic-legends" id="topic-legends"></div>
-    </div>
-
-    <!-- Streak -->
-    <div class="card">
-      <div class="section-title"><i class="ti ti-flame"></i> 30-day streak</div>
-      <div class="streak-wrap" id="streak-bar"></div>
-      <div class="streak-label">
-        <span style="color:var(--green)">● met</span> &nbsp;
-        <span style="color:var(--red)">● missed</span> &nbsp;
-        <span style="color:var(--ink-3)">● no data</span>
+      <div style="position:relative;width:100%;height:220px">
+        <canvas id="mainChart" role="img" aria-label="Study hours bar chart"></canvas>
       </div>
     </div>
-  </div>
 
-  <!-- Day grid -->
-  <div class="card" style="margin-top:1rem">
-    <div class="section-title"><i class="ti ti-calendar-stats"></i> daily overview — click a day to log</div>
-    <div class="day-grid" id="day-grid"></div>
-  </div>
+    <!-- Bottom row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem">
 
+      <!-- Calendar -->
+      <div class="panel" style="grid-column:1/3">
+        <div class="panel-head">
+          <div class="panel-title"><i class="ti ti-calendar-stats"></i> Daily calendar</div>
+          <div style="font-size:11px;color:var(--text-3)">click day to pre-fill date</div>
+        </div>
+        <div class="cal-head-row">
+          <div class="cal-head">Mon</div><div class="cal-head">Tue</div><div class="cal-head">Wed</div>
+          <div class="cal-head">Thu</div><div class="cal-head">Fri</div><div class="cal-head">Sat</div><div class="cal-head">Sun</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+
+      <!-- Topic breakdown -->
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title"><i class="ti ti-chart-donut"></i> By topic</div></div>
+        <div style="position:relative;width:100%;height:140px">
+          <canvas id="topicChart" role="img" aria-label="Topic donut chart"></canvas>
+        </div>
+        <div class="topic-pills" id="topic-pills"></div>
+      </div>
+    </div>
+
+    <!-- Streak + Topic bars -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title"><i class="ti ti-flame"></i> 30-day streak</div></div>
+        <div class="streak-grid" id="streak-grid"></div>
+        <div class="streak-legend">
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:rgba(34,197,94,0.2)"></span>met</span>
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:rgba(239,68,68,0.15)"></span>missed</span>
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--bg-4)"></span>no data</span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title"><i class="ti ti-chart-bar-left"></i> Topic totals</div></div>
+        <div class="topic-bars" id="topic-bars">
+          <div class="empty">Log sessions to see topic breakdown</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Credit -->
+    <div style="margin-top:2rem;text-align:center;font-size:10px;color:var(--text-3);line-height:1.8">
+      Design inspired by <strong style="color:var(--text-2)">Linear</strong> (sidebar + metric cards),
+      <strong style="color:var(--text-2)">Vercel Analytics</strong> (dark theme + chart style),
+      <strong style="color:var(--text-2)">Raycast</strong> (command-first, compact density) &amp;
+      <strong style="color:var(--text-2)">Superhuman</strong> (focus layout). Built for GMAT prep.
+    </div>
+
+  </div>
+</main>
 </div>
 
 <script>
-const TOPIC_COLORS = {
-  'Quant':'#1a4f8a','Verbal':'#2d7a4f','IR':'#b06a00',
-  'AWA':'#993556','Mock test':'#534AB7','Review':'#c8471a'
+const TOPIC_COLORS={
+  'Quant':'#7c6af7','RC':'#22c55e','CR':'#f59e0b',
+  'DI':'#38bdf8','Mock test':'#f472b6','Review':'#fb923c'
 };
-const today = new Date(); today.setHours(0,0,0,0);
-let sessions = JSON.parse(localStorage.getItem('gmat_sessions')||'[]');
-let viewMode = 'week', viewOffset = 0;
-let mainChartInst, topicChartInst;
+const today=new Date();today.setHours(0,0,0,0);
+let sessions=JSON.parse(localStorage.getItem('gmat_sessions_v2')||'[]');
+let viewMode='week',viewOffset=0;
+let mainChartInst,topicChartInst;
 
-function save(){ localStorage.setItem('gmat_sessions', JSON.stringify(sessions)); }
-function fmtHM(mins){ return Math.floor(mins/60)+'h '+Math.round(mins%60)+'m'; }
-function dateStr(d){ return d.toISOString().slice(0,10); }
-function isWeekend(d){ const wd = new Date(d).getDay(); return wd===0||wd===6; }
-function targetFor(d){ return isWeekend(d) ? 360 : 180; }
-function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
-function startOfWeek(d){ const r=new Date(d); r.setDate(r.getDate()-((r.getDay()+6)%7)); r.setHours(0,0,0,0); return r; }
-function startOfMonth(d){ return new Date(d.getFullYear(),d.getMonth(),1); }
-function minsOn(ds){ return sessions.filter(s=>s.date===ds).reduce((a,s)=>a+s.mins,0); }
-function sessionsOn(ds){ return sessions.filter(s=>s.date===ds); }
+function save(){localStorage.setItem('gmat_sessions_v2',JSON.stringify(sessions))}
+function fmtHM(m){return Math.floor(m/60)+'h '+(Math.round(m%60)>0?Math.round(m%60)+'m':'')||'0m'}
+function dateStr(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+day}
+function parseLocal(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
+function isWE(d){const w=new Date(d).getDay();return w===0||w===6}
+function targetFor(d){return isWE(d)?360:180}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r}
+function startOfWeek(d){const r=new Date(d);r.setDate(r.getDate()-((r.getDay()+6)%7));r.setHours(0,0,0,0);return r}
+function startOfMonth(d){return new Date(d.getFullYear(),d.getMonth(),1)}
+function minsOn(ds){return sessions.filter(s=>s.date===ds).reduce((a,s)=>a+s.mins,0)}
+function sessionsOn(ds){return sessions.filter(s=>s.date===ds)}
 
 // Header date
-document.getElementById('header-date').textContent = today.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+document.getElementById('topbar-date').textContent=today.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
 function getViewDates(){
-  if(viewMode==='week'){
-    const s=startOfWeek(addDays(today,viewOffset*7));
-    return Array.from({length:7},(_,i)=>addDays(s,i));
-  }
-  if(viewMode==='month'){
-    const ref=new Date(today.getFullYear(),today.getMonth()+viewOffset,1);
-    const days=new Date(ref.getFullYear(),ref.getMonth()+1,0).getDate();
-    return Array.from({length:days},(_,i)=>new Date(ref.getFullYear(),ref.getMonth(),i+1));
-  }
-  const allDates=sessions.map(s=>s.date).filter((v,i,a)=>a.indexOf(v)===i).sort();
-  if(!allDates.length)return [today];
-  const s=new Date(allDates[0]),e=new Date(allDates[allDates.length-1]);
-  const d=[];let cur=new Date(s);while(cur<=e){d.push(new Date(cur));cur=addDays(cur,1);}
-  return d;
+  if(viewMode==='week'){const s=startOfWeek(addDays(today,viewOffset*7));return Array.from({length:7},(_,i)=>addDays(s,i))}
+  if(viewMode==='month'){const ref=new Date(today.getFullYear(),today.getMonth()+viewOffset,1);const days=new Date(ref.getFullYear(),ref.getMonth()+1,0).getDate();return Array.from({length:days},(_,i)=>new Date(ref.getFullYear(),ref.getMonth(),i+1))}
+  const all=sessions.map(s=>s.date).filter((v,i,a)=>a.indexOf(v)===i).sort();
+  if(!all.length)return[today];
+  const s=parseLocal(all[0]),e=parseLocal(all[all.length-1]);
+  const d=[];let c=new Date(s);while(c<=e){d.push(new Date(c));c=addDays(c,1);}return d;
 }
 
 function getRangeLabel(){
-  if(viewMode==='week'){
-    const s=startOfWeek(addDays(today,viewOffset*7)),e=addDays(s,6);
-    const fmt=d=>d.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
-    return viewOffset===0?'This week':fmt(s)+' – '+fmt(e);
-  }
-  if(viewMode==='month'){
-    const ref=new Date(today.getFullYear(),today.getMonth()+viewOffset,1);
-    return viewOffset===0?'This month':ref.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
-  }
+  if(viewMode==='week'){const s=startOfWeek(addDays(today,viewOffset*7)),e=addDays(s,6);const f=d=>d.toLocaleDateString('en-IN',{day:'numeric',month:'short'});return viewOffset===0?'This week':f(s)+' – '+f(e)}
+  if(viewMode==='month'){const ref=new Date(today.getFullYear(),today.getMonth()+viewOffset,1);return viewOffset===0?'This month':ref.toLocaleDateString('en-IN',{month:'long',year:'numeric'})}
   return 'All time';
 }
 
@@ -503,197 +579,195 @@ function addSession(){
   const m=parseInt(document.getElementById('inp-mins').value)||0;
   if(!d||h+m===0)return;
   sessions.push({id:Date.now(),date:d,topic,mins:h*60+m});
-  save(); render();
+  save();render();
   document.getElementById('inp-hours').value='';
   document.getElementById('inp-mins').value='';
 }
 
-function delSession(id){
-  sessions=sessions.filter(s=>s.id!==id);
-  save(); render();
-}
+function delSession(id){sessions=sessions.filter(s=>s.id!==id);save();render()}
+function setView(v){viewMode=v;viewOffset=0;render()}
+function goDate(d){viewOffset+=d;render()}
 
-function setView(v){ viewMode=v; viewOffset=0; render(); }
-function goDate(d){ viewOffset+=d; render(); }
+const QUOTES=[
+  'Every hour compounds. 700+ is built one session at a time.',
+  'Consistency beats intensity. Show up daily.',
+  'The GMAT rewards structured thinkers. Be one.',
+  'You\'re building the habit that leads to the score.',
+  'Progress is invisible until it isn\'t. Keep going.',
+];
 
 function render(){
-  ['week','month','all'].forEach(v=>{
-    document.getElementById('f-'+v).className='filter-btn'+(viewMode===v?' active':'');
-  });
+  ['week','month','all'].forEach(v=>{document.getElementById('f-'+v).className='fbtn'+(viewMode===v?' active':'')});
   document.getElementById('f-range-label').textContent=getRangeLabel();
 
-  // Today
-  const todayStr=dateStr(today);
-  const todayMins=minsOn(todayStr);
-  const todayTarget=targetFor(today);
-  const todayPct=Math.min(100,Math.round(todayMins/todayTarget*100));
-  const todayMet=todayMins>=todayTarget;
-  const mTodayEl=document.getElementById('m-today');
-  mTodayEl.textContent=fmtHM(todayMins);
-  mTodayEl.style.color=todayMet&&todayMins>0?'var(--green)':'var(--ink)';
-  document.getElementById('m-today-sub').textContent='Target: '+(isWeekend(today)?'6h':'3h')+' · '+todayPct+'% done';
-  document.getElementById('today-bar').style.width=todayPct+'%';
-  document.getElementById('today-bar').style.background=todayMet?'var(--green)':'var(--accent)';
+  const ts=dateStr(today),tm=minsOn(ts),tt=targetFor(today);
+  const tpct=Math.min(100,Math.round(tm/tt*100)),tmet=tm>=tt;
+  const mte=document.getElementById('m-today');
+  mte.textContent=fmtHM(tm);mte.className='hm-value'+(tmet&&tm>0?' met':'');
+  document.getElementById('m-today-sub').textContent='Target: '+(isWE(today)?'6h':'3h')+' · '+tpct+'% done';
+  document.getElementById('today-bar').style.width=tpct+'%';
+  document.getElementById('today-bar').style.background=tmet?'var(--green)':'var(--accent)';
+  document.getElementById('sb-today').textContent=fmtHM(tm);
+  document.getElementById('sb-today-sub').textContent='of '+(isWE(today)?'6h':'3h');
+  document.getElementById('sb-today-bar').style.width=tpct+'%';
+  document.getElementById('sb-today-bar').style.background=tmet?'var(--green)':'var(--accent)';
 
-  // Week
-  const wStart=startOfWeek(today);
-  let wMins=0,wTarget=0;
-  for(let i=0;i<7;i++){const d=addDays(wStart,i);wMins+=minsOn(dateStr(d));wTarget+=targetFor(d);}
-  const wPct=Math.min(100,Math.round(wMins/wTarget*100)||0);
-  const mWeekEl=document.getElementById('m-week');
-  mWeekEl.textContent=fmtHM(wMins);
-  mWeekEl.style.color=wMins>=wTarget&&wMins>0?'var(--green)':'var(--ink)';
-  document.getElementById('m-week-sub').textContent=(wMins/60).toFixed(1)+'h / '+(wTarget/60).toFixed(0)+'h target';
-  document.getElementById('week-bar').style.width=wPct+'%';
-  document.getElementById('weekly-pct').textContent=wPct;
+  const ws=startOfWeek(today);let wm=0,wt=0;
+  for(let i=0;i<7;i++){const d=addDays(ws,i);wm+=minsOn(dateStr(d));wt+=targetFor(d);}
+  const wpct=Math.min(100,Math.round(wm/wt*100)||0);
+  const mwe=document.getElementById('m-week');
+  mwe.textContent=fmtHM(wm);mwe.className='hm-value'+(wm>=wt&&wm>0?' met':'');
+  document.getElementById('m-week-sub').textContent=(wm/60).toFixed(1)+'h / '+(wt/60).toFixed(0)+'h target';
+  document.getElementById('week-bar').style.width=wpct+'%';
+  document.getElementById('week-chip').textContent=wpct;
+  document.getElementById('sb-week').textContent=wpct+'%';
+  document.getElementById('sb-week-sub').textContent=(wm/60).toFixed(1)+'h of '+(wt/60).toFixed(0)+'h';
+  document.getElementById('sb-week-bar').style.width=wpct+'%';
 
-  // Month
-  const mStart=startOfMonth(today);
-  const mEnd=new Date(today.getFullYear(),today.getMonth()+1,0);
-  let mMins=0,mSess=0;
-  for(let d=new Date(mStart);d<=mEnd;d=addDays(d,1)){mMins+=minsOn(dateStr(d));}
-  mSess=sessions.filter(s=>s.date>=dateStr(mStart)&&s.date<=dateStr(mEnd)).length;
-  document.getElementById('m-month').textContent=fmtHM(mMins);
-  document.getElementById('m-month-sub').textContent=mSess+' session'+(mSess===1?'':'s')+' logged';
+  const ms=startOfMonth(today),me=new Date(today.getFullYear(),today.getMonth()+1,0);
+  let mm=0,msc=0;
+  for(let d=new Date(ms);d<=me;d=addDays(d,1))mm+=minsOn(dateStr(d));
+  msc=sessions.filter(s=>s.date>=dateStr(ms)&&s.date<=dateStr(me)).length;
+  document.getElementById('m-month').textContent=fmtHM(mm);
+  document.getElementById('m-month-sub').textContent=msc+' session'+(msc===1?'':'s');
 
-  // Total
-  const totalMins=sessions.reduce((a,s)=>a+s.mins,0);
-  const studiedDays=new Set(sessions.map(s=>s.date)).size;
-  document.getElementById('m-total').textContent=fmtHM(totalMins);
-  document.getElementById('m-total-sub').textContent=studiedDays+' days studied';
+  const tot=sessions.reduce((a,s)=>a+s.mins,0),sd=new Set(sessions.map(s=>s.date)).size;
+  document.getElementById('m-total').textContent=fmtHM(tot);
+  document.getElementById('m-total-sub').textContent=sd+' days studied';
 
-  // Streak
   let streak=0;let cur=new Date(today);
   while(true){const ds=dateStr(cur);if(minsOn(ds)>0){streak++;cur=addDays(cur,-1);}else break;}
-  document.getElementById('streak-count').textContent=streak;
+  document.getElementById('streak-chip').textContent=streak;
 
-  renderChart(); renderTopicChart(); renderDayGrid(); renderStreakBar(); renderTodaySessions();
+  // Banner
+  const bannerEl=document.getElementById('banner-text');
+  if(sessions.length===0){
+    bannerEl.innerHTML='<strong>Start your GMAT journey today.</strong> Log your first session below — weekday target 3h, weekend 6h.';
+  } else if(tmet){
+    bannerEl.innerHTML='<strong>Target hit today! 🎯</strong> '+QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  } else if(tm>0){
+    const rem=tt-tm;bannerEl.innerHTML='<strong>'+fmtHM(rem)+' to go today.</strong> '+QUOTES[streak%QUOTES.length];
+  } else {
+    bannerEl.innerHTML='<strong>No study yet today.</strong> '+QUOTES[new Date().getDay()%QUOTES.length];
+  }
+
+  renderChart();renderTopicChart();renderTopicBars();renderCalendar();renderStreak();renderTodaySessions();
 }
 
 function renderChart(){
   const dates=getViewDates();
-  const labels=dates.map(d=>{
-    if(viewMode==='month')return d.getDate();
-    return d.toLocaleDateString('en-IN',{weekday:'short'}).slice(0,3);
-  });
+  const labels=dates.map(d=>viewMode==='month'?d.getDate():d.toLocaleDateString('en-IN',{weekday:'short'}).slice(0,3));
   const actual=dates.map(d=>parseFloat((minsOn(dateStr(d))/60).toFixed(2)));
   const target=dates.map(d=>parseFloat((targetFor(d)/60).toFixed(1)));
-  const colors=dates.map((d,i)=>{
-    if(actual[i]===0)return 'rgba(15,14,12,0.1)';
-    return actual[i]>=target[i]?'rgba(45,122,79,0.75)':'rgba(192,57,43,0.7)';
-  });
+  const colors=dates.map((d,i)=>actual[i]===0?'rgba(255,255,255,0.06)':actual[i]>=target[i]?'rgba(34,197,94,0.7)':'rgba(239,68,68,0.65)');
   if(mainChartInst)mainChartInst.destroy();
   mainChartInst=new Chart(document.getElementById('mainChart'),{
     type:'bar',
-    data:{
-      labels,
-      datasets:[
-        {label:'Actual',data:actual,backgroundColor:colors,borderRadius:5,order:2},
-        {label:'Target',data:target,type:'line',borderColor:'#c0392b',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false,order:1,tension:0}
-      ]
-    },
+    data:{labels,datasets:[
+      {label:'Actual',data:actual,backgroundColor:colors,borderRadius:6,borderSkipped:false,order:2},
+      {label:'Target',data:target,type:'line',borderColor:'rgba(239,68,68,0.5)',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false,order:1,tension:0}
+    ]},
     options:{
       responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed.y;const h=Math.floor(v);const m=Math.round((v-h)*60);return ctx.dataset.label+': '+h+'h '+m+'m';}}}},
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1a1f',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,titleColor:'#f0eff4',bodyColor:'#9998a8',padding:10,callbacks:{label:ctx=>{const v=ctx.parsed.y;const h=Math.floor(v);const m=Math.round((v-h)*60);return ctx.dataset.label+': '+h+'h '+(m>0?m+'m':'')}}}},
       scales:{
-        x:{grid:{display:false},ticks:{font:{size:11,family:'DM Sans'},color:'#7a7670'},border:{display:false}},
-        y:{grid:{color:'rgba(15,14,12,0.06)'},ticks:{font:{size:11,family:'DM Sans'},color:'#7a7670',callback:v=>v+'h'},border:{display:false},min:0}
+        x:{grid:{display:false},ticks:{font:{size:11,family:'Geist'},color:'#5c5b6e'},border:{display:false}},
+        y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{font:{size:11,family:'Geist'},color:'#5c5b6e',callback:v=>v+'h'},border:{display:false},min:0}
       }
     }
   });
 }
 
 function renderTopicChart(){
-  const totals={};
-  sessions.forEach(s=>{totals[s.topic]=(totals[s.topic]||0)+s.mins;});
+  const totals={};sessions.forEach(s=>{totals[s.topic]=(totals[s.topic]||0)+s.mins});
   const topics=Object.keys(totals);
-  const legendEl=document.getElementById('topic-legends');
-  if(!topics.length){
-    if(topicChartInst)topicChartInst.destroy();
-    legendEl.innerHTML='<div class="empty-state">Log sessions to see topic breakdown</div>';
-    return;
-  }
+  const pEl=document.getElementById('topic-pills');
+  if(!topics.length){if(topicChartInst)topicChartInst.destroy();pEl.innerHTML='';return}
   if(topicChartInst)topicChartInst.destroy();
   topicChartInst=new Chart(document.getElementById('topicChart'),{
     type:'doughnut',
-    data:{
-      labels:topics,
-      datasets:[{data:topics.map(t=>parseFloat((totals[t]/60).toFixed(2))),backgroundColor:topics.map(t=>TOPIC_COLORS[t]||'#888'),borderWidth:0}]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,cutout:'70%',
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed;const h=Math.floor(v);const m=Math.round((v-h)*60);return ctx.label+': '+h+'h '+m+'m';}}}}
-    }
+    data:{labels:topics,datasets:[{data:topics.map(t=>parseFloat((totals[t]/60).toFixed(2))),backgroundColor:topics.map(t=>TOPIC_COLORS[t]||'#888'),borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1a1f',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,titleColor:'#f0eff4',bodyColor:'#9998a8',padding:8,callbacks:{label:ctx=>{const v=ctx.parsed;const h=Math.floor(v);const m=Math.round((v-h)*60);return ctx.label+': '+h+'h '+(m>0?m+'m':'')}}}}}
   });
-  legendEl.innerHTML=topics.map(t=>`<div class="topic-legend-item"><span class="topic-legend-dot" style="background:${TOPIC_COLORS[t]||'#888'}"></span>${t}</div>`).join('');
+  const total=Object.values(totals).reduce((a,b)=>a+b,0);
+  pEl.innerHTML=topics.map(t=>{const pct=Math.round(totals[t]/total*100);return`<div class="topic-pill" style="border-color:${TOPIC_COLORS[t]}22;background:${TOPIC_COLORS[t]}18"><span style="width:6px;height:6px;border-radius:50%;background:${TOPIC_COLORS[t]};flex-shrink:0;display:inline-block"></span>${t} <span style="color:var(--text-3)">${pct}%</span></div>`}).join('');
 }
 
-function renderDayGrid(){
-  const dates=getViewDates().slice(0,35);
-  const container=document.getElementById('day-grid');
-  container.innerHTML='';
-  dates.forEach(d=>{
+function renderTopicBars(){
+  const totals={};sessions.forEach(s=>{totals[s.topic]=(totals[s.topic]||0)+s.mins});
+  const topics=Object.keys(totals).sort((a,b)=>totals[b]-totals[a]);
+  const el=document.getElementById('topic-bars');
+  if(!topics.length){el.innerHTML='<div class="empty">Log sessions to see topic breakdown</div>';return}
+  const max=Math.max(...Object.values(totals));
+  el.innerHTML=topics.map(t=>{
+    const h=Math.floor(totals[t]/60),m=Math.round(totals[t]%60);
+    const pct=Math.round(totals[t]/max*100);
+    return`<div class="tb-row"><div class="tb-label"><span class="tb-name" style="color:${TOPIC_COLORS[t]}">${t}</span><span class="tb-val">${h}h${m>0?' '+m+'m':''}</span></div><div class="tb-track"><div class="tb-fill" style="width:${pct}%;background:${TOPIC_COLORS[t]}"></div></div></div>`;
+  }).join('');
+}
+
+function renderCalendar(){
+  const grid=document.getElementById('cal-grid');
+  grid.innerHTML='';
+  let dates;
+  if(viewMode==='week'){dates=getViewDates();}
+  else if(viewMode==='month'){
+    const ref=new Date(today.getFullYear(),today.getMonth()+viewOffset,1);
+    const days=new Date(ref.getFullYear(),ref.getMonth()+1,0).getDate();
+    dates=Array.from({length:days},(_,i)=>new Date(ref.getFullYear(),ref.getMonth(),i+1));
+  } else {
+    const all=sessions.map(s=>s.date).filter((v,i,a)=>a.indexOf(v)===i).sort();
+    if(!all.length){dates=[today];}
+    else{const s=parseLocal(all[0]),e=parseLocal(all[all.length-1]);const d=[];let c=new Date(s);while(c<=e){d.push(new Date(c));c=addDays(c,1);}dates=d;}
+  }
+  // Pad to start on Monday
+  const firstDay=dates[0].getDay();
+  const pad=(firstDay+6)%7;
+  for(let i=0;i<pad;i++){const empty=document.createElement('div');empty.className='cal-cell empty-day';grid.appendChild(empty);}
+  dates.slice(0,35).forEach(d=>{
     const ds=dateStr(d);
     const mins=minsOn(ds);
     const tgt=targetFor(d);
     const pct=Math.min(100,Math.round(mins/tgt*100));
     const met=mins>=tgt&&mins>0;
     const empty=mins===0;
-    const color=met?'#3B6D11':empty?'#b4b2a9':'#c0392b';
-    const bgColor=met?'rgba(45,122,79,0.3)':empty?'rgba(15,14,12,0.08)':'rgba(192,57,43,0.25)';
-    const r=16,circ=2*Math.PI*r,dash=circ*(pct/100),gap=circ-dash;
-    const div=document.createElement('div');
-    div.className='day-cell '+(met?'met':empty?'empty':'missed');
-    div.title=ds+(mins?' · '+fmtHM(mins):'');
-    div.innerHTML=`
-<div class="day-name">${d.toLocaleDateString('en-IN',{weekday:'short'}).slice(0,3)}</div>
-<div class="ring-wrap">
-<svg viewBox="0 0 40 40" width="40" height="40" aria-hidden="true">
-<circle cx="20" cy="20" r="${r}" fill="none" stroke="${bgColor}" stroke-width="3.5"/>
-<circle cx="20" cy="20" r="${r}" fill="none" stroke="${color}" stroke-width="3.5"
-  stroke-dasharray="${dash.toFixed(1)} ${gap.toFixed(1)}"
-  stroke-dashoffset="${(circ/4).toFixed(1)}" stroke-linecap="round"/>
-</svg>
-<div class="ring-pct" style="color:${color}">${empty?'–':pct+'%'}</div>
-</div>
-<div class="day-date">${d.getDate()}</div>
-<div class="day-hrs" style="color:${color}">${empty?'–':fmtHM(mins)}</div>`;
-    div.onclick=()=>{ document.getElementById('inp-date').value=ds; };
-    container.appendChild(div);
+    const isTdy=ds===dateStr(today);
+    const cell=document.createElement('div');
+    cell.className='cal-cell'+(met?' met':empty?'':' missed')+(isTdy?' today-cell':'');
+    const color=met?'var(--green)':empty?'var(--text-3)':'var(--red)';
+    cell.innerHTML=`<div class="cal-num" style="color:${isTdy?'var(--accent)':'var(--text-2)'}">${d.getDate()}</div>${!empty?`<div class="cal-hrs" style="color:${color};font-size:9px">${Math.floor(mins/60)}h${Math.round(mins%60)>0?Math.round(mins%60)+'m':''}</div>`:''}${!empty?`<div class="cal-dot" style="background:${color}"></div>`:''}`;
+    cell.title=ds+(mins?' · '+fmtHM(mins)+' · '+pct+'%':'');
+    cell.onclick=()=>{document.getElementById('inp-date').value=ds;};
+    grid.appendChild(cell);
   });
 }
 
-function renderStreakBar(){
-  const container=document.getElementById('streak-bar');
-  container.innerHTML='';
+function renderStreak(){
+  const grid=document.getElementById('streak-grid');
+  grid.innerHTML='';
   for(let i=29;i>=0;i--){
-    const d=addDays(today,-i);
-    const ds=dateStr(d);
-    const mins=minsOn(ds);
-    const tgt=targetFor(d);
-    const met=mins>=tgt&&mins>0;
-    const empty=mins===0;
+    const d=addDays(today,-i),ds=dateStr(d);
+    const mins=minsOn(ds),tgt=targetFor(d);
+    const met=mins>=tgt&&mins>0,empty=mins===0;
     const dot=document.createElement('div');
-    dot.className='streak-dot '+(met?'met':empty?'empty':'missed');
+    dot.className='s-dot '+(met?'met':empty?'empty':'missed');
     dot.title=ds+(mins?' · '+fmtHM(mins):'');
-    dot.innerHTML=met?'<i class="ti ti-check" style="font-size:10px"></i>':empty?'<span>·</span>':'<i class="ti ti-x" style="font-size:10px"></i>';
-    container.appendChild(dot);
+    dot.innerHTML=met?'<i class="ti ti-check" style="font-size:10px"></i>':empty?'<span style="font-size:8px;opacity:.4">·</span>':'<i class="ti ti-x" style="font-size:10px"></i>';
+    grid.appendChild(dot);
   }
 }
 
 function renderTodaySessions(){
-  const container=document.getElementById('sessions-list');
-  const todayStr=dateStr(today);
-  const todaySess=sessionsOn(todayStr);
-  if(!todaySess.length){container.innerHTML='<div class="empty-state">No sessions logged today</div>';return;}
-  container.innerHTML=todaySess.map(s=>`
-<div class="session-item">
-<div class="session-info">
-<span class="session-dot" style="background:${TOPIC_COLORS[s.topic]||'#888'}"></span>
-<span class="session-topic">${s.topic}</span>
-</div>
-<span class="session-dur">${fmtHM(s.mins)}</span>
-<button class="del-btn" onclick="delSession(${s.id})" title="Delete"><i class="ti ti-trash"></i></button>
+  const el=document.getElementById('sessions-list');
+  const ts=dateStr(today),sess=sessionsOn(ts);
+  const total=sess.reduce((a,s)=>a+s.mins,0);
+  document.getElementById('today-total-label').textContent=sess.length?fmtHM(total)+' total':'';
+  if(!sess.length){el.innerHTML='<div class="empty">No sessions yet today</div>';return}
+  el.innerHTML=sess.map(s=>`<div class="sess-item">
+<span class="sess-dot" style="background:${TOPIC_COLORS[s.topic]||'#888'}"></span>
+<span class="sess-topic">${s.topic}</span>
+<span class="sess-dur">${fmtHM(s.mins)}</span>
+<button class="sess-del" onclick="delSession(${s.id})" title="Delete"><i class="ti ti-trash" style="font-size:13px"></i></button>
 </div>`).join('');
 }
 
