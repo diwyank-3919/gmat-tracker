@@ -629,7 +629,7 @@ body{
       <!-- Progress bar to exam -->
       <div id="exam-progress-wrap" style="display:none;margin-top:14px">
         <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:500;color:#6366f1;margin-bottom:5px">
-          <span>25 Apr 2025 (start)</span>
+          <span>25 Apr 2026 (start)</span>
           <span id="exam-progress-pct">0% of prep done</span>
           <span id="exam-date-label">Exam day</span>
         </div>
@@ -1401,8 +1401,8 @@ function render() {
   document.getElementById("m-total-sub").textContent = sd+" days studied";
   document.getElementById("total-chip").textContent  = tot>0?fmtH(tot):"0h";
 
-  // MISSED TARGETS — count days since GMAT prep start (25 Apr 2025)
-  var PREP_START = new Date(2025, 3, 25); // April 25, 2025
+  // MISSED TARGETS — count days since GMAT prep start (25 Apr 2026)
+  var PREP_START = new Date(2026, 3, 25); // April 25, 2026
   var missedDays=0, deficitMins=0, consistentDays=0, totalDaysSinceStart=0;
   if (true) {
     var cursor=new Date(PREP_START);
@@ -1930,7 +1930,7 @@ function renderFullLog() {
 
 // ── EXAM SETTINGS ──
 var TARGET_SCORE = 735;
-var PREP_START_DATE = new Date(2025, 3, 25); // Apr 25 2025
+var PREP_START_DATE = new Date(2026, 3, 25); // Apr 25 2026
 
 function saveExamSettings() {
   var examDate = document.getElementById("exam-date-inp").value;
@@ -1980,7 +1980,7 @@ function updateExamCountdown() {
   var projected     = totalStudied + (avgHrsPerDay * daysLeft);
   document.getElementById("proj-total").textContent  = Math.round(projected) + "h";
 
-  // Prep progress bar (Apr 25 2025 → exam date)
+  // Prep progress bar (Apr 25 2026 → exam date)
   var totalPrepDays = Math.ceil((examDate - PREP_START_DATE) / (1000*60*60*24));
   var doneDays      = Math.ceil((today - PREP_START_DATE) / (1000*60*60*24));
   var prepPct       = Math.min(100, Math.round(doneDays / totalPrepDays * 100));
