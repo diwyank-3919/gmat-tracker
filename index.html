@@ -1411,12 +1411,14 @@ function render() {
       var dsMins=minsOn(dateStr(cursor));
       var dsTgt=targetFor(cursor);
       if(dsMins>0) {
-        if(dsMins >= dsTgt * 0.8) {
-          consistentDays++;
-        } else {
-          missedDays++;
-          deficitMins += dsTgt - dsMins;
-      }
+  if(dsMins >= dsTgt * 0.8) {
+    consistentDays++;
+    surplusMins += dsMins - dsTgt; // track extra hours
+  } else {
+    missedDays++;
+    deficitMins += dsTgt - dsMins;
+  }
+}
 }
       // Days with 0 mins are neither consistent nor missed (just skipped)
       cursor=addDays(cursor,1);
