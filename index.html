@@ -379,6 +379,7 @@ body{
       <div id="sync-status" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:#9ea3ae;padding:5px 12px;border-radius:100px;border:1px solid #eaecf0;background:#fff">
         <i class="ti ti-cloud" style="font-size:13px"></i> Connecting…
       </div>
+      <button onclick="openTrash()" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:#6b7280;padding:5px 12px;border-radius:100px;border:1px solid #eaecf0;background:#fff;cursor:pointer" title="View deleted sessions"><i class="ti ti-trash" style="font-size:13px"></i> Trash</button>
     </div>
   </div>
 
@@ -691,21 +692,85 @@ function addSession() {
 // DELETE SESSION
 function delSession(id) {
   setStatus("saving");
-  supa.from("sessions").delete().eq("id",id)
+  supa.from("sessions").update({deleted:true}).eq("id",id)
     .then(function(res){
       if (res.error) { setStatus("error"); alert("Delete failed: "+res.error.message); return; }
       loadSessions();
     });
 }
 
+function restoreSession(id) {
+  setStatus("saving");
+  supa.from("sessions").update({deleted:false}).eq("id",id)
+    .then(function(res){
+      if (res.error) { setStatus("error"); alert("Restore failed: "+res.error.message); return; }
+      loadTrashed();
+      loadSessions();
+    });
+}
+
+function permanentDelete(id) {
+  if (!confirm("Permanently delete this session? This cannot be undone.")) return;
+  setStatus("saving");
+  supa.from("sessions").delete().eq("id",id)
+    .then(function(res){
+      if (res.error) { setStatus("error"); alert("Delete failed: "+res.error.message); return; }
+      loadTrashed();
+    });
+}
+
+function renderTrash(trashed) {
+  var el = document.getElementById("trash-list");
+  if (!el) return;
+  if (!trashed.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:20px 0">Trash is empty</div>';
+    return;
+  }
+  el.innerHTML = trashed.map(function(s){
+    var dateLabel = parseLocal(s.date).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
+    return '<div class="sess-item" style="opacity:0.75">'
+      +'<span class="sess-color" style="background:'+(TC[s.topic]||"#888")+'"></span>'
+      +'<div class="sess-info">'
+      +'<span class="sess-topic">'+s.topic+'</span>'
+      +'<span class="sess-date-tag">'+dateLabel+'</span>'
+      +'</div>'
+      +'<span class="sess-dur">'+fmtH(s.mins)+'</span>'
+      +'<button data-id="'+s.id+'" class="trash-restore" title="Restore" style="background:#eef2ff;border:none;border-radius:6px;padding:4px 8px;cursor:pointer;color:#6366f1;font-size:11px;font-weight:600;margin-right:4px">Restore</button>'
+      +'<button data-id="'+s.id+'" class="trash-perm" title="Delete forever" style="background:#fff1f2;border:none;border-radius:6px;padding:4px 8px;cursor:pointer;color:#e11d48;font-size:11px;font-weight:600">Forever</button>'
+      +'</div>';
+  }).join("");
+  el.querySelectorAll(".trash-restore").forEach(function(btn){
+    btn.addEventListener("click",function(){restoreSession(this.getAttribute("data-id"));});
+  });
+  el.querySelectorAll(".trash-perm").forEach(function(btn){
+    btn.addEventListener("click",function(){permanentDelete(this.getAttribute("data-id"));});
+  });
+}
+
+function openTrash() {
+  document.getElementById("trash-modal").style.display="flex";
+  loadTrashed();
+}
+function closeTrash() {
+  document.getElementById("trash-modal").style.display="none";
+}
+
 // LOAD ALL SESSIONS FROM SUPABASE
 function loadSessions() {
-  supa.from("sessions").select("*").order("date",{ascending:false}).order("created_at",{ascending:false})
+  supa.from("sessions").select("*").eq("deleted",false).order("date",{ascending:false}).order("created_at",{ascending:false})
     .then(function(res){
       if (res.error) { console.error("Load error:",res.error); setStatus("error"); return; }
       sessions=res.data||[];
       setStatus("synced");
       render();
+    });
+}
+
+function loadTrashed() {
+  supa.from("sessions").select("*").eq("deleted",true).order("date",{ascending:false})
+    .then(function(res){
+      if (res.error) { setStatus("error"); return; }
+      renderTrash(res.data||[]);
     });
 }
 
@@ -981,6 +1046,26 @@ checkLocalMigration();
     <div style="display:flex;gap:10px">
       <button id="migrate-confirm" style="flex:1;padding:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer">Upload to Supabase</button>
       <button id="migrate-cancel" style="padding:10px 18px;background:#f7f8fa;border:1px solid #eaecf0;border-radius:9px;font-size:13px;cursor:pointer">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRASH MODAL -->
+<div id="trash-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:0;max-width:480px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.15);overflow:hidden;max-height:80vh;display:flex;flex-direction:column">
+    <div style="padding:20px 24px 16px;border-bottom:1px solid #f2f4f7;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:#1a1d23;display:flex;align-items:center;gap:8px"><i class="ti ti-trash" style="color:#e11d48"></i> Trash</div>
+        <div style="font-size:12px;color:#9ea3ae;margin-top:2px">Deleted sessions — restore or remove permanently</div>
+      </div>
+      <button onclick="closeTrash()" style="background:none;border:none;cursor:pointer;color:#9ea3ae;font-size:22px;line-height:1;padding:0">&times;</button>
+    </div>
+    <div id="trash-list" style="padding:16px 24px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;flex:1">
+      <div class="empty-state" style="padding:20px 0">Loading...</div>
+    </div>
+    <div style="padding:14px 24px;border-top:1px solid #f2f4f7;flex-shrink:0;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:11px;color:#9ea3ae"><i class="ti ti-info-circle"></i> Soft-deleted data stays in Supabase until permanently removed</div>
+      <button onclick="closeTrash()" style="padding:7px 16px;background:#f7f8fa;border:1px solid #eaecf0;border-radius:8px;font-size:12px;cursor:pointer;font-weight:500">Close</button>
     </div>
   </div>
 </div>
