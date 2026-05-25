@@ -1403,23 +1403,26 @@ function render() {
 
   // MISSED TARGETS — count days since GMAT prep start (25 Apr 2026)
   var PREP_START = new Date(2026, 3, 25); // April 25, 2026
-  var missedDays=0, deficitMins=0, consistentDays=0, totalDaysSinceStart=0;
-  if (true) {
-    var cursor=new Date(PREP_START);
-    while(cursor<=today) {
-      totalDaysSinceStart++;
-      var dsMins=minsOn(dateStr(cursor));
-      var dsTgt=targetFor(cursor);
-      if(dsMins>=dsTgt&&dsMins>0) {
-        consistentDays++;
-      } else if(dsMins>0&&dsMins<dsTgt) {
-        missedDays++;
-        deficitMins+=dsTgt-dsMins;
-      }
-      // Days with 0 mins are neither consistent nor missed (just skipped)
-      cursor=addDays(cursor,1);
+PREP_START.setHours(0, 0, 0, 0);
+
+var missedDays = 0, deficitMins = 0, consistentDays = 0, totalDaysSinceStart = 0, surplusMins = 0;
+
+var cursor = new Date(PREP_START);
+while (cursor <= today) {
+  totalDaysSinceStart++;
+  var dsMins = minsOn(dateStr(cursor));
+  var dsTgt = targetFor(cursor);
+  if (dsMins > 0) {
+    if (dsMins >= dsTgt * 0.8) {
+      consistentDays++;
+      surplusMins += dsMins - dsTgt;
+    } else {
+      missedDays++;
+      deficitMins += dsTgt - dsMins;
     }
   }
+  cursor = addDays(cursor, 1);
+}
   var studiedDaysPct = totalDaysSinceStart>0 ? Math.min(100,Math.round(consistentDays/totalDaysSinceStart*100)) : 0;
   var missedPct      = sd>0 ? Math.min(100,Math.round(missedDays/sd*100)) : 0;
   document.getElementById("m-missed").textContent       = missedDays;
