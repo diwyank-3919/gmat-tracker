@@ -316,6 +316,122 @@ body{
 .kpi:nth-child(3){animation-delay:0.15s}
 .kpi:nth-child(4){animation-delay:0.2s}
 .card,.banner{animation:fadeUp 0.4s ease 0.1s both}
+
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width: 640px) {
+
+  /* Topbar */
+  .topbar { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+  .topbar > div:first-child { width: 100%; }
+  .topbar-title { font-size: 18px; }
+  .topbar-date  { font-size: 11px; }
+  .topbar-right {
+    width: 100%; overflow-x: auto; flex-wrap: nowrap;
+    padding-bottom: 2px; gap: 6px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .topbar-right::-webkit-scrollbar { display: none; }
+  .tb-chip { white-space: nowrap; font-size: 11px; padding: 4px 10px; flex-shrink: 0; }
+
+  /* Content padding */
+  .content { padding: 14px; }
+
+  /* KPI grid — 2 cols on mobile */
+  .kpi-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kpi { padding: 14px; }
+  .kpi-value { font-size: 22px; }
+  .kpi-label { font-size: 10px; }
+  .kpi-icon  { width: 28px; height: 28px; font-size: 13px; }
+
+  /* Banner */
+  .banner { padding: 12px 14px; gap: 10px; }
+  .banner-icon { font-size: 18px; }
+  .banner-title { font-size: 12px; }
+  .banner-sub   { font-size: 11px; }
+
+  /* Log panel — stack vertically */
+  .main-grid { grid-template-columns: 1fr !important; gap: 12px; }
+
+  /* Form */
+  .form-grid { grid-template-columns: 1fr 1fr; }
+  .field.full { grid-column: 1 / -1; }
+  .dur-wrap input { width: 52px; }
+
+  /* Bottom grid — stack */
+  .bottom-grid { grid-template-columns: 1fr !important; }
+
+  /* Session tabs */
+  .sess-tabs { gap: 3px; }
+  .sess-tab  { font-size: 11px; padding: 5px 6px; }
+
+  /* Card padding */
+  .card { padding: 14px 14px; }
+
+  /* Chart height */
+  #mainChart { height: 180px !important; }
+
+  /* Calendar cells */
+  .cal-cell { border-radius: 6px; }
+  .cal-num  { font-size: 10px; }
+  .cal-hrs  { font-size: 8px; }
+
+  /* Streak dots */
+  .s-dot { width: 17px; height: 17px; border-radius: 5px; font-size: 8px; }
+
+  /* Donut wrap */
+  .donut-wrap { height: 130px; }
+
+  /* Filter bar */
+  .filter-bar { gap: 5px; }
+  .fpill      { font-size: 11px; padding: 5px 11px; }
+  .fnav       { margin-left: auto; }
+  .frange     { min-width: 80px; font-size: 11px; }
+
+  /* Section title */
+  .sec-title { font-size: 14px; }
+
+  /* Custom date picker */
+  #custom-picker { width: calc(100vw - 28px) !important; left: 0 !important; }
+
+  /* Migrate bar */
+  #migrate-bar { flex-wrap: wrap; gap: 8px; }
+
+  /* Trash modal */
+  #trash-modal > div { max-height: 90vh; width: 95% !important; }
+
+  /* Analytics grid */
+  #view-analytics > div[style*="grid-template-columns:repeat(3"] {
+    grid-template-columns: 1fr !important;
+  }
+  #view-analytics > div[style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Big calendar */
+  #big-cal-grid > div { border-radius: 7px; }
+
+  /* Session log filter row */
+  #view-sessions .sec-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+}
+
+@media (max-width: 400px) {
+  .kpi-row { grid-template-columns: 1fr 1fr; }
+  .kpi-value { font-size: 18px; }
+  .topbar-title { font-size: 16px; }
+}
+
+/* Analytics + bottom grid mobile */
+@media (max-width: 640px) {
+  .an-top-grid { grid-template-columns: 1fr 1fr !important; }
+  .an-mid-grid { grid-template-columns: 1fr !important; }
+  .bottom-grid { grid-template-columns: 1fr !important; }
+  /* Topbar — title row above chips */
+  .topbar { flex-direction: column; align-items: flex-start; }
+  .topbar-right { width: 100%; }
+  /* Make main-grid stack */
+  .main-grid { grid-template-columns: 1fr !important; }
+}
 </style>
 </head>
 <body>
@@ -368,7 +484,7 @@ body{
 <!-- ── MAIN ── -->
 <main class="main">
   <div class="topbar">
-    <div>
+    <div style="min-width:0;flex-shrink:1">
       <div class="topbar-title">Dashboard</div>
       <div class="topbar-date" id="topbar-date"></div>
     </div>
@@ -625,7 +741,7 @@ body{
   </div>
 
   <!-- Best / Worst day -->
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px" class="an-top-grid">
     <div class="kpi">
       <div class="kpi-top"><div class="kpi-label">Best day ever</div><div class="kpi-icon violet"><i class="ti ti-trending-up"></i></div></div>
       <div class="kpi-value" id="an-best-day" style="font-size:20px">--</div>
@@ -661,7 +777,7 @@ body{
   </div>
 
   <!-- Day of week + Hour distribution -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px" class="an-mid-grid">
     <div class="card">
       <div class="card-head"><div class="card-title"><i class="ti ti-chart-bar"></i> Hours by day of week</div></div>
       <div style="position:relative;height:200px"><canvas id="dowChart"></canvas></div>
