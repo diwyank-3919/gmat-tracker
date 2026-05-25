@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GMAT Study Tracker</title>
+<title>Aditya Diwyank — GMAT Dashboard</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236366f1'/%3E%3Ctext x='16' y='23' font-size='19' text-anchor='middle' font-family='system-ui'%3E🎯%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -437,6 +437,30 @@ body{
   /* Make main-grid stack */
   .main-grid { grid-template-columns: 1fr !important; }
 }
+
+/* ── DREAM SCHOOLS ── */
+.dream-school-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; border-radius: 8px;
+  transition: background 0.12s; cursor: default;
+}
+.dream-school-item:hover { background: #f7f8fa; }
+.dream-school-logo {
+  width: 28px; height: 28px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.dream-school-name {
+  font-size: 12px; font-weight: 500; color: #374151;
+  flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dream-school-rank {
+  font-size: 10px; font-weight: 700; color: #9ea3ae;
+  background: #f2f4f7; padding: 1px 5px; border-radius: 4px;
+}
+
+/* Also update sidebar logo for longer name */
+.sb-logo-name { font-size: 13px !important; }
 </style>
 </head>
 <body>
@@ -447,8 +471,8 @@ body{
   <div class="sb-logo">
     <div class="sb-logo-icon"><i class="ti ti-target"></i></div>
     <div>
-      <div class="sb-logo-name">GMAT Tracker</div>
-      <div class="sb-logo-sub">Study Dashboard</div>
+      <div class="sb-logo-name">Aditya Diwyank</div>
+      <div class="sb-logo-sub">GMAT Dashboard · Target 735</div>
     </div>
   </div>
 
@@ -469,6 +493,77 @@ body{
     <div class="sb-item"><i class="ti ti-chart-dots"></i> DI <span class="sb-badge" id="sb-di">0h</span></div>
     <div class="sb-item"><i class="ti ti-clipboard-check"></i> Mock <span class="sb-badge" id="sb-mock">0h</span></div>
     <div class="sb-item"><i class="ti ti-refresh"></i> Review <span class="sb-badge" id="sb-review">0h</span></div>
+  </div>
+
+  <!-- DREAM SCHOOLS -->
+  <div style="padding:14px 12px 0;border-top:1px solid #f2f4f7">
+    <div style="font-size:10px;font-weight:600;color:#b0b7c3;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;padding:0 8px">Dream schools</div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+
+      <!-- INSEAD -->
+      <div class="dream-school-item" title="INSEAD">
+        <div class="dream-school-logo" style="background:#003366">
+          <span style="color:#fff;font-size:9px;font-weight:800;letter-spacing:0.5px">INS</span>
+        </div>
+        <span class="dream-school-name">INSEAD</span>
+        <span class="dream-school-rank">#1</span>
+      </div>
+
+      <!-- HBS -->
+      <div class="dream-school-item" title="Harvard Business School">
+        <div class="dream-school-logo" style="background:#A51C30">
+          <span style="color:#fff;font-size:9px;font-weight:800">HBS</span>
+        </div>
+        <span class="dream-school-name">Harvard Business</span>
+        <span class="dream-school-rank">#2</span>
+      </div>
+
+      <!-- MIT Sloan -->
+      <div class="dream-school-item" title="MIT Sloan">
+        <div class="dream-school-logo" style="background:#A31F34">
+          <span style="color:#fff;font-size:9px;font-weight:800">MIT</span>
+        </div>
+        <span class="dream-school-name">MIT Sloan</span>
+        <span class="dream-school-rank">#4</span>
+      </div>
+
+      <!-- Chicago Booth -->
+      <div class="dream-school-item" title="Chicago Booth">
+        <div class="dream-school-logo" style="background:#800000">
+          <span style="color:#fff;font-size:9px;font-weight:800">CHI</span>
+        </div>
+        <span class="dream-school-name">Chicago Booth</span>
+        <span class="dream-school-rank">#5</span>
+      </div>
+
+      <!-- Columbia -->
+      <div class="dream-school-item" title="Columbia Business School">
+        <div class="dream-school-logo" style="background:#003DA5">
+          <span style="color:#fff;font-size:9px;font-weight:800">CBS</span>
+        </div>
+        <span class="dream-school-name">Columbia</span>
+        <span class="dream-school-rank">#9</span>
+      </div>
+
+      <!-- LBS -->
+      <div class="dream-school-item" title="London Business School">
+        <div class="dream-school-logo" style="background:#002D62">
+          <span style="color:#fff;font-size:9px;font-weight:800">LBS</span>
+        </div>
+        <span class="dream-school-name">London Business</span>
+        <span class="dream-school-rank">#6</span>
+      </div>
+
+      <!-- Yale SOM -->
+      <div class="dream-school-item" title="Yale School of Management">
+        <div class="dream-school-logo" style="background:#00356B">
+          <span style="color:#fff;font-size:9px;font-weight:800">YLS</span>
+        </div>
+        <span class="dream-school-name">Yale SOM</span>
+        <span class="dream-school-rank">#10</span>
+      </div>
+
+    </div>
   </div>
 
   <div class="sb-bottom">
@@ -579,65 +674,6 @@ body{
       </div>
     </div>
 
-    <!-- BANNER -->
-    <div class="banner" id="banner">
-      <div class="banner-icon">🚀</div>
-      <div class="banner-body">
-        <div class="banner-title" id="banner-title">Start your GMAT journey</div>
-        <div class="banner-sub" id="banner-sub">Log your first session — weekday target 3h, weekend 6h</div>
-      </div>
-    </div>
-
-    <!-- EXAM COMMAND CENTER -->
-    <div class="card" id="exam-command" style="margin-bottom:16px;background:linear-gradient(135deg,#eef2ff 0%,#faf5ff 100%);border:1.5px solid #e0e7ff">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-        <!-- Countdown -->
-        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-          <div style="text-align:center">
-            <div style="font-size:11px;font-weight:600;color:#6366f1;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">Exam date</div>
-            <input type="date" id="exam-date-inp" onchange="saveExamSettings()" style="height:34px;font-size:12px;font-weight:600;font-family:inherit;padding:0 10px;border:1.5px solid #c7d2fe;border-radius:8px;background:#fff;color:#3730a3;outline:none;cursor:pointer">
-          </div>
-          <div id="countdown-block" style="display:none;text-align:center">
-            <div style="font-size:36px;font-weight:800;color:#3730a3;letter-spacing:-2px;line-height:1" id="days-left">--</div>
-            <div style="font-size:11px;font-weight:600;color:#6366f1;text-transform:uppercase;letter-spacing:0.06em">days left</div>
-          </div>
-          <div id="hrs-needed-block" style="display:none;text-align:center">
-            <div style="font-size:24px;font-weight:800;color:#3730a3;letter-spacing:-1px;line-height:1" id="hrs-needed">--</div>
-            <div style="font-size:11px;font-weight:600;color:#6366f1;text-transform:uppercase;letter-spacing:0.06em">hrs/day needed</div>
-          </div>
-          <div id="total-hrs-block" style="display:none;text-align:center">
-            <div style="font-size:24px;font-weight:800;color:#3730a3;letter-spacing:-1px;line-height:1" id="proj-total">--</div>
-            <div style="font-size:11px;font-weight:600;color:#6366f1;text-transform:uppercase;letter-spacing:0.06em">projected total hrs</div>
-          </div>
-        </div>
-        <!-- Target score -->
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <div style="text-align:center">
-            <div style="font-size:11px;font-weight:600;color:#6366f1;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">Target score</div>
-            <input type="number" id="target-score-inp" onchange="saveExamSettings()" min="200" max="805" placeholder="735" style="width:80px;height:34px;font-size:18px;font-weight:800;font-family:inherit;padding:0 8px;border:1.5px solid #c7d2fe;border-radius:8px;background:#fff;color:#3730a3;outline:none;text-align:center">
-          </div>
-          <div id="score-progress-block" style="display:none">
-            <div style="font-size:11px;font-weight:600;color:#6366f1;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">Latest mock</div>
-            <div style="font-size:24px;font-weight:800;color:#3730a3;letter-spacing:-1px" id="latest-mock-display">--</div>
-          </div>
-          <div id="gap-block" style="display:none;text-align:center">
-            <div style="font-size:11px;font-weight:600;color:#e11d48;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">Gap to target</div>
-            <div style="font-size:24px;font-weight:800;color:#e11d48;letter-spacing:-1px" id="score-gap">--</div>
-          </div>
-        </div>
-      </div>
-      <!-- Progress bar to exam -->
-      <div id="exam-progress-wrap" style="display:none;margin-top:14px">
-        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:500;color:#6366f1;margin-bottom:5px">
-          <span>25 Apr 2025 (start)</span>
-          <span id="exam-progress-pct">0% of prep done</span>
-          <span id="exam-date-label">Exam day</span>
-        </div>
-        <div style="height:6px;background:#e0e7ff;border-radius:3px;overflow:hidden">
-          <div id="exam-progress-bar" style="height:100%;border-radius:3px;background:linear-gradient(90deg,#6366f1,#8b5cf6);transition:width 0.6s ease;width:0%"></div>
-        </div>
-      </div>
-    </div>
 
     <!-- LOG + SESSIONS -->
     <div class="main-grid">
@@ -1044,11 +1080,11 @@ var TC     = { "Quant":"#6366f1","RC":"#16a34a","CR":"#d97706","DI":"#0ea5e9","M
 var TOPICS = ["Quant","RC","CR","DI","Mock test","Review"];
 var SB_IDS = {"Quant":"sb-quant","RC":"sb-rc","CR":"sb-cr","DI":"sb-di","Mock test":"sb-mock","Review":"sb-review"};
 var QUOTES = [
-  ["Every hour compounds.","700+ is built one session at a time."],
-  ["Consistency beats intensity.","Show up daily and the score follows."],
-  ["The GMAT rewards structure.","Keep building the habit."],
-  ["You are ahead of who you were yesterday.","Keep the streak alive."],
-  ["Progress is invisible until it is not.","Log today session."]
+  ["Every hour compounds, Aditya.","735 is built one session at a time."],
+  ["Consistency beats intensity.","INSEAD waits for those who show up daily."],
+  ["HBS, Booth, Sloan — they reward structure.","Keep building the habit."],
+  ["You are ahead of who you were yesterday.","LBS and Yale see the journey, not just the score."],
+  ["Progress is invisible until it is not.","Log today and stay on track for 735."]
 ];
 
 var today = new Date(); today.setHours(0,0,0,0);
@@ -1446,7 +1482,7 @@ function render() {
 
   qi=streak%QUOTES.length;
   if(sessions.length===0){
-    document.getElementById("banner-title").textContent="Start your GMAT journey";
+    document.getElementById("banner-title").textContent="Aditya, your GMAT journey starts now!";
     document.getElementById("banner-sub").textContent="Log your first session - weekday target 3h, weekend 6h";
   } else if(tmet){
     document.getElementById("banner-title").textContent="Target hit today!";
@@ -1650,7 +1686,7 @@ function switchView(view) {
   });
   currentView = view;
   // Update topbar title
-  var titles = {dashboard:"Dashboard",analytics:"Analytics",calendar:"Calendar",sessions:"Session log"};
+  var titles = {dashboard:"Aditya's Dashboard",analytics:"Analytics",calendar:"Calendar",sessions:"Session log"};
   document.querySelector(".topbar-title").textContent = titles[view]||view;
   if (view==="analytics") renderAnalytics();
   if (view==="calendar")  renderBigCalendar();
