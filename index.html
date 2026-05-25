@@ -888,7 +888,6 @@ function renderStreak() {
     grid.appendChild(dot);
   }
 }
-
 function renderSessions() {
   var el,ts,ws,we,filtered,total;
   el=document.getElementById("sessions-list");
@@ -910,4 +909,81 @@ function renderSessions() {
       +'</div>'
       +'<span class="sess-dur">'+fmtH(s.mins)+'</span>'
       +'<button class="sess-del" data-id="'+s.id+'" title="Delete"><i class="ti ti-trash" style="font-size:13px"></i></button>'
-      +'</div>';>
+      +'</div>';
+  }).join("");
+  el.querySelectorAll(".sess-del").forEach(function(btn){
+    btn.addEventListener("click",function(){delSession(this.getAttribute("data-id"));});
+  });
+}
+
+// MIGRATE FROM LOCALSTORAGE
+function migrateFromLocalStorage() {
+  var OLD_KEYS = ["gmat_v3","gmat_sessions_v2","gmat_sessions"];
+  var found = null, foundKey = null;
+  OLD_KEYS.forEach(function(k){
+    var raw = localStorage.getItem(k);
+    if (raw && !found) { try { found = JSON.parse(raw); foundKey = k; } catch(e){} }
+  });
+  if (!found || !found.length) {
+    alert("No local data found to migrate.");
+    return;
+  }
+  var modal = document.getElementById("migrate-modal");
+  document.getElementById("migrate-count").textContent = found.length;
+  document.getElementById("migrate-preview").textContent = found.slice(0,3).map(function(s){
+    return s.date+" - "+s.topic+" - "+fmtH(s.mins);
+  }).join("\n")+(found.length>3?"\n...and "+(found.length-3)+" more":"");
+  modal.style.display = "flex";
+  document.getElementById("migrate-confirm").onclick = function() {
+    modal.style.display = "none";
+    setStatus("saving");
+    var rows = found.map(function(s){
+      return {date:s.date, topic:s.topic, mins:s.mins, created_at:s.createdAt||s.created_at||Date.now()};
+    });
+    supa.from("sessions").insert(rows)
+      .then(function(res){
+        if (res.error) { setStatus("error"); alert("Migration failed: "+res.error.message); return; }
+        // Clear old localStorage
+        OLD_KEYS.forEach(function(k){ localStorage.removeItem(k); });
+        alert("Migrated "+rows.length+" sessions successfully!");
+        loadSessions();
+      })
+      .catch(function(err){ setStatus("error"); alert("Migration failed: "+err.message); });
+  };
+  document.getElementById("migrate-cancel").onclick = function() {
+    modal.style.display = "none";
+  };
+}
+
+// AUTO-CHECK: if localStorage has old data on first load, show banner
+function checkLocalMigration() {
+  var OLD_KEYS = ["gmat_v3","gmat_sessions_v2","gmat_sessions"];
+  var found = false;
+  OLD_KEYS.forEach(function(k){ if(localStorage.getItem(k)) found=true; });
+  if (found) {
+    var bar = document.getElementById("migrate-bar");
+    if (bar) bar.style.display = "flex";
+  }
+}
+
+// START
+loadSessions();
+checkLocalMigration();
+</script>
+
+<!-- MIGRATION MODAL -->
+<div id="migrate-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:28px 32px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.15)">
+    <div style="font-size:22px;margin-bottom:4px">📦 Migrate local data</div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:16px">Found <strong id="migrate-count">0</strong> sessions in your browser storage</div>
+    <pre id="migrate-preview" style="background:#f7f8fa;border:1px solid #eaecf0;border-radius:8px;padding:12px;font-size:12px;color:#374151;margin-bottom:20px;white-space:pre-wrap"></pre>
+    <div style="font-size:12px;color:#9ea3ae;margin-bottom:20px">These will be uploaded to Supabase and removed from local storage.</div>
+    <div style="display:flex;gap:10px">
+      <button id="migrate-confirm" style="flex:1;padding:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer">Upload to Supabase</button>
+      <button id="migrate-cancel" style="padding:10px 18px;background:#f7f8fa;border:1px solid #eaecf0;border-radius:9px;font-size:13px;cursor:pointer">Cancel</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
