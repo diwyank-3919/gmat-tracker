@@ -448,9 +448,47 @@ body{
           <div class="card-title"><i class="ti ti-plus-circle"></i> Log a session</div>
         </div>
         <div class="form-grid">
-          <div class="field">
+          <div class="field" style="position:relative">
             <label>Date</label>
-            <input type="date" id="inp-date">
+            <div style="display:flex;align-items:center;gap:6px">
+              <button onclick="shiftDate(-1)" title="Previous day" style="width:34px;height:38px;flex-shrink:0;border:1.5px solid #eaecf0;border-radius:9px;background:#fafafa;color:#6b7280;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all 0.12s" onmouseover="this.style.borderColor='#6366f1';this.style.color='#6366f1'" onmouseout="this.style.borderColor='#eaecf0';this.style.color='#6b7280'"><i class="ti ti-chevron-left"></i></button>
+              <div id="date-display" onclick="togglePicker()" style="flex:1;height:38px;border:1.5px solid #eaecf0;border-radius:9px;background:#fafafa;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;font-size:13px;font-weight:600;color:#1a1d23;transition:all 0.15s;user-select:none" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='#eaecf0'">
+                <i class="ti ti-calendar" style="color:#6366f1;font-size:15px"></i>
+                <span id="date-display-text">Select date</span>
+              </div>
+              <button onclick="shiftDate(1)" title="Next day" style="width:34px;height:38px;flex-shrink:0;border:1.5px solid #eaecf0;border-radius:9px;background:#fafafa;color:#6b7280;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all 0.12s" onmouseover="this.style.borderColor='#6366f1';this.style.color='#6366f1'" onmouseout="this.style.borderColor='#eaecf0';this.style.color='#6b7280'"><i class="ti ti-chevron-right"></i></button>
+            </div>
+            <!-- Hidden real input for value storage -->
+            <input type="hidden" id="inp-date">
+            <!-- Custom Calendar Picker -->
+            <div id="custom-picker" style="display:none;position:absolute;top:72px;left:0;z-index:999;background:#fff;border:1.5px solid #eaecf0;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.12);padding:0;width:300px;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif">
+              <!-- Picker Header -->
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid #f2f4f7">
+                <button onclick="pickerNav(-1)" style="width:30px;height:30px;border:1.5px solid #eaecf0;border-radius:8px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:14px;transition:all 0.12s" onmouseover="this.style.borderColor='#6366f1';this.style.color='#6366f1'" onmouseout="this.style.borderColor='#eaecf0';this.style.color='#6b7280'"><i class="ti ti-chevron-left"></i></button>
+                <div style="text-align:center">
+                  <div id="picker-month-year" style="font-size:15px;font-weight:700;color:#1a1d23;letter-spacing:-0.3px"></div>
+                </div>
+                <button onclick="pickerNav(1)" style="width:30px;height:30px;border:1.5px solid #eaecf0;border-radius:8px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:14px;transition:all 0.12s" onmouseover="this.style.borderColor='#6366f1';this.style.color='#6366f1'" onmouseout="this.style.borderColor='#eaecf0';this.style.color='#6b7280'"><i class="ti ti-chevron-right"></i></button>
+              </div>
+              <!-- Day labels -->
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:12px 14px 4px">
+                <div style="text-align:center;font-size:10px;font-weight:700;color:#b0b7c3;letter-spacing:0.06em;text-transform:uppercase;padding:4px 0">Mo</div>
+                <div style="text-align:center;font-size:10px;font-weight:700;color:#b0b7c3;letter-spacing:0.06em;text-transform:uppercase;padding:4px 0">Tu</div>
+                <div style="text-align:center;font-size:10px;font-weight:700;color:#b0b7c3;letter-spacing:0.06em;text-transform:uppercase;padding:4px 0">We</div>
+                <div style="text-align:center;font-size:10px;font-weight:700;color:#b0b7c3;letter-spacing:0.06em;text-transform:uppercase;padding:4px 0">Th</div>
+                <div style="text-align:center;font-size:10px;font-weight:700;color:#b0b7c3;letter-spacing:0.06em;text-transform:uppercase;padding:4px 0">Fr</div>
+                <div style="text-align:center;font-size:10px;font-weight:700;color:#c7d2fe;letter-spacing:0.06em;text-transform:uppercase;padding:4px 0">Sa</div>
+                <div style="text-align:center;font-size:10px;font-weight:700;color:#c7d2fe;letter-spacing:0.06em;text-transform:uppercase;padding:4px 0">Su</div>
+              </div>
+              <!-- Day grid -->
+              <div id="picker-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:0 14px 14px"></div>
+              <!-- Footer shortcuts -->
+              <div style="border-top:1px solid #f2f4f7;padding:10px 14px;display:flex;gap:6px">
+                <button onclick="pickerSelectDate(dateStr(today))" style="flex:1;padding:7px;font-size:12px;font-weight:600;border:1.5px solid #e0e7ff;border-radius:8px;background:#eef2ff;color:#6366f1;cursor:pointer">Today</button>
+                <button onclick="pickerSelectDate(dateStr(addDays(today,-1)))" style="flex:1;padding:7px;font-size:12px;font-weight:600;border:1.5px solid #eaecf0;border-radius:8px;background:#fafafa;color:#6b7280;cursor:pointer">Yesterday</button>
+                <button onclick="closePicker()" style="flex:1;padding:7px;font-size:12px;font-weight:600;border:1.5px solid #eaecf0;border-radius:8px;background:#fafafa;color:#6b7280;cursor:pointer">Cancel</button>
+              </div>
+            </div>
           </div>
           <div class="field">
             <label>Topic</label>
@@ -762,6 +800,7 @@ function minsOn(ds)    { return sessions.filter(function(s){return s.date===ds;}
 
 document.getElementById("topbar-date").textContent = today.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
 document.getElementById("inp-date").value = dateStr(today);
+document.getElementById("date-display-text").textContent = "Today";
 
 function getViewDates() {
   var s,ref,days,all,s2,e,d,c;
@@ -797,6 +836,132 @@ function getRangeLabel() {
 }
 
 // ADD SESSION
+// CUSTOM DATE PICKER STATE
+var pickerOffset = 0; // months from today
+
+function getPickerRef() {
+  var d = new Date(today.getFullYear(), today.getMonth()+pickerOffset, 1);
+  return d;
+}
+
+function togglePicker() {
+  var p = document.getElementById("custom-picker");
+  if (p.style.display === "none") {
+    // Set picker to selected date's month if available
+    var inp = document.getElementById("inp-date");
+    if (inp.value) {
+      var parts = inp.value.split("-").map(Number);
+      var sel = new Date(parts[0], parts[1]-1, 1);
+      var diff = (sel.getFullYear()-today.getFullYear())*12 + (sel.getMonth()-today.getMonth());
+      pickerOffset = diff;
+    } else { pickerOffset = 0; }
+    renderPicker();
+    p.style.display = "block";
+    // Close on outside click
+    setTimeout(function(){
+      document.addEventListener("click", pickerOutside, true);
+    }, 0);
+  } else {
+    closePicker();
+  }
+}
+
+function pickerOutside(e) {
+  var p = document.getElementById("custom-picker");
+  var d = document.getElementById("date-display");
+  if (p && !p.contains(e.target) && d && !d.contains(e.target)) {
+    closePicker();
+  }
+}
+
+function closePicker() {
+  document.getElementById("custom-picker").style.display = "none";
+  document.removeEventListener("click", pickerOutside, true);
+}
+
+function pickerNav(n) {
+  pickerOffset += n;
+  renderPicker();
+}
+
+function renderPicker() {
+  var ref   = getPickerRef();
+  var label = ref.toLocaleDateString("en-IN",{month:"long",year:"numeric"});
+  document.getElementById("picker-month-year").textContent = label;
+
+  var grid  = document.getElementById("picker-grid");
+  grid.innerHTML = "";
+  var days  = new Date(ref.getFullYear(), ref.getMonth()+1, 0).getDate();
+  var first = new Date(ref.getFullYear(), ref.getMonth(), 1);
+  var pad   = (first.getDay()+6)%7;
+  var sel   = document.getElementById("inp-date").value;
+  var todayStr = dateStr(today);
+
+  for (var i=0; i<pad; i++) {
+    var blank = document.createElement("div"); grid.appendChild(blank);
+  }
+  for (var day=1; day<=days; day++) {
+    var d   = new Date(ref.getFullYear(), ref.getMonth(), day);
+    var ds  = dateStr(d);
+    var isToday = ds === todayStr;
+    var isSel   = ds === sel;
+    var isWEnd  = d.getDay()===0||d.getDay()===6;
+    var hasSess = minsOn(ds) > 0;
+    var cell = document.createElement("div");
+    cell.style.cssText = "aspect-ratio:1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all 0.12s;position:relative;gap:2px";
+    if (isSel) {
+      cell.style.background = "linear-gradient(135deg,#6366f1,#8b5cf6)";
+      cell.style.boxShadow  = "0 4px 12px rgba(99,102,241,0.35)";
+    } else if (isToday) {
+      cell.style.background = "#eef2ff";
+      cell.style.border     = "1.5px solid #c7d2fe";
+    } else {
+      cell.style.background = "transparent";
+    }
+    var numEl = document.createElement("div");
+    numEl.style.cssText = "font-size:13px;font-weight:"+(isSel||isToday?"700":"500")+";color:"+(isSel?"#fff":isToday?"#6366f1":isWEnd?"#6366f1":"#1a1d23");
+    numEl.textContent = day;
+    cell.appendChild(numEl);
+    if (hasSess && !isSel) {
+      var pip = document.createElement("div");
+      pip.style.cssText = "width:4px;height:4px;border-radius:50%;background:"+(isToday?"#6366f1":"#16a34a");
+      cell.appendChild(pip);
+    }
+    cell.onmouseover = (function(el, sel2) { return function() {
+      if (!sel2) el.style.background = "#f7f8fa";
+    }; })(cell, isSel);
+    cell.onmouseout = (function(el, sel2, today2) { return function() {
+      if (!sel2 && !today2) el.style.background = "transparent";
+    }; })(cell, isSel, isToday);
+    cell.onclick = (function(ds2){ return function(e) {
+      e.stopPropagation();
+      pickerSelectDate(ds2);
+    }; })(ds);
+    grid.appendChild(cell);
+  }
+}
+
+function pickerSelectDate(ds) {
+  document.getElementById("inp-date").value = ds;
+  // Update display
+  var parts = ds.split("-").map(Number);
+  var d = new Date(parts[0], parts[1]-1, parts[2]);
+  var isToday = ds === dateStr(today);
+  var isYest  = ds === dateStr(addDays(today,-1));
+  var label   = isToday ? "Today" : isYest ? "Yesterday" : d.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+  document.getElementById("date-display-text").textContent = label;
+  closePicker();
+}
+
+function shiftDate(n) {
+  var inp = document.getElementById("inp-date");
+  var cur = inp.value || dateStr(today);
+  var parts = cur.split("-").map(Number);
+  var d = new Date(parts[0], parts[1]-1, parts[2]);
+  d.setDate(d.getDate()+n);
+  pickerSelectDate(dateStr(d));
+}
+
 function addSession() {
   var d     = document.getElementById("inp-date").value;
   var topic = document.getElementById("inp-topic").value;
