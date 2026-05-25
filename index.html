@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px;height:100%}
@@ -375,6 +376,9 @@ body{
       <div class="tb-chip purple"><i class="ti ti-flame"></i><span id="streak-chip">0</span> day streak</div>
       <div class="tb-chip green"><i class="ti ti-target"></i><span id="week-chip">0</span>% this week</div>
       <div class="tb-chip amber"><i class="ti ti-trophy"></i><span id="total-chip">0h</span> total</div>
+      <div id="sync-status" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:#9ea3ae;padding:5px 12px;border-radius:100px;border:1px solid #eaecf0;background:#fff">
+        <i class="ti ti-cloud" style="font-size:13px"></i> Connecting…
+      </div>
     </div>
   </div>
 
@@ -572,271 +576,338 @@ body{
 </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const TC={
-  'Quant':'#6366f1','RC':'#16a34a','CR':'#d97706',
-  'DI':'#0ea5e9','Mock test':'#ec4899','Review':'#f97316'
-};
-const TOPICS=['Quant','RC','CR','DI','Mock test','Review'];
-const SB_IDS={'Quant':'sb-quant','RC':'sb-rc','CR':'sb-cr','DI':'sb-di','Mock test':'sb-mock','Review':'sb-review'};
-const today=new Date();today.setHours(0,0,0,0);
-let sessions=JSON.parse(localStorage.getItem('gmat_v3')||'[]');
-let viewMode='week',viewOffset=0,sessFilter='today';
-let mainChartInst,topicChartInst;
+var SUPA_URL = "https://zglxfaarezgyibewtmbh.supabase.co";
+var SUPA_KEY = "sb_publishable_24bSL5sfl-tRgRLtik1qNA_NdexORqM";
+var supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-const QUOTES=[
-  ['Every hour compounds.','700+ is built one session at a time.'],
-  ['Consistency beats intensity.','Show up daily and the score follows.'],
-  ['The GMAT rewards structure.','Keep building the habit.'],
-  ['You\'re ahead of who you were yesterday.','Keep the streak alive.'],
-  ['Progress is invisible — until it isn\'t.','Log today\'s session.'],
+// STATUS
+function setStatus(s) {
+  var el = document.getElementById("sync-status");
+  if (!el) return;
+  if (s === "saving")      { el.innerHTML = "<i class=\"ti ti-cloud-upload\" style=\"font-size:13px\"></i> Saving...";     el.style.color = "#ca8a04"; }
+  else if (s === "synced") { el.innerHTML = "<i class=\"ti ti-cloud-check\"  style=\"font-size:13px\"></i> Synced";        el.style.color = "#16a34a"; }
+  else if (s === "error")  { el.innerHTML = "<i class=\"ti ti-cloud-off\"    style=\"font-size:13px\"></i> Error";         el.style.color = "#e11d48"; }
+  else                     { el.innerHTML = "<i class=\"ti ti-cloud\"        style=\"font-size:13px\"></i> Connecting..."; el.style.color = "#9ea3ae"; }
+}
+setStatus("connecting");
+
+var TC     = { "Quant":"#6366f1","RC":"#16a34a","CR":"#d97706","DI":"#0ea5e9","Mock test":"#ec4899","Review":"#f97316" };
+var TOPICS = ["Quant","RC","CR","DI","Mock test","Review"];
+var SB_IDS = {"Quant":"sb-quant","RC":"sb-rc","CR":"sb-cr","DI":"sb-di","Mock test":"sb-mock","Review":"sb-review"};
+var QUOTES = [
+  ["Every hour compounds.","700+ is built one session at a time."],
+  ["Consistency beats intensity.","Show up daily and the score follows."],
+  ["The GMAT rewards structure.","Keep building the habit."],
+  ["You are ahead of who you were yesterday.","Keep the streak alive."],
+  ["Progress is invisible until it is not.","Log today session."]
 ];
 
-function save(){localStorage.setItem('gmat_v3',JSON.stringify(sessions))}
-function fmtH(m){const h=Math.floor(m/60),mn=Math.round(m%60);return h>0?(mn>0?h+'h '+mn+'m':h+'h'):(mn+'m')}
-function dateStr(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dy=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+dy}
-function parseLocal(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
-function isWE(d){const w=new Date(d).getDay();return w===0||w===6}
-function targetFor(d){return isWE(d)?360:180}
-function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r}
-function startOfWeek(d){const r=new Date(d);r.setDate(r.getDate()-((r.getDay()+6)%7));r.setHours(0,0,0,0);return r}
-function startOfMonth(d){return new Date(d.getFullYear(),d.getMonth(),1)}
-function minsOn(ds){return sessions.filter(s=>s.date===ds).reduce((a,s)=>a+s.mins,0)}
-function sessionsOn(ds){return sessions.filter(s=>s.date===ds)}
+var today = new Date(); today.setHours(0,0,0,0);
+var sessions   = [];
+var viewMode   = "week";
+var viewOffset = 0;
+var sessFilter = "today";
+var mainChartInst  = null;
+var topicChartInst = null;
 
-document.getElementById('topbar-date').textContent=today.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-document.getElementById('inp-date').value=dateStr(today);
+function fmtH(m) {
+  var h = Math.floor(m/60), mn = Math.round(m%60);
+  return h > 0 ? (mn > 0 ? h+"h "+mn+"m" : h+"h") : mn+"m";
+}
+function dateStr(d) {
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function parseLocal(s) { var p=s.split("-").map(Number); return new Date(p[0],p[1]-1,p[2]); }
+function isWE(d)       { var w=new Date(d).getDay(); return w===0||w===6; }
+function targetFor(d)  { return isWE(d)?360:180; }
+function addDays(d,n)  { var r=new Date(d); r.setDate(r.getDate()+n); return r; }
+function startOfWeek(d){ var r=new Date(d); r.setDate(r.getDate()-((r.getDay()+6)%7)); r.setHours(0,0,0,0); return r; }
+function startOfMonth(d){ return new Date(d.getFullYear(),d.getMonth(),1); }
+function minsOn(ds)    { return sessions.filter(function(s){return s.date===ds;}).reduce(function(a,s){return a+s.mins;},0); }
 
-function getViewDates(){
-  if(viewMode==='week'){const s=startOfWeek(addDays(today,viewOffset*7));return Array.from({length:7},(_,i)=>addDays(s,i))}
-  if(viewMode==='month'){const ref=new Date(today.getFullYear(),today.getMonth()+viewOffset,1);const days=new Date(ref.getFullYear(),ref.getMonth()+1,0).getDate();return Array.from({length:days},(_,i)=>new Date(ref.getFullYear(),ref.getMonth(),i+1))}
-  const all=sessions.map(s=>s.date).filter((v,i,a)=>a.indexOf(v)===i).sort();
-  if(!all.length)return[today];
-  const s=parseLocal(all[0]),e=parseLocal(all[all.length-1]);
-  const d=[];let c=new Date(s);while(c<=e){d.push(new Date(c));c=addDays(c,1);}return d;
-}
-function getRangeLabel(){
-  if(viewMode==='week'){const s=startOfWeek(addDays(today,viewOffset*7)),e=addDays(s,6);const f=d=>d.toLocaleDateString('en-IN',{day:'numeric',month:'short'});return viewOffset===0?'This week':f(s)+' – '+f(e)}
-  if(viewMode==='month'){const ref=new Date(today.getFullYear(),today.getMonth()+viewOffset,1);return viewOffset===0?'This month':ref.toLocaleDateString('en-IN',{month:'long',year:'numeric'})}
-  return 'All time';
+document.getElementById("topbar-date").textContent = today.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+document.getElementById("inp-date").value = dateStr(today);
+
+function getViewDates() {
+  var s,ref,days,all,s2,e,d,c;
+  if (viewMode==="week") {
+    s=startOfWeek(addDays(today,viewOffset*7));
+    return Array.from({length:7},function(_,i){return addDays(s,i);});
+  }
+  if (viewMode==="month") {
+    ref=new Date(today.getFullYear(),today.getMonth()+viewOffset,1);
+    days=new Date(ref.getFullYear(),ref.getMonth()+1,0).getDate();
+    return Array.from({length:days},function(_,i){return new Date(ref.getFullYear(),ref.getMonth(),i+1);});
+  }
+  all=sessions.map(function(s){return s.date;}).filter(function(v,i,a){return a.indexOf(v)===i;}).sort();
+  if (!all.length) return [today];
+  s2=parseLocal(all[0]); e=parseLocal(all[all.length-1]);
+  d=[]; c=new Date(s2);
+  while(c<=e){d.push(new Date(c));c=addDays(c,1);}
+  return d;
 }
 
-function addSession(){
-  const d=document.getElementById('inp-date').value;
-  const topic=document.getElementById('inp-topic').value;
-  const h=parseInt(document.getElementById('inp-hours').value)||0;
-  const m=parseInt(document.getElementById('inp-mins').value)||0;
-  if(!d||h+m===0)return;
-  sessions.push({id:Date.now(),date:d,topic,mins:h*60+m});
-  save();render();
-  document.getElementById('inp-hours').value='';
-  document.getElementById('inp-mins').value='';
+function getRangeLabel() {
+  var s,e,ref,f;
+  if (viewMode==="week") {
+    s=startOfWeek(addDays(today,viewOffset*7)); e=addDays(s,6);
+    f=function(d){return d.toLocaleDateString("en-IN",{day:"numeric",month:"short"});};
+    return viewOffset===0?"This week":f(s)+" - "+f(e);
+  }
+  if (viewMode==="month") {
+    ref=new Date(today.getFullYear(),today.getMonth()+viewOffset,1);
+    return viewOffset===0?"This month":ref.toLocaleDateString("en-IN",{month:"long",year:"numeric"});
+  }
+  return "All time";
 }
-function delSession(id){sessions=sessions.filter(s=>s.id!==id);save();render()}
-function setView(v){viewMode=v;viewOffset=0;render()}
-function goDate(d){viewOffset+=d;render()}
-function setSessFilter(f){
+
+// ADD SESSION
+function addSession() {
+  var d     = document.getElementById("inp-date").value;
+  var topic = document.getElementById("inp-topic").value;
+  var h     = parseInt(document.getElementById("inp-hours").value)||0;
+  var m     = parseInt(document.getElementById("inp-mins").value)||0;
+  if (!d||h+m===0) return;
+  var btn=document.querySelector(".log-btn");
+  btn.disabled=true; btn.textContent="Saving...";
+  setStatus("saving");
+  supa.from("sessions").insert({date:d,topic:topic,mins:h*60+m,created_at:Date.now()})
+    .then(function(res) {
+      if (res.error) throw res.error;
+      document.getElementById("inp-hours").value="";
+      document.getElementById("inp-mins").value="";
+      btn.disabled=false; btn.innerHTML='<i class="ti ti-plus"></i> Add session';
+      loadSessions();
+    })
+    .catch(function(err) {
+      setStatus("error");
+      alert("Save failed: "+err.message);
+      btn.disabled=false; btn.innerHTML='<i class="ti ti-plus"></i> Add session';
+    });
+}
+
+// DELETE SESSION
+function delSession(id) {
+  setStatus("saving");
+  supa.from("sessions").delete().eq("id",id)
+    .then(function(res){
+      if (res.error) { setStatus("error"); alert("Delete failed: "+res.error.message); return; }
+      loadSessions();
+    });
+}
+
+// LOAD ALL SESSIONS FROM SUPABASE
+function loadSessions() {
+  supa.from("sessions").select("*").order("date",{ascending:false}).order("created_at",{ascending:false})
+    .then(function(res){
+      if (res.error) { console.error("Load error:",res.error); setStatus("error"); return; }
+      sessions=res.data||[];
+      setStatus("synced");
+      render();
+    });
+}
+
+function setView(v)  { viewMode=v; viewOffset=0; render(); }
+function goDate(n)   { viewOffset+=n; render(); }
+function setSessFilter(f) {
   sessFilter=f;
-  ['today','week','all'].forEach(v=>{const el=document.getElementById('sf-'+v);if(el)el.className='sess-tab'+(v===f?' active':'')});
+  ["today","week","all"].forEach(function(v){
+    var el=document.getElementById("sf-"+v);
+    if(el) el.className="sess-tab"+(v===f?" active":"");
+  });
   renderSessions();
 }
 
-function render(){
-  ['week','month','all'].forEach(v=>{document.getElementById('f-'+v).className='fpill'+(viewMode===v?' active':'')});
-  document.getElementById('f-range-label').textContent=getRangeLabel();
+function render() {
+  var i,ts,tm,tt,tpct,tmet,ws,wm,wt,wpct,ms,me,mm,msc,dd,tot,sd,streak,cur,ds2,qi,topicTotals,wd;
 
-  const ts=dateStr(today),tm=minsOn(ts),tt=targetFor(today);
-  const tpct=Math.min(100,Math.round(tm/tt*100)),tmet=tm>=tt&&tm>0;
-  document.getElementById('m-today').textContent=fmtH(tm);
-  document.getElementById('m-today').className='kpi-value'+(tmet?' met':'');
-  document.getElementById('m-today-sub').textContent='Target: '+(isWE(today)?'6h':'3h')+' · '+tpct+'% done';
-  document.getElementById('today-bar').style.width=tpct+'%';
-  document.getElementById('sb-today-val').textContent=fmtH(tm);
-  document.getElementById('sb-today-sub').textContent='of '+(isWE(today)?'6h':'3h')+' target';
-  document.getElementById('sb-today-fill').style.width=tpct+'%';
-  document.getElementById('sb-today-fill').style.background=tmet?'#16a34a':'linear-gradient(90deg,#6366f1,#8b5cf6)';
+  ["week","month","all"].forEach(function(v){
+    document.getElementById("f-"+v).className="fpill"+(viewMode===v?" active":"");
+  });
+  document.getElementById("f-range-label").textContent=getRangeLabel();
 
-  const ws=startOfWeek(today);let wm=0,wt=0;
-  for(let i=0;i<7;i++){const d=addDays(ws,i);wm+=minsOn(dateStr(d));wt+=targetFor(d);}
-  const wpct=Math.min(100,Math.round(wm/wt*100)||0);
-  document.getElementById('m-week').textContent=fmtH(wm);
-  document.getElementById('m-week').className='kpi-value'+(wm>=wt&&wm>0?' met':'');
-  document.getElementById('m-week-sub').textContent=(wm/60).toFixed(1)+'h / '+(wt/60).toFixed(0)+'h target';
-  document.getElementById('week-bar').style.width=wpct+'%';
-  document.getElementById('week-chip').textContent=wpct;
-  document.getElementById('sb-week-pct').textContent=wpct+'%';
-  document.getElementById('sb-week-fill').style.width=wpct+'%';
+  ts=dateStr(today); tm=minsOn(ts); tt=targetFor(today);
+  tpct=Math.min(100,Math.round(tm/tt*100)); tmet=tm>=tt&&tm>0;
+  document.getElementById("m-today").textContent     = tm>0?fmtH(tm):"0m";
+  document.getElementById("m-today").className       = "kpi-value"+(tmet?" met":"");
+  document.getElementById("m-today-sub").textContent = "Target: "+(isWE(today)?"6h":"3h")+" - "+tpct+"% done";
+  document.getElementById("today-bar").style.width   = tpct+"%";
+  document.getElementById("sb-today-val").textContent  = tm>0?fmtH(tm):"0m";
+  document.getElementById("sb-today-sub").textContent  = "of "+(isWE(today)?"6h":"3h")+" target";
+  document.getElementById("sb-today-fill").style.width = tpct+"%";
+  document.getElementById("sb-today-fill").style.background = tmet?"#16a34a":"linear-gradient(90deg,#6366f1,#8b5cf6)";
 
-  const ms=startOfMonth(today),me=new Date(today.getFullYear(),today.getMonth()+1,0);
-  let mm=0,msc=0;
-  for(let d=new Date(ms);d<=me;d=addDays(d,1))mm+=minsOn(dateStr(d));
-  msc=sessions.filter(s=>s.date>=dateStr(ms)&&s.date<=dateStr(me)).length;
-  document.getElementById('m-month').textContent=fmtH(mm);
-  document.getElementById('m-month-sub').textContent=msc+' session'+(msc===1?'':'s')+' logged';
+  ws=startOfWeek(today); wm=0; wt=0;
+  for(i=0;i<7;i++){wd=addDays(ws,i);wm+=minsOn(dateStr(wd));wt+=targetFor(wd);}
+  wpct=Math.min(100,Math.round(wm/wt*100)||0);
+  document.getElementById("m-week").textContent      = wm>0?fmtH(wm):"0m";
+  document.getElementById("m-week").className        = "kpi-value"+(wm>=wt&&wm>0?" met":"");
+  document.getElementById("m-week-sub").textContent  = (wm/60).toFixed(1)+"h / "+(wt/60).toFixed(0)+"h target";
+  document.getElementById("week-bar").style.width    = wpct+"%";
+  document.getElementById("week-chip").textContent   = wpct;
+  document.getElementById("sb-week-pct").textContent = wpct+"%";
+  document.getElementById("sb-week-fill").style.width= wpct+"%";
 
-  const tot=sessions.reduce((a,s)=>a+s.mins,0),sd=new Set(sessions.map(s=>s.date)).size;
-  document.getElementById('m-total').textContent=fmtH(tot);
-  document.getElementById('m-total-sub').textContent=sd+' days studied';
-  document.getElementById('total-chip').textContent=fmtH(tot);
+  ms=startOfMonth(today); me=new Date(today.getFullYear(),today.getMonth()+1,0);
+  mm=0; msc=0;
+  for(dd=new Date(ms);dd<=me;dd=addDays(dd,1)) mm+=minsOn(dateStr(dd));
+  msc=sessions.filter(function(s){return s.date>=dateStr(ms)&&s.date<=dateStr(me);}).length;
+  document.getElementById("m-month").textContent     = mm>0?fmtH(mm):"0m";
+  document.getElementById("m-month-sub").textContent = msc+" session"+(msc===1?"":"s")+" logged";
 
-  // If today has no session yet, start from yesterday so streak isn't broken prematurely
-  let streak=0,cur=minsOn(dateStr(today))>0?new Date(today):addDays(today,-1);
-  while(true){const ds=dateStr(cur);if(minsOn(ds)>0){streak++;cur=addDays(cur,-1);}else break;}
-  document.getElementById('streak-chip').textContent=streak;
-  document.getElementById('streak-count').textContent=streak;
+  tot=sessions.reduce(function(a,s){return a+s.mins;},0);
+  sd=new Set(sessions.map(function(s){return s.date;})).size;
+  document.getElementById("m-total").textContent     = tot>0?fmtH(tot):"0m";
+  document.getElementById("m-total-sub").textContent = sd+" days studied";
+  document.getElementById("total-chip").textContent  = tot>0?fmtH(tot):"0h";
 
-  // Topic sidebar badges
-  const topicTotals={};sessions.forEach(s=>{topicTotals[s.topic]=(topicTotals[s.topic]||0)+s.mins});
-  TOPICS.forEach(t=>{const el=document.getElementById(SB_IDS[t]);if(el)el.textContent=topicTotals[t]?fmtH(topicTotals[t]):'0h'});
+  streak=0; cur=minsOn(ts)>0?new Date(today):addDays(today,-1);
+  while(true){ds2=dateStr(cur);if(minsOn(ds2)>0){streak++;cur=addDays(cur,-1);}else break;}
+  document.getElementById("streak-chip").textContent  = streak;
+  document.getElementById("streak-count").textContent = streak;
 
-  // Banner
-  const qi=streak%QUOTES.length;
+  topicTotals={};
+  sessions.forEach(function(s){topicTotals[s.topic]=(topicTotals[s.topic]||0)+s.mins;});
+  TOPICS.forEach(function(t){
+    var el=document.getElementById(SB_IDS[t]);
+    if(el) el.textContent=topicTotals[t]?fmtH(topicTotals[t]):"0h";
+  });
+
+  qi=streak%QUOTES.length;
   if(sessions.length===0){
-    document.getElementById('banner-title').textContent='Start your GMAT journey';
-    document.getElementById('banner-sub').textContent='Log your first session — weekday target 3h, weekend 6h';
+    document.getElementById("banner-title").textContent="Start your GMAT journey";
+    document.getElementById("banner-sub").textContent="Log your first session - weekday target 3h, weekend 6h";
   } else if(tmet){
-    document.getElementById('banner-title').textContent='Target hit today! 🎯';
-    document.getElementById('banner-sub').textContent=QUOTES[qi][1];
+    document.getElementById("banner-title").textContent="Target hit today!";
+    document.getElementById("banner-sub").textContent=QUOTES[qi][1];
   } else if(tm>0){
-    document.getElementById('banner-title').textContent=fmtH(tt-tm)+' to go today';
-    document.getElementById('banner-sub').textContent=QUOTES[qi][1];
+    document.getElementById("banner-title").textContent=fmtH(tt-tm)+" to go today";
+    document.getElementById("banner-sub").textContent=QUOTES[qi][1];
   } else {
-    document.getElementById('banner-title').textContent=QUOTES[qi][0];
-    document.getElementById('banner-sub').textContent=QUOTES[qi][1];
+    document.getElementById("banner-title").textContent=QUOTES[qi][0];
+    document.getElementById("banner-sub").textContent=QUOTES[qi][1];
   }
 
-  renderChart();renderTopicDonut();renderTopicBars();renderCalendar();renderStreak();renderSessions();
+  renderChart(); renderTopicDonut(); renderTopicBars(); renderCalendar(); renderStreak(); renderSessions();
 }
 
-function renderChart(){
-  const dates=getViewDates();
-  const labels=dates.map(d=>viewMode==='month'?d.getDate():d.toLocaleDateString('en-IN',{weekday:'short'}).slice(0,3));
-  const actual=dates.map(d=>parseFloat((minsOn(dateStr(d))/60).toFixed(2)));
-  const target=dates.map(d=>parseFloat((targetFor(d)/60).toFixed(1)));
-  const colors=dates.map((d,i)=>actual[i]===0?'#f2f4f7':actual[i]>=target[i]?'#16a34a':'#e11d48');
-  const alphas=dates.map((d,i)=>actual[i]===0?'#f2f4f7':actual[i]>=target[i]?'rgba(22,163,74,0.15)':'rgba(225,29,72,0.08)');
-  if(mainChartInst)mainChartInst.destroy();
-  mainChartInst=new Chart(document.getElementById('mainChart'),{
-    type:'bar',
-    data:{labels,datasets:[
-      {label:'Actual',data:actual,backgroundColor:colors,borderRadius:7,borderSkipped:false,order:2},
-      {label:'Target',data:target,type:'line',borderColor:'#d1d5db',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false,order:1,tension:0}
+function renderChart() {
+  var dates,labels,actual,target,colors;
+  dates  = getViewDates();
+  labels = dates.map(function(d){return viewMode==="month"?d.getDate():d.toLocaleDateString("en-IN",{weekday:"short"}).slice(0,3);});
+  actual = dates.map(function(d){return parseFloat((minsOn(dateStr(d))/60).toFixed(2));});
+  target = dates.map(function(d){return parseFloat((targetFor(d)/60).toFixed(1));});
+  colors = dates.map(function(d,i){return actual[i]===0?"#f2f4f7":actual[i]>=target[i]?"#16a34a":"#e11d48";});
+  if(mainChartInst) mainChartInst.destroy();
+  mainChartInst=new Chart(document.getElementById("mainChart"),{
+    type:"bar",
+    data:{labels:labels,datasets:[
+      {label:"Actual",data:actual,backgroundColor:colors,borderRadius:7,borderSkipped:false,order:2},
+      {label:"Target",data:target,type:"line",borderColor:"#d1d5db",borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false,order:1,tension:0}
     ]},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{
-        backgroundColor:'#fff',borderColor:'#eaecf0',borderWidth:1,
-        titleColor:'#1a1d23',bodyColor:'#6b7280',padding:10,
-        boxShadow:'0 4px 16px rgba(0,0,0,0.1)',
-        callbacks:{label:ctx=>{const v=ctx.parsed.y;const h=Math.floor(v);const m=Math.round((v-h)*60);return ctx.dataset.label+': '+h+'h'+(m>0?' '+m+'m':'')}}
-      }},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:"#fff",borderColor:"#eaecf0",borderWidth:1,titleColor:"#1a1d23",bodyColor:"#6b7280",padding:10,
+        callbacks:{label:function(ctx){var v=ctx.parsed.y,h=Math.floor(v),m=Math.round((v-h)*60);return ctx.dataset.label+": "+h+"h"+(m>0?" "+m+"m":"");}}}},
       scales:{
-        x:{grid:{display:false},ticks:{font:{size:11,family:'Plus Jakarta Sans'},color:'#9ea3ae'},border:{display:false}},
-        y:{grid:{color:'#f2f4f7'},ticks:{font:{size:11,family:'Plus Jakarta Sans'},color:'#9ea3ae',callback:v=>v+'h'},border:{display:false},min:0}
+        x:{grid:{display:false},ticks:{font:{size:11,family:"Plus Jakarta Sans"},color:"#9ea3ae"},border:{display:false}},
+        y:{grid:{color:"#f2f4f7"},ticks:{font:{size:11,family:"Plus Jakarta Sans"},color:"#9ea3ae",callback:function(v){return v+"h";}},border:{display:false},min:0}
       }
     }
   });
 }
 
-function renderTopicDonut(){
-  const totals={};sessions.forEach(s=>{totals[s.topic]=(totals[s.topic]||0)+s.mins});
-  const topics=Object.keys(totals);
-  const legendEl=document.getElementById('donut-legend');
-  const centerEl=document.getElementById('donut-center-val');
-  if(!topics.length){if(topicChartInst)topicChartInst.destroy();legendEl.innerHTML='';centerEl.textContent='—';return}
-  const totalMins=Object.values(totals).reduce((a,b)=>a+b,0);
+function renderTopicDonut() {
+  var totals={},topics,totalMins,legendEl,centerEl;
+  sessions.forEach(function(s){totals[s.topic]=(totals[s.topic]||0)+s.mins;});
+  topics=Object.keys(totals);
+  legendEl=document.getElementById("donut-legend");
+  centerEl=document.getElementById("donut-center-val");
+  if(!topics.length){if(topicChartInst)topicChartInst.destroy();legendEl.innerHTML="";centerEl.textContent="--";return;}
+  totalMins=Object.values(totals).reduce(function(a,b){return a+b;},0);
   centerEl.textContent=fmtH(totalMins);
-  if(topicChartInst)topicChartInst.destroy();
-  topicChartInst=new Chart(document.getElementById('topicChart'),{
-    type:'doughnut',
-    data:{labels:topics,datasets:[{data:topics.map(t=>parseFloat((totals[t]/60).toFixed(2))),backgroundColor:topics.map(t=>TC[t]||'#888'),borderWidth:3,borderColor:'#fff',hoverBorderColor:'#fff'}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',borderColor:'#eaecf0',borderWidth:1,titleColor:'#1a1d23',bodyColor:'#6b7280',padding:10,callbacks:{label:ctx=>{const v=ctx.parsed;const h=Math.floor(v);const m=Math.round((v-h)*60);return ctx.label+': '+h+'h'+(m>0?' '+m+'m':'')}}}}
+  if(topicChartInst) topicChartInst.destroy();
+  topicChartInst=new Chart(document.getElementById("topicChart"),{
+    type:"doughnut",
+    data:{labels:topics,datasets:[{data:topics.map(function(t){return parseFloat((totals[t]/60).toFixed(2));}),backgroundColor:topics.map(function(t){return TC[t]||"#888";}),borderWidth:3,borderColor:"#fff",hoverBorderColor:"#fff"}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:"68%",
+      plugins:{legend:{display:false},tooltip:{backgroundColor:"#fff",borderColor:"#eaecf0",borderWidth:1,titleColor:"#1a1d23",bodyColor:"#6b7280",padding:10,
+        callbacks:{label:function(ctx){var v=ctx.parsed,h=Math.floor(v),m=Math.round((v-h)*60);return ctx.label+": "+h+"h"+(m>0?" "+m+"m":"");}}}}
     }
   });
-  legendEl.innerHTML=topics.map(t=>{
-    const pct=Math.round(totals[t]/totalMins*100);
-    return`<div class="donut-pill"><span class="donut-pip" style="background:${TC[t]}"></span>${t} <span style="color:#9ea3ae;margin-left:2px">${pct}%</span></div>`;
-  }).join('');
+  legendEl.innerHTML=topics.map(function(t){
+    var pct=Math.round(totals[t]/totalMins*100);
+    return '<div class="donut-pill"><span class="donut-pip" style="background:'+TC[t]+'"></span>'+t+' <span style="color:#9ea3ae;margin-left:2px">'+pct+'%</span></div>';
+  }).join("");
 }
 
-function renderTopicBars(){
-  const totals={};sessions.forEach(s=>{totals[s.topic]=(totals[s.topic]||0)+s.mins});
-  const topics=Object.keys(totals).sort((a,b)=>totals[b]-totals[a]);
-  const el=document.getElementById('topic-bars');
-  if(!topics.length){el.innerHTML='<div class="empty-state">Log sessions to see breakdown</div>';return}
-  const max=Math.max(...Object.values(totals));
-  el.innerHTML=topics.map(t=>{
-    const pct=Math.round(totals[t]/max*100);
-    return`<div class="t-row">
-<div class="t-head"><span class="t-name" style="color:${TC[t]}">${t}</span><span class="t-val">${fmtH(totals[t])}</span></div>
-<div class="t-track"><div class="t-fill" style="width:${pct}%;background:${TC[t]}"></div></div>
-</div>`;
-  }).join('');
+function renderTopicBars() {
+  var totals={},topics,el,max;
+  sessions.forEach(function(s){totals[s.topic]=(totals[s.topic]||0)+s.mins;});
+  topics=Object.keys(totals).sort(function(a,b){return totals[b]-totals[a];});
+  el=document.getElementById("topic-bars");
+  if(!topics.length){el.innerHTML='<div class="empty-state">Log sessions to see breakdown</div>';return;}
+  max=Math.max.apply(null,Object.values(totals));
+  el.innerHTML=topics.map(function(t){
+    var pct=Math.round(totals[t]/max*100);
+    return '<div class="t-row"><div class="t-head"><span class="t-name" style="color:'+TC[t]+'">'+t+'</span><span class="t-val">'+fmtH(totals[t])+'</span></div><div class="t-track"><div class="t-fill" style="width:'+pct+'%;background:'+TC[t]+'"></div></div></div>';
+  }).join("");
 }
 
-function renderCalendar(){
-  const grid=document.getElementById('cal-grid');
-  grid.innerHTML='';
-  const dates=getViewDates().slice(0,42);
-  const first=dates[0];
-  const pad=(first.getDay()+6)%7;
-  for(let i=0;i<pad;i++){const e=document.createElement('div');e.className='cal-cell pad';grid.appendChild(e);}
-  dates.forEach(d=>{
-    const ds=dateStr(d),mins=minsOn(ds),tgt=targetFor(d);
-    const pct=Math.min(100,Math.round(mins/tgt*100));
-    const met=mins>=tgt&&mins>0,hasData=mins>0;
-    const isTdy=ds===dateStr(today);
-    const cell=document.createElement('div');
-    cell.className='cal-cell'+(hasData?(met?' has-data met':' has-data missed'):'')+(isTdy?' is-today':'');
-    cell.title=ds+(mins?' · '+fmtH(mins)+' ('+pct+'%)':'');
-    cell.innerHTML=`<div class="cal-num">${d.getDate()}</div>${hasData?`<div class="cal-pip" style="background:${met?'#16a34a':'#e11d48'}"></div><div class="cal-time">${fmtH(mins)}</div>`:''}`;
-    cell.onclick=()=>{document.getElementById('inp-date').value=ds;};
+function renderCalendar() {
+  var grid,dates,pad,i,ep,ds,mins,tgt,pct,met,hasData,isTdy,cell;
+  grid=document.getElementById("cal-grid"); grid.innerHTML="";
+  dates=getViewDates().slice(0,42);
+  pad=(dates[0].getDay()+6)%7;
+  for(i=0;i<pad;i++){ep=document.createElement("div");ep.className="cal-cell pad";grid.appendChild(ep);}
+  dates.forEach(function(d){
+    ds=dateStr(d); mins=minsOn(ds); tgt=targetFor(d);
+    pct=Math.min(100,Math.round(mins/tgt*100));
+    met=mins>=tgt&&mins>0; hasData=mins>0; isTdy=ds===dateStr(today);
+    cell=document.createElement("div");
+    cell.className="cal-cell"+(hasData?(met?" has-data met":" has-data missed"):"")+(isTdy?" is-today":"");
+    cell.title=ds+(mins?" - "+fmtH(mins)+" ("+pct+"%)":"");
+    cell.innerHTML='<div class="cal-num">'+d.getDate()+'</div>'+(hasData?'<div class="cal-pip" style="background:'+(met?"#16a34a":"#e11d48")+'"></div><div class="cal-time">'+fmtH(mins)+'</div>':'');
+    cell.onclick=(function(ds2){return function(){document.getElementById("inp-date").value=ds2;};})(ds);
     grid.appendChild(cell);
   });
 }
 
-function renderStreak(){
-  const grid=document.getElementById('streak-grid');
-  grid.innerHTML='';
-  for(let i=29;i>=0;i--){
-    const d=addDays(today,-i),ds=dateStr(d);
-    const mins=minsOn(ds),tgt=targetFor(d);
-    const met=mins>=tgt&&mins>0,empty=mins===0;
-    const dot=document.createElement('div');
-    dot.className='s-dot '+(met?'met':empty?'empty':'missed');
-    dot.title=ds+(mins?' · '+fmtH(mins):'');
-    dot.innerHTML=met?'<i class="ti ti-check" style="font-size:9px"></i>':empty?'<span style="font-size:8px;opacity:.3">·</span>':'<i class="ti ti-x" style="font-size:9px"></i>';
+function renderStreak() {
+  var grid,i,d,ds,mins,tgt,met,empty,dot;
+  grid=document.getElementById("streak-grid"); grid.innerHTML="";
+  for(i=29;i>=0;i--){
+    d=addDays(today,-i); ds=dateStr(d);
+    mins=minsOn(ds); tgt=targetFor(d);
+    met=mins>=tgt&&mins>0; empty=mins===0;
+    dot=document.createElement("div");
+    dot.className="s-dot "+(met?"met":empty?"empty":"missed");
+    dot.title=ds+(mins?" - "+fmtH(mins):"");
+    dot.innerHTML=met?'<i class="ti ti-check" style="font-size:9px"></i>':empty?'<span style="font-size:8px;opacity:.3">.</span>':'<i class="ti ti-x" style="font-size:9px"></i>';
     grid.appendChild(dot);
   }
 }
 
-function renderSessions(){
-  const el=document.getElementById('sessions-list');
-  const ts=dateStr(today);
-  const ws=startOfWeek(today),we=addDays(ws,6);
-  let filtered=sessions;
-  if(sessFilter==='today')filtered=sessions.filter(s=>s.date===ts);
-  else if(sessFilter==='week')filtered=sessions.filter(s=>s.date>=dateStr(ws)&&s.date<=dateStr(we));
-  filtered=[...filtered].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
-  const total=filtered.reduce((a,s)=>a+s.mins,0);
-  document.getElementById('sess-total-label').textContent=filtered.length?fmtH(total)+' total':'';
-  if(!filtered.length){el.innerHTML='<div class="empty-state">No sessions for this period</div>';return}
-  el.innerHTML=filtered.map(s=>{
-    const isToday=s.date===ts;
-    const dateLabel=isToday?'Today':parseLocal(s.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
-    return`<div class="sess-item">
-<span class="sess-color" style="background:${TC[s.topic]||'#888'}"></span>
-<div class="sess-info">
-<span class="sess-topic">${s.topic}</span>${sessFilter!=='today'?`<span class="sess-date-tag">${dateLabel}</span>`:''}
-</div>
-<span class="sess-dur">${fmtH(s.mins)}</span>
-<button class="sess-del" onclick="delSession(${s.id})" title="Delete"><i class="ti ti-trash" style="font-size:13px"></i></button>
-</div>`;
-  }).join('');
-}
-
-render();
-</script>
-</body>
-</html>
+function renderSessions() {
+  var el,ts,ws,we,filtered,total;
+  el=document.getElementById("sessions-list");
+  ts=dateStr(today); ws=startOfWeek(today); we=addDays(ws,6);
+  filtered=sessions.slice();
+  if(sessFilter==="today")     filtered=sessions.filter(function(s){return s.date===ts;});
+  else if(sessFilter==="week") filtered=sessions.filter(function(s){return s.date>=dateStr(ws)&&s.date<=dateStr(we);});
+  filtered.sort(function(a,b){return b.date.localeCompare(a.date)||((b.created_at||0)-(a.created_at||0));});
+  total=filtered.reduce(function(a,s){return a+s.mins;},0);
+  document.getElementById("sess-total-label").textContent=filtered.length?fmtH(total)+" total":"";
+  if(!filtered.length){el.innerHTML='<div class="empty-state">No sessions for this period</div>';return;}
+  el.innerHTML=filtered.map(function(s){
+    var isToday=s.date===ts;
+    var dateLabel=isToday?"Today":parseLocal(s.date).toLocaleDateString("en-IN",{day:"numeric",month:"short"});
+    return '<div class="sess-item">'
+      +'<span class="sess-color" style="background:'+(TC[s.topic]||"#888")+'"></span>'
+      +'<div class="sess-info"><span class="sess-topic">'+s.topic+'</span>'
+      +(sessFilter!=="today"?'<span class="sess-date-tag">'+dateLabel+'</span>':'')
+      +'</div>'
+      +'<span class="sess-dur">'+fmtH(s.mins)+'</span>'
+      +'<button class="sess-del" data-id="'+s.id+'" title="Delete"><i class="ti ti-trash" style="font-size:13px"></i></button>'
+      +'</div>';>
