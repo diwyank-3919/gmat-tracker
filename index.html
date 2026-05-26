@@ -1413,11 +1413,14 @@ while (cursor <= today) {
   var dsMins = minsOn(dateStr(cursor));
   var dsTgt = targetFor(cursor);
   if (dsMins > 0) {
+    if(dsMins < dsTgt)
+    {
+      missedDays++;
+    }
     if (dsMins >= dsTgt * 0.8) {
       consistentDays++;
       surplusMins += dsMins - dsTgt;
     } else {
-      missedDays++;
       deficitMins += dsTgt - dsMins;
     }
   }
