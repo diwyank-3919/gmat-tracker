@@ -650,48 +650,43 @@ body{
           <div class="card-title"><i class="ti ti-plus-circle"></i> Log a session</div>
         </div>
         <div class="form-grid">
-          <div class="field" style="position:relative">
+          <div class="field">
             <label>Date</label>
-            <div style="display:flex;align-items:center;gap:6px">
+            <div style="display:flex;align-items:center;gap:6px;position:relative">
               <button onclick="shiftDate(-1)" title="Previous day" style="width:34px;height:38px;flex-shrink:0;border:1.5px solid #eaecf0;border-radius:9px;background:#fafafa;color:#6b7280;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all 0.12s" onmouseover="this.style.borderColor='#6366f1';this.style.color='#6366f1'" onmouseout="this.style.borderColor='#eaecf0';this.style.color='#6b7280'"><i class="ti ti-chevron-left"></i></button>
               <div id="date-display" onclick="togglePicker()" style="flex:1;height:38px;border:1.5px solid #eaecf0;border-radius:9px;background:#fafafa;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;font-size:13px;font-weight:600;color:#1a1d23;transition:all 0.15s;user-select:none" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='#eaecf0'">
                 <i class="ti ti-calendar" style="color:#6366f1;font-size:15px"></i>
                 <span id="date-display-text">Select date</span>
               </div>
               <button onclick="shiftDate(1)" title="Next day" style="width:34px;height:38px;flex-shrink:0;border:1.5px solid #eaecf0;border-radius:9px;background:#fafafa;color:#6b7280;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all 0.12s" onmouseover="this.style.borderColor='#6366f1';this.style.color='#6366f1'" onmouseout="this.style.borderColor='#eaecf0';this.style.color='#6b7280'"><i class="ti ti-chevron-right"></i></button>
-            </div>
-            <!-- Hidden real input for value storage -->
-            <input type="hidden" id="inp-date">
-            <!--
-              ── FIX: Custom Calendar Picker ──
-              Changed from position:absolute (overflows on mobile) to position:fixed
-              with JS-calculated top/left so it always stays within the viewport.
-              max-width: calc(100vw - 24px) ensures it never wider than the screen.
-            -->
-            <div id="custom-picker" style="display:none;position:absolute;top:100%;margin-top:4px;left:0;z-index:9999;background:#fff;border:1.5px solid #e0e7ff;border-radius:12px;box-shadow:0 4px 20px rgba(99,102,241,0.15);padding:0;width:224px;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif">
-              <!-- Compact Header -->
-              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px 6px">
-                <button onclick="pickerNav(-1)" style="width:24px;height:24px;border:none;border-radius:6px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9ea3ae;font-size:13px;transition:all 0.1s" onmouseover="this.style.background='#eef2ff';this.style.color='#6366f1'" onmouseout="this.style.background='transparent';this.style.color='#9ea3ae'"><i class="ti ti-chevron-left"></i></button>
-                <div id="picker-month-year" style="font-size:12px;font-weight:700;color:#1a1d23;letter-spacing:-0.2px"></div>
-                <button onclick="pickerNav(1)" style="width:24px;height:24px;border:none;border-radius:6px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9ea3ae;font-size:13px;transition:all 0.1s" onmouseover="this.style.background='#eef2ff';this.style.color='#6366f1'" onmouseout="this.style.background='transparent';this.style.color='#9ea3ae'"><i class="ti ti-chevron-right"></i></button>
-              </div>
-              <!-- Day labels -->
-              <div style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 8px 2px">
-                <div style="text-align:center;font-size:9px;font-weight:700;color:#c4c8d4;text-transform:uppercase;padding:2px 0">M</div>
-                <div style="text-align:center;font-size:9px;font-weight:700;color:#c4c8d4;text-transform:uppercase;padding:2px 0">T</div>
-                <div style="text-align:center;font-size:9px;font-weight:700;color:#c4c8d4;text-transform:uppercase;padding:2px 0">W</div>
-                <div style="text-align:center;font-size:9px;font-weight:700;color:#c4c8d4;text-transform:uppercase;padding:2px 0">T</div>
-                <div style="text-align:center;font-size:9px;font-weight:700;color:#c4c8d4;text-transform:uppercase;padding:2px 0">F</div>
-                <div style="text-align:center;font-size:9px;font-weight:700;color:#c7d2fe;text-transform:uppercase;padding:2px 0">S</div>
-                <div style="text-align:center;font-size:9px;font-weight:700;color:#c7d2fe;text-transform:uppercase;padding:2px 0">S</div>
-              </div>
-              <!-- Day grid -->
-              <div id="picker-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;padding:0 8px 6px"></div>
-              <!-- Footer shortcuts -->
-              <div style="border-top:1px solid #f2f4f7;padding:6px 8px;display:flex;gap:4px">
-                <button onclick="pickerSelectDate(dateStr(today))" style="flex:1;padding:4px 0;font-size:10px;font-weight:700;border:1.5px solid #e0e7ff;border-radius:6px;background:#eef2ff;color:#6366f1;cursor:pointer;font-family:inherit">Today</button>
-                <button onclick="pickerSelectDate(dateStr(addDays(today,-1)))" style="flex:1;padding:4px 0;font-size:10px;font-weight:600;border:1.5px solid #eaecf0;border-radius:6px;background:#fafafa;color:#6b7280;cursor:pointer;font-family:inherit">Yest.</button>
-                <button onclick="closePicker()" style="flex:1;padding:4px 0;font-size:10px;font-weight:600;border:1.5px solid #eaecf0;border-radius:6px;background:#fafafa;color:#9ea3ae;cursor:pointer;font-family:inherit">✕</button>
+              <!-- Hidden real input for value storage -->
+              <input type="hidden" id="inp-date">
+              <!-- Calendar Picker — position:absolute inside this relative row, top:100% = directly below buttons -->
+              <div id="custom-picker" style="display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:9999;background:#fff;border:1.5px solid #e0e7ff;border-radius:12px;box-shadow:0 4px 20px rgba(99,102,241,0.15);padding:0;width:224px;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif">
+                <!-- Compact Header -->
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px 6px">
+                  <button onclick="pickerNav(-1)" style="width:24px;height:24px;border:none;border-radius:6px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9ea3ae;font-size:13px;transition:all 0.1s" onmouseover="this.style.background='#eef2ff';this.style.color='#6366f1'" onmouseout="this.style.background='transparent';this.style.color='#9ea3ae'"><i class="ti ti-chevron-left"></i></button>
+                  <div id="picker-month-year" style="font-size:12px;font-weight:700;color:#1a1d23;letter-spacing:-0.2px"></div>
+                  <button onclick="pickerNav(1)" style="width:24px;height:24px;border:none;border-radius:6px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9ea3ae;font-size:13px;transition:all 0.1s" onmouseover="this.style.background='#eef2ff';this.style.color='#6366f1'" onmouseout="this.style.background='transparent';this.style.color='#9ea3ae'"><i class="ti ti-chevron-right"></i></button>
+                </div>
+                <!-- Day labels -->
+                <div style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 8px 2px">
+                  <div style="text-align:center;font-size:9px;font-weight:700;color:#c4c8d4;padding:2px 0">M</div>
+                  <div style="text-align:center;font-size:9px;font-weight:700;color:#c4c8d4;padding:2px 0">T</div>
+                  <div style="text-align:center;font-size:9px;font-weight:700;color:#c4c8d4;padding:2px 0">W</div>
+                  <div style="text-align:center;font-size:9px;font-weight:700;color:#c4c8d4;padding:2px 0">T</div>
+                  <div style="text-align:center;font-size:9px;font-weight:700;color:#c4c8d4;padding:2px 0">F</div>
+                  <div style="text-align:center;font-size:9px;font-weight:700;color:#c7d2fe;padding:2px 0">S</div>
+                  <div style="text-align:center;font-size:9px;font-weight:700;color:#c7d2fe;padding:2px 0">S</div>
+                </div>
+                <!-- Day grid -->
+                <div id="picker-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;padding:0 8px 6px"></div>
+                <!-- Footer shortcuts -->
+                <div style="border-top:1px solid #f2f4f7;padding:6px 8px;display:flex;gap:4px">
+                  <button onclick="pickerSelectDate(dateStr(today))" style="flex:1;padding:4px 0;font-size:10px;font-weight:700;border:1.5px solid #e0e7ff;border-radius:6px;background:#eef2ff;color:#6366f1;cursor:pointer;font-family:inherit">Today</button>
+                  <button onclick="pickerSelectDate(dateStr(addDays(today,-1)))" style="flex:1;padding:4px 0;font-size:10px;font-weight:600;border:1.5px solid #eaecf0;border-radius:6px;background:#fafafa;color:#6b7280;cursor:pointer;font-family:inherit">Yest.</button>
+                  <button onclick="closePicker()" style="flex:1;padding:4px 0;font-size:10px;font-weight:600;border:1.5px solid #eaecf0;border-radius:6px;background:#fafafa;color:#9ea3ae;cursor:pointer;font-family:inherit">✕</button>
+                </div>
               </div>
             </div>
           </div>
