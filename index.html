@@ -6,7 +6,7 @@
 <title>Aditya Diwyank — GMAT Dashboard</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236366f1'/%3E%3Ctext x='16' y='23' font-size='19' text-anchor='middle' font-family='system-ui'%3E🎯%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
@@ -1641,6 +1641,190 @@ function setSessFilter(f){
   renderSessions();
 }
 
+  // ── ANIMATED COUNTER ──
+function animateCount(el, endVal, suffix, duration) {
+  if (!el) return;
+  var startVal = 0, startTime = null;
+  var step = function(timestamp) {
+    if (!startTime) startTime = timestamp;
+    var progress = Math.min((timestamp - startTime) / duration, 1);
+    var ease = 1 - Math.pow(1 - progress, 3);
+    var current = Math.round(startVal + (endVal - startVal) * ease);
+    el.textContent = current + (suffix || "");
+    if (progress < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+// ── SPARKLINE RENDERER ──
+function drawSparkline(id, data, strokeColor, fillColor) {
+  var canvas = document.getElementById(id);
+  if (!canvas) return;
+  var ctx = canvas.getContext("2d");
+  var W = canvas.offsetWidth || canvas.parentElement.offsetWidth;
+  var H = 28;
+  canvas.width = W * (window.devicePixelRatio || 1);
+  canvas.height = H * (window.devicePixelRatio || 1);
+  canvas.style.width = W + "px";
+  canvas.style.height = H + "px";
+  ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+  ctx.clearRect(0, 0, W, H);
+  if (!data || data.length < 2) return;
+  var max = Math.max.apply(null, data);
+  var min = Math.min.apply(null, data);
+  var range = max - min || 1;
+  var pad = 3;
+  var points = data.map(function(v, i) {
+    return {
+      x: pad + (i / (data.length - 1)) * (W - pad * 2),
+      y: H - pad - ((v - min) / range) * (H - pad * 2)
+    };
+  });
+  // Fill area
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, H);
+  points.forEach(function(p) { ctx.lineTo(p.x, p.y); });
+  ctx.lineTo(points[points.length - 1].x, H);
+  ctx.closePath();
+  var grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, fillColor);
+  grad.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = grad;
+  ctx.fill();
+  // Line
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (var i = 1; i < points.length - 1; i++) {
+    var cpx = (points[i].x + points[i + 1].x) / 2;
+    var cpy = (points[i].y + points[i + 1].y) / 2;
+    ctx.quadraticCurveTo(points[i].x, points[i].y, cpx, cpy);
+  }
+  ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
+  ctx.strokeStyle = strokeColor;
+  ctx.lineWidth = 1.8;
+  ctx.stroke();
+  // End dot
+  var last = points[points.length - 1];
+  ctx.beginPath();
+  ctx.arc(last.x, last.y, 2.5, 0, Math.PI * 2);
+  ctx.fillStyle = strokeColor;
+  ctx.fill();
+}
+
+// ── DELTA BADGE RENDERER ──
+function renderDelta(id, current, previous, unit) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (!previous && previous !== 0) { el.className = "kpi-delta neutral"; el.textContent = "—"; return; }
+  if (previous === 0 && current === 0) { el.className = "kpi-delta neutral"; el.textContent = "—"; return; }
+  var diff = current - previous;
+  var pct = previous > 0 ? Math.round(Math.abs(diff) / previous * 100) : 100;
+  var arrow = diff >= 0 ? "↑" : "↓";
+  var label = pct + "% " + (diff >= 0 ? "↑" : "↓");
+  if (previous === 0 && current > 0) label = "New ↑";
+  el.textContent = label;
+  el.className = "kpi-delta " + (diff > 0 ? "up" : diff < 0 ? "down" : "neutral");
+}
+
+// ── RING CARD SETTER ──
+function setRing(id, pct, circumference) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var dash = (pct / 100) * circumference;
+  el.setAttribute("stroke-dasharray", dash + " " + (circumference - dash));
+  var color = pct >= 75 ? "#34d399" : pct >= 45 ? "#fbbf24" : "#fb7185";
+  el.style.stroke = color;
+  var valEl = document.getElementById(id + "-val");
+  if (valEl && !valEl.style.color) valEl.style.color = color;
+}
+
+// ── INTELLIGENCE PANEL ──
+function renderIntelCards(data) {
+  var insights = [];
+  var wm = data.weekMins, wt = data.weekTarget, lwm = data.lastWeekMins;
+  var tm = data.todayMins, tt = data.todayTarget;
+  var cons = data.consistency, streak = data.streak;
+  var topics = data.topicTotals || {}, tot = data.totalMins, sess = data.sessions || [];
+
+  // Pace vs last week
+  if (lwm > 0 && wm > lwm) {
+    var uplift = Math.round((wm - lwm) / lwm * 100);
+    insights.push({ type: "positive", icon: "📈", text: "You're " + uplift + "% ahead of last week's pace.", sub: fmtH(wm) + " studied vs " + fmtH(lwm) + " last week" });
+  } else if (lwm > 0 && wm < lwm * 0.7) {
+    insights.push({ type: "warning", icon: "⚠️", text: "Study pace is down vs last week.", sub: "Last week: " + fmtH(lwm) + " · This week: " + fmtH(wm) });
+  }
+
+  // Daily target
+  if (tm >= tt && tm > 0) {
+    insights.push({ type: "positive", icon: "🎯", text: "Daily target hit! Strong session today.", sub: fmtH(tm) + " logged · " + fmtH(tm - tt) + " above target" });
+  } else if (tm > 0 && tt > tm) {
+    insights.push({ type: "warning", icon: "⏱️", text: fmtH(tt - tm) + " remaining to hit today's target.", sub: Math.round(tm / tt * 100) + "% of " + fmtH(tt) + " goal done" });
+  } else if (tm === 0) {
+    insights.push({ type: "negative", icon: "💤", text: "No study logged yet today.", sub: "Weekday target: 3h · Weekend: 6h" });
+  }
+
+  // Consistency
+  if (cons >= 80) {
+    insights.push({ type: "positive", icon: "🔥", text: "Exceptional consistency at " + cons + "%.", sub: "You're on target " + cons + "% of all prep days" });
+  } else if (cons >= 50) {
+    insights.push({ type: "neutral", icon: "📊", text: "Consistency at " + cons + "% — room to grow.", sub: "Aim for 80%+ to stay on GMAT track" });
+  } else if (cons > 0) {
+    insights.push({ type: "negative", icon: "📉", text: "Consistency needs attention: " + cons + "%.", sub: "Missing targets frequently — try smaller daily goals" });
+  }
+
+  // Streak
+  if (streak >= 7) {
+    insights.push({ type: "positive", icon: "⚡", text: streak + "-day streak — momentum is building!", sub: "Keep it going. Consistency compounds." });
+  } else if (streak === 0) {
+    insights.push({ type: "warning", icon: "🔁", text: "Streak broken. Start fresh today.", sub: "Even 30 minutes counts to restart momentum" });
+  }
+
+  // Topic dominance
+  var topicArr = Object.keys(topics).map(function(t) { return { t: t, m: topics[t] }; }).sort(function(a, b) { return b.m - a.m; });
+  if (topicArr.length >= 2) {
+    var top = topicArr[0], bottom = topicArr[topicArr.length - 1];
+    insights.push({ type: "neutral", icon: "📚", text: "Strongest: " + top.t + " · Least: " + bottom.t + ".", sub: fmtH(top.m) + " vs " + fmtH(bottom.m) + " — consider rebalancing" });
+  }
+
+  // Weekday vs weekend pattern
+  var wdMins = 0, weMins = 0, wdDays = 0, weDays = 0;
+  sess.forEach(function(s) { if (isWE(parseLocal(s.date))) { weMins += s.mins; weDays++; } else { wdMins += s.mins; wdDays++; } });
+  if (wdDays > 0 && weDays > 0) {
+    var wdAvg = wdMins / wdDays, weAvg = weMins / weDays;
+    if (wdAvg > weAvg * 1.3) {
+      insights.push({ type: "neutral", icon: "📅", text: "Weekday sessions are your strength.", sub: "Avg " + fmtH(Math.round(wdAvg)) + "/day vs " + fmtH(Math.round(weAvg)) + " on weekends" });
+    } else if (weAvg > wdAvg * 1.3) {
+      insights.push({ type: "neutral", icon: "🗓️", text: "You study more on weekends.", sub: "Avg " + fmtH(Math.round(weAvg)) + "/day weekends vs " + fmtH(Math.round(wdAvg)) + " weekdays" });
+    }
+  }
+
+  // Score trajectory (if mock scores exist)
+  if (typeof mockScores !== "undefined" && mockScores.length >= 2) {
+    var first = mockScores[0].score, latest = mockScores[mockScores.length - 1].score;
+    var delta = latest - first;
+    if (delta > 0) {
+      insights.push({ type: "positive", icon: "🚀", text: "Mock score improving: +" + delta + " pts since first test.", sub: first + " → " + latest + " · Target: " + (TARGET_SCORE || 735) });
+    } else if (delta < 0) {
+      insights.push({ type: "warning", icon: "📉", text: "Mock score dipped " + Math.abs(delta) + " pts recently.", sub: "Review fundamentals and error patterns" });
+    }
+  } else if (typeof mockScores !== "undefined" && mockScores.length === 0 && tot > 600) {
+    insights.push({ type: "warning", icon: "🧪", text: "You've studied 10h+ — time for a mock test.", sub: "Log a practice score in Mock Scores tab" });
+  }
+
+  // Take top 3 most relevant
+  var shown = insights.slice(0, 3);
+  var container = document.getElementById("intel-cards");
+  if (!container) return;
+  container.innerHTML = shown.map(function(ins) {
+    return '<div class="intel-card ' + ins.type + '">'
+      + '<div class="intel-icon">' + ins.icon + '</div>'
+      + '<div class="intel-body">'
+      + '<div class="intel-text">' + ins.text + '</div>'
+      + '<div class="intel-sub">' + ins.sub + '</div>'
+      + '</div></div>';
+  }).join("");
+}
+
 function render(){
   var ts,tm,tt,tpct,tmet,ws,wm,wt,wpct,ms,me,mm,msc,dd,tot,sd,streak,cur,ds2,qi,topicTotals,wd;
   ["week","month","all"].forEach(function(v){document.getElementById("f-"+v).className="fpill"+(viewMode===v?" active":"");});
@@ -1749,73 +1933,94 @@ function render(){
 
   // ── DELTA BADGES ──
   // Today delta vs yesterday
-  var yesterdayMins=minsOn(dateStr(addDays(today,-1)));
-  renderDelta("today-delta",tm,yesterdayMins,"min");
-  // Week delta vs last week
-  var lastWeekWs=startOfWeek(addDays(today,-7)); var lwm=0;
-  for(var j=0;j<7;j++) lwm+=minsOn(dateStr(addDays(lastWeekWs,j)));
-  renderDelta("week-delta",wm,lwm,"min");
-  // Month delta vs last month
-  var lastMonthMs=new Date(today.getFullYear(),today.getMonth()-1,1);
-  var lastMonthMe=new Date(today.getFullYear(),today.getMonth(),0);
-  var lmm=0; for(var dd2=new Date(lastMonthMs);dd2<=lastMonthMe;dd2=addDays(dd2,1)) lmm+=minsOn(dateStr(dd2));
-  renderDelta("month-delta",mm,lmm,"min");
-  // Total
-  var prevWeekTot=0; for(var k=7;k<14;k++) prevWeekTot+=minsOn(dateStr(addDays(today,-k)));
-  var curWeekTot=0; for(var l=0;l<7;l++) curWeekTot+=minsOn(dateStr(addDays(today,-l)));
-  renderDelta("total-delta",curWeekTot,prevWeekTot,"min");
+  // ── DELTA BADGES ──
+  var yesterdayMins = minsOn(dateStr(addDays(today,-1)));
+  renderDelta("today-delta", tm, yesterdayMins, "min");
+
+  var lastWeekWs = startOfWeek(addDays(today,-7)); var lwm = 0;
+  for (var j = 0; j < 7; j++) lwm += minsOn(dateStr(addDays(lastWeekWs,j)));
+  renderDelta("week-delta", wm, lwm, "min");
+
+  var lastMonthMs = new Date(today.getFullYear(),today.getMonth()-1,1);
+  var lastMonthMe = new Date(today.getFullYear(),today.getMonth(),0);
+  var lmm = 0;
+  for (var dd2 = new Date(lastMonthMs); dd2 <= lastMonthMe; dd2 = addDays(dd2,1)) lmm += minsOn(dateStr(dd2));
+  renderDelta("month-delta", mm, lmm, "min");
+
+  var prevWeekTot = 0; for (var k = 7; k < 14; k++) prevWeekTot += minsOn(dateStr(addDays(today,-k)));
+  var curWeekTot  = 0; for (var l = 0; l < 7;  l++) curWeekTot  += minsOn(dateStr(addDays(today,-l)));
+  renderDelta("total-delta", curWeekTot, prevWeekTot, "min");
+
+  // ── ANIMATED COUNTERS ──
+  animateCount(document.getElementById("m-missed"), missedDays, "", 600);
+  animateCount(document.getElementById("streak-count"), streak, "", 700);
+  animateCount(document.getElementById("streak-chip"), streak, "", 700);
+  animateCount(document.getElementById("mom-streak"), streak, "", 700);
 
   // ── SPARKLINES ──
-  // Today: last 7 days
-  setTimeout(function(){
-    var last7=[];for(var n=6;n>=0;n--) last7.push(minsOn(dateStr(addDays(today,-n)))/60);
-    drawSparkline("spark-today",last7,"rgba(139,124,248,0.8)","rgba(139,124,248,0.15)");
-    // Week: last 4 weeks
-    var last4w=[];for(var n2=3;n2>=0;n2--){var ws2=startOfWeek(addDays(today,-n2*7));var wt2=0;for(var n3=0;n3<7;n3++) wt2+=minsOn(dateStr(addDays(ws2,n3)));last4w.push(wt2/60);}
-    drawSparkline("spark-week",last4w,"rgba(52,211,153,0.8)","rgba(52,211,153,0.12)");
-    // Month: last 6 months
-    var last6m=[];for(var n4=5;n4>=0;n4--){var mRef=new Date(today.getFullYear(),today.getMonth()-n4,1);var mMe=new Date(mRef.getFullYear(),mRef.getMonth()+1,0);var mt=0;for(var dd3=new Date(mRef);dd3<=mMe;dd3=addDays(dd3,1)) mt+=minsOn(dateStr(dd3));last6m.push(mt/60);}
-    drawSparkline("spark-month",last6m,"rgba(251,191,36,0.8)","rgba(251,191,36,0.12)");
-    // Total: cumulative last 12 weeks
-    var cumul=[];var running=0;for(var n5=11;n5>=0;n5--){var ws3=startOfWeek(addDays(today,-n5*7));for(var n6=0;n6<7;n6++) running+=minsOn(dateStr(addDays(ws3,n6)));cumul.push(running/60);}
-    drawSparkline("spark-total",cumul,"rgba(251,113,133,0.8)","rgba(251,113,133,0.10)");
-  },100);
+  setTimeout(function() {
+    var last7 = [];
+    for (var n = 6; n >= 0; n--) last7.push(minsOn(dateStr(addDays(today,-n))) / 60);
+    drawSparkline("spark-today", last7, "rgba(139,124,248,0.9)", "rgba(139,124,248,0.15)");
+
+    var last4w = [];
+    for (var n2 = 3; n2 >= 0; n2--) {
+      var ws2 = startOfWeek(addDays(today,-n2*7)); var wt2 = 0;
+      for (var n3 = 0; n3 < 7; n3++) wt2 += minsOn(dateStr(addDays(ws2,n3)));
+      last4w.push(wt2 / 60);
+    }
+    drawSparkline("spark-week", last4w, "rgba(52,211,153,0.9)", "rgba(52,211,153,0.13)");
+
+    var last6m = [];
+    for (var n4 = 5; n4 >= 0; n4--) {
+      var mRef = new Date(today.getFullYear(), today.getMonth()-n4, 1);
+      var mMe  = new Date(mRef.getFullYear(), mRef.getMonth()+1, 0);
+      var mt = 0;
+      for (var dd3 = new Date(mRef); dd3 <= mMe; dd3 = addDays(dd3,1)) mt += minsOn(dateStr(dd3));
+      last6m.push(mt / 60);
+    }
+    drawSparkline("spark-month", last6m, "rgba(251,191,36,0.9)", "rgba(251,191,36,0.13)");
+
+    var cumul = []; var running = 0;
+    for (var n5 = 11; n5 >= 0; n5--) {
+      var ws3 = startOfWeek(addDays(today,-n5*7));
+      for (var n6 = 0; n6 < 7; n6++) running += minsOn(dateStr(addDays(ws3,n6)));
+      cumul.push(running / 60);
+    }
+    drawSparkline("spark-total", cumul, "rgba(251,113,133,0.9)", "rgba(251,113,133,0.12)");
+  }, 120);
 
   // ── RING SUITE ──
-  setRing("rs-readiness",readiness,182);
-  document.getElementById("rs-readiness-val").textContent=readiness+"%";
-  var readDesc=readiness>=80?"Excellent":readiness>=60?"Good":readiness>=40?"Building":"Starting";
-  document.getElementById("rs-readiness-desc").textContent=readDesc+" readiness";
+  setRing("rs-readiness", readiness, 182);
+  document.getElementById("rs-readiness-val").textContent = readiness + "%";
+  document.getElementById("rs-readiness-desc").textContent = (readiness>=80?"Excellent":readiness>=60?"Good":readiness>=40?"Building":"Starting") + " readiness";
 
-  setRing("rs-pace",wpct,182);
-  document.getElementById("rs-pace-val").textContent=wpct+"%";
-  document.getElementById("rs-pace-desc").textContent=wpct>=100?"Weekly target hit!":wpct>=60?"On pace":"Below pace";
+  setRing("rs-pace", wpct, 182);
+  document.getElementById("rs-pace-val").textContent = wpct + "%";
+  document.getElementById("rs-pace-desc").textContent = wpct>=100?"Weekly target hit!":wpct>=60?"On pace":"Below pace";
 
-  // Focus score = quality sessions / total (sessions ≥ 60 min = quality)
-  var qualitySessions=sessions.filter(function(s){return s.mins>=60;}).length;
-  var focusPct=sessions.length?Math.round(qualitySessions/sessions.length*100):0;
-  setRing("rs-focus",focusPct,182);
-  document.getElementById("rs-focus-val").textContent=focusPct+"%";
-  document.getElementById("rs-focus-desc").textContent=qualitySessions+" quality sessions";
+  var qualitySessions = sessions.filter(function(s){return s.mins>=60;}).length;
+  var focusPct = sessions.length ? Math.round(qualitySessions/sessions.length*100) : 0;
+  setRing("rs-focus", focusPct, 182);
+  document.getElementById("rs-focus-val").textContent = focusPct + "%";
+  document.getElementById("rs-focus-desc").textContent = qualitySessions + " quality sessions";
 
-  // Burnout meter: avg daily hours last 7 days vs target
-  var avg7=0; for(var b=0;b<7;b++) avg7+=minsOn(dateStr(addDays(today,-b)));
-  avg7=avg7/7;
-  var burnPct=Math.min(100,Math.round(avg7/((180+360)/2)*100)); // ideal avg = (3h+6h)/2 = 4.5h
-  var burnStatus=burnPct>90?"High!":burnPct>65?"Good":burnPct>30?"Low":"Rest";
-  var burnColor=burnPct>85?"#fb7185":burnPct>50?"#34d399":"#60a5fa";
-  setRing("rs-burnout",burnPct,182);
-  document.getElementById("rs-burnout-val").textContent=burnStatus;
-  document.getElementById("rs-burnout-val").style.color=burnColor;
-  document.getElementById("rs-burnout-desc").textContent=burnPct>85?"Consider resting":burnPct>50?"Healthy load":"Increase sessions";
+  var avg7 = 0; for (var b = 0; b < 7; b++) avg7 += minsOn(dateStr(addDays(today,-b)));
+  avg7 = avg7 / 7;
+  var burnPct = Math.min(100, Math.round(avg7 / 270 * 100));
+  var burnStatus = burnPct > 90 ? "High!" : burnPct > 65 ? "Good" : burnPct > 30 ? "Low" : "Rest";
+  var burnColor  = burnPct > 85 ? "#fb7185" : burnPct > 50 ? "#34d399" : "#60a5fa";
+  setRing("rs-burnout", burnPct, 182);
+  var bvEl = document.getElementById("rs-burnout-val");
+  bvEl.textContent = burnStatus; bvEl.style.color = burnColor;
+  document.getElementById("rs-burnout-desc").textContent = burnPct>85?"Consider resting":burnPct>50?"Healthy load":"Increase sessions";
 
   // ── INTELLIGENCE PANEL ──
-  renderIntelCards({weekMins:wm,weekTarget:wt,lastWeekMins:lwm,todayMins:tm,todayTarget:tt,consistency:studiedDaysPct,streak:streak,topicTotals:topicTotals,totalMins:tot,sessions:sessions});
+  renderIntelCards({weekMins:wm,weekTarget:wt,lastWeekMins:lwm,todayMins:tm,todayTarget:tt,
+    consistency:studiedDaysPct,streak:streak,topicTotals:topicTotals,totalMins:tot,sessions:sessions});
 
-  checkMilestones(tot,streak);
+  checkMilestones(tot, streak);
   renderChart(); renderTopicDonut(); renderTopicBars(); renderCalendar(); renderStreak(); renderSessions();
-}
-
 function renderDelta(elId, curMins, prevMins, unit){
   var el=document.getElementById(elId); if(!el) return;
   if(prevMins===0||curMins===0){el.textContent="—";el.className="kpi-delta neutral";return;}
