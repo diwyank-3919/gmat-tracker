@@ -391,8 +391,13 @@ body{
   /* Section title */
   .sec-title { font-size: 14px; }
 
-  /* Custom date picker */
-  #custom-picker { width: calc(100vw - 28px) !important; left: 0 !important; }
+  /* ── FIX: Custom date picker — centered, never overflows ── */
+  #custom-picker {
+    width: calc(100vw - 24px) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    right: auto !important;
+  }
 
   /* Migrate bar */
   #migrate-bar { flex-wrap: wrap; gap: 8px; }
@@ -658,8 +663,13 @@ body{
             </div>
             <!-- Hidden real input for value storage -->
             <input type="hidden" id="inp-date">
-            <!-- Custom Calendar Picker -->
-            <div id="custom-picker" style="display:none;position:absolute;top:72px;left:0;z-index:999;background:#fff;border:1.5px solid #eaecf0;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.12);padding:0;width:300px;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif">
+            <!--
+              ── FIX: Custom Calendar Picker ──
+              Changed from position:absolute (overflows on mobile) to position:fixed
+              with JS-calculated top/left so it always stays within the viewport.
+              max-width: calc(100vw - 24px) ensures it never wider than the screen.
+            -->
+            <div id="custom-picker" style="display:none;position:fixed;z-index:9999;background:#fff;border:1.5px solid #eaecf0;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.12);padding:0;width:300px;max-width:calc(100vw - 24px);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif">
               <!-- Picker Header -->
               <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid #f2f4f7">
                 <button onclick="pickerNav(-1)" style="width:30px;height:30px;border:1.5px solid #eaecf0;border-radius:8px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:14px;transition:all 0.12s" onmouseover="this.style.borderColor='#6366f1';this.style.color='#6366f1'" onmouseout="this.style.borderColor='#eaecf0';this.style.color='#6b7280'"><i class="ti ti-chevron-left"></i></button>
@@ -1111,29 +1121,45 @@ function getRangeLabel() {
   return "All time";
 }
 
-// ADD SESSION
-// CUSTOM DATE PICKER STATE
-var pickerOffset = 0; // months from today
+// ── CUSTOM DATE PICKER ──
+// Uses position:fixed + JS-calculated coordinates so it never overflows on any screen size.
+var pickerOffset = 0;
 
 function getPickerRef() {
-  var d = new Date(today.getFullYear(), today.getMonth()+pickerOffset, 1);
-  return d;
+  return new Date(today.getFullYear(), today.getMonth()+pickerOffset, 1);
 }
 
 function togglePicker() {
   var p = document.getElementById("custom-picker");
   if (p.style.display === "none") {
-    // Set picker to selected date's month if available
+    // Sync picker month to currently selected date
     var inp = document.getElementById("inp-date");
     if (inp.value) {
       var parts = inp.value.split("-").map(Number);
       var sel = new Date(parts[0], parts[1]-1, 1);
-      var diff = (sel.getFullYear()-today.getFullYear())*12 + (sel.getMonth()-today.getMonth());
-      pickerOffset = diff;
+      pickerOffset = (sel.getFullYear()-today.getFullYear())*12 + (sel.getMonth()-today.getMonth());
     } else { pickerOffset = 0; }
     renderPicker();
+
+    // ── FIX: Position the picker using fixed coords from getBoundingClientRect ──
+    // This ensures the picker is always fully visible regardless of parent overflow or scroll.
+    var btn     = document.getElementById("date-display");
+    var rect    = btn.getBoundingClientRect();
+    var pickerW = Math.min(300, window.innerWidth - 24);
+    var left    = rect.left + rect.width / 2 - pickerW / 2;
+    // Clamp so picker never goes off left or right edge
+    left = Math.max(12, Math.min(left, window.innerWidth - pickerW - 12));
+    var top  = rect.bottom + 6;
+    // If picker would go off bottom, show above the button instead
+    var pickerH = 420; // approximate picker height
+    if (top + pickerH > window.innerHeight) {
+      top = Math.max(8, rect.top - pickerH - 6);
+    }
+    p.style.left  = left + "px";
+    p.style.top   = top + "px";
+    p.style.width = pickerW + "px";
     p.style.display = "block";
-    // Close on outside click
+
     setTimeout(function(){
       document.addEventListener("click", pickerOutside, true);
     }, 0);
@@ -1219,7 +1245,6 @@ function renderPicker() {
 
 function pickerSelectDate(ds) {
   document.getElementById("inp-date").value = ds;
-  // Update display
   var parts = ds.split("-").map(Number);
   var d = new Date(parts[0], parts[1]-1, parts[2]);
   var isToday = ds === dateStr(today);
@@ -1257,17 +1282,25 @@ function addSession() {
     })
     .catch(function(err) {
       setStatus("error");
-      alert("Save failed: "+err.message);
+      alert("Save failed: "+(err.message||JSON.stringify(err)));
       btn.disabled=false; btn.innerHTML='<i class="ti ti-plus"></i> Add session';
     });
 }
 
-// DELETE SESSION
 function delSession(id) {
   setStatus("saving");
   supa.from("sessions").update({deleted:true}).eq("id",id)
     .then(function(res){
-      if (res.error) { setStatus("error"); alert("Delete failed: "+res.error.message); return; }
+      if (res.error) {
+        // If 'deleted' column doesn't exist, do a hard delete instead
+        console.warn("Soft delete failed, trying hard delete:", res.error.message);
+        supa.from("sessions").delete().eq("id",id)
+          .then(function(res2){
+            if (res2.error) { setStatus("error"); alert("Delete failed: "+(res2.error.message||JSON.stringify(res2.error))); return; }
+            loadSessions();
+          });
+        return;
+      }
       loadSessions();
     });
 }
@@ -1276,7 +1309,7 @@ function restoreSession(id) {
   setStatus("saving");
   supa.from("sessions").update({deleted:false}).eq("id",id)
     .then(function(res){
-      if (res.error) { setStatus("error"); alert("Restore failed: "+res.error.message); return; }
+      if (res.error) { setStatus("error"); alert("Restore failed: "+(res.error.message||JSON.stringify(res.error))); return; }
       loadTrashed();
       loadSessions();
     });
@@ -1287,7 +1320,7 @@ function permanentDelete(id) {
   setStatus("saving");
   supa.from("sessions").delete().eq("id",id)
     .then(function(res){
-      if (res.error) { setStatus("error"); alert("Delete failed: "+res.error.message); return; }
+      if (res.error) { setStatus("error"); alert("Delete failed: "+(res.error.message||JSON.stringify(res.error))); return; }
       loadTrashed();
     });
 }
@@ -1328,12 +1361,33 @@ function closeTrash() {
   document.getElementById("trash-modal").style.display="none";
 }
 
-// LOAD ALL SESSIONS FROM SUPABASE
 function loadSessions() {
-  supa.from("sessions").select("*").eq("deleted",false).order("date",{ascending:false}).order("created_at",{ascending:false})
+  // Try with deleted filter first; fall back to unfiltered if column doesn't exist yet
+  supa.from("sessions").select("*").eq("deleted",false)
+    .order("date",{ascending:false}).order("created_at",{ascending:false})
     .then(function(res){
-      if (res.error) { console.error("Load error:",res.error); setStatus("error"); return; }
-      sessions=res.data||[];
+      if (res.error) {
+        var msg = res.error.message || JSON.stringify(res.error);
+        console.warn("deleted column not available, falling back:", msg);
+        // Fallback: load all rows without filtering on deleted
+        return supa.from("sessions").select("*")
+          .order("date",{ascending:false}).order("created_at",{ascending:false})
+          .then(function(res2){
+            if (res2.error) {
+              var msg2 = res2.error.message || JSON.stringify(res2.error);
+              console.error("Load error:", msg2);
+              setStatus("error");
+              var el = document.getElementById("sync-status");
+              if (el) el.title = msg2;
+              return;
+            }
+            // Filter client-side: exclude rows where deleted===true
+            sessions = (res2.data||[]).filter(function(s){ return s.deleted !== true; });
+            setStatus("synced");
+            render();
+          });
+      }
+      sessions = res.data||[];
       setStatus("synced");
       render();
     });
@@ -1342,7 +1396,11 @@ function loadSessions() {
 function loadTrashed() {
   supa.from("sessions").select("*").eq("deleted",true).order("date",{ascending:false})
     .then(function(res){
-      if (res.error) { setStatus("error"); return; }
+      if (res.error) {
+        // If deleted column doesn't exist, trash is simply empty
+        renderTrash([]);
+        return;
+      }
       renderTrash(res.data||[]);
     });
 }
@@ -1401,31 +1459,25 @@ function render() {
   document.getElementById("m-total-sub").textContent = sd+" days studied";
   document.getElementById("total-chip").textContent  = tot>0?fmtH(tot):"0h";
 
-  // MISSED TARGETS — count days since GMAT prep start (25 Apr 2026)
-  var PREP_START = new Date(2026, 3, 25); // April 25, 2026
-PREP_START.setHours(0, 0, 0, 0);
-
-var missedDays = 0, deficitMins = 0, consistentDays = 0, totalDaysSinceStart = 0, surplusMins = 0;
-
-var cursor = new Date(PREP_START);
-while (cursor <= today) {
-  totalDaysSinceStart++;
-  var dsMins = minsOn(dateStr(cursor));
-  var dsTgt = targetFor(cursor);
-  if (dsMins > 0) {
-    if(dsMins < dsTgt)
-    {
-      missedDays++;
+  var PREP_START = new Date(2026, 3, 25);
+  PREP_START.setHours(0, 0, 0, 0);
+  var missedDays = 0, deficitMins = 0, consistentDays = 0, totalDaysSinceStart = 0, surplusMins = 0;
+  var cursor = new Date(PREP_START);
+  while (cursor <= today) {
+    totalDaysSinceStart++;
+    var dsMins = minsOn(dateStr(cursor));
+    var dsTgt = targetFor(cursor);
+    if (dsMins > 0) {
+      if(dsMins < dsTgt) { missedDays++; }
+      if (dsMins >= dsTgt * 0.8) {
+        consistentDays++;
+        surplusMins += dsMins - dsTgt;
+      } else {
+        deficitMins += dsTgt - dsMins;
+      }
     }
-    if (dsMins >= dsTgt * 0.8) {
-      consistentDays++;
-      surplusMins += dsMins - dsTgt;
-    } else {
-      deficitMins += dsTgt - dsMins;
-    }
+    cursor = addDays(cursor, 1);
   }
-  cursor = addDays(cursor, 1);
-}
   var studiedDaysPct = totalDaysSinceStart>0 ? Math.min(100,Math.round(consistentDays/totalDaysSinceStart*100)) : 0;
   var missedPct      = sd>0 ? Math.min(100,Math.round(missedDays/sd*100)) : 0;
   document.getElementById("m-missed").textContent       = missedDays;
@@ -1563,6 +1615,7 @@ function renderStreak() {
     grid.appendChild(dot);
   }
 }
+
 function renderSessions() {
   var el,ts,ws,we,filtered,total;
   el=document.getElementById("sessions-list");
@@ -1591,7 +1644,6 @@ function renderSessions() {
   });
 }
 
-// MIGRATE FROM LOCALSTORAGE
 function migrateFromLocalStorage() {
   var OLD_KEYS = ["gmat_v3","gmat_sessions_v2","gmat_sessions"];
   var found = null, foundKey = null;
@@ -1618,7 +1670,6 @@ function migrateFromLocalStorage() {
     supa.from("sessions").insert(rows)
       .then(function(res){
         if (res.error) { setStatus("error"); alert("Migration failed: "+res.error.message); return; }
-        // Clear old localStorage
         OLD_KEYS.forEach(function(k){ localStorage.removeItem(k); });
         alert("Migrated "+rows.length+" sessions successfully!");
         loadSessions();
@@ -1630,7 +1681,6 @@ function migrateFromLocalStorage() {
   };
 }
 
-// AUTO-CHECK: if localStorage has old data on first load, show banner
 function checkLocalMigration() {
   var OLD_KEYS = ["gmat_v3","gmat_sessions_v2","gmat_sessions"];
   var found = false;
@@ -1641,13 +1691,12 @@ function checkLocalMigration() {
   }
 }
 
-// ── VIEW SWITCHER ──
 var currentView = "dashboard";
 var calOffset   = 0;
 var dowChartInst = null, topicBarChartInst = null, monthlyChartInst = null;
 
 function switchView(view) {
-  var views = ["dashboard","analytics","calendar","sessions"];
+  var views = ["dashboard","analytics","calendar","sessions","mock"];
   views.forEach(function(v){
     var el = document.getElementById("view-"+v);
     if (el) el.style.display = v===view ? "block" : "none";
@@ -1655,33 +1704,26 @@ function switchView(view) {
     if (nav) nav.className = "sb-item"+(v===view?" active":"");
   });
   currentView = view;
-  // Update topbar title
-  var titles = {dashboard:"Dashboard",analytics:"Analytics",calendar:"Calendar",sessions:"Session log"};
+  var titles = {dashboard:"Dashboard",analytics:"Analytics",calendar:"Calendar",sessions:"Session log",mock:"Mock Scores"};
   document.querySelector(".topbar-title").textContent = titles[view]||view;
   if (view==="analytics") renderAnalytics();
   if (view==="calendar")  renderBigCalendar();
   if (view==="sessions")  renderFullLog();
+  if (view==="mock")      renderMockView();
 }
 
-// ── ANALYTICS ──
 function renderAnalytics() {
   if (!sessions.length) return;
-
-  // Best day
   var byDate = {};
   sessions.forEach(function(s){ byDate[s.date]=(byDate[s.date]||0)+s.mins; });
   var bestDate = Object.keys(byDate).sort(function(a,b){return byDate[b]-byDate[a];})[0];
   document.getElementById("an-best-day").textContent = bestDate ? parseLocal(bestDate).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}) : "--";
   document.getElementById("an-best-hrs").textContent = bestDate ? fmtH(byDate[bestDate])+" studied" : "";
-
-  // Daily average
   var studiedDays = Object.keys(byDate).length;
   var totalMins   = sessions.reduce(function(a,s){return a+s.mins;},0);
   var avg         = studiedDays ? Math.round(totalMins/studiedDays) : 0;
   document.getElementById("an-avg").textContent     = fmtH(avg);
   document.getElementById("an-avg-sub").textContent = "across "+studiedDays+" studied days";
-
-  // Best streak
   var allDates = Object.keys(byDate).sort();
   var best=0, cur2=0, prev=null;
   allDates.forEach(function(ds){
@@ -1693,7 +1735,6 @@ function renderAnalytics() {
     prev=ds;
   });
   document.getElementById("an-best-streak").textContent = best;
-
   renderHeatmap();
   renderDowChart();
   renderTopicBarChart();
@@ -1707,13 +1748,9 @@ function renderHeatmap() {
   var byDate = {};
   sessions.forEach(function(s){ byDate[s.date]=(byDate[s.date]||0)+s.mins; });
   var maxMins = Math.max.apply(null, Object.values(byDate).concat([1]));
-
-  // 12 weeks back from today
   var end   = new Date(today);
-  var start = addDays(end, -83); // 12*7
-  // Align to Monday
+  var start = addDays(end, -83);
   start = startOfWeek(start);
-
   function heatColor(mins) {
     if (!mins) return "#f2f4f7";
     var pct = mins/maxMins;
@@ -1722,8 +1759,6 @@ function renderHeatmap() {
     if (pct<0.75) return "#16a34a";
     return "#14532d";
   }
-
-  // Build columns (one per week)
   var cur3 = new Date(start);
   while (cur3 <= end) {
     var col = document.createElement("div");
@@ -1742,10 +1777,10 @@ function renderHeatmap() {
 }
 
 function renderDowChart() {
-  var dowMins = [0,0,0,0,0,0,0]; // Mon-Sun
+  var dowMins = [0,0,0,0,0,0,0];
   sessions.forEach(function(s){
     var d = parseLocal(s.date);
-    var dow = (d.getDay()+6)%7; // 0=Mon
+    var dow = (d.getDay()+6)%7;
     dowMins[dow] += s.mins;
   });
   var labels = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
@@ -1777,7 +1812,6 @@ function renderTopicBarChart() {
 }
 
 function renderMonthlyChart() {
-  // Get last 6 months
   var months=[];
   for (var i=5;i>=0;i--) {
     var ref=new Date(today.getFullYear(),today.getMonth()-i,1);
@@ -1801,7 +1835,6 @@ function renderMonthlyChart() {
   });
 }
 
-// ── BIG CALENDAR ──
 function renderBigCalendar() {
   var ref   = new Date(today.getFullYear(), today.getMonth()+calOffset, 1);
   var label = ref.toLocaleDateString("en-IN",{month:"long",year:"numeric"});
@@ -1875,7 +1908,6 @@ function showDayDetail(ds) {
   card.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 
-// ── FULL SESSION LOG ──
 function renderFullLog() {
   var el     = document.getElementById("full-log-list");
   if (!el) return;
@@ -1883,40 +1915,34 @@ function renderFullLog() {
   var period = document.getElementById("log-filter-period").value;
   var ws=startOfWeek(today), we=addDays(ws,6);
   var ms=startOfMonth(today), me=new Date(today.getFullYear(),today.getMonth()+1,0);
-
   var filtered=sessions.slice();
-  if (topic)         filtered=filtered.filter(function(s){return s.topic===topic;});
+  if (topic)            filtered=filtered.filter(function(s){return s.topic===topic;});
   if (period==="week")  filtered=filtered.filter(function(s){return s.date>=dateStr(ws)&&s.date<=dateStr(we);});
   if (period==="month") filtered=filtered.filter(function(s){return s.date>=dateStr(ms)&&s.date<=dateStr(me);});
   filtered.sort(function(a,b){return b.date.localeCompare(a.date)||((b.created_at||0)-(a.created_at||0));});
-
   var total=filtered.reduce(function(a,s){return a+s.mins;},0);
   document.getElementById("log-summary").textContent=filtered.length+" sessions · "+fmtH(total)+" total";
-
   if (!filtered.length){el.innerHTML='<div class="empty-state" style="padding:24px 0">No sessions match the filters</div>';return;}
-
-  // Group by date
   var byDate={}, dateOrder=[];
   filtered.forEach(function(s){
     if(!byDate[s.date]){byDate[s.date]=[];dateOrder.push(s.date);}
     byDate[s.date].push(s);
   });
   dateOrder=dateOrder.filter(function(v,i,a){return a.indexOf(v)===i;});
-
   el.innerHTML=dateOrder.map(function(ds){
     var d=parseLocal(ds);
     var label=ds===dateStr(today)?"Today":d.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
     var dayTotal=byDate[ds].reduce(function(a,s){return a+s.mins;},0);
     var tgt=targetFor(d), met=dayTotal>=tgt;
     var rows=byDate[ds].map(function(s){
-      '<div class="sess-item" style="background:#fff;border:1.5px solid #f2f4f7">'
+      return '<div class="sess-item" style="background:#fff;border:1.5px solid #f2f4f7">'
         +'<span class="sess-color" style="background:'+(TC[s.topic]||"#888")+'"></span>'
         +'<span class="sess-topic" style="flex:1">'+s.topic+'</span>'
         +'<span class="sess-dur">'+fmtH(s.mins)+'</span>'
         +'<button data-id="'+s.id+'" class="log-del-btn" title="Delete" style="background:none;border:none;cursor:pointer;color:#d1d5db;font-size:13px;padding:3px;border-radius:5px"><i class="ti ti-trash"></i></button>'
         +'</div>';
     }).join("");
-    '<div style="margin-bottom:12px">'
+    return '<div style="margin-bottom:12px">'
       +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
       +'<span style="font-size:12px;font-weight:700;color:#374151">'+label+'</span>'
       +'<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;background:'+(met?'#f0fdf4':'#fff1f2')+';color:'+(met?'#15803d':'#be123c')+'">'+fmtH(dayTotal)+(met?' ✓':'')+'</span>'
@@ -1924,7 +1950,6 @@ function renderFullLog() {
       +rows
       +'</div>';
   }).join('');
-
   el.querySelectorAll(".log-del-btn").forEach(function(btn){
     btn.addEventListener("click",function(){
       var id=this.getAttribute("data-id");
@@ -1934,9 +1959,8 @@ function renderFullLog() {
   });
 }
 
-// ── EXAM SETTINGS ──
 var TARGET_SCORE = 735;
-var PREP_START_DATE = new Date(2026, 3, 25); // Apr 25 2026
+var PREP_START_DATE = new Date(2026, 3, 25);
 
 function saveExamSettings() {
   var examDate = document.getElementById("exam-date-inp").value;
@@ -1964,29 +1988,21 @@ function updateExamCountdown() {
   document.getElementById("hrs-needed-block").style.display   = showCountdown ? "block" : "none";
   document.getElementById("total-hrs-block").style.display    = showCountdown ? "block" : "none";
   document.getElementById("exam-progress-wrap").style.display = showCountdown ? "block" : "none";
-
   if (!showCountdown) return;
-
   var examParts = examDateVal.split("-").map(Number);
   var examDate  = new Date(examParts[0], examParts[1]-1, examParts[2]);
   var daysLeft  = Math.ceil((examDate - today) / (1000*60*60*24));
   daysLeft      = Math.max(0, daysLeft);
   document.getElementById("days-left").textContent = daysLeft;
-
-  // Hours needed per day to hit 200h total (recommended for GMAT)
   var totalStudied  = sessions.reduce(function(a,s){return a+s.mins;},0) / 60;
   var GOAL_HRS      = 200;
   var remaining     = Math.max(0, GOAL_HRS - totalStudied);
   var hrsPerDay     = daysLeft > 0 ? (remaining / daysLeft).toFixed(1) : "0";
   document.getElementById("hrs-needed").textContent  = hrsPerDay + "h";
-
-  // Projected total based on current daily average
   var sd = new Set(sessions.map(function(s){return s.date;})).size || 1;
   var avgHrsPerDay  = totalStudied / sd;
   var projected     = totalStudied + (avgHrsPerDay * daysLeft);
   document.getElementById("proj-total").textContent  = Math.round(projected) + "h";
-
-  // Prep progress bar (Apr 25 2026 → exam date)
   var totalPrepDays = Math.ceil((examDate - PREP_START_DATE) / (1000*60*60*24));
   var doneDays      = Math.ceil((today - PREP_START_DATE) / (1000*60*60*24));
   var prepPct       = Math.min(100, Math.round(doneDays / totalPrepDays * 100));
@@ -1995,10 +2011,8 @@ function updateExamCountdown() {
   document.getElementById("exam-date-label").textContent   = examDate.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
 }
 
-// ── MOCK SCORES ──
 var mockScores = JSON.parse(localStorage.getItem("gmat_mock_scores") || "[]");
 var mockChartInst = null;
-
 function saveMockScores() { localStorage.setItem("gmat_mock_scores", JSON.stringify(mockScores)); }
 
 function openAddMock() {
@@ -2035,7 +2049,6 @@ function deleteMock(id) {
 }
 
 function updateCommandCenter() {
-  // Update score gap in command center
   if (mockScores.length > 0) {
     var latest = mockScores[mockScores.length-1].score;
     var gap    = TARGET_SCORE - latest;
@@ -2053,7 +2066,6 @@ function updateCommandCenter() {
 function renderMockView() {
   if (currentView !== "mock") return;
   document.getElementById("mk-target-label").textContent = TARGET_SCORE;
-
   if (!mockScores.length) {
     document.getElementById("mk-latest").textContent     = "--";
     document.getElementById("mk-best").textContent       = "--";
@@ -2063,14 +2075,12 @@ function renderMockView() {
     if (mockChartInst) mockChartInst.destroy();
     return;
   }
-
   var sorted  = mockScores.slice().sort(function(a,b){return a.date.localeCompare(b.date);});
   var latest  = sorted[sorted.length-1].score;
   var best    = Math.max.apply(null, sorted.map(function(m){return m.score;}));
   var first   = sorted[0].score;
   var gap     = TARGET_SCORE - latest;
   var improvement = latest - first;
-
   document.getElementById("mk-latest").textContent      = latest;
   document.getElementById("mk-latest").className        = "kpi-value" + (latest >= TARGET_SCORE ? " met" : "");
   document.getElementById("mk-latest-sub").textContent  = parseLocal(sorted[sorted.length-1].date).toLocaleDateString("en-IN",{day:"numeric",month:"short"});
@@ -2082,8 +2092,6 @@ function renderMockView() {
   document.getElementById("mk-improvement").textContent = (improvement >= 0 ? "+" : "") + improvement;
   document.getElementById("mk-improvement").className   = "kpi-value" + (improvement > 0 ? " met" : improvement < 0 ? "" : "");
   document.getElementById("mk-imp-sub").textContent     = sorted.length > 1 ? first + " -> " + latest : "Need 2+ mocks";
-
-  // Chart
   if (mockChartInst) mockChartInst.destroy();
   var labels   = sorted.map(function(m){ return parseLocal(m.date).toLocaleDateString("en-IN",{day:"numeric",month:"short"}); });
   var scores   = sorted.map(function(m){ return m.score; });
@@ -2100,12 +2108,10 @@ function renderMockView() {
       }},
       scales: {
         x: { grid: { display: false }, ticks: { font: { size: 11, family: "Plus Jakarta Sans" }, color: "#9ea3ae" }, border: { display: false } },
-        y: { grid: { color: "#f2f4f7" }, ticks: { font: { size: 11, family: "Plus Jakarta Sans" }, color: "#9ea3ae" }, border: { display: false }, min: function(){ return Math.max(200, Math.min.apply(null,scores)-30); }(), suggestedMax: Math.max(TARGET_SCORE + 20, Math.max.apply(null,scores)+20) }
+        y: { grid: { color: "#f2f4f7" }, ticks: { font: { size: 11, family: "Plus Jakarta Sans" }, color: "#9ea3ae" }, border: { display: false }, min: Math.max(200, Math.min.apply(null,scores)-30), suggestedMax: Math.max(TARGET_SCORE + 20, Math.max.apply(null,scores)+20) }
       }
     }
   });
-
-  // History list
   var list = document.getElementById("mock-history-list");
   var rows = sorted.slice().reverse().map(function(m, i) {
     var gap2 = TARGET_SCORE - m.score;
@@ -2134,7 +2140,6 @@ function renderMockView() {
   rows.forEach(function(div){ list.appendChild(div); });
 }
 
-// ── WEEK vs LAST WEEK ──
 function getWeekHours(offset) {
   var ws = startOfWeek(addDays(today, offset*7));
   var total = 0;
@@ -2142,32 +2147,12 @@ function getWeekHours(offset) {
   return total;
 }
 
-// Override switchView to include mock
-var _origSwitchView = switchView;
-switchView = function(view) {
-  var views = ["dashboard","analytics","calendar","sessions","mock"];
-  views.forEach(function(v){
-    var el = document.getElementById("view-"+v);
-    if (el) el.style.display = v===view ? "block" : "none";
-    var nav = document.getElementById("nav-"+v);
-    if (nav) nav.className = "sb-item"+(v===view?" active":"");
-  });
-  currentView = view;
-  var titles = {dashboard:"Dashboard",analytics:"Analytics",calendar:"Calendar",sessions:"Session log",mock:"Mock Scores"};
-  document.querySelector(".topbar-title").textContent = titles[view]||view;
-  if (view==="analytics") renderAnalytics();
-  if (view==="calendar")  renderBigCalendar();
-  if (view==="sessions")  renderFullLog();
-  if (view==="mock")      renderMockView();
-};
-
-// Patch render() to also update countdown and command center
+// Patch render() to also update countdown, command center, and wow badge
 var _origRender = render;
 render = function() {
   _origRender();
   updateExamCountdown();
   updateCommandCenter();
-  // Week vs last week banner update
   var thisWeek = getWeekHours(0);
   var lastWeek = getWeekHours(-1);
   var diff     = thisWeek - lastWeek;
