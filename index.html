@@ -391,12 +391,11 @@ body{
   /* Section title */
   .sec-title { font-size: 14px; }
 
-  /* ── FIX: Custom date picker — compact, anchored, never overflows ── */
+  /* ── Custom date picker — compact, anchored below button ── */
   #custom-picker {
     width: 224px !important;
-    left: 12px !important;
+    left: 0 !important;
     transform: none !important;
-    right: auto !important;
   }
 
   /* Migrate bar */
@@ -669,7 +668,7 @@ body{
               with JS-calculated top/left so it always stays within the viewport.
               max-width: calc(100vw - 24px) ensures it never wider than the screen.
             -->
-            <div id="custom-picker" style="display:none;position:fixed;z-index:9999;background:#fff;border:1.5px solid #e0e7ff;border-radius:12px;box-shadow:0 4px 20px rgba(99,102,241,0.13);padding:0;width:224px;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif">
+            <div id="custom-picker" style="display:none;position:absolute;top:100%;margin-top:4px;left:0;z-index:9999;background:#fff;border:1.5px solid #e0e7ff;border-radius:12px;box-shadow:0 4px 20px rgba(99,102,241,0.15);padding:0;width:224px;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif">
               <!-- Compact Header -->
               <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px 6px">
                 <button onclick="pickerNav(-1)" style="width:24px;height:24px;border:none;border-radius:6px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9ea3ae;font-size:13px;transition:all 0.1s" onmouseover="this.style.background='#eef2ff';this.style.color='#6366f1'" onmouseout="this.style.background='transparent';this.style.color='#9ea3ae'"><i class="ti ti-chevron-left"></i></button>
@@ -1138,26 +1137,7 @@ function togglePicker() {
       pickerOffset = (sel.getFullYear()-today.getFullYear())*12 + (sel.getMonth()-today.getMonth());
     } else { pickerOffset = 0; }
     renderPicker();
-
-    // ── FIX: Position the picker using fixed coords from getBoundingClientRect ──
-    // This ensures the picker is always fully visible regardless of parent overflow or scroll.
-    var btn     = document.getElementById("date-display");
-    var rect    = btn.getBoundingClientRect();
-    var pickerW = Math.min(224, window.innerWidth - 24);
-    var left    = rect.left; // align left edge with the button
-    // Clamp so picker never goes off right or left edge
-    left = Math.max(12, Math.min(left, window.innerWidth - pickerW - 12));
-    var top  = rect.bottom + 4;
-    // If picker would go off bottom, show above the button instead
-    var pickerH = 260; // compact picker height
-    if (top + pickerH > window.innerHeight) {
-      top = Math.max(8, rect.top - pickerH - 4);
-    }
-    p.style.left  = left + "px";
-    p.style.top   = top + "px";
-    p.style.width = pickerW + "px";
     p.style.display = "block";
-
     setTimeout(function(){
       document.addEventListener("click", pickerOutside, true);
     }, 0);
