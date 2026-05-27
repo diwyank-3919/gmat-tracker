@@ -391,11 +391,11 @@ body{
   /* Section title */
   .sec-title { font-size: 14px; }
 
-  /* ── FIX: Custom date picker — centered, never overflows ── */
+  /* ── FIX: Custom date picker — compact, anchored, never overflows ── */
   #custom-picker {
-    width: calc(100vw - 24px) !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
+    width: 224px !important;
+    left: 12px !important;
+    transform: none !important;
     right: auto !important;
   }
 
@@ -669,32 +669,30 @@ body{
               with JS-calculated top/left so it always stays within the viewport.
               max-width: calc(100vw - 24px) ensures it never wider than the screen.
             -->
-            <div id="custom-picker" style="display:none;position:fixed;z-index:9999;background:#fff;border:1.5px solid #eaecf0;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.12);padding:0;width:300px;max-width:calc(100vw - 24px);overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif">
-              <!-- Picker Header -->
-              <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid #f2f4f7">
-                <button onclick="pickerNav(-1)" style="width:30px;height:30px;border:1.5px solid #eaecf0;border-radius:8px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:14px;transition:all 0.12s" onmouseover="this.style.borderColor='#6366f1';this.style.color='#6366f1'" onmouseout="this.style.borderColor='#eaecf0';this.style.color='#6b7280'"><i class="ti ti-chevron-left"></i></button>
-                <div style="text-align:center">
-                  <div id="picker-month-year" style="font-size:15px;font-weight:700;color:#1a1d23;letter-spacing:-0.3px"></div>
-                </div>
-                <button onclick="pickerNav(1)" style="width:30px;height:30px;border:1.5px solid #eaecf0;border-radius:8px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:14px;transition:all 0.12s" onmouseover="this.style.borderColor='#6366f1';this.style.color='#6366f1'" onmouseout="this.style.borderColor='#eaecf0';this.style.color='#6b7280'"><i class="ti ti-chevron-right"></i></button>
+            <div id="custom-picker" style="display:none;position:fixed;z-index:9999;background:#fff;border:1.5px solid #e0e7ff;border-radius:12px;box-shadow:0 4px 20px rgba(99,102,241,0.13);padding:0;width:224px;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif">
+              <!-- Compact Header -->
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px 6px">
+                <button onclick="pickerNav(-1)" style="width:24px;height:24px;border:none;border-radius:6px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9ea3ae;font-size:13px;transition:all 0.1s" onmouseover="this.style.background='#eef2ff';this.style.color='#6366f1'" onmouseout="this.style.background='transparent';this.style.color='#9ea3ae'"><i class="ti ti-chevron-left"></i></button>
+                <div id="picker-month-year" style="font-size:12px;font-weight:700;color:#1a1d23;letter-spacing:-0.2px"></div>
+                <button onclick="pickerNav(1)" style="width:24px;height:24px;border:none;border-radius:6px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9ea3ae;font-size:13px;transition:all 0.1s" onmouseover="this.style.background='#eef2ff';this.style.color='#6366f1'" onmouseout="this.style.background='transparent';this.style.color='#9ea3ae'"><i class="ti ti-chevron-right"></i></button>
               </div>
               <!-- Day labels -->
-              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:12px 14px 4px">
-                <div style="text-align:center;font-size:10px;font-weight:700;color:#b0b7c3;letter-spacing:0.06em;text-transform:uppercase;padding:4px 0">Mo</div>
-                <div style="text-align:center;font-size:10px;font-weight:700;color:#b0b7c3;letter-spacing:0.06em;text-transform:uppercase;padding:4px 0">Tu</div>
-                <div style="text-align:center;font-size:10px;font-weight:700;color:#b0b7c3;letter-spacing:0.06em;text-transform:uppercase;padding:4px 0">We</div>
-                <div style="text-align:center;font-size:10px;font-weight:700;color:#b0b7c3;letter-spacing:0.06em;text-transform:uppercase;padding:4px 0">Th</div>
-                <div style="text-align:center;font-size:10px;font-weight:700;color:#b0b7c3;letter-spacing:0.06em;text-transform:uppercase;padding:4px 0">Fr</div>
-                <div style="text-align:center;font-size:10px;font-weight:700;color:#c7d2fe;letter-spacing:0.06em;text-transform:uppercase;padding:4px 0">Sa</div>
-                <div style="text-align:center;font-size:10px;font-weight:700;color:#c7d2fe;letter-spacing:0.06em;text-transform:uppercase;padding:4px 0">Su</div>
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 8px 2px">
+                <div style="text-align:center;font-size:9px;font-weight:700;color:#c4c8d4;text-transform:uppercase;padding:2px 0">M</div>
+                <div style="text-align:center;font-size:9px;font-weight:700;color:#c4c8d4;text-transform:uppercase;padding:2px 0">T</div>
+                <div style="text-align:center;font-size:9px;font-weight:700;color:#c4c8d4;text-transform:uppercase;padding:2px 0">W</div>
+                <div style="text-align:center;font-size:9px;font-weight:700;color:#c4c8d4;text-transform:uppercase;padding:2px 0">T</div>
+                <div style="text-align:center;font-size:9px;font-weight:700;color:#c4c8d4;text-transform:uppercase;padding:2px 0">F</div>
+                <div style="text-align:center;font-size:9px;font-weight:700;color:#c7d2fe;text-transform:uppercase;padding:2px 0">S</div>
+                <div style="text-align:center;font-size:9px;font-weight:700;color:#c7d2fe;text-transform:uppercase;padding:2px 0">S</div>
               </div>
               <!-- Day grid -->
-              <div id="picker-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:0 14px 14px"></div>
+              <div id="picker-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;padding:0 8px 6px"></div>
               <!-- Footer shortcuts -->
-              <div style="border-top:1px solid #f2f4f7;padding:10px 14px;display:flex;gap:6px">
-                <button onclick="pickerSelectDate(dateStr(today))" style="flex:1;padding:7px;font-size:12px;font-weight:600;border:1.5px solid #e0e7ff;border-radius:8px;background:#eef2ff;color:#6366f1;cursor:pointer">Today</button>
-                <button onclick="pickerSelectDate(dateStr(addDays(today,-1)))" style="flex:1;padding:7px;font-size:12px;font-weight:600;border:1.5px solid #eaecf0;border-radius:8px;background:#fafafa;color:#6b7280;cursor:pointer">Yesterday</button>
-                <button onclick="closePicker()" style="flex:1;padding:7px;font-size:12px;font-weight:600;border:1.5px solid #eaecf0;border-radius:8px;background:#fafafa;color:#6b7280;cursor:pointer">Cancel</button>
+              <div style="border-top:1px solid #f2f4f7;padding:6px 8px;display:flex;gap:4px">
+                <button onclick="pickerSelectDate(dateStr(today))" style="flex:1;padding:4px 0;font-size:10px;font-weight:700;border:1.5px solid #e0e7ff;border-radius:6px;background:#eef2ff;color:#6366f1;cursor:pointer;font-family:inherit">Today</button>
+                <button onclick="pickerSelectDate(dateStr(addDays(today,-1)))" style="flex:1;padding:4px 0;font-size:10px;font-weight:600;border:1.5px solid #eaecf0;border-radius:6px;background:#fafafa;color:#6b7280;cursor:pointer;font-family:inherit">Yest.</button>
+                <button onclick="closePicker()" style="flex:1;padding:4px 0;font-size:10px;font-weight:600;border:1.5px solid #eaecf0;border-radius:6px;background:#fafafa;color:#9ea3ae;cursor:pointer;font-family:inherit">✕</button>
               </div>
             </div>
           </div>
@@ -1145,15 +1143,15 @@ function togglePicker() {
     // This ensures the picker is always fully visible regardless of parent overflow or scroll.
     var btn     = document.getElementById("date-display");
     var rect    = btn.getBoundingClientRect();
-    var pickerW = Math.min(300, window.innerWidth - 24);
-    var left    = rect.left + rect.width / 2 - pickerW / 2;
-    // Clamp so picker never goes off left or right edge
+    var pickerW = Math.min(224, window.innerWidth - 24);
+    var left    = rect.left; // align left edge with the button
+    // Clamp so picker never goes off right or left edge
     left = Math.max(12, Math.min(left, window.innerWidth - pickerW - 12));
-    var top  = rect.bottom + 6;
+    var top  = rect.bottom + 4;
     // If picker would go off bottom, show above the button instead
-    var pickerH = 420; // approximate picker height
+    var pickerH = 260; // compact picker height
     if (top + pickerH > window.innerHeight) {
-      top = Math.max(8, rect.top - pickerH - 6);
+      top = Math.max(8, rect.top - pickerH - 4);
     }
     p.style.left  = left + "px";
     p.style.top   = top + "px";
@@ -1210,23 +1208,22 @@ function renderPicker() {
     var isWEnd  = d.getDay()===0||d.getDay()===6;
     var hasSess = minsOn(ds) > 0;
     var cell = document.createElement("div");
-    cell.style.cssText = "aspect-ratio:1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all 0.12s;position:relative;gap:2px";
+    cell.style.cssText = "aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:background 0.1s;position:relative";
     if (isSel) {
       cell.style.background = "linear-gradient(135deg,#6366f1,#8b5cf6)";
-      cell.style.boxShadow  = "0 4px 12px rgba(99,102,241,0.35)";
     } else if (isToday) {
       cell.style.background = "#eef2ff";
-      cell.style.border     = "1.5px solid #c7d2fe";
+      cell.style.outline = "1.5px solid #c7d2fe";
     } else {
       cell.style.background = "transparent";
     }
     var numEl = document.createElement("div");
-    numEl.style.cssText = "font-size:13px;font-weight:"+(isSel||isToday?"700":"500")+";color:"+(isSel?"#fff":isToday?"#6366f1":isWEnd?"#6366f1":"#1a1d23");
+    numEl.style.cssText = "font-size:11px;font-weight:"+(isSel||isToday?"700":"500")+";color:"+(isSel?"#fff":isToday?"#6366f1":isWEnd?"#8b8ff8":"#374151");
     numEl.textContent = day;
     cell.appendChild(numEl);
     if (hasSess && !isSel) {
       var pip = document.createElement("div");
-      pip.style.cssText = "width:4px;height:4px;border-radius:50%;background:"+(isToday?"#6366f1":"#16a34a");
+      pip.style.cssText = "position:absolute;bottom:2px;width:3px;height:3px;border-radius:50%;background:"+(isToday?"#6366f1":"#16a34a");
       cell.appendChild(pip);
     }
     cell.onmouseover = (function(el, sel2) { return function() {
