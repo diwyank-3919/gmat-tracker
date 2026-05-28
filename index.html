@@ -2304,14 +2304,13 @@ render=function(){
     {id:"mom-xp",    suffix:"",  isTime:false},
     {id:"mom-streak",suffix:"",  isTime:false},
   ];
-  function parseMinutes(text){
-    // parses "3h 20m", "45m", "0m", "72%" → raw number for animation
+   function parseMinutes(text){
     if(!text||text==="—"||text==="0m") return 0;
     var h=0,m=0;
-    var hm=text.match(/(\d+)h/); if(hm) h=parseInt(hm[1]);
-    var mm=text.match(/(\d+)m/); if(mm) m=parseInt(mm[1]);
-    var pm=text.match(/^(\d+)%/); if(pm) return parseInt(pm[1]);
-    var nm=text.match(/^(\d+)$/); if(nm) return parseInt(nm[1]);
+    var rh=text.match(/(\d+)h/); if(rh) h=parseInt(rh[1]);
+    var rm=text.match(/(\d+)m/); if(rm) m=parseInt(rm[1]);
+    var rp=text.match(/^(\d+)%/); if(rp) return parseInt(rp[1]);
+    var rn=text.match(/^(\d+)$/); if(rn) return parseInt(rn[1]);
     return h*60+m;
   }
   function formatLike(raw, isTime, refText){
