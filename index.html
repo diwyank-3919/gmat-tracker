@@ -785,6 +785,74 @@ body::after{
   animation:pageOut 0.18s ease both;
   pointer-events:none;
 }
+  /* ── SIDEBAR UPGRADE: COMPACT + TOPIC BARS ── */
+
+/* Tighter sidebar width */
+.shell{grid-template-columns:196px 1fr}
+
+/* Compact nav items */
+.sb-item{
+  padding:6px 8px;
+  font-size:12px;
+  margin-bottom:1px;
+}
+
+/* Stronger active glow */
+.sb-item.active{
+  box-shadow:
+    0 0 0 1px rgba(139,124,248,0.35),
+    0 2px 16px rgba(139,124,248,0.25),
+    0 0 40px rgba(139,124,248,0.12),
+    inset 0 1px 0 rgba(139,124,248,0.20);
+}
+.sb-item.active::before{
+  width:3px;
+  box-shadow:0 0 14px var(--accent-bright),0 0 6px var(--accent-bright);
+}
+
+/* Topic item layout — stack label+bar */
+.sb-topic-item{
+  display:flex;flex-direction:column;gap:3px;
+  padding:6px 9px;border-radius:9px;
+  margin-bottom:1px;cursor:default;
+  transition:background 0.15s;
+  border:1px solid transparent;
+}
+.sb-topic-item:hover{
+  background:rgba(255,255,255,0.05);
+  border-color:rgba(255,255,255,0.06);
+}
+.sb-topic-row{display:flex;align-items:center;justify-content:space-between;}
+.sb-topic-name{
+  display:flex;align-items:center;gap:6px;
+  font-size:11.5px;font-weight:500;color:var(--text-secondary);
+}
+.sb-topic-name .ti{font-size:13px;opacity:0.8;}
+.sb-topic-hours{
+  font-size:9.5px;font-weight:650;
+  color:var(--accent-bright);
+  background:rgba(139,124,248,0.10);
+  padding:1px 6px;border-radius:100px;
+  border:1px solid rgba(139,124,248,0.16);
+}
+.sb-topic-track{
+  height:2px;
+  background:rgba(255,255,255,0.07);
+  border-radius:2px;overflow:hidden;
+}
+.sb-topic-fill{
+  height:100%;border-radius:2px;
+  transition:width 0.8s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 4px currentColor;
+}
+
+/* Logo tighter */
+.sb-logo{padding:16px 14px 13px;}
+.sb-logo-name{font-size:13.5px;}
+
+/* Section label tighter */
+.sb-section{padding:12px 10px 4px;}
+.sb-section-label{font-size:8.5px;margin-bottom:5px;}
 </style>
 </head>
 <body>
@@ -811,12 +879,48 @@ body::after{
 
   <div class="sb-section">
     <div class="sb-section-label">Topics</div>
-    <div class="sb-item"><i class="ti ti-math" style="color:#8b7cf8"></i> Quant <span class="sb-badge" id="sb-quant">0h</span></div>
-    <div class="sb-item"><i class="ti ti-book-2" style="color:#34d399"></i> RC <span class="sb-badge" id="sb-rc">0h</span></div>
-    <div class="sb-item"><i class="ti ti-brain" style="color:#fbbf24"></i> CR <span class="sb-badge" id="sb-cr">0h</span></div>
-    <div class="sb-item"><i class="ti ti-chart-dots" style="color:#60a5fa"></i> DI <span class="sb-badge" id="sb-di">0h</span></div>
-    <div class="sb-item"><i class="ti ti-clipboard-check" style="color:#f472b6"></i> Mock <span class="sb-badge" id="sb-mock">0h</span></div>
-    <div class="sb-item"><i class="ti ti-refresh" style="color:#fb923c"></i> Review <span class="sb-badge" id="sb-review">0h</span></div>
+    <div class="sb-topic-item" id="sbt-quant">
+      <div class="sb-topic-row">
+        <div class="sb-topic-name"><i class="ti ti-math" style="color:#8b7cf8"></i> Quant</div>
+        <span class="sb-topic-hours" id="sb-quant">0h</span>
+      </div>
+      <div class="sb-topic-track"><div class="sb-topic-fill" id="sbf-quant" style="width:0%;background:#8b7cf8"></div></div>
+    </div>
+    <div class="sb-topic-item" id="sbt-rc">
+      <div class="sb-topic-row">
+        <div class="sb-topic-name"><i class="ti ti-book-2" style="color:#34d399"></i> RC</div>
+        <span class="sb-topic-hours" id="sb-rc">0h</span>
+      </div>
+      <div class="sb-topic-track"><div class="sb-topic-fill" id="sbf-rc" style="width:0%;background:#34d399"></div></div>
+    </div>
+    <div class="sb-topic-item" id="sbt-cr">
+      <div class="sb-topic-row">
+        <div class="sb-topic-name"><i class="ti ti-brain" style="color:#fbbf24"></i> CR</div>
+        <span class="sb-topic-hours" id="sb-cr">0h</span>
+      </div>
+      <div class="sb-topic-track"><div class="sb-topic-fill" id="sbf-cr" style="width:0%;background:#fbbf24"></div></div>
+    </div>
+    <div class="sb-topic-item" id="sbt-di">
+      <div class="sb-topic-row">
+        <div class="sb-topic-name"><i class="ti ti-chart-dots" style="color:#60a5fa"></i> DI</div>
+        <span class="sb-topic-hours" id="sb-di">0h</span>
+      </div>
+      <div class="sb-topic-track"><div class="sb-topic-fill" id="sbf-di" style="width:0%;background:#60a5fa"></div></div>
+    </div>
+    <div class="sb-topic-item" id="sbt-mock">
+      <div class="sb-topic-row">
+        <div class="sb-topic-name"><i class="ti ti-clipboard-check" style="color:#f472b6"></i> Mock</div>
+        <span class="sb-topic-hours" id="sb-mock">0h</span>
+      </div>
+      <div class="sb-topic-track"><div class="sb-topic-fill" id="sbf-mock" style="width:0%;background:#f472b6"></div></div>
+    </div>
+    <div class="sb-topic-item" id="sbt-review">
+      <div class="sb-topic-row">
+        <div class="sb-topic-name"><i class="ti ti-refresh" style="color:#fb923c"></i> Review</div>
+        <span class="sb-topic-hours" id="sb-review">0h</span>
+      </div>
+      <div class="sb-topic-track"><div class="sb-topic-fill" id="sbf-review" style="width:0%;background:#fb923c"></div></div>
+    </div>
   </div>
 
   <div class="sb-bottom">
@@ -1895,7 +1999,13 @@ function render(){
   readEl.style.borderColor=readiness>=80?"rgba(52,211,153,0.25)":readiness>=60?"rgba(251,191,36,0.22)":"rgba(255,255,255,0.10)";
 
   topicTotals={};sessions.forEach(function(s){topicTotals[s.topic]=(topicTotals[s.topic]||0)+s.mins;});
-  TOPICS.forEach(function(t){var el=document.getElementById(SB_IDS[t]);if(el)el.textContent=topicTotals[t]?fmtH(topicTotals[t]):"0h";});
+  var SBF_IDS={"Quant":"sbf-quant","RC":"sbf-rc","CR":"sbf-cr","DI":"sbf-di","Mock test":"sbf-mock","Review":"sbf-review"};
+  var maxTopic=Math.max.apply(null,TOPICS.map(function(t){return topicTotals[t]||0;}).concat([1]));
+  TOPICS.forEach(function(t){
+    var el=document.getElementById(SB_IDS[t]);if(el)el.textContent=topicTotals[t]?fmtH(topicTotals[t]):"0h";
+    var fill=document.getElementById(SBF_IDS[t]);
+    if(fill)fill.style.width=Math.round((topicTotals[t]||0)/maxTopic*100)+"%";
+  });
 
   qi=streak%QUOTES.length;
   if(sessions.length===0){document.getElementById("banner-title").textContent="Start your GMAT journey";document.getElementById("banner-sub").textContent="Log your first session - weekday target 3h, weekend 6h";}
