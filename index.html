@@ -955,6 +955,15 @@ body::after{
   .form-grid{grid-template-columns:1fr 1fr;}
   .dur-wrap{flex-wrap:wrap;}
 }
+
+  @media(max-width:900px){
+  .sec-header{flex-wrap:wrap;gap:8px;}
+  .sec-header>div:first-child{width:100%;}
+  .sec-header>div:last-child{width:100%;}
+  .content>div[id^="view-"]{overflow-x:hidden;max-width:100%;}
+  #big-cal-grid{grid-template-columns:repeat(7,1fr);gap:3px;}
+  #big-cal-grid>div{padding:4px 2px;min-width:0;}
+}
 </style>
 </head>
 <body>
