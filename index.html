@@ -2178,31 +2178,6 @@ function drawSparkline(canvasId, dataPoints, color, fillColor) {
   requestAnimationFrame(drawFrame);
   ctx.restore();
 }
-  // Fill
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x,H);
-  pts.forEach(function(p){ctx.lineTo(p.x,p.y);});
-  ctx.lineTo(pts[pts.length-1].x,H);
-  ctx.closePath();
-  var grad=ctx.createLinearGradient(0,0,0,H);
-  grad.addColorStop(0,fillColor||"rgba(139,124,248,0.25)");
-  grad.addColorStop(1,"rgba(0,0,0,0)");
-  ctx.fillStyle=grad; ctx.fill();
-  // Line
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x,pts[0].y);
-  for(var i=1;i<pts.length;i++){
-    var cp1x=(pts[i-1].x+pts[i].x)/2; var cp1y=pts[i-1].y;
-    var cp2x=cp1x; var cp2y=pts[i].y;
-    ctx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,pts[i].x,pts[i].y);
-  }
-  ctx.strokeStyle=color||"rgba(139,124,248,0.7)"; ctx.lineWidth=1.5; ctx.stroke();
-  // Last point dot
-  var last=pts[pts.length-1];
-  ctx.beginPath(); ctx.arc(last.x,last.y,2.5,0,Math.PI*2);
-  ctx.fillStyle=color||"rgba(139,124,248,0.7)"; ctx.fill();
-}
-
 // ── RING HELPERS ──
 function setRing(id, pct, circumference){
   var el=document.getElementById(id); if(!el) return;
