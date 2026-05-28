@@ -962,7 +962,11 @@ body::after{
   .sec-header>div:last-child{width:100%;}
   .content>div[id^="view-"]{overflow-x:hidden;max-width:100%;}
   #big-cal-grid{grid-template-columns:repeat(7,1fr);gap:3px;}
-  #big-cal-grid>div{padding:4px 2px;min-width:0;}
+  #big-cal-grid>div{
+    height:80px;
+    justify-content:flex-start;
+    padding-top:6px;
+  }
 }
 </style>
 </head>
