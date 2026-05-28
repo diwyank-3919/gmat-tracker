@@ -594,6 +594,17 @@ body::after{
 .kpi-icon{transition:transform 0.22s cubic-bezier(.34,1.56,.64,1),box-shadow 0.22s;}
 .kpi:hover .kpi-icon{transform:scale(1.10);box-shadow:0 0 16px currentColor;}
 
+.ring-card:nth-child(1) #rs-readiness,
+.ring-card:nth-child(2) #rs-pace,
+.ring-card:nth-child(3) #rs-focus,
+.ring-card:nth-child(4) #rs-burnout {
+  transition-delay: 0.1s, 0s;
+}
+.ring-card:nth-child(1){animation-delay:0.08s}
+.ring-card:nth-child(2){animation-delay:0.14s}
+.ring-card:nth-child(3){animation-delay:0.20s}
+.ring-card:nth-child(4){animation-delay:0.26s}
+
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(139,124,248,0.22);border-radius:10px}
@@ -1765,21 +1776,26 @@ function render(){
   var curWeekTot=0; for(var l=0;l<7;l++) curWeekTot+=minsOn(dateStr(addDays(today,-l)));
   renderDelta("total-delta",curWeekTot,prevWeekTot,"min");
 
-  // ── SPARKLINES ──
-  // Today: last 7 days
-  setTimeout(function(){
-    var last7=[];for(var n=6;n>=0;n--) last7.push(minsOn(dateStr(addDays(today,-n)))/60);
-    drawSparkline("spark-today",last7,"rgba(139,124,248,0.8)","rgba(139,124,248,0.15)");
-    // Week: last 4 weeks
-    var last4w=[];for(var n2=3;n2>=0;n2--){var ws2=startOfWeek(addDays(today,-n2*7));var wt2=0;for(var n3=0;n3<7;n3++) wt2+=minsOn(dateStr(addDays(ws2,n3)));last4w.push(wt2/60);}
-    drawSparkline("spark-week",last4w,"rgba(52,211,153,0.8)","rgba(52,211,153,0.12)");
-    // Month: last 6 months
-    var last6m=[];for(var n4=5;n4>=0;n4--){var mRef=new Date(today.getFullYear(),today.getMonth()-n4,1);var mMe=new Date(mRef.getFullYear(),mRef.getMonth()+1,0);var mt=0;for(var dd3=new Date(mRef);dd3<=mMe;dd3=addDays(dd3,1)) mt+=minsOn(dateStr(dd3));last6m.push(mt/60);}
-    drawSparkline("spark-month",last6m,"rgba(251,191,36,0.8)","rgba(251,191,36,0.12)");
-    // Total: cumulative last 12 weeks
-    var cumul=[];var running=0;for(var n5=11;n5>=0;n5--){var ws3=startOfWeek(addDays(today,-n5*7));for(var n6=0;n6<7;n6++) running+=minsOn(dateStr(addDays(ws3,n6)));cumul.push(running/60);}
-    drawSparkline("spark-total",cumul,"rgba(251,113,133,0.8)","rgba(251,113,133,0.10)");
-  },100);
+ // ── SPARKLINES — reliable deferred render ──
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      // Force reflow so offsetWidth is real
+      var canvases=["spark-today","spark-week","spark-month","spark-total"];
+      canvases.forEach(function(id){var c=document.getElementById(id);if(c){c.width=c.offsetWidth||160;}});
+
+      var last7=[];for(var n=6;n>=0;n--) last7.push(minsOn(dateStr(addDays(today,-n)))/60);
+      drawSparkline("spark-today",last7,"rgba(139,124,248,0.8)","rgba(139,124,248,0.15)");
+
+      var last4w=[];for(var n2=3;n2>=0;n2--){var ws2=startOfWeek(addDays(today,-n2*7));var wt2=0;for(var n3=0;n3<7;n3++) wt2+=minsOn(dateStr(addDays(ws2,n3)));last4w.push(wt2/60);}
+      drawSparkline("spark-week",last4w,"rgba(52,211,153,0.8)","rgba(52,211,153,0.12)");
+
+      var last6m=[];for(var n4=5;n4>=0;n4--){var mRef=new Date(today.getFullYear(),today.getMonth()-n4,1);var mMe=new Date(mRef.getFullYear(),mRef.getMonth()+1,0);var mt=0;for(var dd3=new Date(mRef);dd3<=mMe;dd3=addDays(dd3,1)) mt+=minsOn(dateStr(dd3));last6m.push(mt/60);}
+      drawSparkline("spark-month",last6m,"rgba(251,191,36,0.8)","rgba(251,191,36,0.12)");
+
+      var cumul=[];var running=0;for(var n5=11;n5>=0;n5--){var ws3=startOfWeek(addDays(today,-n5*7));for(var n6=0;n6<7;n6++) running+=minsOn(dateStr(addDays(ws3,n6)));cumul.push(running/60);}
+      drawSparkline("spark-total",cumul,"rgba(251,113,133,0.8)","rgba(251,113,133,0.10)");
+    });
+  });
 
   // ── RING SUITE ──
   setRing("rs-readiness",readiness,182);
@@ -2273,6 +2289,67 @@ render=function(){
     }
   }
 };
+
+  // ── ANIMATED COUNTER INJECTION ──
+// Wraps the existing render() to animate KPI numbers after each call
+(function(){
+  var _baseRender = render;
+  var COUNTERS = [
+    {id:"m-today",   suffix:"",  isTime:true},
+    {id:"m-week",    suffix:"",  isTime:true},
+    {id:"m-month",   suffix:"",  isTime:true},
+    {id:"m-total",   suffix:"",  isTime:true},
+    {id:"m-missed",  suffix:"",  isTime:false},
+    {id:"m-consistency", suffix:"%", isTime:false},
+    {id:"mom-xp",    suffix:"",  isTime:false},
+    {id:"mom-streak",suffix:"",  isTime:false},
+  ];
+  function parseMinutes(text){
+    // parses "3h 20m", "45m", "0m", "72%" → raw number for animation
+    if(!text||text==="—"||text==="0m") return 0;
+    var h=0,m=0;
+    var hm=text.match(/(\d+)h/); if(hm) h=parseInt(hm[1]);
+    var mm=text.match(/(\d+)m/); if(mm) m=parseInt(mm[1]);
+    var pm=text.match(/^(\d+)%/); if(pm) return parseInt(pm[1]);
+    var nm=text.match(/^(\d+)$/); if(nm) return parseInt(nm[1]);
+    return h*60+m;
+  }
+  function formatLike(raw, isTime, refText){
+    if(!isTime) return Math.round(raw).toLocaleString();
+    var h=Math.floor(raw/60),m=Math.round(raw%60);
+    if(h>0) return m>0?h+"h "+m+"m":h+"h";
+    return m+"m";
+  }
+  function animateEl(id, isTime, refText, duration){
+    var el=document.getElementById(id); if(!el) return;
+    var target=parseMinutes(refText||el.textContent);
+    if(!target) return;
+    var start=null;
+    function step(ts){
+      if(!start) start=ts;
+      var prog=Math.min((ts-start)/duration,1);
+      var eased=1-Math.pow(1-prog,4);
+      var cur=target*eased;
+      el.textContent=isTime?formatLike(cur,true,refText):Math.round(cur).toLocaleString();
+      if(prog<1) requestAnimationFrame(step);
+      else el.textContent=refText;
+    }
+    requestAnimationFrame(step);
+  }
+  render = function(){
+    // Capture pre-render values (will be 0 on first load, old value on update)
+    _baseRender.apply(this, arguments);
+    // After base render sets the final text, animate from 0
+    setTimeout(function(){
+      COUNTERS.forEach(function(c){
+        var el=document.getElementById(c.id); if(!el) return;
+        var finalText=el.textContent;
+        el.textContent=c.isTime?"0m":"0";
+        animateEl(c.id, c.isTime, finalText, 900);
+      });
+    }, 30);
+  };
+})();
 
 loadSessions();
 checkLocalMigration();
