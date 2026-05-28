@@ -853,10 +853,169 @@ body::after{
 /* Section label tighter */
 .sb-section{padding:12px 10px 4px;}
 .sb-section-label{font-size:8.5px;margin-bottom:5px;}
+
+  /* ── MOBILE SIDEBAR ── */
+.mob-header{
+  display:none;
+  align-items:center;justify-content:space-between;
+  padding:12px 16px;
+  background:rgba(10,7,22,0.92);
+  backdrop-filter:blur(32px);
+  border-bottom:1px solid rgba(255,255,255,0.07);
+  position:sticky;top:0;z-index:25;
+}
+@media(max-width:900px){.mob-header{display:flex;}}
+.mob-logo{display:flex;align-items:center;gap:8px;}
+.mob-logo-icon{
+  width:30px;height:30px;border-radius:8px;
+  background:linear-gradient(135deg,#7c3aed,#4f46e5);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:#fff;flex-shrink:0;
+}
+.mob-logo-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--text-primary);}
+.mob-burger{
+  width:36px;height:36px;border-radius:9px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.10);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text-secondary);
+  font-size:16px;transition:all 0.15s;
+}
+.mob-burger:hover{background:rgba(139,124,248,0.14);border-color:rgba(139,124,248,0.30);color:var(--accent-bright);}
+
+.mob-overlay{
+  display:none;
+  position:fixed;inset:0;z-index:40;
+  background:rgba(0,0,0,0.55);
+  backdrop-filter:blur(6px);
+  opacity:0;transition:opacity 0.25s ease;
+}
+.mob-overlay.open{opacity:1;}
+
+.mob-drawer{
+  position:fixed;left:0;top:0;bottom:0;z-index:41;
+  width:260px;
+  background:rgba(10,7,22,0.97);
+  backdrop-filter:blur(40px) saturate(180%);
+  border-right:1px solid rgba(255,255,255,0.08);
+  box-shadow:4px 0 40px rgba(0,0,0,0.50);
+  display:flex;flex-direction:column;
+  transform:translateX(-100%);
+  transition:transform 0.28s cubic-bezier(.34,1.56,.64,1);
+  overflow-y:auto;
+}
+.mob-drawer.open{transform:translateX(0);}
+
+.mob-drawer-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 14px 13px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.mob-close{
+  width:28px;height:28px;border-radius:7px;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text-tertiary);font-size:13px;
+  transition:all 0.15s;
+}
+.mob-close:hover{background:var(--red-soft);color:var(--red);border-color:rgba(251,113,133,0.25);}
+
+.mob-drawer .sb-section{padding:10px 8px 4px;}
+.mob-drawer .sb-item{font-size:13px;padding:8px 10px;}
+.mob-drawer .sb-topic-item{padding:7px 10px;}
+.mob-drawer .sb-bottom{padding:12px 10px 16px;}
+
+.mob-today-strip{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 14px;
+  background:rgba(139,124,248,0.08);
+  border-bottom:1px solid rgba(139,124,248,0.15);
+}
+.mob-today-strip .ti{font-size:13px;color:var(--accent-bright);}
+.mob-today-text{font-size:11.5px;font-weight:600;color:var(--text-primary);}
+.mob-today-sub{font-size:10px;color:var(--text-tertiary);margin-left:auto;}
+@media(max-width:900px){
+  .topbar{display:none;}
+}
 </style>
 </head>
 <body>
 <div class="shell">
+
+  <!-- ── MOBILE HEADER ── -->
+<div class="mob-header">
+  <div class="mob-logo">
+    <div class="mob-logo-icon"><i class="ti ti-target"></i></div>
+    <div class="mob-logo-name">GMAT Tracker</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:7px;">
+    <div class="tb-chip purple" style="font-size:10.5px;padding:4px 9px;"><i class="ti ti-flame"></i><span id="mob-streak">0</span></div>
+    <div class="tb-chip green" style="font-size:10.5px;padding:4px 9px;"><i class="ti ti-target"></i><span id="mob-week">0</span>%</div>
+    <button class="mob-burger" onclick="openMobDrawer()" aria-label="Open menu"><i class="ti ti-menu-2"></i></button>
+  </div>
+</div>
+
+<!-- ── MOBILE DRAWER ── -->
+<div class="mob-overlay" id="mob-overlay" onclick="closeMobDrawer()"></div>
+<div class="mob-drawer" id="mob-drawer">
+  <div class="mob-drawer-head">
+    <div class="mob-logo">
+      <div class="mob-logo-icon"><i class="ti ti-target"></i></div>
+      <div class="mob-logo-name">GMAT Tracker</div>
+    </div>
+    <button class="mob-close" onclick="closeMobDrawer()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="mob-today-strip">
+    <i class="ti ti-clock"></i>
+    <span class="mob-today-text" id="mob-today-val">0m today</span>
+    <span class="mob-today-sub" id="mob-today-sub">of 3h target</span>
+  </div>
+  <div class="sb-section">
+    <div class="sb-section-label">Navigation</div>
+    <div class="sb-item active" onclick="mobileSwitchView('dashboard')" id="mob-nav-dashboard"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+    <div class="sb-item" onclick="mobileSwitchView('analytics')" id="mob-nav-analytics"><i class="ti ti-chart-bar"></i> Analytics</div>
+    <div class="sb-item" onclick="mobileSwitchView('calendar')" id="mob-nav-calendar"><i class="ti ti-calendar-event"></i> Calendar</div>
+    <div class="sb-item" onclick="mobileSwitchView('sessions')" id="mob-nav-sessions"><i class="ti ti-history"></i> Session log</div>
+    <div class="sb-item" onclick="mobileSwitchView('mock')" id="mob-nav-mock"><i class="ti ti-clipboard-check"></i> Mock scores</div>
+  </div>
+  <div class="sb-section">
+    <div class="sb-section-label">Topics</div>
+    <div class="sb-topic-item">
+      <div class="sb-topic-row"><div class="sb-topic-name"><i class="ti ti-math" style="color:#8b7cf8"></i> Quant</div><span class="sb-topic-hours" id="mob-sb-quant">0h</span></div>
+      <div class="sb-topic-track"><div class="sb-topic-fill" id="mob-sbf-quant" style="width:0%;background:#8b7cf8"></div></div>
+    </div>
+    <div class="sb-topic-item">
+      <div class="sb-topic-row"><div class="sb-topic-name"><i class="ti ti-book-2" style="color:#34d399"></i> RC</div><span class="sb-topic-hours" id="mob-sb-rc">0h</span></div>
+      <div class="sb-topic-track"><div class="sb-topic-fill" id="mob-sbf-rc" style="width:0%;background:#34d399"></div></div>
+    </div>
+    <div class="sb-topic-item">
+      <div class="sb-topic-row"><div class="sb-topic-name"><i class="ti ti-brain" style="color:#fbbf24"></i> CR</div><span class="sb-topic-hours" id="mob-sb-cr">0h</span></div>
+      <div class="sb-topic-track"><div class="sb-topic-fill" id="mob-sbf-cr" style="width:0%;background:#fbbf24"></div></div>
+    </div>
+    <div class="sb-topic-item">
+      <div class="sb-topic-row"><div class="sb-topic-name"><i class="ti ti-chart-dots" style="color:#60a5fa"></i> DI</div><span class="sb-topic-hours" id="mob-sb-di">0h</span></div>
+      <div class="sb-topic-track"><div class="sb-topic-fill" id="mob-sbf-di" style="width:0%;background:#60a5fa"></div></div>
+    </div>
+    <div class="sb-topic-item">
+      <div class="sb-topic-row"><div class="sb-topic-name"><i class="ti ti-clipboard-check" style="color:#f472b6"></i> Mock</div><span class="sb-topic-hours" id="mob-sb-mock">0h</span></div>
+      <div class="sb-topic-track"><div class="sb-topic-fill" id="mob-sbf-mock" style="width:0%;background:#f472b6"></div></div>
+    </div>
+    <div class="sb-topic-item">
+      <div class="sb-topic-row"><div class="sb-topic-name"><i class="ti ti-refresh" style="color:#fb923c"></i> Review</div><span class="sb-topic-hours" id="mob-sb-review">0h</span></div>
+      <div class="sb-topic-track"><div class="sb-topic-fill" id="mob-sbf-review" style="width:0%;background:#fb923c"></div></div>
+    </div>
+  </div>
+  <div class="sb-bottom">
+    <div class="sb-today-label">Today's Progress</div>
+    <div class="sb-today-val" id="mob-sb-today-val">0m</div>
+    <div class="sb-today-sub" id="mob-sb-today-sub">of 3h target</div>
+    <div class="sb-track" style="margin-top:7px"><div class="sb-fill" id="mob-sb-today-fill" style="width:0%"></div></div>
+    <div style="margin-top:12px">
+      <div class="sb-progress-label"><span>Week</span><span id="mob-sb-week-pct">0%</span></div>
+      <div class="sb-track"><div class="sb-fill" id="mob-sb-week-fill" style="width:0%;background:var(--green-bright)"></div></div>
+    </div>
+  </div>
+</div>
 
 <!-- ── SIDEBAR ── -->
 <aside class="sidebar">
@@ -2618,6 +2777,69 @@ render=function(){
     }, 30);
   };
 })();
+
+// ── MOBILE DRAWER ──
+function openMobDrawer(){
+  var overlay=document.getElementById("mob-overlay");
+  var drawer=document.getElementById("mob-drawer");
+  overlay.style.display="block";
+  requestAnimationFrame(function(){
+    overlay.classList.add("open");
+    drawer.classList.add("open");
+  });
+  document.body.style.overflow="hidden";
+}
+function closeMobDrawer(){
+  var overlay=document.getElementById("mob-overlay");
+  var drawer=document.getElementById("mob-drawer");
+  overlay.classList.remove("open");
+  drawer.classList.remove("open");
+  setTimeout(function(){overlay.style.display="none";},280);
+  document.body.style.overflow="";
+}
+function mobileSwitchView(view){
+  closeMobDrawer();
+  setTimeout(function(){switchView(view);},180);
+  var views=["dashboard","analytics","calendar","sessions","mock"];
+  views.forEach(function(v){
+    var el=document.getElementById("mob-nav-"+v);
+    if(el)el.className="sb-item"+(v===view?" active":"");
+  });
+}
+
+// Sync mobile drawer stats with main render
+var _renderForMob=render;
+render=function(){
+  _renderForMob.apply(this,arguments);
+  var tm=minsOn(dateStr(today));
+  var tt=targetFor(today);
+  var tpct=Math.min(100,Math.round(tm/tt*100));
+  var ws=startOfWeek(today);var wm=0;var wt=0;
+  for(var i=0;i<7;i++){var wd=addDays(ws,i);wm+=minsOn(dateStr(wd));wt+=targetFor(wd);}
+  var wpct=Math.min(100,Math.round(wm/wt*100)||0);
+  var topicTotals={};sessions.forEach(function(s){topicTotals[s.topic]=(topicTotals[s.topic]||0)+s.mins;});
+  var maxTopic=Math.max.apply(null,TOPICS.map(function(t){return topicTotals[t]||0;}).concat([1]));
+  var streak=parseInt(document.getElementById("streak-chip").textContent)||0;
+  // Mobile header chips
+  var ms=document.getElementById("mob-streak");if(ms)ms.textContent=streak;
+  var mw=document.getElementById("mob-week");if(mw)mw.textContent=wpct;
+  // Mobile today strip
+  var mt=document.getElementById("mob-today-val");if(mt)mt.textContent=(tm>0?fmtH(tm):"0m")+" today";
+  var mts=document.getElementById("mob-today-sub");if(mts)mts.textContent="of "+(isWE(today)?"6h":"3h")+" target";
+  // Mobile sb-bottom
+  var msv=document.getElementById("mob-sb-today-val");if(msv)msv.textContent=tm>0?fmtH(tm):"0m";
+  var mss=document.getElementById("mob-sb-today-sub");if(mss)mss.textContent="of "+(isWE(today)?"6h":"3h")+" target";
+  var msf=document.getElementById("mob-sb-today-fill");if(msf){msf.style.width=tpct+"%";msf.style.background=tm>=tt?"var(--green-bright)":"linear-gradient(90deg,#7c3aed,#4f46e5)";}
+  var mwp=document.getElementById("mob-sb-week-pct");if(mwp)mwp.textContent=wpct+"%";
+  var mwf=document.getElementById("mob-sb-week-fill");if(mwf)mwf.style.width=wpct+"%";
+  // Mobile topic bars
+  var MOB_SB={"Quant":"mob-sb-quant","RC":"mob-sb-rc","CR":"mob-sb-cr","DI":"mob-sb-di","Mock test":"mob-sb-mock","Review":"mob-sb-review"};
+  var MOB_SBF={"Quant":"mob-sbf-quant","RC":"mob-sbf-rc","CR":"mob-sbf-cr","DI":"mob-sbf-di","Mock test":"mob-sbf-mock","Review":"mob-sbf-review"};
+  TOPICS.forEach(function(t){
+    var el=document.getElementById(MOB_SB[t]);if(el)el.textContent=topicTotals[t]?fmtH(topicTotals[t]):"0h";
+    var fill=document.getElementById(MOB_SBF[t]);if(fill)fill.style.width=Math.round((topicTotals[t]||0)/maxTopic*100)+"%";
+  });
+};
 
 loadSessions();
 checkLocalMigration();
