@@ -937,8 +937,11 @@ body::after{
 @media(max-width:900px){
   .topbar{display:none;}
 }
-  @media(max-width:900px){
-  .content{padding:12px;overflow-x:hidden;}
+ @media(max-width:900px){
+  .topbar{display:none;}
+  .shell{display:block!important;}
+  .main{width:100%;max-width:100vw;overflow-x:hidden;}
+  .content{padding:12px;overflow-x:hidden;max-width:100%;}
   .momentum-grid{grid-template-columns:repeat(2,1fr)!important;}
   .bottom-grid{grid-template-columns:1fr!important;}
   .main-grid{grid-template-columns:1fr!important;}
@@ -946,6 +949,11 @@ body::after{
   .an-top-grid{grid-template-columns:1fr 1fr!important;}
   .an-mid-grid{grid-template-columns:1fr!important;}
   .intel-row{grid-template-columns:1fr!important;}
+  .kpi-row{grid-template-columns:1fr 1fr;}
+  .ring-suite{grid-template-columns:1fr 1fr!important;}
+  .banner{flex-wrap:wrap;}
+  .form-grid{grid-template-columns:1fr 1fr;}
+  .dur-wrap{flex-wrap:wrap;}
 }
 </style>
 </head>
