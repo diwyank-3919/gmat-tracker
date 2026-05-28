@@ -640,6 +640,134 @@ body::after{
   .an-top-grid{grid-template-columns:1fr 1fr!important}
   .an-mid-grid{grid-template-columns:1fr!important}
 }
+  /* ── MODULE 4: MOTION LAYER ── */
+
+/* Card entrance — stagger children of content area */
+.content > * {
+  animation:fadeUp 0.45s cubic-bezier(.34,1.56,.64,1) both;
+}
+.content > *:nth-child(1){animation-delay:0.04s}
+.content > *:nth-child(2){animation-delay:0.08s}
+.content > *:nth-child(3){animation-delay:0.12s}
+.content > *:nth-child(4){animation-delay:0.16s}
+.content > *:nth-child(5){animation-delay:0.20s}
+.content > *:nth-child(6){animation-delay:0.24s}
+.content > *:nth-child(7){animation-delay:0.28s}
+
+/* KPI icon pop on card hover */
+.kpi:hover .kpi-icon{
+  transform:scale(1.18) rotate(-6deg);
+  box-shadow:0 0 20px currentColor;
+}
+
+/* Intel card hover — slide + glow */
+.intel-card{
+  transition:transform 0.22s cubic-bezier(.34,1.56,.64,1),
+             box-shadow 0.22s ease,
+             border-color 0.22s ease,
+             background 0.20s ease;
+}
+.intel-card:hover{
+  transform:translateY(-3px) scale(1.015);
+  box-shadow:0 8px 32px rgba(139,124,248,0.18);
+}
+
+/* Progress bar entrance animation */
+@keyframes barGrow{
+  from{width:0%!important}
+}
+.kpi-bar-fill{animation:barGrow 1.1s cubic-bezier(.4,0,.2,1) 0.3s both;}
+.sb-fill{animation:barGrow 1.2s cubic-bezier(.4,0,.2,1) 0.5s both;}
+.xp-fill{animation:barGrow 1.4s cubic-bezier(.4,0,.2,1) 0.6s both;}
+.t-fill{animation:barGrow 0.9s cubic-bezier(.4,0,.2,1) both;}
+
+/* Streak dot pop-in */
+@keyframes dotPop{
+  0%{opacity:0;transform:scale(0.4)}
+  70%{transform:scale(1.25)}
+  100%{opacity:1;transform:scale(1)}
+}
+.s-dot{
+  animation:dotPop 0.35s cubic-bezier(.34,1.56,.64,1) both;
+}
+.s-dot:nth-child(5n+1){animation-delay:0.02s}
+.s-dot:nth-child(5n+2){animation-delay:0.04s}
+.s-dot:nth-child(5n+3){animation-delay:0.06s}
+.s-dot:nth-child(5n+4){animation-delay:0.08s}
+.s-dot:nth-child(5n+5){animation-delay:0.10s}
+
+/* Sidebar item hover — stronger glow */
+.sb-item:hover{
+  box-shadow:0 0 20px rgba(139,124,248,0.12);
+}
+.sb-item.active{
+  box-shadow:0 2px 14px rgba(139,124,248,0.22),
+             inset 0 1px 0 rgba(139,124,248,0.15),
+             0 0 30px rgba(139,124,248,0.10);
+}
+
+/* Topbar chip hover lift */
+.tb-chip{transition:all 0.20s cubic-bezier(.34,1.56,.64,1);}
+.tb-chip:hover{
+  transform:translateY(-2px) scale(1.04);
+  box-shadow:0 6px 20px rgba(0,0,0,0.25);
+}
+
+/* Ring card hover glow per color */
+.ring-card:nth-child(1):hover{box-shadow:var(--shadow-card-hover),0 0 30px rgba(52,211,153,0.15);}
+.ring-card:nth-child(2):hover{box-shadow:var(--shadow-card-hover),0 0 30px rgba(251,191,36,0.15);}
+.ring-card:nth-child(3):hover{box-shadow:var(--shadow-card-hover),0 0 30px rgba(96,165,250,0.15);}
+.ring-card:nth-child(4):hover{box-shadow:var(--shadow-card-hover),0 0 30px rgba(251,113,133,0.15);}
+
+/* Momentum stat val — subtle pulse on load */
+@keyframes statPulse{
+  0%{opacity:0;transform:scale(0.85) translateY(8px)}
+  70%{transform:scale(1.05) translateY(-2px)}
+  100%{opacity:1;transform:scale(1) translateY(0)}
+}
+.momentum-stat-val{
+  animation:statPulse 0.55s cubic-bezier(.34,1.56,.64,1) both;
+}
+.momentum-stat:nth-child(1) .momentum-stat-val{animation-delay:0.10s}
+.momentum-stat:nth-child(2) .momentum-stat-val{animation-delay:0.17s}
+.momentum-stat:nth-child(3) .momentum-stat-val{animation-delay:0.24s}
+.momentum-stat:nth-child(4) .momentum-stat-val{animation-delay:0.31s}
+
+/* Log button shimmer on hover */
+@keyframes btnShimmer{
+  0%{background-position:200% center}
+  100%{background-position:-200% center}
+}
+.log-btn:hover{
+  background-size:400% 100%;
+  animation:gradientShift 1.5s ease infinite, btnShimmer 1.5s linear infinite;
+}
+
+/* Session item entrance */
+.sess-item{
+  animation:fadeUp 0.3s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+/* Calendar cell hover scale already exists — add glow */
+.cal-cell:hover{
+  box-shadow:0 0 14px rgba(139,124,248,0.22);
+}
+.cal-cell.has-data.met:hover{
+  box-shadow:0 0 14px rgba(52,211,153,0.25);
+}
+.cal-cell.has-data.missed:hover{
+  box-shadow:0 0 14px rgba(251,113,133,0.20);
+}
+
+/* Exam progress bar entrance */
+#exam-progress-bar{
+  animation:barGrow 1.6s cubic-bezier(.4,0,.2,1) 0.8s both;
+}
+
+/* Floating orb on momentum card */
+.momentum-card::after{
+  animation:orbFloat 9s ease-in-out infinite;
+}
 </style>
 </head>
 <body>
