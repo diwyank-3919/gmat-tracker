@@ -2295,22 +2295,21 @@ render=function(){
 (function(){
   var _baseRender = render;
   var COUNTERS = [
-    {id:"m-today",   suffix:"",  isTime:true},
-    {id:"m-week",    suffix:"",  isTime:true},
-    {id:"m-month",   suffix:"",  isTime:true},
-    {id:"m-total",   suffix:"",  isTime:true},
-    {id:"m-missed",  suffix:"",  isTime:false},
-    {id:"m-consistency", suffix:"%", isTime:false},
-    {id:"mom-xp",    suffix:"",  isTime:false},
-    {id:"mom-streak",suffix:"",  isTime:false},
+    {id:"m-today",       suffix:"", isTime:true},
+    {id:"m-week",        suffix:"", isTime:true},
+    {id:"m-month",       suffix:"", isTime:true},
+    {id:"m-total",       suffix:"", isTime:true},
+    {id:"m-missed",      suffix:"", isTime:false},
+    {id:"m-consistency", suffix:"", isTime:false},
+    {id:"mom-xp",        suffix:"", isTime:false},
   ];
    function parseMinutes(text){
-    if(!text||text==="—"||text==="0m") return 0;
+    if(!text||text==="—"||text==="0m"||text==="0") return 0;
     var h=0,m=0;
     var rh=text.match(/(\d+)h/); if(rh) h=parseInt(rh[1]);
     var rm=text.match(/(\d+)m/); if(rm) m=parseInt(rm[1]);
     var rp=text.match(/^(\d+)%/); if(rp) return parseInt(rp[1]);
-    var rn=text.match(/^(\d+)$/); if(rn) return parseInt(rn[1]);
+    var rn=text.replace(/,/g,"").match(/^(\d+)$/); if(rn) return parseInt(rn[1]);
     return h*60+m;
   }
   function formatLike(raw, isTime, refText){
