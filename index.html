@@ -841,6 +841,10 @@ body::after{
   background:rgba(139,124,248,0.10);
   padding:1px 6px;border-radius:100px;
   border:1px solid rgba(139,124,248,0.16);
+
+  color:var(--text-secondary) !important;
+  background:rgba(255,255,255,0.05) !important;
+  border-color:rgba(255,255,255,0.10) !important;
 }
 .sb-topic-track{
   height:2px;
@@ -2858,7 +2862,7 @@ function render(){
       canvases.forEach(function(id){var c=document.getElementById(id);if(c){c.width=c.offsetWidth||160;}});
 
       var last7=[];for(var n=6;n>=0;n--) last7.push(minsOn(dateStr(addDays(today,-n)))/60);
-      drawSparkline("spark-today",last7,"rgba(139,124,248,0.8)","rgba(139,124,248,0.15)");
+      drawSparkline("spark-today",last7,"#878dff","rgba(135,141,255,0.15)");
 
       var last4w=[];for(var n2=3;n2>=0;n2--){var ws2=startOfWeek(addDays(today,-n2*7));var wt2=0;for(var n3=0;n3<7;n3++) wt2+=minsOn(dateStr(addDays(ws2,n3)));last4w.push(wt2/60);}
       drawSparkline("spark-week",last4w,"rgba(52,211,153,0.8)","rgba(52,211,153,0.12)");
