@@ -1492,20 +1492,28 @@ input[type="date"], input[type="number"], select{
   /* Let the session-log date picker escape its card's clipping */
 .main-grid > .card:first-child{ overflow:visible !important; }
 
-  /* ── BRAND MARK v3 — progress ring (replaces the monogram block) ── */
+/* ── BRAND MARK v4 — animated progress ring ── */
 .sb-logo-icon, .mob-logo-icon{
   background:#13161f !important;
   box-shadow:inset 0 0 0 1px rgba(135,141,255,0.22), 0 4px 14px rgba(0,0,0,0.35) !important;
-  position:relative !important; overflow:hidden !important;
+  display:flex !important; align-items:center; justify-content:center;
+  overflow:hidden; position:relative;
 }
+.sb-logo-icon::after, .mob-logo-icon::after{ display:none !important; }
 .sb-logo-icon i, .mob-logo-icon i{ display:none !important; }
-.sb-logo-icon::after, .mob-logo-icon::after{
-  content:"" !important;
-  position:absolute; inset:0;
-  background-repeat:no-repeat; background-position:center; background-size:66%;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='r' x1='6' y1='26' x2='26' y2='6' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%238b7cf8'/%3E%3Cstop offset='1' stop-color='%235fd9a8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='rgba(255,255,255,0.10)' stroke-width='3.4'/%3E%3Cpath d='M22.3 7 A 11 11 0 1 1 9.7 7' fill='none' stroke='url(%23r)' stroke-width='3.4' stroke-linecap='round'/%3E%3Ccircle cx='22.3' cy='7' r='2.3' fill='%235fd9a8'/%3E%3C/svg%3E") !important;
+.brand-ring{ display:block; }
+.sb-logo-icon .brand-ring{ width:23px; height:23px; }
+.mob-logo-icon .brand-ring{ width:19px; height:19px; }
+.brand-arc{
+  stroke-dasharray:100; stroke-dashoffset:100;
+  animation:brandDraw 1.05s cubic-bezier(.4,0,.2,1) 0.2s forwards;
 }
-
+.brand-dot{
+  opacity:0; transform-box:fill-box; transform-origin:center;
+  animation:brandDot 0.45s cubic-bezier(.34,1.56,.64,1) 1.2s forwards;
+}
+@keyframes brandDraw{ to{ stroke-dashoffset:0; } }
+@keyframes brandDot{ from{opacity:0;transform:scale(.3);} to{opacity:1;transform:scale(1);} }
 
   /* ── BRAND WORDMARK — Fraunces ── */
 .sb-logo-name, .mob-logo-name{
@@ -1582,7 +1590,7 @@ body::before{
  <!-- ── MOBILE HEADER ── -->
 <div class="mob-header">
   <div class="mob-logo">
-    <div class="mob-logo-icon"><i class="ti ti-target"></i></div>
+    <div class="mob-logo-icon"><svg class="brand-ring" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="brandGrad" x1="6" y1="26" x2="26" y2="6" gradientUnits="userSpaceOnUse"><stop stop-color="#8b7cf8"/><stop offset="0.55" stop-color="#7e9bf0"/><stop offset="1" stop-color="#5fd9a8"/></linearGradient></defs><circle cx="16" cy="16" r="11" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="3.4"/><path class="brand-arc" d="M22.3 7 A 11 11 0 1 1 9.7 7" fill="none" stroke="url(#brandGrad)" stroke-width="3.4" stroke-linecap="round" pathLength="100"/><circle class="brand-dot" cx="22.3" cy="7" r="2.4" fill="#6fe7b6"/></svg></div>
     <div class="mob-logo-name">Performance OS</div>
   </div>
   <div style="display:flex;align-items:center;gap:7px;">
@@ -1597,7 +1605,7 @@ body::before{
 <div class="mob-drawer" id="mob-drawer">
   <div class="mob-drawer-head">
     <div class="mob-logo">
-      <div class="mob-logo-icon"><i class="ti ti-target"></i></div>
+      <div class="mob-logo-icon"><svg class="brand-ring" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="brandGrad" x1="6" y1="26" x2="26" y2="6" gradientUnits="userSpaceOnUse"><stop stop-color="#8b7cf8"/><stop offset="0.55" stop-color="#7e9bf0"/><stop offset="1" stop-color="#5fd9a8"/></linearGradient></defs><circle cx="16" cy="16" r="11" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="3.4"/><path class="brand-arc" d="M22.3 7 A 11 11 0 1 1 9.7 7" fill="none" stroke="url(#brandGrad)" stroke-width="3.4" stroke-linecap="round" pathLength="100"/><circle class="brand-dot" cx="22.3" cy="7" r="2.4" fill="#6fe7b6"/></svg></div>
       <div class="mob-logo-name">Performance OS</div>
     </div>
     <button class="mob-close" onclick="closeMobDrawer()"><i class="ti ti-x"></i></button>
@@ -1660,7 +1668,7 @@ body::before{
 <!-- ── SIDEBAR ── -->
 <aside class="sidebar">
   <div class="sb-logo">
-    <div class="sb-logo-icon"><i class="ti ti-target"></i></div>
+    <div class="sb-logo-icon"><svg class="brand-ring" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="brandGrad" x1="6" y1="26" x2="26" y2="6" gradientUnits="userSpaceOnUse"><stop stop-color="#8b7cf8"/><stop offset="0.55" stop-color="#7e9bf0"/><stop offset="1" stop-color="#5fd9a8"/></linearGradient></defs><circle cx="16" cy="16" r="11" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="3.4"/><path class="brand-arc" d="M22.3 7 A 11 11 0 1 1 9.7 7" fill="none" stroke="url(#brandGrad)" stroke-width="3.4" stroke-linecap="round" pathLength="100"/><circle class="brand-dot" cx="22.3" cy="7" r="2.4" fill="#6fe7b6"/></svg></div>
     <div>
       <div class="sb-logo-name">Performance OS</div>
       <div class="sb-logo-sub">GMAT Prep</div>
