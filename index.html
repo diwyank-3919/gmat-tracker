@@ -3603,6 +3603,13 @@ render=function(){
     var fill=document.getElementById(MOB_SBF[t]);if(fill)fill.style.width=Math.round((topicTotals[t]||0)/maxTopic*100)+"%";
   });
 };
+  // Close the date picker on scroll/resize so it can't drift from its field
+["scroll","resize"].forEach(function(ev){
+  window.addEventListener(ev,function(){
+    var p=document.getElementById("custom-picker");
+    if(p && p.style.display!=="none") closePicker();
+  },true);
+});
 
 loadSessions();
 checkLocalMigration();
