@@ -2640,7 +2640,9 @@ function generateInsights(data){
   }
   // Topic balance
   var topicKeys=Object.keys(topicTotals);
-  if(topicKeys.length>=2){
+  if(topicKeys.length===1 && totalMins>=180){
+    insights.push({type:"warning",icon:"⚖️",text:topicKeys[0]+" is your only logged section",sub:"The other GMAT sections are untouched — add variety for balanced prep"});
+  } else if(topicKeys.length>=2){
     var sorted=topicKeys.slice().sort(function(a,b){return topicTotals[b]-topicTotals[a];});
     var topTopic=sorted[0], bottomTopic=sorted[sorted.length-1];
     var ratio=topicTotals[bottomTopic]>0?topicTotals[topTopic]/topicTotals[bottomTopic]:99;
@@ -3079,9 +3081,15 @@ function render(){
   var readDesc=readiness>=80?"Excellent":readiness>=60?"Good":readiness>=40?"Building":"Starting";
   document.getElementById("rs-readiness-desc").textContent=readDesc+" readiness";
 
-  setRing("rs-pace",wpct,182);
-  document.getElementById("rs-pace-val").textContent=wpct+"%";
-  document.getElementById("rs-pace-desc").textContent=wpct>=100?"Weekly target hit!":wpct>=60?"On pace":"Below pace";
+  // elapsed-aware pace: minutes so far vs target through today, not the whole week
+  var paceWs=startOfWeek(today), paceElapsedTarget=0;
+  for(var pp=0;pp<7;pp++){var ppd=addDays(paceWs,pp); if(ppd<=today) paceElapsedTarget+=targetFor(ppd);}
+  var pacePct=paceElapsedTarget>0?Math.round(wm/paceElapsedTarget*100):0;
+  setRing("rs-pace",Math.min(100,pacePct),182);
+  var paceValEl=document.getElementById("rs-pace-val");
+  paceValEl.textContent=pacePct+"%";
+  paceValEl.style.color=pacePct>=80?"#34d399":pacePct>=50?"#fbbf24":"#fb7185";
+  document.getElementById("rs-pace-desc").textContent=pacePct>=100?"On track":pacePct>=80?"On pace":pacePct>=50?"Slightly behind":"Behind pace";
 
   // Focus score = quality sessions / total (sessions ≥ 60 min = quality)
   var qualitySessions=sessions.filter(function(s){return s.mins>=60;}).length;
@@ -3111,10 +3119,17 @@ function render(){
 function renderDelta(elId, curMins, prevMins, unit){
   var el=document.getElementById(elId); if(!el) return;
   if(prevMins===0||curMins===0){el.textContent="—";el.className="kpi-delta neutral";return;}
-  var diff=curMins-prevMins; var pct=Math.abs(Math.round(diff/prevMins*100));
-  if(diff>0){el.textContent="↑"+pct+"% vs prior";el.className="kpi-delta up";}
-  else if(diff<0){el.textContent="↓"+pct+"% vs prior";el.className="kpi-delta down";}
-  else{el.textContent="Same as prior";el.className="kpi-delta neutral";}
+  var diff=curMins-prevMins;
+  if(diff===0){el.textContent="Same as prior";el.className="kpi-delta neutral";return;}
+  var pct=Math.abs(Math.round(diff/prevMins*100));
+  var arrow=diff>0?"↑":"↓", cls=diff>0?"up":"down", label;
+  if(pct>300){
+    var ad=Math.abs(diff),h=Math.floor(ad/60),m=Math.round(ad%60);
+    label=arrow+(h>0?(m>0?h+"h "+m+"m":h+"h"):m+"m")+" vs prior";
+  } else {
+    label=arrow+pct+"% vs prior";
+  }
+  el.textContent=label; el.className="kpi-delta "+cls;
 }
 
 function renderChart(){
