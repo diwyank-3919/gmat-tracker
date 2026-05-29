@@ -546,9 +546,16 @@ body::after{
 .donut-pill{display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:500;color:var(--text-secondary);background:rgba(255,255,255,0.05);border:1px solid var(--border-subtle);padding:3px 7px;border-radius:100px;}
 .donut-pip{width:6px;height:6px;border-radius:50%;flex-shrink:0;box-shadow:0 0 5px currentColor;}
 
+#view-dashboard{display:flex;flex-direction:column;}
 #exam-command{
-  background:linear-gradient(135deg,rgba(139,124,248,0.12) 0%,rgba(60,130,255,0.08) 60%,rgba(52,211,153,0.06) 100%)!important;
-  border:1px solid rgba(139,124,248,0.28)!important;
+  order:-1;
+  margin-bottom:18px!important;
+  padding:22px 26px!important;
+  background:
+    radial-gradient(120% 150% at 100% 0%, rgba(139,124,248,0.20), transparent 55%),
+    linear-gradient(135deg,rgba(139,124,248,0.13) 0%,rgba(60,130,255,0.08) 60%,rgba(52,211,153,0.06) 100%)!important;
+  border:1px solid rgba(139,124,248,0.35)!important;
+  box-shadow:var(--shadow-card),0 0 50px rgba(139,124,248,0.10)!important;
 }
 #exam-command input[type="date"],#exam-command input[type="number"]{
   background:rgba(255,255,255,0.07)!important;border-color:rgba(139,124,248,0.28)!important;color:var(--accent-bright)!important;
@@ -1226,6 +1233,21 @@ body::after{
 .xp-fill {
   animation: xpShimmer 3s linear infinite, xpGlowPulse 2.5s ease-in-out infinite;
 }
+  /* ── PATCH 8: DEMOTE RING SUITE TO QUIET SECONDARY STRIP ── */
+.ring-suite{gap:10px;margin-bottom:18px;}
+.ring-card{
+  padding:12px 10px 11px;
+  background:rgba(255,255,255,0.025);
+  border-color:var(--border-subtle);
+  box-shadow:none;
+}
+.ring-card::before{display:none;}
+.ring-card .ring-label-top{font-size:8.5px;margin-bottom:7px;}
+.ring-card-svg{width:50px;height:50px;}
+.ring-card-svg svg{width:50px;height:50px;}
+.ring-card-val{font-size:12px;}
+.ring-card-desc{font-size:9.5px;margin-top:7px;opacity:0.72;}
+.ring-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.22);}
 </style>
 </head>
 <body>
@@ -1656,7 +1678,7 @@ body::after{
             <input type="date" id="exam-date-inp" onchange="saveExamSettings()" style="height:32px;font-size:12px;font-weight:600;font-family:inherit;padding:0 9px;border:1px solid rgba(139,124,248,0.35);border-radius:8px;background:rgba(255,255,255,0.07);color:var(--accent-bright);outline:none;cursor:pointer">
           </div>
           <div id="countdown-block" style="display:none;text-align:center">
-            <div style="font-family:'Fraunces',serif;font-size:36px;font-weight:800;color:var(--accent-bright);letter-spacing:-2px;line-height:1" id="days-left">--</div>
+            <div style="font-family:'Fraunces',serif;font-size:52px;font-weight:600;color:var(--accent-bright);letter-spacing:-2px;line-height:1" id="days-left">--</div>
             <div style="font-size:10.5px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em">days left</div>
           </div>
           <div id="hrs-needed-block" style="display:none;text-align:center">
@@ -2829,7 +2851,7 @@ function switchView(view){
     if(nav)nav.className="sb-item"+(v===view?" active":"");
     if(v===view){
       if(el){
-        el.style.display="block";
+        el.style.display=(v==="dashboard"?"flex":"block");
         el.classList.remove("view-enter");
         void el.offsetWidth;
         el.classList.add("view-enter");
