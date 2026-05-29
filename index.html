@@ -1409,6 +1409,74 @@ body{font-family:'Hanken Grotesk',system-ui,sans-serif !important;font-variant-n
   font-weight:600 !important;
   letter-spacing:-0.01em !important;
 }
+  /* ════ PART 2: PALETTE — navy surfaces, indigo used sparingly, lavender retired ════ */
+
+/* 1. Recolor the accent to the mock's calmer indigo + lift text dims for the darker surface */
+:root{
+  --accent:#878dff;
+  --accent-bright:#9ca2ff;
+  --green:#46c98f;
+  --text-secondary:rgba(255,255,255,0.70);
+  --text-tertiary:rgba(255,255,255,0.46);
+}
+
+/* 2. CARD SURFACES — solid navy gradient instead of translucent glass */
+.card, .kpi, .momentum-card, .banner{
+  background:linear-gradient(155deg,#151a26 0%,#1a2030 100%) !important;
+  border-color:rgba(255,255,255,0.06) !important;
+}
+.ring-card{ background:linear-gradient(155deg,#141823 0%,#181d29 100%) !important; }
+.card:hover, .kpi:hover{
+  background:linear-gradient(155deg,#171c2a 0%,#1e2538 100%) !important;
+  border-color:rgba(135,141,255,0.16) !important;
+}
+.momentum-card::before, .banner::before{
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.10),transparent) !important;
+}
+/* intel cards keep their positive/warning/negative tints; only the lavender "neutral" is retired */
+.intel-card.neutral{
+  background:rgba(255,255,255,0.04) !important;
+  border-color:rgba(255,255,255,0.08) !important;
+}
+
+/* 3. RETIRE THE LOUD LAVENDER CHROME */
+/* sidebar active item → neutral surface, one indigo edge + icon */
+.sb-item.active{
+  background:rgba(255,255,255,0.06) !important;
+  color:var(--text-primary) !important;
+  border-color:rgba(255,255,255,0.08) !important;
+  box-shadow:none !important;
+}
+.sb-item.active::before{ background:#878dff !important; box-shadow:none !important; }
+.sb-item.active .ti{ color:#878dff !important; }
+
+/* topbar streak chip → neutral instead of purple */
+.tb-chip.purple{
+  color:var(--text-secondary) !important;
+  background:rgba(255,255,255,0.05) !important;
+  border-color:rgba(255,255,255,0.10) !important;
+}
+
+/* exam progress bar + label → green/neutral */
+#exam-progress-bar{ background:linear-gradient(90deg,#2f8f6b,#46c98f) !important; }
+#exam-progress-pct{ color:var(--text-secondary) !important; }
+
+/* date / target inputs → neutral borders */
+#exam-command input[type="date"], #exam-command input[type="number"]{
+  border-color:rgba(255,255,255,0.12) !important;
+  color:rgba(255,255,255,0.92) !important;
+}
+
+/* KPI icon tiles → neutral white, no lavender wash or hover glow */
+.kpi-icon.violet,.kpi-icon.green,.kpi-icon.amber,.kpi-icon.rose{
+  background:rgba(255,255,255,0.05) !important;
+  color:rgba(255,255,255,0.55) !important;
+}
+.kpi:hover .kpi-icon{ box-shadow:none !important; transform:scale(1.08) !important; }
+
+/* primary CTA (Add session) → calm solid indigo, no shimmer */
+.log-btn{ background:#878dff !important; box-shadow:none !important; animation:none !important; }
+.log-btn:hover{ background:#9ca2ff !important; box-shadow:none !important; }
 </style>
 </head>
 <body>
