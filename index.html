@@ -841,10 +841,6 @@ body::after{
   background:rgba(139,124,248,0.10);
   padding:1px 6px;border-radius:100px;
   border:1px solid rgba(139,124,248,0.16);
-
-  color:var(--text-secondary) !important;
-  background:rgba(255,255,255,0.05) !important;
-  border-color:rgba(255,255,255,0.10) !important;
 }
 .sb-topic-track{
   height:2px;
@@ -1481,6 +1477,17 @@ body{font-family:'Hanken Grotesk',system-ui,sans-serif !important;font-variant-n
 /* primary CTA (Add session) → calm solid indigo, no shimmer */
 .log-btn{ background:#878dff !important; box-shadow:none !important; animation:none !important; }
 .log-btn:hover{ background:#9ca2ff !important; box-shadow:none !important; }
+  /* Render native date/number pickers + selects in dark mode to match the app */
+input[type="date"], input[type="number"], select{
+  color-scheme: dark;
+  accent-color: #878dff;
+}
+  /* mop-up: neutralize the sidebar topic-hours pills */
+.sb-topic-hours{
+  color:var(--text-secondary) !important;
+  background:rgba(255,255,255,0.05) !important;
+  border-color:rgba(255,255,255,0.10) !important;
+}
 </style>
 </head>
 <body>
