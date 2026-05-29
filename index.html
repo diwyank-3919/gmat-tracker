@@ -1328,6 +1328,27 @@ body::before{
 }
 .ec-stat{font-family:'Clash Display',sans-serif;font-size:26px;font-weight:800;letter-spacing:-1px;line-height:1;color:var(--text-primary);}
 .ec-stat.ec-green{color:#5fd9a8;}
+  /* ── UNIFY KPI COLOR LANGUAGE WITH THE HERO ── */
+/* Headline numbers: luminous white, like the "62" */
+.kpi-value{
+  background:linear-gradient(180deg,#ffffff 30%,#d8d3f1);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+/* On-target / positive: the same calm green as "projected total" */
+.kpi-value.met{
+  background:none;-webkit-text-fill-color:#5fd9a8;color:#5fd9a8;
+}
+/* Consistency hero — refined to echo the exam command center */
+.kpi.hero{
+  background:
+    radial-gradient(130% 140% at 100% 0%, rgba(139,124,248,0.14), transparent 55%),
+    radial-gradient(120% 130% at 0% 110%, rgba(52,211,153,0.06), transparent 52%),
+    linear-gradient(135deg, rgba(26,24,46,0.60), rgba(15,15,24,0.45)) !important;
+  border-color:rgba(139,124,248,0.24) !important;
+}
+.kpi.hero .kpi-label{color:rgba(167,139,250,0.62) !important;}
+/* Labels: faint lavender small-caps to match the hero eyebrows */
+.kpi-label{color:rgba(167,139,250,0.46);letter-spacing:0.12em;}
 </style>
 </head>
 <body>
