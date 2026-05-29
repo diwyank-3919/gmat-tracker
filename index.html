@@ -1427,6 +1427,57 @@ body::after{
 
   <div class="content">
 <div id="view-dashboard" class="view-enter">
+      <!-- EXAM COMMAND CENTER -->
+    <div class="card" id="exam-command" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <div style="text-align:center">
+            <div style="font-size:10.5px;font-weight:700;color:var(--accent-bright);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">Exam date</div>
+            <input type="date" id="exam-date-inp" onchange="saveExamSettings()" style="height:32px;font-size:12px;font-weight:600;font-family:inherit;padding:0 9px;border:1px solid rgba(139,124,248,0.35);border-radius:8px;background:rgba(255,255,255,0.07);color:var(--accent-bright);outline:none;cursor:pointer">
+          </div>
+          <div id="exam-empty-prompt" style="display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:var(--accent-bright)">
+            <i class="ti ti-arrow-left" style="font-size:15px"></i>
+            Set your exam date to start the countdown
+          </div>
+          <div id="countdown-block" style="display:none;text-align:center">
+            <div style="font-family:'Fraunces',serif;font-size:52px;font-weight:600;color:var(--accent-bright);letter-spacing:-2px;line-height:1" id="days-left">--</div>
+            <div style="font-size:10.5px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em">days left</div>
+          </div>
+          <div id="hrs-needed-block" style="display:none;text-align:center">
+            <div style="font-family:'Clash Display',sans-serif;font-size:24px;font-weight:800;color:var(--accent-bright);letter-spacing:-1px;line-height:1" id="hrs-needed">--</div>
+            <div style="font-size:10.5px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em">hrs/day needed</div>
+          </div>
+          <div id="total-hrs-block" style="display:none;text-align:center">
+            <div style="font-family:'Clash Display',sans-serif;font-size:24px;font-weight:800;color:var(--accent-bright);letter-spacing:-1px;line-height:1" id="proj-total">--</div>
+            <div style="font-size:10.5px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em">projected total hrs</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div style="text-align:center">
+            <div style="font-size:10.5px;font-weight:700;color:var(--accent-bright);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">Target score</div>
+            <input type="number" id="target-score-inp" onchange="saveExamSettings()" min="200" max="805" placeholder="735" style="width:76px;height:32px;font-family:'Clash Display',sans-serif;font-size:18px;font-weight:800;padding:0 7px;border:1px solid rgba(139,124,248,0.35);border-radius:8px;background:rgba(255,255,255,0.07);color:var(--accent-bright);outline:none;text-align:center">
+          </div>
+          <div id="score-progress-block" style="display:none">
+            <div style="font-size:10.5px;font-weight:700;color:var(--accent-bright);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">Latest mock</div>
+            <div style="font-family:'Clash Display',sans-serif;font-size:24px;font-weight:800;color:var(--accent-bright);letter-spacing:-1px" id="latest-mock-display">--</div>
+          </div>
+          <div id="gap-block" style="display:none;text-align:center">
+            <div style="font-size:10.5px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">Gap to target</div>
+            <div style="font-family:'Clash Display',sans-serif;font-size:24px;font-weight:800;color:var(--red);letter-spacing:-1px" id="score-gap">--</div>
+          </div>
+        </div>
+      </div>
+      <div id="exam-progress-wrap" style="display:none;margin-top:13px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:500;color:var(--text-tertiary);margin-bottom:5px">
+          <span>25 Apr 2026 (start)</span>
+          <span id="exam-progress-pct" style="color:var(--accent-bright);font-weight:650">0% of prep done</span>
+          <span id="exam-date-label">Exam day</span>
+        </div>
+        <div style="height:5px;background:rgba(255,255,255,0.06);border-radius:100px;overflow:hidden">
+          <div id="exam-progress-bar" style="height:100%;border-radius:100px;background:linear-gradient(90deg,#7c3aed,#8b5cf6,#60a5fa);box-shadow:0 0 10px rgba(139,124,248,0.50);transition:width 0.6s ease;width:0%"></div>
+        </div>
+      </div>
+    </div>
 
     <!-- KPI ROW (enhanced with sparklines + deltas) -->
     <div class="kpi-row">
@@ -1666,54 +1717,6 @@ body::after{
       <div class="banner-body">
         <div class="banner-title" id="banner-title">Start your GMAT journey</div>
         <div class="banner-sub" id="banner-sub">Log your first session — weekday target 3h, weekend 6h</div>
-      </div>
-    </div>
-
-    <!-- EXAM COMMAND CENTER -->
-    <div class="card" id="exam-command" style="margin-bottom:14px">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-          <div style="text-align:center">
-            <div style="font-size:10.5px;font-weight:700;color:var(--accent-bright);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">Exam date</div>
-            <input type="date" id="exam-date-inp" onchange="saveExamSettings()" style="height:32px;font-size:12px;font-weight:600;font-family:inherit;padding:0 9px;border:1px solid rgba(139,124,248,0.35);border-radius:8px;background:rgba(255,255,255,0.07);color:var(--accent-bright);outline:none;cursor:pointer">
-          </div>
-          <div id="countdown-block" style="display:none;text-align:center">
-            <div style="font-family:'Fraunces',serif;font-size:52px;font-weight:600;color:var(--accent-bright);letter-spacing:-2px;line-height:1" id="days-left">--</div>
-            <div style="font-size:10.5px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em">days left</div>
-          </div>
-          <div id="hrs-needed-block" style="display:none;text-align:center">
-            <div style="font-family:'Clash Display',sans-serif;font-size:24px;font-weight:800;color:var(--accent-bright);letter-spacing:-1px;line-height:1" id="hrs-needed">--</div>
-            <div style="font-size:10.5px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em">hrs/day needed</div>
-          </div>
-          <div id="total-hrs-block" style="display:none;text-align:center">
-            <div style="font-family:'Clash Display',sans-serif;font-size:24px;font-weight:800;color:var(--accent-bright);letter-spacing:-1px;line-height:1" id="proj-total">--</div>
-            <div style="font-size:10.5px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em">projected total hrs</div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <div style="text-align:center">
-            <div style="font-size:10.5px;font-weight:700;color:var(--accent-bright);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">Target score</div>
-            <input type="number" id="target-score-inp" onchange="saveExamSettings()" min="200" max="805" placeholder="735" style="width:76px;height:32px;font-family:'Clash Display',sans-serif;font-size:18px;font-weight:800;padding:0 7px;border:1px solid rgba(139,124,248,0.35);border-radius:8px;background:rgba(255,255,255,0.07);color:var(--accent-bright);outline:none;text-align:center">
-          </div>
-          <div id="score-progress-block" style="display:none">
-            <div style="font-size:10.5px;font-weight:700;color:var(--accent-bright);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">Latest mock</div>
-            <div style="font-family:'Clash Display',sans-serif;font-size:24px;font-weight:800;color:var(--accent-bright);letter-spacing:-1px" id="latest-mock-display">--</div>
-          </div>
-          <div id="gap-block" style="display:none;text-align:center">
-            <div style="font-size:10.5px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">Gap to target</div>
-            <div style="font-family:'Clash Display',sans-serif;font-size:24px;font-weight:800;color:var(--red);letter-spacing:-1px" id="score-gap">--</div>
-          </div>
-        </div>
-      </div>
-      <div id="exam-progress-wrap" style="display:none;margin-top:13px">
-        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:500;color:var(--text-tertiary);margin-bottom:5px">
-          <span>25 Apr 2026 (start)</span>
-          <span id="exam-progress-pct" style="color:var(--accent-bright);font-weight:650">0% of prep done</span>
-          <span id="exam-date-label">Exam day</span>
-        </div>
-        <div style="height:5px;background:rgba(255,255,255,0.06);border-radius:100px;overflow:hidden">
-          <div id="exam-progress-bar" style="height:100%;border-radius:100px;background:linear-gradient(90deg,#7c3aed,#8b5cf6,#60a5fa);box-shadow:0 0 10px rgba(139,124,248,0.50);transition:width 0.6s ease;width:0%"></div>
-        </div>
       </div>
     </div>
 
@@ -3041,6 +3044,8 @@ function updateExamCountdown(){
   var examDateVal=document.getElementById("exam-date-inp").value;
   var show=!!examDateVal;
   ["countdown-block","hrs-needed-block","total-hrs-block","exam-progress-wrap"].forEach(function(id){document.getElementById(id).style.display=show?"block":"none";});
+  var promptEl=document.getElementById("exam-empty-prompt");
+  if(promptEl) promptEl.style.display=show?"none":"flex";
   if(!show) return;
   var examParts=examDateVal.split("-").map(Number);var examDate=new Date(examParts[0],examParts[1]-1,examParts[2]);
   var daysLeft=Math.max(0,Math.ceil((examDate-today)/(1000*60*60*24)));
