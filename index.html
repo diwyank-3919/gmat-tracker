@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@300,400,500,700,900&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
@@ -1362,6 +1363,38 @@ body::before{
   transform:scale(1.10) rotate(-4deg) !important;
   box-shadow:0 0 14px rgba(139,124,248,0.28) !important;
 }
+  /* ════ TYPE SYSTEM RESET — mock-aligned, kills the lavender ════ */
+body{font-family:'Hanken Grotesk',system-ui,sans-serif !important;font-variant-numeric:tabular-nums;}
+
+/* ONE number/title voice: Fraunces, gentle tracking */
+.kpi-value,.ec-stat,.ec-hero-num,.momentum-stat-val,.ring-card-val,
+.ring-text-val,.donut-center-val,.sb-today-val,.card-title{
+  font-family:'Fraunces',serif !important;
+  font-weight:600 !important;
+  letter-spacing:-0.01em !important;
+}
+/* kill the white→lavender gradient on the big numbers, go solid */
+.kpi-value,.momentum-stat-val{
+  background:none !important;-webkit-text-fill-color:currentColor !important;color:var(--text-primary) !important;
+}
+/* on-target / positive = a calmer green */
+.kpi-value.met{color:#46c98f !important;-webkit-text-fill-color:#46c98f !important;}
+.ec-stat.ec-green{color:#46c98f !important;}
+.momentum-stat-val.green{color:#46c98f !important;-webkit-text-fill-color:#46c98f !important;}
+.momentum-stat-val.amber{color:#f0bd6a !important;-webkit-text-fill-color:#f0bd6a !important;}
+
+/* sizes (no !important, so inline 22px/24px values stay smaller) */
+.kpi-value{font-size:30px;}
+.ec-stat{font-size:28px;}
+.card-title{font-size:15px;}
+
+/* labels: drop the lavender, calm faint, airy tracking */
+.kpi-label,.ec-eyebrow,.ring-label-top{color:rgba(255,255,255,0.42) !important;letter-spacing:0.13em !important;}
+
+/* breathing room — uncramp the cards */
+.kpi{padding:18px 20px 16px !important;}
+.kpi-top{margin-bottom:12px !important;}
+.kpi-footer{margin-top:8px !important;}
 </style>
 </head>
 <body>
