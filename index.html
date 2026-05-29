@@ -1488,6 +1488,8 @@ input[type="date"], input[type="number"], select{
   background:rgba(255,255,255,0.05) !important;
   border-color:rgba(255,255,255,0.10) !important;
 }
+  /* Let the session-log date picker escape its card's clipping */
+.main-grid > .card:first-child{ overflow:visible !important; }
 </style>
 </head>
 <body>
@@ -1675,7 +1677,11 @@ input[type="date"], input[type="number"], select{
         <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
           <div>
             <div class="ec-eyebrow" style="margin-top:0;margin-bottom:5px">Exam date</div>
-            <input type="date" id="exam-date-inp" onchange="saveExamSettings()" style="height:34px;font-size:12.5px;font-weight:600;font-family:inherit;padding:0 10px;border-radius:9px;outline:none;cursor:pointer">
+            <input type="hidden" id="exam-date-inp">
+              <div id="exam-date-display" onclick="openPicker({inputId:'exam-date-inp',textId:'exam-date-text',displayId:'exam-date-display',onSelect:saveExamSettings})" style="height:34px;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;padding:0 12px;border-radius:9px;cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.92);user-select:none">
+              <i class="ti ti-calendar" style="font-size:14px;color:var(--accent-bright)"></i>
+              <span id="exam-date-text">Select date</span>
+            </div>
           </div>
           <div id="exam-empty-prompt" style="display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:rgba(167,139,250,0.85)">
             <i class="ti ti-arrow-left" style="font-size:15px"></i>
@@ -1987,7 +1993,7 @@ input[type="date"], input[type="number"], select{
               </div>
               <button onclick="shiftDate(1)" title="Next day" style="width:32px;height:36px;flex-shrink:0;border:1px solid var(--border);border-radius:9px;background:rgba(255,255,255,0.05);color:var(--text-secondary);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(139,124,248,0.45)';this.style.color='var(--accent-bright)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'"><i class="ti ti-chevron-right"></i></button>
               <input type="hidden" id="inp-date">
-              <div id="custom-picker" style="display:none;position:absolute;top:calc(100% + 4px);left:32px;z-index:9999;background:rgba(15,12,26,0.97);backdrop-filter:blur(32px) saturate(200%);-webkit-backdrop-filter:blur(32px) saturate(200%);border:1px solid rgba(139,124,248,0.25);border-radius:13px;box-shadow:0 16px 48px rgba(0,0,0,0.60),0 0 0 1px rgba(139,124,248,0.10);padding:0;width:190px;overflow:hidden;font-family:'Satoshi',sans-serif">
+              <div id="custom-picker" style="display:none;position:fixed;top:0;left:0;z-index:9999;background:rgba(15,12,26,0.97);backdrop-filter:blur(32px) saturate(200%);-webkit-backdrop-filter:blur(32px) saturate(200%);border:1px solid rgba(139,124,248,0.25);border-radius:13px;box-shadow:0 16px 48px rgba(0,0,0,0.60),0 0 0 1px rgba(139,124,248,0.10);padding:0;width:190px;overflow:hidden;font-family:'Satoshi',sans-serif">
                 <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 8px 5px">
                   <button onclick="pickerNav(-1)" style="width:24px;height:24px;border:none;border-radius:6px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);font-size:12px;transition:all 0.1s" onmouseover="this.style.background='rgba(139,124,248,0.15)';this.style.color='var(--accent-bright)'" onmouseout="this.style.background='transparent';this.style.color='var(--text-tertiary)'"><i class="ti ti-chevron-left"></i></button>
                   <div id="picker-month-year" style="font-size:12px;font-weight:700;color:var(--text-primary);letter-spacing:-0.2px"></div>
@@ -2154,7 +2160,13 @@ input[type="date"], input[type="number"], select{
     <div style="font-size:17px;font-weight:750;color:var(--text-primary);margin-bottom:4px">Log mock score</div>
     <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:18px">Record your GMAT practice test result</div>
     <div style="display:flex;flex-direction:column;gap:11px">
-      <div class="field"><label>Date</label><input type="date" id="mock-date-inp"></div>
+      <div class="field"><label>Date</label>
+        <input type="hidden" id="mock-date-inp">
+        <div id="mock-date-display" onclick="openPicker({inputId:'mock-date-inp',textId:'mock-date-text',displayId:'mock-date-display'})" style="height:36px;display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:0 11px;border-radius:9px;cursor:pointer;background:var(--bg-input);border:1px solid var(--border);color:var(--text-primary);user-select:none">
+          <i class="ti ti-calendar" style="font-size:14px;color:var(--accent-bright)"></i>
+          <span id="mock-date-text">Select date</span>
+        </div>
+      </div>
       <div class="field"><label>Total score</label><input type="number" id="mock-score-inp" min="200" max="805" placeholder="e.g. 645" style="font-size:22px;font-weight:700;text-align:center;color:var(--accent-bright)"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
         <div class="field"><label>Quant score</label><input type="number" id="mock-quant-inp" min="60" max="90" placeholder="e.g. 72"></div>
@@ -2590,22 +2602,63 @@ function getRangeLabel(){
   return "All time";
 }
 
-// ── DATE PICKER ──
+// ── DATE PICKER (generalized — drives all date fields, body-mounted, never clips) ──
 var pickerOffset=0;
+var pickerTarget=null; // {inputId,textId,displayId,onSelect}
+
 function getPickerRef(){return new Date(today.getFullYear(),today.getMonth()+pickerOffset,1);}
+
+function setDateDisplay(inputId,textId){
+  var inp=document.getElementById(inputId),txt=document.getElementById(textId);
+  if(!inp||!txt) return;
+  if(!inp.value){txt.textContent="Select date";return;}
+  var parts=inp.value.split("-").map(Number);var d=new Date(parts[0],parts[1]-1,parts[2]);
+  var isToday=inp.value===dateStr(today),isYest=inp.value===dateStr(addDays(today,-1));
+  txt.textContent=isToday?"Today":isYest?"Yesterday":d.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+}
+
+function openPicker(target){
+  pickerTarget=target;
+  var p=document.getElementById("custom-picker");
+  if(p.parentNode!==document.body) document.body.appendChild(p); // escape any card/modal clipping
+  var inp=document.getElementById(target.inputId);
+  if(inp&&inp.value){var parts=inp.value.split("-").map(Number);var sel=new Date(parts[0],parts[1]-1,1);pickerOffset=(sel.getFullYear()-today.getFullYear())*12+(sel.getMonth()-today.getMonth());}
+  else{pickerOffset=0;}
+  renderPicker();
+  p.style.display="block";
+  positionPicker();
+  setTimeout(function(){document.addEventListener("click",pickerOutside,true);},0);
+}
+
+function positionPicker(){
+  var p=document.getElementById("custom-picker");
+  if(!pickerTarget) return;
+  var a=document.getElementById(pickerTarget.displayId); if(!a) return;
+  var r=a.getBoundingClientRect();
+  var pw=p.offsetWidth||190,ph=p.offsetHeight||260;
+  var left=r.left,top=r.bottom+6;
+  if(left+pw>window.innerWidth-8) left=window.innerWidth-pw-8;
+  if(left<8) left=8;
+  if(top+ph>window.innerHeight-8) top=Math.max(8,r.top-ph-6);
+  p.style.left=left+"px"; p.style.top=top+"px";
+}
+
+// session-log field keeps its inline onclick="togglePicker()"
 function togglePicker(){
   var p=document.getElementById("custom-picker");
-  if(p.style.display==="none"){
-    var inp=document.getElementById("inp-date");
-    if(inp.value){var parts=inp.value.split("-").map(Number);var sel=new Date(parts[0],parts[1]-1,1);pickerOffset=(sel.getFullYear()-today.getFullYear())*12+(sel.getMonth()-today.getMonth());}
-    else{pickerOffset=0;}
-    renderPicker(); p.style.display="block";
-    setTimeout(function(){document.addEventListener("click",pickerOutside,true);},0);
-  } else {closePicker();}
+  var openForSession=p.style.display!=="none"&&pickerTarget&&pickerTarget.inputId==="inp-date";
+  if(openForSession) closePicker();
+  else openPicker({inputId:"inp-date",textId:"date-display-text",displayId:"date-display"});
 }
-function pickerOutside(e){var p=document.getElementById("custom-picker");var d=document.getElementById("date-display");if(p&&!p.contains(e.target)&&d&&!d.contains(e.target)){closePicker();}}
-function closePicker(){document.getElementById("custom-picker").style.display="none";document.removeEventListener("click",pickerOutside,true);}
-function pickerNav(n){pickerOffset+=n;renderPicker();}
+
+function pickerOutside(e){
+  var p=document.getElementById("custom-picker");
+  var d=pickerTarget?document.getElementById(pickerTarget.displayId):null;
+  if(p&&!p.contains(e.target)&&(!d||!d.contains(e.target))) closePicker();
+}
+function closePicker(){var p=document.getElementById("custom-picker");if(p)p.style.display="none";document.removeEventListener("click",pickerOutside,true);pickerTarget=null;}
+function pickerNav(n){pickerOffset+=n;renderPicker();positionPicker();}
+
 function renderPicker(){
   var ref=getPickerRef();
   document.getElementById("picker-month-year").textContent=ref.toLocaleDateString("en-IN",{month:"long",year:"numeric"});
@@ -2613,37 +2666,38 @@ function renderPicker(){
   var days=new Date(ref.getFullYear(),ref.getMonth()+1,0).getDate();
   var first=new Date(ref.getFullYear(),ref.getMonth(),1);
   var pad=(first.getDay()+6)%7;
-  var sel=document.getElementById("inp-date").value;
+  var sel=pickerTarget?(document.getElementById(pickerTarget.inputId)||{}).value:"";
   var todayStr=dateStr(today);
   for(var i=0;i<pad;i++){var blank=document.createElement("div");grid.appendChild(blank);}
   for(var day=1;day<=days;day++){
     var d=new Date(ref.getFullYear(),ref.getMonth(),day);
     var ds=dateStr(d);
-    var isToday=ds===todayStr; var isSel=ds===sel; var isWEnd=d.getDay()===0||d.getDay()===6;
+    var isToday=ds===todayStr, isSel=ds===sel, isWEnd=d.getDay()===0||d.getDay()===6;
     var hasSess=minsOn(ds)>0;
     var cell=document.createElement("div");
     cell.style.cssText="aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:background 0.1s;position:relative";
-    if(isSel){cell.style.background="linear-gradient(135deg,#7c3aed,#4f46e5)";}
-    else if(isToday){cell.style.background="rgba(139,124,248,0.16)";cell.style.outline="1.5px solid rgba(139,124,248,0.45)";}
+    if(isSel){cell.style.background="linear-gradient(135deg,#878dff,#6f76e8)";}
+    else if(isToday){cell.style.background="rgba(135,141,255,0.16)";cell.style.outline="1.5px solid rgba(135,141,255,0.45)";}
     else{cell.style.background="transparent";}
     var numEl=document.createElement("div");
-    numEl.style.cssText="font-size:10px;font-weight:"+(isSel||isToday?"700":"500")+";color:"+(isSel?"#fff":isToday?"var(--accent-bright)":isWEnd?"rgba(139,124,248,0.70)":"var(--text-secondary)");
+    numEl.style.cssText="font-size:10px;font-weight:"+(isSel||isToday?"700":"500")+";color:"+(isSel?"#fff":isToday?"var(--accent-bright)":isWEnd?"rgba(135,141,255,0.70)":"var(--text-secondary)");
     numEl.textContent=day; cell.appendChild(numEl);
     if(hasSess&&!isSel){var pip=document.createElement("div");pip.style.cssText="position:absolute;bottom:2px;width:3px;height:3px;border-radius:50%;background:"+(isToday?"var(--accent-bright)":"var(--green)");cell.appendChild(pip);}
-    cell.onmouseover=(function(el2,sel2){return function(){if(!sel2)el2.style.background="rgba(139,124,248,0.12)";};})(cell,isSel);
+    cell.onmouseover=(function(el2,sel2){return function(){if(!sel2)el2.style.background="rgba(135,141,255,0.12)";};})(cell,isSel);
     cell.onmouseout=(function(el2,sel2,t2){return function(){if(!sel2&&!t2)el2.style.background="transparent";};})(cell,isSel,isToday);
     cell.onclick=(function(ds2){return function(e){e.stopPropagation();pickerSelectDate(ds2);};})(ds);
     grid.appendChild(cell);
   }
 }
+
 function pickerSelectDate(ds){
-  document.getElementById("inp-date").value=ds;
-  var parts=ds.split("-").map(Number); var d=new Date(parts[0],parts[1]-1,parts[2]);
-  var isToday=ds===dateStr(today); var isYest=ds===dateStr(addDays(today,-1));
-  var label=isToday?"Today":isYest?"Yesterday":d.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
-  document.getElementById("date-display-text").textContent=label;
+  var t=pickerTarget||{inputId:"inp-date",textId:"date-display-text",displayId:"date-display"};
+  var inp=document.getElementById(t.inputId); if(inp) inp.value=ds;
+  setDateDisplay(t.inputId,t.textId);
   closePicker();
+  if(typeof t.onSelect==="function") t.onSelect();
 }
+
 function shiftDate(n){var inp=document.getElementById("inp-date");var cur=inp.value||dateStr(today);var parts=cur.split("-").map(Number);var d=new Date(parts[0],parts[1]-1,parts[2]);d.setDate(d.getDate()+n);pickerSelectDate(dateStr(d));}
 
 function addSession(){
@@ -3292,7 +3346,7 @@ function loadExamSettings(){
   var examDate=localStorage.getItem("gmat_exam_date")||"";
   var targetScore=parseInt(localStorage.getItem("gmat_target_score"))||735;
   TARGET_SCORE=targetScore;
-  document.getElementById("exam-date-inp").value=examDate;document.getElementById("target-score-inp").value=targetScore;
+  document.getElementById("exam-date-inp").value=examDate;document.getElementById("target-score-inp").value=targetScore;setDateDisplay("exam-date-inp","exam-date-text");
   updateExamCountdown();
 }
 function updateExamCountdown(){
@@ -3324,7 +3378,7 @@ var mockScores=JSON.parse(localStorage.getItem("gmat_mock_scores")||"[]");
 window.mockScores=mockScores;
 var mockChartInst=null;
 function saveMockScores(){localStorage.setItem("gmat_mock_scores",JSON.stringify(mockScores));}
-function openAddMock(){document.getElementById("mock-date-inp").value=dateStr(today);["mock-score-inp","mock-quant-inp","mock-verbal-inp","mock-notes-inp"].forEach(function(id){document.getElementById(id).value="";});document.getElementById("add-mock-modal").style.display="flex";}
+document.getElementById("mock-date-inp").value=dateStr(today);setDateDisplay("mock-date-inp","mock-date-text");["mock-score-inp","mock-quant-inp","mock-verbal-inp","mock-notes-inp"].forEach(function(id){document.getElementById(id).value="";});document.getElementById("add-mock-modal").style.display="flex";}
 function closeAddMock(){document.getElementById("add-mock-modal").style.display="none";}
 function saveMock(){
   var date=document.getElementById("mock-date-inp").value;var score=parseInt(document.getElementById("mock-score-inp").value);
