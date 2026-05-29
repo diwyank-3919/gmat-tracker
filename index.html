@@ -1532,7 +1532,53 @@ input[type="date"], input[type="number"], select{
   padding:2px 4px 1px;margin-left:5px;
   vertical-align:middle;position:relative;top:-1px;
 }
-  
+  /* ════ PALETTE v2 — NAVY SURFACES (comment out this block to revert) ════ */
+:root{
+  --bg-base:#0d1018;
+  --bg-card:linear-gradient(180deg,#151a26,#1a2030);
+  --bg-card-hover:linear-gradient(180deg,#19202e,#1f2638);
+  --bg-card-strong:#1a2030;
+  --bg-input:rgba(255,255,255,0.05);
+  --bg-input-focus:rgba(255,255,255,0.09);
+  --border:rgba(255,255,255,0.065);
+  --border-subtle:rgba(255,255,255,0.045);
+  --border-strong:rgba(255,255,255,0.11);
+  --text-primary:#e9ebf2;
+  --text-secondary:#a3abbd;
+  --text-tertiary:#727b91;
+  --text-muted:#586075;
+  --accent:#878dff;
+  --accent-bright:#9aa0ff;
+}
+/* Primary surfaces: solid navy, not translucent glass */
+.card, .kpi, .ring-card{ background:var(--bg-card) !important; }
+.card:hover, .kpi:hover{ background:var(--bg-card-hover) !important; }
+.momentum-card, .banner{ background:linear-gradient(180deg,#161c2a,#1b2233) !important; border-color:var(--border) !important; }
+
+/* Chrome */
+.sidebar{ background:linear-gradient(180deg,#0f131d,#0d1018) !important; }
+.topbar{ background:rgba(13,16,24,0.82) !important; }
+.mob-header, .mob-drawer{ background:#0f131d !important; }
+
+/* Hero + Consistency hero: navy base, keep their glow */
+#exam-command{
+  background:
+    radial-gradient(130% 140% at 100% 0%, rgba(135,141,255,0.15), transparent 52%),
+    radial-gradient(120% 130% at 0% 110%, rgba(70,201,143,0.055), transparent 50%),
+    linear-gradient(165deg,#181f2e,#141a28) !important;
+}
+.kpi.hero{
+  background:
+    radial-gradient(130% 140% at 100% 0%, rgba(135,141,255,0.12), transparent 55%),
+    linear-gradient(165deg,#181f2e,#141a28) !important;
+}
+/* Calmer ambient depth */
+body::before{
+  background:
+    radial-gradient(900px 520px at 80% -8%, rgba(135,141,255,0.10), transparent 60%),
+    radial-gradient(720px 520px at 10% 6%, rgba(70,201,143,0.045), transparent 55%),
+    linear-gradient(180deg,#0d1018,#0b0e15) !important;
+}
 </style>
 </head>
 <body>
