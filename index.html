@@ -1300,6 +1300,27 @@ body::before{
 
 /* 9. Ease the fire-emoji glow */
 .streak-fire{filter:none !important;}
+  /* ── DEMOTE RING SUITE TO QUIET SECONDARY STRIP ── */
+.ring-suite{gap:10px !important;margin-bottom:18px !important;}
+.ring-card{
+  padding:12px 10px 11px !important;
+  background:rgba(255,255,255,0.025) !important;
+  border-color:var(--border-subtle) !important;
+  box-shadow:var(--shadow-card) !important;
+}
+.ring-card::before{display:none !important;}
+.ring-card .ring-label-top{font-size:8.5px !important;margin-bottom:7px !important;}
+.ring-card-svg{width:50px !important;height:50px !important;}
+.ring-card-svg svg{width:50px !important;height:50px !important;}
+.ring-card-val{font-size:12px !important;}
+.ring-card-desc{font-size:9.5px !important;margin-top:7px !important;opacity:0.72 !important;}
+.ring-card:hover{transform:translateY(-2px) !important;box-shadow:var(--shadow-card-hover) !important;}
+  /* Calm the "down" delta badges — gray instead of red */
+.kpi-delta.down{
+  color:var(--text-secondary) !important;
+  background:rgba(255,255,255,0.04) !important;
+  border-color:rgba(255,255,255,0.10) !important;
+}
 </style>
 </head>
 <body>
@@ -2535,9 +2556,14 @@ function render(){
 
   ts=dateStr(today); tm=minsOn(ts); tt=targetFor(today);
   tpct=Math.min(100,Math.round(tm/tt*100)); tmet=tm>=tt&&tm>0;
-  document.getElementById("m-today").textContent=tm>0?fmtH(tm):"0m";
+  if(tm>0){
+    document.getElementById("m-today").textContent=fmtH(tm);
+    document.getElementById("m-today-sub").textContent="Target: "+(isWE(today)?"6h":"3h")+" - "+tpct+"% done";
+  }else{
+    document.getElementById("m-today").textContent="Ready";
+    document.getElementById("m-today-sub").textContent="Today's goal: "+(isWE(today)?"6h":"3h")+" — start when you are";
+  }
   document.getElementById("m-today").className="kpi-value"+(tmet?" met":"");
-  document.getElementById("m-today-sub").textContent="Target: "+(isWE(today)?"6h":"3h")+" - "+tpct+"% done";
   document.getElementById("today-bar").style.width=tpct+"%";
   document.getElementById("sb-today-val").textContent=tm>0?fmtH(tm):"0m";
   document.getElementById("sb-today-sub").textContent="of "+(isWE(today)?"6h":"3h")+" target";
@@ -3255,8 +3281,8 @@ render=function(){
   }
   function animateEl(id, isTime, refText, duration){
     var el=document.getElementById(id); if(!el) return;
-    var target=parseMinutes(refText||el.textContent);
-    if(!target) return;
+   var target=parseMinutes(refText||el.textContent);
+    if(!target){el.textContent=refText;return;}
     var start=null;
     function step(ts){
       if(!start) start=ts;
