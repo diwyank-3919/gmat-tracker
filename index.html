@@ -1583,6 +1583,33 @@ body::before{
     radial-gradient(720px 520px at 10% 6%, rgba(70,201,143,0.045), transparent 55%),
     linear-gradient(180deg,#0d1018,#0b0e15) !important;
 }
+  /* ── SESSION TIMER ── */
+.timer-panel{
+  background:linear-gradient(160deg, rgba(135,141,255,0.08), rgba(70,201,143,0.04));
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:14px; padding:15px 16px 14px; margin-bottom:14px;
+}
+.timer-head{display:flex;align-items:center;justify-content:space-between;}
+.timer-label{font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.5);display:flex;align-items:center;gap:6px;}
+.timer-label .ti{font-size:14px;color:var(--accent-bright);}
+.timer-status{font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:100px;color:var(--text-tertiary);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);}
+.timer-status.running{color:#5fd9a8;background:rgba(70,201,143,0.12);border-color:rgba(70,201,143,0.30);}
+.timer-status.paused{color:var(--amber);background:rgba(240,189,106,0.12);border-color:rgba(240,189,106,0.30);}
+.timer-display{font-family:'Fraunces',serif;font-weight:600;font-size:40px;letter-spacing:-0.01em;line-height:1;color:var(--text-primary);font-variant-numeric:tabular-nums;margin:8px 0 14px;}
+.timer-display.running{color:#fff;}
+.timer-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.timer-select{height:36px;flex:1;min-width:110px;font-size:13px;font-family:'Hanken Grotesk',sans-serif;font-weight:500;padding:0 30px 0 11px;border:1px solid var(--border);border-radius:9px;background:var(--bg-input);color:var(--text-primary);outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.35)' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;}
+.timer-select:disabled{opacity:0.6;cursor:not-allowed;}
+.timer-btn{height:36px;padding:0 14px;border:none;border-radius:9px;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-size:13px;font-weight:650;display:inline-flex;align-items:center;gap:6px;transition:filter .15s,transform .1s;color:#fff;}
+.timer-btn .ti{font-size:15px;}
+.timer-btn.primary{background:#878dff;}
+.timer-btn.stop{background:#46c98f;color:#0f1118;}
+.timer-btn:not(.ghost):hover{filter:brightness(1.08);}
+.timer-btn:active{transform:scale(0.97);}
+.timer-btn.ghost{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text-secondary);padding:0 11px;}
+.timer-btn.ghost:hover{background:rgba(251,113,133,0.12);color:var(--red);border-color:rgba(251,113,133,0.25);}
+.timer-divider{display:flex;align-items:center;gap:10px;margin-bottom:12px;color:var(--text-muted);font-size:10.5px;}
+.timer-divider::before,.timer-divider::after{content:"";flex:1;height:1px;background:rgba(255,255,255,0.07);}
 </style>
 </head>
 <body>
@@ -2072,9 +2099,26 @@ body::before{
     <!-- LOG + SESSIONS -->
     <div class="main-grid">
       <div class="card">
-        <div class="card-head">
+       <div class="card-head">
           <div class="card-title"><i class="ti ti-plus-circle"></i> Log a session</div>
         </div>
+        <div class="timer-panel" id="timer-panel">
+          <div class="timer-head">
+            <div class="timer-label"><i class="ti ti-stopwatch"></i> Timed session</div>
+            <span class="timer-status" id="timer-status">Idle</span>
+          </div>
+          <div class="timer-display" id="timer-display">00:00:00</div>
+          <div class="timer-controls">
+            <select id="timer-topic" class="timer-select">
+              <option>Quant</option><option>RC</option><option>CR</option><option>DI</option><option>Mock test</option><option>Review</option>
+            </select>
+            <button id="timer-start-btn" class="timer-btn primary" onclick="timerStart()"><i class="ti ti-player-play"></i> Start</button>
+            <button id="timer-pause-btn" class="timer-btn" onclick="timerPause()" style="display:none;background:rgba(255,255,255,0.08)"><i class="ti ti-player-pause"></i> Pause</button>
+            <button id="timer-stop-btn" class="timer-btn stop" onclick="timerStop()" style="display:none"><i class="ti ti-check"></i> Save</button>
+            <button id="timer-discard-btn" class="timer-btn ghost" onclick="timerDiscard()" style="display:none" title="Discard"><i class="ti ti-x"></i></button>
+          </div>
+        </div>
+        <div class="timer-divider"><span>or log manually</span></div>
         <div class="form-grid">
           <div class="field">
             <label>Date</label>
@@ -3703,6 +3747,43 @@ render=function(){
     if(p && p.style.display!=="none") closePicker();
   },true);
 });
+  // ── SESSION TIMER ──
+(function(){
+  var TKEY="perfos_timer", tickInt=null;
+  var state={running:false,topic:"Quant",startedAt:null,accMs:0};
+  function persist(){localStorage.setItem(TKEY,JSON.stringify(state));}
+  function clear(){state={running:false,topic:state.topic||"Quant",startedAt:null,accMs:0};localStorage.removeItem(TKEY);}
+  function elapsedMs(){var e=state.accMs||0;if(state.running&&state.startedAt)e+=Date.now()-state.startedAt;return e;}
+  function fmtClock(ms){var t=Math.floor(ms/1000),h=Math.floor(t/3600),m=Math.floor((t%3600)/60),s=t%60;function p(n){return String(n).padStart(2,"0");}return p(h)+":"+p(m)+":"+p(s);}
+  function startTick(){if(!tickInt)tickInt=setInterval(paint,500);}
+  function stopTick(){if(tickInt){clearInterval(tickInt);tickInt=null;}}
+  function paint(){
+    var active=state.running||state.accMs>0;
+    var disp=document.getElementById("timer-display"); if(disp){disp.textContent=fmtClock(elapsedMs());disp.classList.toggle("running",state.running);}
+    var st=document.getElementById("timer-status"); if(st){st.textContent=state.running?"Recording":active?"Paused":"Idle";st.className="timer-status"+(state.running?" running":active?" paused":"");}
+    var sel=document.getElementById("timer-topic"); if(sel){sel.disabled=active;if(active)sel.value=state.topic;}
+    var sB=document.getElementById("timer-start-btn"),pB=document.getElementById("timer-pause-btn"),oB=document.getElementById("timer-stop-btn"),dB=document.getElementById("timer-discard-btn");
+    if(sB){sB.style.display=state.running?"none":"inline-flex";sB.innerHTML=(active&&!state.running)?'<i class="ti ti-player-play"></i> Resume':'<i class="ti ti-player-play"></i> Start';}
+    if(pB)pB.style.display=state.running?"inline-flex":"none";
+    if(oB)oB.style.display=active?"inline-flex":"none";
+    if(dB)dB.style.display=active?"inline-flex":"none";
+  }
+  window.timerStart=function(){var sel=document.getElementById("timer-topic");if(!state.running){if(state.accMs===0&&sel)state.topic=sel.value;state.running=true;state.startedAt=Date.now();persist();startTick();paint();}};
+  window.timerPause=function(){if(state.running){state.accMs=(state.accMs||0)+(Date.now()-state.startedAt);state.running=false;state.startedAt=null;persist();stopTick();paint();}};
+  window.timerDiscard=function(){if(!confirm("Discard this timed session?"))return;clear();stopTick();paint();};
+  window.timerStop=function(){
+    var mins=Math.round(elapsedMs()/60000);
+    if(mins<1){if(!confirm("Less than a minute — log as 1 minute?"))return;mins=1;}
+    var topic=state.topic||"Quant",btn=document.getElementById("timer-stop-btn");
+    if(btn)btn.disabled=true; setStatus("saving");
+    supa.from("sessions").insert({date:dateStr(today),topic:topic,mins:mins,created_at:Date.now()})
+      .then(function(res){if(res.error)throw res.error;clear();stopTick();paint();if(btn)btn.disabled=false;if(typeof showToast==="function")showToast("⏱️","Session logged!",fmtH(mins)+" of "+topic+" added.");loadSessions();})
+      .catch(function(err){setStatus("error");alert("Save failed: "+(err.message||JSON.stringify(err)));if(btn)btn.disabled=false;});
+  };
+  try{var s=JSON.parse(localStorage.getItem(TKEY));if(s&&typeof s==="object")state=s;}catch(e){}
+  if(state.running)startTick();
+  paint();
+})();
 
 loadSessions();
 checkLocalMigration();
