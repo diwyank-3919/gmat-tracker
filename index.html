@@ -1395,6 +1395,20 @@ body{font-family:'Hanken Grotesk',system-ui,sans-serif !important;font-variant-n
 .kpi{padding:18px 20px 16px !important;}
 .kpi-top{margin-bottom:12px !important;}
 .kpi-footer{margin-top:8px !important;}
+  /* ── LEAK SWEEP: finish the two-font system + calm the consistency label ── */
+
+/* 1. Consistency hero label — the last lavender label, to faint white like the rest */
+.kpi.hero .kpi-label{ color:rgba(255,255,255,0.42) !important; }
+
+/* 2. Pull the remaining Clash Display headers/brand into Fraunces (kills the 3rd font) */
+.topbar-title,
+.sb-logo-name,
+.mob-logo-name,
+[style*="Clash Display"]{
+  font-family:'Fraunces',serif !important;
+  font-weight:600 !important;
+  letter-spacing:-0.01em !important;
+}
 </style>
 </head>
 <body>
