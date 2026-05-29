@@ -3378,7 +3378,7 @@ var mockScores=JSON.parse(localStorage.getItem("gmat_mock_scores")||"[]");
 window.mockScores=mockScores;
 var mockChartInst=null;
 function saveMockScores(){localStorage.setItem("gmat_mock_scores",JSON.stringify(mockScores));}
-document.getElementById("mock-date-inp").value=dateStr(today);setDateDisplay("mock-date-inp","mock-date-text");["mock-score-inp","mock-quant-inp","mock-verbal-inp","mock-notes-inp"].forEach(function(id){document.getElementById(id).value="";});document.getElementById("add-mock-modal").style.display="flex";}
+function openAddMock(){document.getElementById("mock-date-inp").value=dateStr(today);setDateDisplay("mock-date-inp","mock-date-text");["mock-score-inp","mock-quant-inp","mock-verbal-inp","mock-notes-inp"].forEach(function(id){document.getElementById(id).value="";});document.getElementById("add-mock-modal").style.display="flex";}
 function closeAddMock(){document.getElementById("add-mock-modal").style.display="none";}
 function saveMock(){
   var date=document.getElementById("mock-date-inp").value;var score=parseInt(document.getElementById("mock-score-inp").value);
