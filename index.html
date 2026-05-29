@@ -1248,6 +1248,58 @@ body::after{
 .ring-card-val{font-size:12px;}
 .ring-card-desc{font-size:9.5px;margin-top:7px;opacity:0.72;}
 .ring-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.22);}
+  /* ════ GRADING: CALM PASS — comment out this whole block to revert ════ */
+
+/* 1. Desaturate + deepen the base; flatten the default card shadow */
+:root{
+  --bg-base:#0c0e15;
+  --shadow-card:0 1px 0 rgba(255,255,255,0.05) inset, 0 6px 24px rgba(0,0,0,0.35);
+  --shadow-card-hover:0 1px 0 rgba(255,255,255,0.08) inset, 0 14px 40px rgba(0,0,0,0.45);
+}
+
+/* 2. Calm the ambient background glows + neutralise the purple cast */
+body::before{
+  background:
+    radial-gradient(ellipse 70% 55% at 82% 6%, rgba(120,90,230,0.07) 0%, transparent 58%),
+    radial-gradient(ellipse 60% 50% at 8% 88%, rgba(40,180,130,0.035) 0%, transparent 55%),
+    linear-gradient(160deg, #0b0d14 0%, #0d1019 50%, #0b0d14 100%) !important;
+}
+.sidebar{background:rgba(9,11,17,0.90) !important;}
+.topbar{background:rgba(9,11,17,0.75) !important;}
+
+/* 3. Remove the liquid-glass bloom layer + flatten all card shadows */
+.card::after, .kpi::after{display:none !important;}
+.card, .kpi, .ring-card, .momentum-card, .intel-card{box-shadow:var(--shadow-card) !important;}
+.card:hover, .kpi:hover{box-shadow:var(--shadow-card-hover) !important;backdrop-filter:blur(24px) saturate(160%) !important;}
+
+/* 4. Kill the big neon halos */
+.kpi.hero, .kpi.hero:hover{box-shadow:var(--shadow-card-hover) !important;}
+.momentum-card{box-shadow:var(--shadow-card) !important;}
+.momentum-card::after{display:none !important;}
+#exam-command{box-shadow:var(--shadow-card) !important;}
+
+/* 5. Quiet the per-ring coloured hover glows */
+.ring-card:nth-child(1):hover,
+.ring-card:nth-child(2):hover,
+.ring-card:nth-child(3):hover,
+.ring-card:nth-child(4):hover{box-shadow:var(--shadow-card-hover) !important;}
+
+/* 6. Drop the tiny currentColor glows scattered around */
+.sb-topic-fill, .t-fill, .cal-pip, .sess-color{box-shadow:none !important;}
+
+/* 7. Stop the XP bar shimmer/pulse — keep the grow-in, lose the neon */
+.xp-fill{
+  animation:barGrow 1.4s cubic-bezier(.4,0,.2,1) 0.6s both !important;
+  background:linear-gradient(90deg, var(--green-bright), var(--green)) !important;
+  box-shadow:none !important;
+}
+
+/* 8. Soften sidebar active/hover glow */
+.sb-item.active{box-shadow:0 0 0 1px rgba(139,124,248,0.25), inset 0 1px 0 rgba(139,124,248,0.12) !important;}
+.sb-item:hover{box-shadow:none !important;}
+
+/* 9. Ease the fire-emoji glow */
+.streak-fire{filter:none !important;}
 </style>
 </head>
 <body>
