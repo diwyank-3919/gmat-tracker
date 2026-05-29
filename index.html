@@ -3836,6 +3836,72 @@ loadExamSettings();
     </div>
   </div>
 </div>
+  <!-- ── PREMIUM TOOLTIP ENGINE ── -->
+<style>
+#perfos-tip{
+  position:fixed; z-index:99999; pointer-events:none;
+  background:linear-gradient(155deg,#1a2030,#141823);
+  border:1px solid rgba(255,255,255,0.10); border-radius:10px;
+  padding:7px 11px; white-space:nowrap;
+  font-family:'Hanken Grotesk',system-ui,sans-serif; font-size:12px; font-weight:500;
+  color:#e9ebf2; font-variant-numeric:tabular-nums;
+  box-shadow:0 10px 30px rgba(0,0,0,0.50), 0 0 0 1px rgba(135,141,255,0.10), inset 0 1px 0 rgba(255,255,255,0.06);
+  backdrop-filter:blur(20px) saturate(160%); -webkit-backdrop-filter:blur(20px) saturate(160%);
+  opacity:0; transform:translateY(4px) scale(0.96);
+  transition:opacity .16s ease, transform .16s cubic-bezier(.34,1.56,.64,1);
+}
+#perfos-tip.show{opacity:1; transform:translateY(0) scale(1);}
+#perfos-tip::after{
+  content:''; position:absolute; left:50%; width:8px; height:8px; background:#141823;
+  border-right:1px solid rgba(255,255,255,0.10); border-bottom:1px solid rgba(255,255,255,0.10);
+}
+#perfos-tip.above::after{ bottom:-4px; transform:translateX(-50%) rotate(45deg); }
+#perfos-tip.below::after{ top:-4px;   transform:translateX(-50%) rotate(225deg); }
+#perfos-tip .tip-val{ font-family:'Fraunces',serif; font-weight:600; color:#fff; }
+#perfos-tip .tip-date{ color:rgba(255,255,255,0.55); margin-right:7px; }
+</style>
+<script>
+(function(){
+  var tip=document.createElement("div"); tip.id="perfos-tip";
+  function mount(){ if(document.body && !document.body.contains(tip)) document.body.appendChild(tip); }
+  if(document.body) mount(); else document.addEventListener("DOMContentLoaded",mount);
+  var active=null;
+
+  function prettify(raw){
+    var parts=raw.split(/\s[-—]\s/), datePart=parts[0], rest=parts.slice(1).join(" · ");
+    var m=datePart.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if(m){ var d=new Date(+m[1],+m[2]-1,+m[3]); datePart=d.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"}); }
+    return rest
+      ? '<span class="tip-date">'+datePart+'</span><span class="tip-val">'+rest+'</span>'
+      : '<span>'+datePart+'</span>';
+  }
+  function position(el){
+    var r=el.getBoundingClientRect(), tw=tip.offsetWidth, th=tip.offsetHeight, gap=9;
+    var left=r.left+r.width/2-tw/2, top=r.top-th-gap;
+    tip.classList.remove("below"); tip.classList.add("above");
+    if(top<8){ top=r.bottom+gap; tip.classList.remove("above"); tip.classList.add("below"); }
+    tip.style.left=Math.max(8,Math.min(left,window.innerWidth-tw-8))+"px";
+    tip.style.top=top+"px";
+  }
+  function show(el){
+    if(el.hasAttribute("title")){ el.setAttribute("data-tip",el.getAttribute("title")); el.removeAttribute("title"); }
+    var raw=el.getAttribute("data-tip"); if(!raw) return;
+    active=el; mount(); tip.innerHTML=prettify(raw); tip.classList.add("show"); position(el);
+  }
+  function hide(){ tip.classList.remove("show"); active=null; }
+
+  document.addEventListener("mouseover",function(e){
+    var el=e.target.closest("[title],[data-tip]"); if(el) show(el);
+  });
+  document.addEventListener("mouseout",function(e){
+    if(!active) return;
+    var to=e.relatedTarget; if(to && (active===to || active.contains(to))) return;
+    hide();
+  });
+  window.addEventListener("scroll",hide,true);
+  window.addEventListener("resize",hide,true);
+})();
+</script>
 
 </body>
 </html>
