@@ -1349,6 +1349,19 @@ body::before{
 .kpi.hero .kpi-label{color:rgba(167,139,250,0.62) !important;}
 /* Labels: faint lavender small-caps to match the hero eyebrows */
 .kpi-label{color:rgba(167,139,250,0.46);letter-spacing:0.12em;}
+  /* ── UNIFY KPI ICON TILES — one restrained lavender voice ── */
+.kpi-icon.violet,
+.kpi-icon.green,
+.kpi-icon.amber,
+.kpi-icon.rose{
+  background:rgba(255,255,255,0.05) !important;
+  color:rgba(167,139,250,0.82) !important;
+}
+/* Calm, uniform hover — no rainbow glow */
+.kpi:hover .kpi-icon{
+  transform:scale(1.10) rotate(-4deg) !important;
+  box-shadow:0 0 14px rgba(139,124,248,0.28) !important;
+}
 </style>
 </head>
 <body>
