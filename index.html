@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aditya Diwyank — GMAT Dashboard</title>
 <title>Performance OS — GMAT Prep</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='7' y1='23' x2='25' y2='7' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%238b7cf8'/%3E%3Cstop offset='1' stop-color='%235fd9a8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%2314141f'/%3E%3Cpath d='M7 22 C11 22 12 13 17 13 S23 10 25 7' fill='none' stroke='url(%23g)' stroke-width='2.6' stroke-linecap='round'/%3E%3Ccircle cx='25' cy='7' r='2.4' fill='%235fd9a8'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='32' y2='32' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%238b7cf8'/%3E%3Cstop offset='0.45' stop-color='%236f8cf0'/%3E%3Cstop offset='1' stop-color='%235fd9a8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='21' font-weight='600' fill='%230f1118' text-anchor='middle'%3EP%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@300,400,500,700,900&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
@@ -1491,18 +1491,34 @@ input[type="date"], input[type="number"], select{
 }
   /* Let the session-log date picker escape its card's clipping */
 .main-grid > .card:first-child{ overflow:visible !important; }
-  /* ── BRAND MARK — Performance OS ── */
+
+  /* ── BRAND MARK v2 — Performance OS monogram ── */
 .sb-logo-icon, .mob-logo-icon{
-  background:linear-gradient(140deg,#1b1830,#14171f) !important;
-  box-shadow:inset 0 0 0 1px rgba(139,124,248,0.30) !important;
-  position:relative;overflow:hidden;
+  background:linear-gradient(145deg,#8b7cf8 0%,#6f8cf0 45%,#5fd9a8 100%) !important;
+  box-shadow:0 6px 18px rgba(95,150,210,0.30) !important;
+  position:relative !important;overflow:hidden !important;
 }
 .sb-logo-icon i, .mob-logo-icon i{display:none !important;}
 .sb-logo-icon::after, .mob-logo-icon::after{
-  content:"";position:absolute;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='4' y1='20' x2='24' y2='6' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%238b7cf8'/%3E%3Cstop offset='1' stop-color='%235fd9a8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M4 19 C8 19 9 10 14 10 S20 7 24 5' fill='none' stroke='url(%23g)' stroke-width='2.6' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='5' r='2.3' fill='%235fd9a8'/%3E%3C/svg%3E");
-  background-size:62%;background-repeat:no-repeat;background-position:center;
+  content:"P" !important;
+  background-image:none !important;
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Fraunces',serif;font-weight:600;letter-spacing:-0.02em;
+  color:#0f1118;
 }
+.sb-logo-icon::after{font-size:24px;}
+.mob-logo-icon::after{font-size:20px;}
+
+
+  /* ── BRAND WORDMARK — Fraunces ── */
+.sb-logo-name, .mob-logo-name{
+  font-family:'Fraunces',serif !important;
+  font-weight:600 !important;
+  font-size:15px !important;
+  letter-spacing:-0.01em !important;
+  white-space:nowrap;
+}
+.sb-logo-sub{letter-spacing:0.05em;}
 </style>
 </head>
 <body>
