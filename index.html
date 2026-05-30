@@ -1791,69 +1791,62 @@ body::before{
 <div id="view-dashboard" class="view-enter">
       <!-- EXAM COMMAND CENTER -->
     <div class="card" id="exam-command" style="margin-bottom:14px">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
-
-        <!-- GROUP A: exam date + countdown -->
-        <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
-          <div>
-            <div class="ec-eyebrow" style="margin-top:0;margin-bottom:5px">Exam date</div>
-            <input type="hidden" id="exam-date-inp">
-              <div id="exam-date-display" onclick="openPicker({inputId:'exam-date-inp',textId:'exam-date-text',displayId:'exam-date-display',onSelect:saveExamSettings})" style="height:34px;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;padding:0 12px;border-radius:9px;cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.92);user-select:none">
-              <i class="ti ti-calendar" style="font-size:14px;color:var(--accent-bright)"></i>
-              <span id="exam-date-text">Select date</span>
-            </div>
-          </div>
-          <div id="exam-empty-prompt" style="display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:rgba(167,139,250,0.85)">
-            <i class="ti ti-arrow-left" style="font-size:15px"></i>
-            Set your exam date to start the countdown
-          </div>
-          <div id="countdown-block" style="display:none">
-            <div class="ec-hero-num" id="days-left">--</div>
-            <div class="ec-eyebrow">days left</div>
-          </div>
-        </div>
-
-        <!-- GROUP B: supporting stats -->
-        <div style="display:flex;align-items:center;gap:30px;flex-wrap:wrap">
-          <div id="hrs-needed-block" style="display:none">
-            <div class="ec-stat" id="hrs-needed">--</div>
-            <div class="ec-eyebrow">hrs/day needed</div>
-          </div>
-          <div id="total-hrs-block" style="display:none">
-            <div class="ec-stat ec-green" id="proj-total">--</div>
-            <div class="ec-eyebrow">projected total</div>
-          </div>
-        </div>
-
-        <!-- GROUP C: target + mock/gap -->
-        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-          <div id="score-progress-block" style="display:none;text-align:right">
-            <div class="ec-eyebrow" style="margin-top:0;margin-bottom:3px">Latest mock</div>
-            <div class="ec-stat" id="latest-mock-display">--</div>
-          </div>
-          <div id="gap-block" style="display:none;text-align:right">
-            <div class="ec-eyebrow" style="margin-top:0;margin-bottom:3px;color:rgba(240,189,106,0.70)">Gap to target</div>
-            <div class="ec-stat" style="color:var(--amber)" id="score-gap">--</div>
-          </div>
-          <div style="text-align:right">
-            <div class="ec-eyebrow" style="margin-top:0;margin-bottom:5px">Target score</div>
-            <input type="number" id="target-score-inp" onchange="saveExamSettings()" min="200" max="805" placeholder="735" style="width:84px;height:40px;font-family:'Fraunces',serif;font-size:22px;font-weight:600;padding:0 8px;border-radius:10px;outline:none;text-align:center">
-          </div>
+  <div class="ec-grid">
+    <!-- IDENTITY: date + days left -->
+    <div class="ec-identity">
+      <div class="ec-date-col">
+        <div class="ec-eyebrow">Exam date</div>
+        <input type="hidden" id="exam-date-inp">
+        <div id="exam-date-display" onclick="openPicker({inputId:'exam-date-inp',textId:'exam-date-text',displayId:'exam-date-display',onSelect:saveExamSettings})" class="ec-date-chip">
+          <i class="ti ti-calendar"></i><span id="exam-date-text">Select date</span>
         </div>
       </div>
-
-      <!-- progress -->
-      <div id="exam-progress-wrap" style="display:none;margin-top:18px">
-        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:500;color:var(--text-tertiary);margin-bottom:6px">
-          <span>25 Apr 2026 (start)</span>
-          <span id="exam-progress-pct" style="color:rgba(167,139,250,0.85);font-weight:650">0% of prep done</span>
-          <span id="exam-date-label">Exam day</span>
-        </div>
-        <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:100px;overflow:hidden">
-          <div id="exam-progress-bar" style="height:100%;border-radius:100px;background:linear-gradient(90deg,#8b7cf8,#5fd9a8);transition:width 0.6s ease;width:0%"></div>
-        </div>
+      <div id="exam-empty-prompt" class="ec-empty">
+        <i class="ti ti-arrow-left" style="font-size:15px"></i> Set your exam date to start the countdown
+      </div>
+      <div id="countdown-block" class="ec-hero" style="display:none">
+        <div class="ec-hero-num" id="days-left">--</div>
+        <div class="ec-eyebrow">days left</div>
       </div>
     </div>
+
+    <!-- STATS STRIP -->
+    <div class="ec-stats">
+      <div id="hrs-needed-block" class="ec-cell" style="display:none">
+        <div class="ec-cell-val" id="hrs-needed">--</div>
+        <div class="ec-eyebrow">hrs/day needed</div>
+      </div>
+      <div id="total-hrs-block" class="ec-cell" style="display:none">
+        <div class="ec-cell-val ec-green" id="proj-total">--</div>
+        <div class="ec-eyebrow">projected total</div>
+      </div>
+      <div id="score-progress-block" class="ec-cell" style="display:none">
+        <div class="ec-cell-val" id="latest-mock-display">--</div>
+        <div class="ec-eyebrow">latest mock</div>
+      </div>
+      <div id="gap-block" class="ec-cell" style="display:none">
+        <div class="ec-cell-val ec-amber" id="score-gap">--</div>
+        <div class="ec-eyebrow">gap to target</div>
+      </div>
+      <div class="ec-cell ec-target-cell">
+        <div class="ec-cell-val"><input type="number" id="target-score-inp" onchange="saveExamSettings()" min="200" max="805" placeholder="735"></div>
+        <div class="ec-eyebrow">target score</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- progress -->
+  <div id="exam-progress-wrap" style="display:none;margin-top:20px">
+    <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:500;color:var(--text-tertiary);margin-bottom:6px">
+      <span>25 Apr 2026 (start)</span>
+      <span id="exam-progress-pct" style="color:rgba(167,139,250,0.85);font-weight:650">0% of prep done</span>
+      <span id="exam-date-label">Exam day</span>
+    </div>
+    <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:100px;overflow:hidden">
+      <div id="exam-progress-bar" style="height:100%;border-radius:100px;background:linear-gradient(90deg,#8b7cf8,#5fd9a8);transition:width 0.6s ease;width:0%"></div>
+    </div>
+  </div>
+</div>
 
     <!-- KPI ROW (enhanced with sparklines + deltas) -->
     <div class="kpi-row">
@@ -3552,7 +3545,7 @@ function updateCommandCenter(){
     document.getElementById("score-progress-block").style.display="block";document.getElementById("gap-block").style.display="block";
     document.getElementById("latest-mock-display").textContent=latest;
     document.getElementById("score-gap").textContent=gap>0?"+"+gap:(gap===0?"On target!":"Exceeded!");
-    document.getElementById("score-gap").style.color=gap<=0?"var(--green)":"var(--red)";
+    document.getElementById("score-gap").style.color=gap<=0?"var(--green)":"#f0bd6a";
   } else {
     document.getElementById("score-progress-block").style.display="none";document.getElementById("gap-block").style.display="none";
   }
@@ -4112,6 +4105,31 @@ supa.auth.onAuthStateChange(function(event, session){
   if(document.readyState!=="loading") initAll(); else document.addEventListener("DOMContentLoaded",initAll);
 })();
 </script>
+  <style>
+.ec-grid{display:flex;align-items:stretch;gap:30px;flex-wrap:wrap}
+.ec-identity{display:flex;align-items:flex-end;gap:26px;padding-right:30px;border-right:1px solid var(--border-subtle)}
+.ec-date-col{display:flex;flex-direction:column;gap:7px}
+.ec-date-chip{height:36px;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;padding:0 13px;border-radius:9px;cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.92);user-select:none;transition:border-color .15s}
+.ec-date-chip:hover{border-color:rgba(135,141,255,0.45)}
+.ec-date-chip .ti{font-size:14px;color:var(--accent-bright)}
+.ec-hero{display:flex;flex-direction:column}
+.ec-empty{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:rgba(167,139,250,0.85);max-width:210px;line-height:1.3}
+.ec-stats{display:flex;align-items:flex-start;gap:34px;flex:1;flex-wrap:wrap;min-width:0}
+.ec-cell{display:flex;flex-direction:column;min-width:0}
+.ec-cell-val{height:42px;display:flex;align-items:center;font-family:'Fraunces',serif;font-weight:600;font-size:28px;line-height:1;letter-spacing:-0.01em;color:var(--text-primary)}
+.ec-cell-val.ec-green{color:#46c98f}
+.ec-cell-val.ec-amber{color:#f0bd6a}
+.ec-cell .ec-eyebrow,.ec-hero .ec-eyebrow{margin-top:8px}
+.ec-target-cell{margin-left:auto;text-align:right}
+.ec-target-cell .ec-cell-val{justify-content:flex-end}
+.ec-target-cell input{width:96px;height:42px;font-family:'Fraunces',serif;font-size:24px;font-weight:600;text-align:center;padding:0 8px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.92);outline:none}
+.ec-target-cell input:focus{border-color:var(--border-accent);box-shadow:0 0 0 3px rgba(135,141,255,0.14)}
+@media(max-width:760px){
+  .ec-identity{border-right:none;padding-right:0;width:100%}
+  .ec-stats{gap:24px}
+  .ec-target-cell{margin-left:0}
+}
+</style>
 
 </body>
 </html>
