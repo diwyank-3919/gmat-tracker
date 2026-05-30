@@ -4005,6 +4005,41 @@ supa.auth.onAuthStateChange(function(event, session){
   }
   if(document.body) load(); else document.addEventListener("DOMContentLoaded",load);
 })();
+  <script>
+(function(){
+  var firstName = "", fullName = "";
+  function applyTitle(){
+    var el = document.querySelector(".topbar-title");
+    if(el && firstName) el.textContent = firstName + "'s Dashboard";
+  }
+  function applyFooter(){
+    var f = document.querySelector(".footer strong");
+    if(f && fullName) f.textContent = fullName;
+  }
+  function setFrom(user){
+    if(!user) return;
+    var md = user.user_metadata || {};
+    fullName = (md.full_name || md.name || (user.email ? user.email.split("@")[0] : "")).trim();
+    firstName = fullName.split(/\s+/)[0] || "";
+    applyTitle();
+    applyFooter();
+  }
+  if(typeof switchView === "function"){
+    var _sv = switchView;
+    switchView = function(view){
+      _sv.apply(this, arguments);
+      if(view === "dashboard") applyTitle();
+    };
+  }
+  function load(){
+    if(typeof supa !== "undefined" && supa.auth){
+      supa.auth.getUser().then(function(r){ setFrom(r && r.data && r.data.user); });
+      supa.auth.onAuthStateChange(function(_e, s){ if(s && s.user) setFrom(s.user); });
+    }
+  }
+  if(document.body) load(); else document.addEventListener("DOMContentLoaded", load);
+})();
+</script>
 
 </body>
 </html>
