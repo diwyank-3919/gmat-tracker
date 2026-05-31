@@ -3127,6 +3127,7 @@ function renderDelta(elId, curMins, prevMins, unit){
 function renderChart(){
   var dates, labels, actual, target, colors;
   dates = getViewDates();
+  window.__dayDates = dates;
   labels = dates.map(function(d){
     return viewMode==="month" ? d.getDate() : d.toLocaleDateString("en-IN",{weekday:"short"}).slice(0,3);
   });
@@ -3163,6 +3164,13 @@ function renderChart(){
     options: {
       responsive:true, maintainAspectRatio:false,
       animation: { duration: 900, easing: "easeInOutCubic" },
+      onHover: function(evt, els){ var c=evt&&evt.native?evt.native.target:null; if(c) c.style.cursor=(els&&els.length)?"pointer":"default"; },
+      onClick: function(evt, els, chart){
+        var pts=chart.getElementsAtEventForMode(evt,"index",{intersect:false},true);
+        if(!pts||!pts.length) return;
+        var d=window.__dayDates&&window.__dayDates[pts[0].index];
+        if(d&&typeof openDayTimeline==="function") openDayTimeline(dateStr(d));
+      },
       plugins: {
         legend:{display:false},
         tooltip:{
@@ -4129,6 +4137,121 @@ supa.auth.onAuthStateChange(function(event, session){
   .ec-target-cell{margin-left:0}
 }
 </style>
+
+  <!-- ── DAY TIMELINE DRILL-DOWN ── -->
+<style>
+#day-timeline-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.62);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.dt-card{background:linear-gradient(155deg,#151a26,#1a2030);border:1px solid rgba(255,255,255,0.10);border-radius:20px;padding:22px 24px;max-width:560px;width:94%;box-shadow:0 32px 80px rgba(0,0,0,0.60),0 0 0 1px rgba(135,141,255,0.10);max-height:88vh;overflow-y:auto}
+.dt-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}
+.dt-title{font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:var(--text-primary);letter-spacing:-0.01em}
+.dt-sub{font-size:11.5px;color:var(--text-tertiary);margin-top:2px}
+.dt-close{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;width:28px;height:28px;flex-shrink:0;cursor:pointer;color:var(--text-tertiary);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.dt-close:hover{background:var(--red-soft);color:var(--red);border-color:rgba(251,113,133,0.25)}
+.dt-track-wrap{margin:18px 0 6px;position:relative}
+.dt-track{position:relative;height:46px;background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);border-radius:10px;overflow:hidden}
+.dt-grid{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,0.06)}
+.dt-block{position:absolute;top:6px;bottom:6px;border-radius:5px;min-width:3px;box-shadow:0 1px 4px rgba(0,0,0,0.30);cursor:default;transition:filter .15s}
+.dt-block:hover{filter:brightness(1.18)}
+.dt-scale{display:flex;justify-content:space-between;font-size:9.5px;color:var(--text-muted);font-weight:500;margin-top:5px;font-variant-numeric:tabular-nums}
+.dt-empty{text-align:center;padding:18px 0;font-size:12px;color:var(--text-muted)}
+.dt-list{display:flex;flex-direction:column;gap:5px;margin-top:14px}
+.dt-row{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:9px;background:rgba(255,255,255,0.03);border:1px solid var(--border-subtle)}
+.dt-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dt-row-topic{font-size:12.5px;font-weight:650;color:var(--text-primary);flex:1}
+.dt-row-time{font-size:11px;color:var(--text-secondary);font-variant-numeric:tabular-nums}
+.dt-row-dur{font-size:11.5px;font-weight:700;color:var(--accent-bright);margin-left:9px}
+.dt-row.untimed{opacity:0.75}
+.dt-row.untimed .dt-row-time{color:var(--text-muted);font-style:italic}
+.dt-rhythm{margin-top:18px;padding-top:16px;border-top:1px solid var(--border-subtle)}
+.dt-rhythm-label{font-size:9px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.13em;margin-bottom:10px}
+.dt-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.dt-stat{background:rgba(255,255,255,0.035);border:1px solid var(--border-subtle);border-radius:11px;padding:11px 12px}
+.dt-stat-k{font-size:9px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.1em}
+.dt-stat-v{font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--text-primary);margin-top:5px;line-height:1.15;letter-spacing:-0.01em}
+.dt-stat-s{font-size:10px;color:var(--text-muted);margin-top:3px}
+@media(max-width:560px){.dt-stats{grid-template-columns:1fr}}
+</style>
+<script>
+(function(){
+  function ready(fn){ if(document.body) fn(); else document.addEventListener("DOMContentLoaded",fn); }
+  function injectModal(){
+    if(document.getElementById("day-timeline-modal")) return;
+    var m=document.createElement("div"); m.id="day-timeline-modal";
+    m.innerHTML='<div class="dt-card">'
+      +'<div class="dt-head"><div><div class="dt-title" id="dt-title">Day</div><div class="dt-sub" id="dt-sub"></div></div>'
+      +'<button class="dt-close" onclick="closeDayTimeline()"><i class="ti ti-x"></i></button></div>'
+      +'<div id="dt-body"></div></div>';
+    m.addEventListener("click",function(e){ if(e.target===m) closeDayTimeline(); });
+    document.body.appendChild(m);
+  }
+  // created_at -> epoch ms (number or timestamp string)
+  function caMs(s){ var v=s.created_at; if(v==null) return null; if(typeof v==="number") return v; var n=Number(v); if(!isNaN(n)&&n>1e11) return n; var p=Date.parse(v); return isNaN(p)?null:p; }
+  function timed(s){
+    var endMs=caMs(s);
+    if(endMs==null) return {s:s,reliable:false,mins:s.mins||0};
+    var st=new Date(endMs-(s.mins||0)*60000), en=new Date(endMs);
+    return {s:s,reliable:(dateStr(en)===s.date),mins:s.mins||0,start:st,end:en,startHour:st.getHours()+st.getMinutes()/60};
+  }
+  function t12(d){var h=d.getHours(),m=d.getMinutes(),ap=h<12?"AM":"PM",hh=h%12;if(hh===0)hh=12;return hh+":"+String(m).padStart(2,"0")+" "+ap;}
+  function hLabel(h){h=((h%24)+24)%24;var ap=h<12?"AM":"PM",hh=h%12;if(hh===0)hh=12;return hh+" "+ap;}
+  function slot(h){return hLabel(h)+"–"+hLabel(h+1);}
+  function focusStats(){
+    var hourMins=[],hourDays={},longest=null,i;
+    for(i=0;i<24;i++) hourMins[i]=0;
+    sessions.forEach(function(s){
+      if((s.mins||0)>(longest?longest.mins:0)) longest={mins:s.mins||0,topic:s.topic,date:s.date};
+      var t=timed(s); if(!t.reliable) return;
+      var startH=t.startHour, endH=startH+(t.mins/60), h=Math.floor(startH), touched={};
+      while(h<endH&&h<48){ var seg=(Math.min(endH,h+1)-Math.max(startH,h))*60; if(seg>0){var hb=((h%24)+24)%24;hourMins[hb]+=seg;touched[hb]=1;} h++; }
+      Object.keys(touched).forEach(function(hb){(hourDays[hb]=hourDays[hb]||{})[s.date]=1;});
+    });
+    var bestH=-1,bestM=0; for(i=0;i<24;i++) if(hourMins[i]>bestM){bestM=hourMins[i];bestH=i;}
+    var consH=-1,consD=0; Object.keys(hourDays).forEach(function(hb){var n=Object.keys(hourDays[hb]).length;if(n>consD){consD=n;consH=+hb;}});
+    return {bestH:bestH,bestM:bestM,consH:consH,consD:consD,longest:longest};
+  }
+  window.openDayTimeline=function(ds){
+    injectModal();
+    var d=parseLocal(ds);
+    document.getElementById("dt-title").textContent=d.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    var dayS=sessions.filter(function(s){return s.date===ds;});
+    var tot=dayS.reduce(function(a,s){return a+s.mins;},0);
+    document.getElementById("dt-sub").textContent=dayS.length?(fmtH(tot)+" across "+dayS.length+" session"+(dayS.length===1?"":"s")):"No sessions logged";
+    var rows=dayS.map(timed), reliable=rows.filter(function(r){return r.reliable;}), untimed=rows.filter(function(r){return !r.reliable;});
+    var html="";
+    if(!dayS.length){ html+='<div class="dt-empty">Nothing logged on this day.</div>'; }
+    else {
+      var grids=""; [3,6,9,12,15,18,21].forEach(function(h){grids+='<div class="dt-grid" style="left:'+(h/24*100)+'%"></div>';});
+      var blocks=""; reliable.forEach(function(r){
+        var left=Math.max(0,Math.min(100,r.startHour/24*100)), w=Math.max(1.2,(r.mins/60)/24*100); if(left+w>100)w=100-left;
+        var col=TC[r.s.topic]||"#888", tip=ds+" — "+r.s.topic+" "+t12(r.start)+"–"+t12(r.end)+" ("+fmtH(r.mins)+")";
+        blocks+='<div class="dt-block" style="left:'+left+'%;width:'+w+'%;background:'+col+'" title="'+tip+'"></div>';
+      });
+      html+='<div class="dt-track-wrap"><div class="dt-track">'+grids+blocks+'</div>'
+        +'<div class="dt-scale"><span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>12 AM</span></div></div>';
+      if(!reliable.length) html+='<div class="dt-empty" style="padding:8px 0">No time-of-day data yet — log with the timer to place sessions on the clock.</div>';
+      var list="";
+      reliable.sort(function(a,b){return a.startHour-b.startHour;}).forEach(function(r){ var col=TC[r.s.topic]||"#888";
+        list+='<div class="dt-row"><span class="dt-dot" style="background:'+col+'"></span><span class="dt-row-topic">'+r.s.topic+'</span><span class="dt-row-time">'+t12(r.start)+"–"+t12(r.end)+'</span><span class="dt-row-dur">'+fmtH(r.mins)+'</span></div>';
+      });
+      untimed.forEach(function(r){ var col=TC[r.s.topic]||"#888";
+        list+='<div class="dt-row untimed"><span class="dt-dot" style="background:'+col+'"></span><span class="dt-row-topic">'+r.s.topic+'</span><span class="dt-row-time">time of day not recorded</span><span class="dt-row-dur">'+fmtH(r.mins)+'</span></div>';
+      });
+      html+='<div class="dt-list">'+list+'</div>';
+    }
+    var fs=focusStats();
+    html+='<div class="dt-rhythm"><div class="dt-rhythm-label">Your focus rhythm — all time</div><div class="dt-stats">'
+      +'<div class="dt-stat"><div class="dt-stat-k">Best slot</div><div class="dt-stat-v">'+(fs.bestH>=0?slot(fs.bestH):"—")+'</div><div class="dt-stat-s">'+(fs.bestH>=0?fmtH(fs.bestM)+" logged here":"timer data needed")+'</div></div>'
+      +'<div class="dt-stat"><div class="dt-stat-k">Most consistent</div><div class="dt-stat-v">'+(fs.consH>=0?slot(fs.consH):"—")+'</div><div class="dt-stat-s">'+(fs.consH>=0?"on "+fs.consD+" day"+(fs.consD===1?"":"s"):"timer data needed")+'</div></div>'
+      +'<div class="dt-stat"><div class="dt-stat-k">Longest focus</div><div class="dt-stat-v">'+(fs.longest&&fs.longest.mins>0?fmtH(fs.longest.mins):"—")+'</div><div class="dt-stat-s">'+(fs.longest&&fs.longest.mins>0?fs.longest.topic:"no sessions yet")+'</div></div>'
+      +'</div></div>';
+    document.getElementById("dt-body").innerHTML=html;
+    document.getElementById("day-timeline-modal").style.display="flex";
+  };
+  window.closeDayTimeline=function(){var m=document.getElementById("day-timeline-modal");if(m)m.style.display="none";};
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"){var m=document.getElementById("day-timeline-modal");if(m&&m.style.display==="flex")closeDayTimeline();}});
+  ready(injectModal);
+})();
+</script>
 
 </body>
 </html>
