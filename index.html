@@ -3791,8 +3791,8 @@ render=function(){
     if(mins<1){if(!confirm("Less than a minute — log as 1 minute?"))return;mins=1;}
     var topic=state.topic||"Quant",btn=document.getElementById("timer-stop-btn");
     if(btn)btn.disabled=true; setStatus("saving");
-    supa.from("sessions").insert({date:dateStr(today),topic:topic,mins:mins,created_at:Date.now()})
-      .then(function(res){if(res.error)throw res.error;clear();stopTick();paint();if(btn)btn.disabled=false;if(typeof showToast==="function")showToast("⏱️","Session logged!",fmtH(mins)+" of "+topic+" added.");loadSessions();})
+    supa.from("sessions").insert({date:(window.__timerLogDate||dateStr(today)),topic:topic,mins:mins,created_at:Date.now()})
+      .then(function(res){if(res.error)throw res.error;clear();stopTick();paint();if(btn)btn.disabled=false;if(typeof showToast==="function"){var _ld=window.__timerLogDate||dateStr(today);var _dl=_ld===dateStr(today)?"today":(_ld===dateStr(addDays(today,-1))?"yesterday":parseLocal(_ld).toLocaleDateString("en-IN",{day:"numeric",month:"short"}));showToast("⏱️","Session logged!",fmtH(mins)+" of "+topic+" added to "+_dl+".");}loadSessions();})
       .catch(function(err){setStatus("error");alert("Save failed: "+(err.message||JSON.stringify(err)));if(btn)btn.disabled=false;});
   };
   try{var s=JSON.parse(localStorage.getItem(TKEY));if(s&&typeof s==="object")state=s;}catch(e){}
@@ -4250,6 +4250,68 @@ supa.auth.onAuthStateChange(function(event, session){
   window.closeDayTimeline=function(){var m=document.getElementById("day-timeline-modal");if(m)m.style.display="none";};
   document.addEventListener("keydown",function(e){if(e.key==="Escape"){var m=document.getElementById("day-timeline-modal");if(m&&m.style.display==="flex")closeDayTimeline();}});
   ready(injectModal);
+})();
+</script>
+
+  <!-- ── TIMER LOG-DATE CONTROL ── -->
+<style>
+.tlog-row{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,0.06)}
+.tlog-label{font-size:10.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.42)}
+.tlog-nav{width:26px;height:26px;border:1px solid var(--border);border-radius:7px;background:rgba(255,255,255,0.05);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s}
+.tlog-nav:hover{border-color:rgba(135,141,255,0.45);color:var(--accent-bright)}
+.tlog-nav:disabled{opacity:0.35;cursor:not-allowed}
+.tlog-date{font-size:12.5px;font-weight:650;color:var(--text-primary);min-width:104px;text-align:center;font-variant-numeric:tabular-nums}
+.tlog-row.not-today .tlog-date{color:var(--accent-bright)}
+.tlog-today{margin-left:auto;font-size:10.5px;font-weight:650;padding:4px 10px;border-radius:100px;border:1px solid rgba(135,141,255,0.30);background:rgba(135,141,255,0.12);color:var(--accent-bright);cursor:pointer;display:none}
+.tlog-row.not-today .tlog-today{display:inline-flex}
+</style>
+<script>
+(function(){
+  function ready(fn){ if(document.body) fn(); else document.addEventListener("DOMContentLoaded",fn); }
+  function label(ds){
+    var tS=dateStr(today), yS=dateStr(addDays(today,-1));
+    if(ds===tS) return "Today";
+    if(ds===yS) return "Yesterday";
+    return parseLocal(ds).toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"});
+  }
+  function paint(){
+    var row=document.getElementById("tlog-row"); if(!row) return;
+    var ds=window.__timerLogDate||dateStr(today);
+    document.getElementById("tlog-date").textContent=label(ds);
+    var isToday=ds===dateStr(today);
+    row.classList.toggle("not-today",!isToday);
+    var n=document.getElementById("tlog-next"); if(n) n.disabled=isToday;
+  }
+  function setDate(ds){
+    if(ds>dateStr(today)) ds=dateStr(today);
+    window.__timerLogDate=ds;
+    try{localStorage.setItem("sc_timer_logdate",ds);}catch(e){}
+    paint();
+  }
+  function shift(n){
+    var ds=window.__timerLogDate||dateStr(today);
+    var p=ds.split("-").map(Number), d=new Date(p[0],p[1]-1,p[2]);
+    d.setDate(d.getDate()+n); setDate(dateStr(d));
+  }
+  function inject(){
+    var panel=document.getElementById("timer-panel");
+    if(!panel||document.getElementById("tlog-row")) return;
+    var stored=null; try{stored=localStorage.getItem("sc_timer_logdate");}catch(e){}
+    // only "yesterday" survives a reload; anything older resets to today
+    window.__timerLogDate=(stored===dateStr(addDays(today,-1)))?stored:dateStr(today);
+    var row=document.createElement("div"); row.className="tlog-row"; row.id="tlog-row";
+    row.innerHTML='<span class="tlog-label">Logging for</span>'
+      +'<button class="tlog-nav" id="tlog-prev" title="Previous day"><i class="ti ti-chevron-left"></i></button>'
+      +'<span class="tlog-date" id="tlog-date">Today</span>'
+      +'<button class="tlog-nav" id="tlog-next" title="Next day"><i class="ti ti-chevron-right"></i></button>'
+      +'<button class="tlog-today" id="tlog-today">Reset to today</button>';
+    panel.appendChild(row);
+    document.getElementById("tlog-prev").addEventListener("click",function(){shift(-1);});
+    document.getElementById("tlog-next").addEventListener("click",function(){shift(1);});
+    document.getElementById("tlog-today").addEventListener("click",function(){setDate(dateStr(today));});
+    paint();
+  }
+  ready(inject);
 })();
 </script>
 
