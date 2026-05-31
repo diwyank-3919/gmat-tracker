@@ -3783,7 +3783,7 @@ render=function(){
     if(oB)oB.style.display=active?"inline-flex":"none";
     if(dB)dB.style.display=active?"inline-flex":"none";
   }
-  window.timerStart=function(){var sel=document.getElementById("timer-topic");if(!state.running){if(state.accMs===0&&sel)state.topic=sel.value;state.running=true;state.startedAt=Date.now();persist();startTick();paint();}};
+  window.timerStart=function(){var sel=document.getElementById("timer-topic");if(!state.running){if(state.accMs===0){if(sel)state.topic=sel.value;state.firstStart=Date.now();}state.running=true;state.startedAt=Date.now();persist();startTick();paint();}};
   window.timerPause=function(){if(state.running){state.accMs=(state.accMs||0)+(Date.now()-state.startedAt);state.running=false;state.startedAt=null;persist();stopTick();paint();}};
   window.timerDiscard=function(){if(!confirm("Discard this timed session?"))return;clear();stopTick();paint();};
   window.timerStop=function(){
@@ -3791,7 +3791,7 @@ render=function(){
     if(mins<1){if(!confirm("Less than a minute — log as 1 minute?"))return;mins=1;}
     var topic=state.topic||"Quant",btn=document.getElementById("timer-stop-btn");
     if(btn)btn.disabled=true; setStatus("saving");
-    supa.from("sessions").insert({date:(window.__timerLogDate||dateStr(today)),topic:topic,mins:mins,created_at:Date.now()})
+    supa.from("sessions").insert({date:(window.__timerLogDate||dateStr(today)),topic:topic,mins:mins,created_at:Date.now(),started_at:new Date(state.firstStart||(Date.now()-elapsedMs())).toISOString()})
       .then(function(res){if(res.error)throw res.error;clear();stopTick();paint();if(btn)btn.disabled=false;if(typeof showToast==="function"){var _ld=window.__timerLogDate||dateStr(today);var _dl=_ld===dateStr(today)?"today":(_ld===dateStr(addDays(today,-1))?"yesterday":parseLocal(_ld).toLocaleDateString("en-IN",{day:"numeric",month:"short"}));showToast("⏱️","Session logged!",fmtH(mins)+" of "+topic+" added to "+_dl+".");}loadSessions();})
       .catch(function(err){setStatus("error");alert("Save failed: "+(err.message||JSON.stringify(err)));if(btn)btn.disabled=false;});
   };
@@ -4138,7 +4138,7 @@ supa.auth.onAuthStateChange(function(event, session){
 }
 </style>
 
-  <!-- ── DAY TIMELINE DRILL-DOWN ── -->
+ <!-- ── DAY TIMELINE DRILL-DOWN ── -->
 <style>
 #day-timeline-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.62);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:1000;align-items:center;justify-content:center;padding:20px}
 .dt-card{background:linear-gradient(155deg,#151a26,#1a2030);border:1px solid rgba(255,255,255,0.10);border-radius:20px;padding:22px 24px;max-width:560px;width:94%;box-shadow:0 32px 80px rgba(0,0,0,0.60),0 0 0 1px rgba(135,141,255,0.10);max-height:88vh;overflow-y:auto}
@@ -4152,12 +4152,14 @@ supa.auth.onAuthStateChange(function(event, session){
 .dt-grid{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,0.06)}
 .dt-block{position:absolute;top:6px;bottom:6px;border-radius:5px;min-width:3px;box-shadow:0 1px 4px rgba(0,0,0,0.30);cursor:default;transition:filter .15s}
 .dt-block:hover{filter:brightness(1.18)}
+.dt-block.cross{box-shadow:0 0 0 1.5px rgba(255,255,255,0.55) inset,0 1px 4px rgba(0,0,0,0.30)}
 .dt-scale{display:flex;justify-content:space-between;font-size:9.5px;color:var(--text-muted);font-weight:500;margin-top:5px;font-variant-numeric:tabular-nums}
 .dt-empty{text-align:center;padding:18px 0;font-size:12px;color:var(--text-muted)}
 .dt-list{display:flex;flex-direction:column;gap:5px;margin-top:14px}
 .dt-row{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:9px;background:rgba(255,255,255,0.03);border:1px solid var(--border-subtle)}
 .dt-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.dt-row-topic{font-size:12.5px;font-weight:650;color:var(--text-primary);flex:1}
+.dt-row-topic{font-size:12.5px;font-weight:650;color:var(--text-primary);flex:1;display:flex;align-items:center}
+.dt-tag{font-size:8.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;background:rgba(135,141,255,0.15);color:var(--accent-bright);padding:1px 6px;border-radius:100px;margin-left:7px}
 .dt-row-time{font-size:11px;color:var(--text-secondary);font-variant-numeric:tabular-nums}
 .dt-row-dur{font-size:11.5px;font-weight:700;color:var(--accent-bright);margin-left:9px}
 .dt-row.untimed{opacity:0.75}
@@ -4184,13 +4186,21 @@ supa.auth.onAuthStateChange(function(event, session){
     m.addEventListener("click",function(e){ if(e.target===m) closeDayTimeline(); });
     document.body.appendChild(m);
   }
-  // created_at -> epoch ms (number or timestamp string)
   function caMs(s){ var v=s.created_at; if(v==null) return null; if(typeof v==="number") return v; var n=Number(v); if(!isNaN(n)&&n>1e11) return n; var p=Date.parse(v); return isNaN(p)?null:p; }
+  // Prefers the precise started_at written by the timer; falls back to created_at-mins.
   function timed(s){
+    var mins=s.mins||0;
+    if(s.started_at){
+      var ps=Date.parse(s.started_at);
+      if(!isNaN(ps)){
+        var st=new Date(ps), en=new Date(ps+mins*60000);
+        return {s:s,reliable:true,precise:true,crossDay:(dateStr(st)!==s.date),mins:mins,start:st,end:en,startHour:st.getHours()+st.getMinutes()/60};
+      }
+    }
     var endMs=caMs(s);
-    if(endMs==null) return {s:s,reliable:false,mins:s.mins||0};
-    var st=new Date(endMs-(s.mins||0)*60000), en=new Date(endMs);
-    return {s:s,reliable:(dateStr(en)===s.date),mins:s.mins||0,start:st,end:en,startHour:st.getHours()+st.getMinutes()/60};
+    if(endMs==null) return {s:s,reliable:false,mins:mins};
+    var st2=new Date(endMs-mins*60000), en2=new Date(endMs);
+    return {s:s,reliable:(dateStr(en2)===s.date),precise:false,crossDay:false,mins:mins,start:st2,end:en2,startHour:st2.getHours()+st2.getMinutes()/60};
   }
   function t12(d){var h=d.getHours(),m=d.getMinutes(),ap=h<12?"AM":"PM",hh=h%12;if(hh===0)hh=12;return hh+":"+String(m).padStart(2,"0")+" "+ap;}
   function hLabel(h){h=((h%24)+24)%24;var ap=h<12?"AM":"PM",hh=h%12;if(hh===0)hh=12;return hh+" "+ap;}
@@ -4223,17 +4233,20 @@ supa.auth.onAuthStateChange(function(event, session){
       var grids=""; [3,6,9,12,15,18,21].forEach(function(h){grids+='<div class="dt-grid" style="left:'+(h/24*100)+'%"></div>';});
       var blocks=""; reliable.forEach(function(r){
         var left=Math.max(0,Math.min(100,r.startHour/24*100)), w=Math.max(1.2,(r.mins/60)/24*100); if(left+w>100)w=100-left;
-        var col=TC[r.s.topic]||"#888", tip=ds+" — "+r.s.topic+" "+t12(r.start)+"–"+t12(r.end)+" ("+fmtH(r.mins)+")";
-        blocks+='<div class="dt-block" style="left:'+left+'%;width:'+w+'%;background:'+col+'" title="'+tip+'"></div>';
+        var col=TC[r.s.topic]||"#888";
+        var tip=ds+" — "+r.s.topic+" "+t12(r.start)+"–"+t12(r.end)+" ("+fmtH(r.mins)+")"+(r.crossDay?" · late night":"");
+        blocks+='<div class="dt-block'+(r.crossDay?' cross':'')+'" style="left:'+left+'%;width:'+w+'%;background:'+col+'" title="'+tip+'"></div>';
       });
       html+='<div class="dt-track-wrap"><div class="dt-track">'+grids+blocks+'</div>'
         +'<div class="dt-scale"><span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>12 AM</span></div></div>';
       if(!reliable.length) html+='<div class="dt-empty" style="padding:8px 0">No time-of-day data yet — log with the timer to place sessions on the clock.</div>';
       var list="";
-      reliable.sort(function(a,b){return a.startHour-b.startHour;}).forEach(function(r){ var col=TC[r.s.topic]||"#888";
-        list+='<div class="dt-row"><span class="dt-dot" style="background:'+col+'"></span><span class="dt-row-topic">'+r.s.topic+'</span><span class="dt-row-time">'+t12(r.start)+"–"+t12(r.end)+'</span><span class="dt-row-dur">'+fmtH(r.mins)+'</span></div>';
+      reliable.sort(function(a,b){return a.startHour-b.startHour;}).forEach(function(r){
+        var col=TC[r.s.topic]||"#888", tag=r.crossDay?'<span class="dt-tag">late night</span>':'';
+        list+='<div class="dt-row"><span class="dt-dot" style="background:'+col+'"></span><span class="dt-row-topic">'+r.s.topic+tag+'</span><span class="dt-row-time">'+t12(r.start)+"–"+t12(r.end)+'</span><span class="dt-row-dur">'+fmtH(r.mins)+'</span></div>';
       });
-      untimed.forEach(function(r){ var col=TC[r.s.topic]||"#888";
+      untimed.forEach(function(r){
+        var col=TC[r.s.topic]||"#888";
         list+='<div class="dt-row untimed"><span class="dt-dot" style="background:'+col+'"></span><span class="dt-row-topic">'+r.s.topic+'</span><span class="dt-row-time">time of day not recorded</span><span class="dt-row-dur">'+fmtH(r.mins)+'</span></div>';
       });
       html+='<div class="dt-list">'+list+'</div>';
