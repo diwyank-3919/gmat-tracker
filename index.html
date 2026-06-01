@@ -1611,6 +1611,21 @@ body::before{
 .timer-divider{display:flex;align-items:center;gap:10px;margin-bottom:12px;color:var(--text-muted);font-size:10.5px;}
 .timer-divider::before,.timer-divider::after{content:"";flex:1;height:1px;background:rgba(255,255,255,0.07);}
 </style>
+  <style>
+  html.sc-guest #auth-overlay{display:flex!important;}
+</style>
+<script>
+(function(){
+  try{
+    var authed=false;
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k && k.indexOf("sb-")===0 && k.indexOf("-auth-token")!==-1 && localStorage.getItem(k)){ authed=true; break; }
+    }
+    document.documentElement.classList.add(authed?"sc-authed":"sc-guest");
+  }catch(e){ document.documentElement.classList.add("sc-guest"); }
+})();
+</script>
 </head>
 <body>
  <!-- ── MOBILE HEADER ── -->
