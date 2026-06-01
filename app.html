@@ -3831,7 +3831,7 @@ function startApp(){
 function signInWithGoogle(){
   supa.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: "https://scoreconsole.com/" }
+    options: { redirectTo: "https://scoreconsole.com/app.html" }
   });
 }
 function signOut(){ supa.auth.signOut().then(function(){ location.reload(); }); }
