@@ -589,6 +589,12 @@ if('IntersectionObserver' in window){
 }
 
 document.getElementById('yr').textContent=new Date().getFullYear();
+
+// App links open in a new tab (also lets them work inside preview/iframe sandboxes)
+document.querySelectorAll('a[href^="https://scoreconsole.com"]').forEach(function(a){
+  a.target='_blank'; a.rel='noopener';
+});
+
 </script>
 </body>
 </html>
