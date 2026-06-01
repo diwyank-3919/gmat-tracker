@@ -592,6 +592,9 @@ body::after{
   from{opacity:0;transform:translateY(14px)}
   to{opacity:1;transform:translateY(0)}
 }
+@keyframes spin {
+  to { transform: rotate(360deg) }
+}
 .card,.banner,.momentum-card{animation:fadeUp 0.45s cubic-bezier(.34,1.56,.64,1) 0.06s both}
 
 /* Animated number counting */
@@ -2054,8 +2057,9 @@ body::before{
     <!-- ── AI INTELLIGENCE PANEL ── -->
     <div class="intel-panel">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-        <div style="font-family:'Clash Display',sans-serif;font-size:13px;font-weight:800;color:var(--text-primary);letter-spacing:-0.2px">✦ Smart Insights</div>
-        <div style="font-size:10px;color:var(--text-muted);padding:2px 8px;border-radius:100px;background:rgba(139,124,248,0.10);border:1px solid rgba(139,124,248,0.18);letter-spacing:0.05em;font-weight:600">AI</div>
+          <div style="font-family:'Clash Display',sans-serif;font-size:13px;font-weight:800;color:var(--text-primary);letter-spacing:-0.2px">✦ Smart Insights</div>
+          <div style="font-size:10px;color:var(--text-muted);padding:2px 8px;border-radius:100px;background:rgba(139,124,248,0.10);border:1px solid rgba(139,124,248,0.18);letter-spacing:0.05em;font-weight:600">AI</div>
+          <button id="ai-refresh-btn" onclick="refreshAIInsights()" style="margin-left:auto;font-size:10.5px;font-weight:650;padding:4px 10px;border-radius:100px;border:1px solid rgba(139,124,248,0.25);background:rgba(139,124,248,0.08);color:var(--accent-bright);cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit;transition:all 0.15s"><i class="ti ti-sparkles" style="font-size:11px"></i> Ask Claude</button>
       </div>
       <div class="intel-row" id="intel-cards">
         <!-- Filled dynamically -->
@@ -3628,8 +3632,78 @@ function getWeekHours(offset){
   for(var i=0;i<7;i++) total+=minsOn(dateStr(addDays(ws,i)));
   return total;
 }
+// ── CLAUDE AI INSIGHTS ──
+var _lastAIInsights = null;
+
+async function refreshAIInsights() {
+  var btn = document.getElementById("ai-refresh-btn");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ti ti-loader-2" style="font-size:11px;animation:spin 1s linear infinite"></i> Thinking…';
+  }
+
+  // Build data snapshot
+  var tm = minsOn(dateStr(today));
+  var ws = startOfWeek(today), wm = 0, wt = 0;
+  for (var i = 0; i < 7; i++) { var wd = addDays(ws, i); wm += minsOn(dateStr(wd)); wt += targetFor(wd); }
+  var tot = sessions.reduce(function(a,s){ return a + s.mins; }, 0);
+  var topicTotals = {};
+  sessions.forEach(function(s){ topicTotals[s.topic] = (topicTotals[s.topic] || 0) + s.mins; });
+  var streak = parseInt(document.getElementById("streak-chip").textContent) || 0;
+  var studiedDaysPct = parseInt(document.getElementById("m-consistency").textContent) || 0;
+  var examDateVal = localStorage.getItem("gmat_exam_date");
+  var daysLeft = null;
+  if (examDateVal) {
+    var ep = examDateVal.split("-").map(Number);
+    daysLeft = Math.max(0, Math.ceil((new Date(ep[0], ep[1]-1, ep[2]) - today) / 86400000));
+  }
+
+  var sessionData = {
+    totalHours: +(tot / 60).toFixed(1),
+    streak: streak,
+    weekHours: +(wm / 60).toFixed(1),
+    weekTarget: +(wt / 60).toFixed(1),
+    consistency: studiedDaysPct,
+    topicTotals: Object.fromEntries(
+      Object.entries(topicTotals).map(function(e){ return [e[0], +(e[1]/60).toFixed(1)]; })
+    ),
+    daysLeft: daysLeft,
+    latestMock: window.mockScores && window.mockScores.length ? window.mockScores[window.mockScores.length-1].score : null,
+    targetScore: TARGET_SCORE
+  };
+
+  try {
+    var res = await supa.functions.invoke('ai-insights', { body: { sessionData: sessionData } });
+    if (res.error) throw res.error;
+    _lastAIInsights = res.data.insights;
+    renderIntelCards_withData(_lastAIInsights);
+  } catch(e) {
+    console.warn("AI insights failed:", e);
+    // Falls back silently — rule-based insights remain visible
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ti ti-sparkles" style="font-size:11px"></i> Ask Claude';
+    }
+  }
+}
+
+function renderIntelCards_withData(insights) {
+  var el = document.getElementById("intel-cards");
+  if (!el) return;
+  var typeClass = { positive:"positive", warning:"warning", negative:"negative", neutral:"neutral" };
+  el.innerHTML = insights.map(function(ins, i) {
+    return '<div class="intel-card ' + typeClass[ins.type] + '" style="animation-delay:' + (0.06 + i * 0.06) + 's">'
+      + '<div class="intel-icon">' + ins.icon + '</div>'
+      + '<div class="intel-body">'
+      + '<div class="intel-text">' + ins.text + '</div>'
+      + '<div class="intel-sub">' + ins.sub + '</div>'
+      + '</div></div>';
+  }).join("");
+}
 
 var _origRender=render;
+
 render=function(){
   _origRender();
   updateExamCountdown();updateCommandCenter();
