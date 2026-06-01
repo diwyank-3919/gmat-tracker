@@ -1613,6 +1613,7 @@ body::before{
 </style>
   <style>
   html.sc-guest #auth-overlay{display:flex!important;}
+  html.sc-guest .shell,html.sc-guest .mob-header{display:none!important;}
 </style>
 <script>
 (function(){
@@ -3818,6 +3819,8 @@ render=function(){
 // ── AUTH GATE (dashboard owns login) ──
 var _appStarted = false;
 function startApp(){
+  document.documentElement.classList.remove("sc-guest");
+  document.documentElement.classList.add("sc-authed");
   document.getElementById("auth-overlay").style.display = "none";
   if(_appStarted) return;
   _appStarted = true;
@@ -3838,7 +3841,7 @@ window.signOut = signOut;
 supa.auth.getSession().then(function(res){
   var session = res.data && res.data.session;
   if(session) startApp();
-  else document.getElementById("auth-overlay").style.display = "flex";
+  else { document.documentElement.classList.remove("sc-authed"); document.documentElement.classList.add("sc-guest"); document.getElementById("auth-overlay").style.display = "flex"; }
 });
 supa.auth.onAuthStateChange(function(event, session){
   if(session) startApp();
