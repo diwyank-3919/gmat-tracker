@@ -3679,7 +3679,10 @@ async function refreshAIInsights() {
     renderIntelCards_withData(_lastAIInsights);
   } catch(e) {
     console.warn("AI insights failed:", e);
-    // Falls back silently — rule-based insights remain visible
+    // Rule-based insights remain visible — just let the user know AI didn't run
+    if (typeof showToast === "function") {
+      showToast("✦", "Showing smart insights", "AI insights need API credit — using the built-in engine for now.");
+    }
   } finally {
     if (btn) {
       btn.disabled = false;
