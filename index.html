@@ -2128,11 +2128,11 @@ body::before{
         <button id="timer-pause-btn" class="timer-btn" onclick="timerPause()" style="display:none;background:rgba(255,255,255,0.08)"><i class="ti ti-player-pause"></i> Pause</button>
         <button id="timer-stop-btn" class="timer-btn stop" onclick="timerStop()" style="display:none"><i class="ti ti-check"></i> Save</button>
         <button id="timer-discard-btn" class="timer-btn ghost" onclick="timerDiscard()" style="display:none" title="Discard"><i class="ti ti-x"></i></button>
+        </div>
       </div>
-      <input type="text" id="timer-notes" placeholder="Quick note about this session… (optional)" maxlength="200"
-        style="margin-top:7px;width:100%;height:32px;font-size:12px;font-family:'Hanken Grotesk',sans-serif;font-weight:500;padding:0 11px;border:1px solid var(--border);border-radius:9px;background:var(--bg-input);color:var(--text-primary);outline:none;transition:border-color 0.15s"
-        onfocus="this.style.borderColor='rgba(135,141,255,0.45)'" onblur="this.style.borderColor='var(--border)'">
-    </div>
+    <input type="text" id="timer-notes" placeholder="Quick note about this timed session… (optional)" maxlength="200"
+      style="margin:8px 0 4px;width:100%;height:32px;font-size:12px;font-family:'Hanken Grotesk',sans-serif;font-weight:500;padding:0 11px;border:1px solid var(--border);border-radius:9px;background:var(--bg-input);color:var(--text-primary);outline:none;transition:border-color 0.15s"
+      onfocus="this.style.borderColor='rgba(135,141,255,0.45)'" onblur="this.style.borderColor='var(--border)'">
     <div class="timer-divider"><span>or log manually</span></div>
     <div class="form-grid">
       <div class="field">
