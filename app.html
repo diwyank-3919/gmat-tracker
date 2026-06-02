@@ -2059,7 +2059,7 @@ body::before{
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
           <div style="font-family:'Clash Display',sans-serif;font-size:13px;font-weight:800;color:var(--text-primary);letter-spacing:-0.2px">✦ Smart Insights</div>
           <div style="font-size:10px;color:var(--text-muted);padding:2px 8px;border-radius:100px;background:rgba(139,124,248,0.10);border:1px solid rgba(139,124,248,0.18);letter-spacing:0.05em;font-weight:600">AI</div>
-          <button id="ai-refresh-btn" onclick="refreshAIInsights()" style="margin-left:auto;font-size:10.5px;font-weight:650;padding:4px 10px;border-radius:100px;border:1px solid rgba(139,124,248,0.25);background:rgba(139,124,248,0.08);color:var(--accent-bright);cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit;transition:all 0.15s"><i class="ti ti-sparkles" style="font-size:11px"></i> Ask Claude</button>
+          <button id="ai-refresh-btn" onclick="refreshAIInsights()" style="margin-left:auto;font-size:10.5px;font-weight:650;padding:4px 10px;border-radius:100px;border:1px solid rgba(139,124,248,0.25);background:rgba(139,124,248,0.08);color:var(--accent-bright);cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit;transition:all 0.15s"><i class="ti ti-sparkles" style="font-size:11px"></i> Ask Sheldon</button>
       </div>
       <div class="intel-row" id="intel-cards">
         <!-- Filled dynamically -->
@@ -3280,13 +3280,18 @@ function renderSessions(){
   el.innerHTML=filtered.map(function(s){
     var isToday=s.date===ts;
     var dateLabel=isToday?"Today":parseLocal(s.date).toLocaleDateString("en-IN",{day:"numeric",month:"short"});
+    var noteLine = s.notes
+      ? '<div style="font-size:10.5px;color:var(--text-tertiary);font-style:italic;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.notes+'</div>'
+      : '';
     return '<div class="sess-item">'
-      +'<span class="sess-color" style="background:'+(TC[s.topic]||"#888")+';box-shadow:0 0 5px '+(TC[s.topic]||"#888")+'"></span>'
-      +'<div class="sess-info"><span class="sess-topic">'+s.topic+'</span>'
-      +(sessFilter!=="today"?'<span class="sess-date-tag">'+dateLabel+'</span>':'')
+      +'<span class="sess-color" style="background:'+(TC[s.topic]||"#888")+'"></span>'
+      +'<div class="sess-info" style="min-width:0">'
+        +'<div style="display:flex;align-items:center"><span class="sess-topic">'+s.topic+'</span>'
+        +(sessFilter!=="today"?'<span class="sess-date-tag">'+dateLabel+'</span>':'')+'</div>'
+        +noteLine
       +'</div>'
       +'<span class="sess-dur">'+fmtH(s.mins)+'</span>'
-      +'<button class="sc-note-btn'+(s.notes?' has-note':'')+'" data-note-id="'+s.id+'" title="'+(s.notes?'Edit note':'Add note')+'"><i class="ti ti-note" style="font-size:13px"></i></button>'
+      +'<button class="sc-note-btn'+(s.notes?' has-note':'')+'" data-note-id="'+s.id+'" title="'+(s.notes?'Edit note':'Add note')+'" style="opacity:1;color:'+(s.notes?'var(--accent-bright)':'var(--text-secondary)')+'"><i class="ti ti-pencil" style="font-size:14px"></i></button>'
       +'<button class="sess-del" data-id="'+s.id+'" title="Delete"><i class="ti ti-trash" style="font-size:12px"></i></button>'
       +'</div>';
   }).join("");
@@ -3687,7 +3692,7 @@ async function refreshAIInsights() {
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = '<i class="ti ti-sparkles" style="font-size:11px"></i> Ask Claude';
+      btn.innerHTML = '<i class="ti ti-sparkles" style="font-size:11px"></i> Ask Sheldon';
     }
   }
 }
