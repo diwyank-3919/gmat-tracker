@@ -574,7 +574,7 @@ body::after{
 }
 
 #milestone-toast{
-  position:fixed;bottom:24px;right:24px;z-index:9999;
+  position:fixed;bottom:96px;right:24px;z-index:9999
   background:rgba(15,12,26,0.96);border:1px solid rgba(139,124,248,0.40);border-radius:16px;
   padding:13px 16px;box-shadow:0 16px 48px rgba(0,0,0,0.50),0 0 40px rgba(139,124,248,0.20);
   display:flex;align-items:center;gap:11px;min-width:270px;
@@ -1630,6 +1630,81 @@ body::before{
   }catch(e){ document.documentElement.classList.add("sc-guest"); }
 })();
 </script>
+  <style>
+    /* ============ Sheldon Coach ============ */
+#sheldonFab {
+  position: fixed; bottom: 24px; right: 24px; width: 58px; height: 58px;
+  border-radius: 50%; border: none; cursor: pointer; z-index: 9998;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #878dff, #46c98f); color: #0d1018;
+  font-size: 26px; box-shadow: 0 8px 28px rgba(135,141,255,.35);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+#sheldonFab:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 12px 34px rgba(70,201,143,.4); }
+#sheldonFab.hidden { display: none; }
+
+#sheldonPanel {
+  position: fixed; bottom: 24px; right: 24px; width: 384px;
+  max-width: calc(100vw - 32px); height: 560px; max-height: calc(100vh - 48px);
+  background: #11151f; border: 1px solid rgba(135,141,255,.18);
+  border-radius: 18px; display: none; flex-direction: column; overflow: hidden;
+  z-index: 9999; box-shadow: 0 24px 60px rgba(0,0,0,.5);
+  font-family: 'Hanken Grotesk', system-ui, sans-serif;
+}
+#sheldonPanel.open { display: flex; }
+
+.sheldon-header {
+  display: flex; align-items: center; gap: 12px; padding: 16px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  background: linear-gradient(180deg, rgba(135,141,255,.08), transparent);
+}
+.sheldon-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, #878dff, #46c98f);
+  display: flex; align-items: center; justify-content: center;
+  color: #0d1018; font-size: 20px; flex-shrink: 0;
+}
+.sheldon-title { flex: 1; line-height: 1.2; }
+.sheldon-title h3 { margin: 0; font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; color: #f5f6fa; }
+.sheldon-title span { font-size: 12px; color: #8a90a2; }
+.sheldon-dot { width: 7px; height: 7px; border-radius: 50%; background: #46c98f; display: inline-block; margin-right: 5px; }
+.sheldon-close { background: none; border: none; color: #8a90a2; cursor: pointer; font-size: 24px; padding: 2px 6px; line-height: 1; border-radius: 8px; }
+.sheldon-close:hover { color: #f5f6fa; background: rgba(255,255,255,.06); }
+
+.sheldon-messages { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.sheldon-messages::-webkit-scrollbar { width: 6px; }
+.sheldon-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 3px; }
+
+.sheldon-msg { max-width: 86%; font-size: 14px; line-height: 1.55; }
+.sheldon-msg.user { align-self: flex-end; background: linear-gradient(135deg, #878dff, #6f76ff); color: #0d1018; font-weight: 500; padding: 10px 14px; border-radius: 16px 16px 4px 16px; }
+.sheldon-msg.bot { align-self: flex-start; background: #1b2130; color: #dfe2ea; padding: 11px 15px; border-radius: 16px 16px 16px 4px; border: 1px solid rgba(255,255,255,.05); }
+.sheldon-msg.bot p { margin: 0 0 8px; } .sheldon-msg.bot p:last-child { margin-bottom: 0; }
+.sheldon-msg.bot ul { margin: 6px 0; padding-left: 18px; } .sheldon-msg.bot li { margin-bottom: 4px; }
+.sheldon-msg.bot strong { color: #f5f6fa; }
+.sheldon-msg.error { align-self: flex-start; background: rgba(255,90,90,.1); border: 1px solid rgba(255,90,90,.25); color: #ff9a9a; padding: 11px 15px; border-radius: 14px; }
+
+.sheldon-chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 18px 4px; }
+.sheldon-chip { background: rgba(135,141,255,.1); border: 1px solid rgba(135,141,255,.25); color: #b6baff; font-size: 12.5px; padding: 7px 12px; border-radius: 20px; cursor: pointer; font-family: inherit; transition: background .15s; }
+.sheldon-chip:hover { background: rgba(135,141,255,.2); }
+
+.sheldon-typing { display: flex; gap: 5px; align-self: flex-start; padding: 13px 16px; background: #1b2130; border-radius: 16px 16px 16px 4px; }
+.sheldon-typing span { width: 7px; height: 7px; border-radius: 50%; background: #878dff; animation: sheldonBlink 1.2s infinite both; }
+.sheldon-typing span:nth-child(2) { animation-delay: .2s; }
+.sheldon-typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes sheldonBlink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+
+.sheldon-input { display: flex; align-items: flex-end; gap: 8px; padding: 12px 14px; border-top: 1px solid rgba(255,255,255,.06); background: #0f131c; }
+.sheldon-input textarea { flex: 1; resize: none; background: #1b2130; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; color: #f5f6fa; font-family: inherit; font-size: 14px; padding: 10px 12px; max-height: 120px; line-height: 1.4; outline: none; }
+.sheldon-input textarea:focus { border-color: rgba(135,141,255,.5); }
+.sheldon-input textarea::placeholder { color: #6a7186; }
+.sheldon-send { width: 40px; height: 40px; border-radius: 11px; border: none; cursor: pointer; background: linear-gradient(135deg, #878dff, #46c98f); color: #0d1018; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity .15s; }
+.sheldon-send:disabled { opacity: .4; cursor: default; }
+
+@media (max-width: 480px) {
+  #sheldonPanel { width: 100vw; height: 100vh; max-height: 100vh; bottom: 0; right: 0; border-radius: 0; }
+  #sheldonFab { bottom: 18px; right: 18px; }
+}
+  </style>
 </head>
 <body>
  <!-- ── MOBILE HEADER ── -->
@@ -3930,6 +4005,175 @@ supa.auth.onAuthStateChange(function(event, session){
   if(session) startApp();
   else if(event === "SIGNED_OUT") location.reload();
 });
+  /* ============ Sheldon Coach ============ */
+var sheldonHistory = [];
+var sheldonBusy = false;
+var sheldonGreeted = false;
+
+function openSheldon() {
+  document.getElementById('sheldonPanel').classList.add('open');
+  document.getElementById('sheldonFab').classList.add('hidden');
+  if (!sheldonGreeted) {
+    sheldonRender('bot', "Hey — I'm Sheldon, your GMAT coach. I can see your dashboard data, so ask me about your progress, weak spots, or what to study next.");
+    sheldonGreeted = true;
+  }
+  setTimeout(function(){ document.getElementById('sheldonInput').focus(); }, 100);
+}
+function closeSheldon() {
+  document.getElementById('sheldonPanel').classList.remove('open');
+  document.getElementById('sheldonFab').classList.remove('hidden');
+}
+function sheldonGrow(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
+function sheldonKeydown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sheldonSend(); } }
+function sheldonAsk(text) { document.getElementById('sheldonInput').value = text; sheldonSend(); }
+
+function sheldonEscape(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function sheldonFormat(raw) {
+  var text = sheldonEscape(raw).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  var lines = text.split(/\n/), html = '', inList = false;
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (/^[-•*]\s+/.test(line)) {
+      if (!inList) { html += '<ul>'; inList = true; }
+      html += '<li>' + line.replace(/^[-•*]\s+/, '') + '</li>';
+    } else {
+      if (inList) { html += '</ul>'; inList = false; }
+      if (line) html += '<p>' + line + '</p>';
+    }
+  }
+  if (inList) html += '</ul>';
+  return html || '<p></p>';
+}
+function sheldonRender(role, text) {
+  var wrap = document.getElementById('sheldonMessages');
+  var div = document.createElement('div');
+  div.className = 'sheldon-msg ' + role;
+  if (role === 'bot') div.innerHTML = sheldonFormat(text);
+  else div.textContent = text;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+function sheldonTyping(on) {
+  var wrap = document.getElementById('sheldonMessages');
+  var existing = document.getElementById('sheldonTyping');
+  if (on && !existing) {
+    var t = document.createElement('div');
+    t.className = 'sheldon-typing'; t.id = 'sheldonTyping';
+    t.innerHTML = '<span></span><span></span><span></span>';
+    wrap.appendChild(t); wrap.scrollTop = wrap.scrollHeight;
+  } else if (!on && existing) { existing.remove(); }
+}
+
+function buildSheldonContext() {
+  // ---- all-time total ----
+  var totalMins = sessions.reduce(function(a, s){ return a + s.mins; }, 0);
+
+  // ---- this week (mirrors render(): Mon–Sun, weekday 3h / weekend 6h) ----
+  var ws = startOfWeek(today), weekMins = 0, weekTargetMins = 0;
+  for (var i = 0; i < 7; i++) {
+    var wd = addDays(ws, i);
+    weekMins += minsOn(dateStr(wd));
+    weekTargetMins += targetFor(wd);
+  }
+
+  // ---- streak (mirrors render(): consecutive days back from today with any minutes) ----
+  var streak = 0;
+  var cur = minsOn(dateStr(today)) > 0 ? new Date(today) : addDays(today, -1);
+  while (minsOn(dateStr(cur)) > 0) { streak++; cur = addDays(cur, -1); }
+
+  // ---- consistency (mirrors render(): % of prep days at ≥80% of target since 25 Apr 2026) ----
+  var prepStart = new Date(2026, 3, 25); prepStart.setHours(0, 0, 0, 0);
+  var consistentDays = 0, totalDays = 0, c = new Date(prepStart);
+  while (c <= today) {
+    totalDays++;
+    var m = minsOn(dateStr(c));
+    if (m > 0 && m >= targetFor(c) * 0.8) consistentDays++;
+    c = addDays(c, 1);
+  }
+  var consistency = totalDays > 0 ? Math.min(100, Math.round(consistentDays / totalDays * 100)) : 0;
+
+  // ---- exam date + days left (same source as updateExamCountdown) ----
+  var examDate = localStorage.getItem("gmat_exam_date") || null;
+  var daysLeft = null;
+  if (examDate) {
+    var ep = examDate.split("-").map(Number);
+    daysLeft = Math.max(0, Math.ceil((new Date(ep[0], ep[1]-1, ep[2]) - today) / 86400000));
+  }
+
+  // ---- topic totals, in hours (1 decimal) ----
+  var topicMins = {};
+  sessions.forEach(function(s){ topicMins[s.topic] = (topicMins[s.topic] || 0) + s.mins; });
+  var topicTotals = {};
+  Object.keys(topicMins).forEach(function(t){ topicTotals[t] = +(topicMins[t] / 60).toFixed(1); });
+
+  // ---- latest mock (mockScores is kept sorted ascending by date) ----
+  var latestMock = (window.mockScores && window.mockScores.length)
+    ? window.mockScores[window.mockScores.length - 1].score
+    : null;
+
+  // ---- recent notes (newest first; sessions arrive date-desc from loadSessions) ----
+  var recentNotes = sessions
+    .filter(function(s){ return s.notes; })
+    .slice(0, 5)
+    .map(function(s){ return s.notes; });
+
+  return {
+    targetScore: TARGET_SCORE,
+    examDate:    examDate,
+    daysLeft:    daysLeft,
+    totalHours:  +(totalMins / 60).toFixed(1),
+    streak:      streak,
+    weekHours:   +(weekMins / 60).toFixed(1),
+    weekTarget:  +(weekTargetMins / 60).toFixed(1),
+    consistency: consistency,
+    latestMock:  latestMock,
+    topicTotals: topicTotals,
+    recentNotes: recentNotes
+  };
+}
+
+function sheldonSend() {
+  if (sheldonBusy) return;
+  var input = document.getElementById('sheldonInput');
+  var msg = input.value.trim();
+  if (!msg) return;
+
+  var chips = document.getElementById('sheldonChips');
+  if (chips) chips.style.display = 'none';
+
+  sheldonRender('user', msg);
+  sheldonHistory.push({ role: 'user', content: msg });
+  input.value = ''; sheldonGrow(input);
+
+  sheldonBusy = true;
+  document.getElementById('sheldonSend').disabled = true;
+  sheldonTyping(true);
+
+  supa.functions.invoke('sheldon', {
+    body: {
+      message: msg,
+      context: buildSheldonContext(),
+      history: sheldonHistory.slice(0, -1).slice(-6)
+    }
+  }).then(function(res) {
+    sheldonTyping(false);
+    var reply = res && res.data && res.data.reply;
+    var err = (res && res.data && res.data.error) || (res && res.error && res.error.message);
+    if (reply) {
+      sheldonRender('bot', reply);
+      sheldonHistory.push({ role: 'assistant', content: reply });
+    } else {
+      sheldonRender('error', 'Sheldon hit a snag: ' + (err || 'no response') + '. Try again in a moment.');
+    }
+  }).catch(function(e) {
+    sheldonTyping(false);
+    sheldonRender('error', 'Network error: ' + e.message);
+  }).then(function() {
+    sheldonBusy = false;
+    document.getElementById('sheldonSend').disabled = false;
+    document.getElementById('sheldonInput').focus();
+  });
+}
 </script>
 
 <!-- MIGRATION MODAL -->
@@ -4509,6 +4753,32 @@ supa.auth.onAuthStateChange(function(event, session){
   ready(inject);
 })();
 </script>
+
+  <!-- Sheldon Coach -->
+<button id="sheldonFab" onclick="openSheldon()" title="Ask Sheldon" aria-label="Ask Sheldon">
+  <i class="ti ti-sparkles"></i>
+</button>
+
+<div id="sheldonPanel" role="dialog" aria-label="Sheldon GMAT Coach">
+  <div class="sheldon-header">
+    <div class="sheldon-avatar"><i class="ti ti-sparkles"></i></div>
+    <div class="sheldon-title">
+      <h3>Sheldon</h3>
+      <span><span class="sheldon-dot"></span>GMAT Coach</span>
+    </div>
+    <button class="sheldon-close" onclick="closeSheldon()" aria-label="Close">&times;</button>
+  </div>
+  <div class="sheldon-messages" id="sheldonMessages"></div>
+  <div class="sheldon-chips" id="sheldonChips">
+    <button class="sheldon-chip" onclick="sheldonAsk(this.textContent)">What's my weakest topic?</button>
+    <button class="sheldon-chip" onclick="sheldonAsk(this.textContent)">Am I on track?</button>
+    <button class="sheldon-chip" onclick="sheldonAsk(this.textContent)">Plan my week</button>
+  </div>
+  <div class="sheldon-input">
+    <textarea id="sheldonInput" rows="1" placeholder="Ask Sheldon anything…" onkeydown="sheldonKeydown(event)" oninput="sheldonGrow(this)"></textarea>
+    <button class="sheldon-send" id="sheldonSend" onclick="sheldonSend()" aria-label="Send"><i class="ti ti-send"></i></button>
+  </div>
+</div>
 
 </body>
 </html>
