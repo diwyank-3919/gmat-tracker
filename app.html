@@ -2896,7 +2896,7 @@ function renderTrash(trashed){
     return '<div class="sess-item" style="opacity:0.80">'
       +'<span class="sess-color" style="background:'+(TC[s.topic]||"#888")+'"></span>'
       +'<div class="sess-info"><span class="sess-topic">'+s.topic+'</span><span class="sess-date-tag">'+dateLabel+'</span></div>'
-      +'<span class="sess-dur">'+fmtH(s.mins)+'</span>'
+     +'<span class="sess-dur">'+fmtH(s.mins)+'</span>'
       +'<button data-id="'+s.id+'" class="trash-restore" style="background:rgba(139,124,248,0.12);border:1px solid rgba(139,124,248,0.25);border-radius:7px;padding:4px 8px;cursor:pointer;color:var(--accent-bright);font-size:11px;font-weight:650;margin-right:4px">Restore</button>'
       +'<button data-id="'+s.id+'" class="trash-perm" style="background:var(--red-soft);border:1px solid rgba(251,113,133,0.25);border-radius:7px;padding:4px 8px;cursor:pointer;color:var(--red);font-size:11px;font-weight:650">Forever</button>'
       +'</div>';
@@ -3286,6 +3286,7 @@ function renderSessions(){
       +(sessFilter!=="today"?'<span class="sess-date-tag">'+dateLabel+'</span>':'')
       +'</div>'
       +'<span class="sess-dur">'+fmtH(s.mins)+'</span>'
+      +'<button class="sc-note-btn'+(s.notes?' has-note':'')+'" data-note-id="'+s.id+'" title="'+(s.notes?'Edit note':'Add note')+'"><i class="ti ti-note" style="font-size:13px"></i></button>'
       +'<button class="sess-del" data-id="'+s.id+'" title="Delete"><i class="ti ti-trash" style="font-size:12px"></i></button>'
       +'</div>';
   }).join("");
@@ -3474,7 +3475,7 @@ function showDayDetail(ds){
   var total=sesses.reduce(function(a,s){return a+s.mins;},0);
   document.getElementById("day-detail-total").textContent=total?fmtH(total)+" total":"";
   if(!sesses.length){list.innerHTML='<div class="empty-state">No sessions on this day</div>';}
-  else{list.innerHTML=sesses.map(function(s){return '<div class="sess-item"><span class="sess-color" style="background:'+(TC[s.topic]||"#888")+'"></span><span class="sess-topic" style="flex:1">'+s.topic+'</span><span class="sess-dur">'+fmtH(s.mins)+'</span></div>';}).join("");}
+  else{list.innerHTML=sesses.map(function(s){return '<div class="sess-item"><span class="sess-color" style="background:'+(TC[s.topic]||"#888")+'"></span><span class="sess-topic" style="flex:1">'+s.topic+'</span><span class="sess-dur">'+fmtH(s.mins)+'</span><button class="sc-note-btn'+(s.notes?' has-note':'')+'" data-note-id="'+s.id+'" title="'+(s.notes?'Edit note':'Add note')+'"><i class="ti ti-note"></i></button></div>';}).join("");}
   card.style.display="block";card.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 
@@ -3499,7 +3500,7 @@ function renderFullLog(){
     var d=parseLocal(ds);var label=ds===dateStr(today)?"Today":d.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
     var dayTotal=byDate[ds].reduce(function(a,s){return a+s.mins;},0);
     var tgt2=targetFor(d),met2=dayTotal>=tgt2;
-    var rows=byDate[ds].map(function(s){return '<div class="sess-item" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07)"><span class="sess-color" style="background:'+(TC[s.topic]||"#888")+';box-shadow:0 0 5px '+(TC[s.topic]||"#888")+'"></span><span class="sess-topic" style="flex:1">'+s.topic+'</span><span class="sess-dur">'+fmtH(s.mins)+'</span><button data-id="'+s.id+'" class="log-del-btn" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.18);font-size:12px;padding:3px;border-radius:5px"><i class="ti ti-trash"></i></button></div>';}).join("");
+    var rows=byDate[ds].map(function(s){return '<div class="sess-item" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07)"><span class="sess-color" style="background:'+(TC[s.topic]||"#888")+';box-shadow:0 0 5px '+(TC[s.topic]||"#888")+'"></span><span class="sess-topic" style="flex:1">'+s.topic+'</span><span class="sess-dur">'+fmtH(s.mins)+'</span><button class="sc-note-btn'+(s.notes?' has-note':'')+'" data-note-id="'+s.id+'" title="'+(s.notes?'Edit note':'Add note')+'"><i class="ti ti-note"></i></button><button data-id="'+s.id+'" class="log-del-btn" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.18);font-size:12px;padding:3px;border-radius:5px"><i class="ti ti-trash"></i></button></div>';}).join("");
     return '<div style="margin-bottom:11px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;font-weight:700;color:var(--text-primary)">'+label+'</span><span style="font-size:11px;font-weight:650;padding:2px 8px;border-radius:100px;background:'+(met2?'rgba(52,211,153,0.12)':'rgba(251,113,133,0.10)')+';color:'+(met2?'var(--green)':'var(--red)')+'">'+fmtH(dayTotal)+(met2?' ✓':'')+'</span></div>'+rows+'</div>';
   }).join('');
   el.querySelectorAll(".log-del-btn").forEach(function(btn){btn.addEventListener("click",function(){var id=this.getAttribute("data-id");delSession(id);setTimeout(renderFullLog,600);});});
@@ -4338,11 +4339,11 @@ supa.auth.onAuthStateChange(function(event, session){
       var list="";
       reliable.sort(function(a,b){return a.startHour-b.startHour;}).forEach(function(r){
         var col=TC[r.s.topic]||"#888", tag=r.crossDay?'<span class="dt-tag">late night</span>':'';
-        list+='<div class="dt-row"><span class="dt-dot" style="background:'+col+'"></span><span class="dt-row-topic">'+r.s.topic+tag+'</span><span class="dt-row-time">'+t12(r.start)+"–"+t12(r.end)+'</span><span class="dt-row-dur">'+fmtH(r.mins)+'</span></div>';
+        list+='<div class="dt-row"><span class="dt-dot" style="background:'+col+'"></span><span class="dt-row-topic">'+r.s.topic+tag+'</span><span class="dt-row-time">'+t12(r.start)+"–"+t12(r.end)+'</span><span class="dt-row-dur">'+fmtH(r.mins)+'</span><button class="sc-note-btn'+(r.s.notes?' has-note':'')+'" data-note-id="'+r.s.id+'" title="'+(r.s.notes?'Edit note':'Add note')+'"><i class="ti ti-note"></i></button></div>';
       });
       untimed.forEach(function(r){
         var col=TC[r.s.topic]||"#888";
-        list+='<div class="dt-row untimed"><span class="dt-dot" style="background:'+col+'"></span><span class="dt-row-topic">'+r.s.topic+'</span><span class="dt-row-time">time of day not recorded</span><span class="dt-row-dur">'+fmtH(r.mins)+'</span></div>';
+        list+='<div class="dt-row untimed"><span class="dt-dot" style="background:'+col+'"></span><span class="dt-row-topic">'+r.s.topic+'</span><span class="dt-row-time">time of day not recorded</span><span class="dt-row-dur">'+fmtH(r.mins)+'</span><button class="sc-note-btn'+(r.s.notes?' has-note':'')+'" data-note-id="'+r.s.id+'" title="'+(r.s.notes?'Edit note':'Add note')+'"><i class="ti ti-note"></i></button></div>';
       });
       html+='<div class="dt-list">'+list+'</div>';
     }
@@ -4419,6 +4420,87 @@ supa.auth.onAuthStateChange(function(event, session){
     document.getElementById("tlog-today").addEventListener("click",function(){setDate(dateStr(today));});
     paint();
   }
+  ready(inject);
+})();
+</script>
+
+  <!-- ── SESSION NOTES EDITOR ── -->
+<style>
+.sc-note-btn{background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.18);padding:3px;border-radius:6px;transition:color .12s,background .12s;display:inline-flex;align-items:center}
+.sc-note-btn:hover{color:var(--accent-bright);background:rgba(135,141,255,0.10)}
+.sc-note-btn.has-note{color:var(--accent-bright)}
+#sc-note-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.62);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:1001;align-items:center;justify-content:center;padding:20px}
+.scn-card{background:linear-gradient(155deg,#151a26,#1a2030);border:1px solid rgba(255,255,255,0.10);border-radius:18px;padding:22px 24px;max-width:440px;width:94%;box-shadow:0 32px 80px rgba(0,0,0,0.60),0 0 0 1px rgba(135,141,255,0.10)}
+.scn-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.scn-title{font-family:'Fraunces',serif;font-size:17px;font-weight:600;color:var(--text-primary);letter-spacing:-0.01em}
+.scn-sub{font-size:11.5px;color:var(--text-tertiary);margin-top:3px}
+.scn-close{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;width:28px;height:28px;flex-shrink:0;cursor:pointer;color:var(--text-tertiary);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.scn-close:hover{background:var(--red-soft);color:var(--red);border-color:rgba(251,113,133,0.25)}
+.scn-ta{width:100%;min-height:104px;resize:vertical;font-family:'Hanken Grotesk',sans-serif;font-size:13.5px;line-height:1.5;color:var(--text-primary);background:var(--bg-input);border:1px solid var(--border);border-radius:11px;padding:11px 13px;outline:none;transition:border-color .15s,box-shadow .15s}
+.scn-ta:focus{border-color:var(--border-accent);box-shadow:0 0 0 3px rgba(135,141,255,0.14)}
+.scn-actions{display:flex;gap:9px;margin-top:16px}
+.scn-save{flex:1;padding:10px;background:#878dff;color:#0f1118;border:none;border-radius:10px;font-family:'Hanken Grotesk',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:filter .15s}
+.scn-save:hover{filter:brightness(1.08)}
+.scn-save:disabled{opacity:.6;cursor:not-allowed}
+.scn-cancel{padding:10px 16px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;font-family:'Hanken Grotesk',sans-serif;font-size:13px;cursor:pointer;color:var(--text-secondary)}
+</style>
+<script>
+(function(){
+  function ready(fn){ if(document.body) fn(); else document.addEventListener("DOMContentLoaded",fn); }
+  function inject(){
+    if(document.getElementById("sc-note-modal")) return;
+    var m=document.createElement("div"); m.id="sc-note-modal";
+    m.innerHTML='<div class="scn-card">'
+      +'<div class="scn-head"><div><div class="scn-title">Session note</div><div class="scn-sub" id="scn-sub"></div></div>'
+      +'<button class="scn-close" onclick="closeNoteEditor()"><i class="ti ti-x"></i></button></div>'
+      +'<textarea class="scn-ta" id="scn-ta" placeholder="What did you work on? What went well, what to revisit…"></textarea>'
+      +'<div class="scn-actions"><button class="scn-save" id="scn-save"><i class="ti ti-check"></i> Save note</button>'
+      +'<button class="scn-cancel" onclick="closeNoteEditor()">Cancel</button></div></div>';
+    m.addEventListener("click",function(e){ if(e.target===m) closeNoteEditor(); });
+    document.body.appendChild(m);
+  }
+  var editingId=null;
+  window.openNoteEditor=function(id){
+    inject();
+    var list=(typeof sessions!=="undefined")?sessions:[];
+    var s=null; for(var i=0;i<list.length;i++){ if(String(list[i].id)===String(id)){ s=list[i]; break; } }
+    if(!s) return;
+    editingId=s.id;
+    var dl=(s.date===dateStr(today))?"Today":parseLocal(s.date).toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"});
+    document.getElementById("scn-sub").textContent=s.topic+" · "+dl+" · "+fmtH(s.mins);
+    var ta=document.getElementById("scn-ta"); ta.value=s.notes||"";
+    document.getElementById("sc-note-modal").style.display="flex";
+    setTimeout(function(){ta.focus();},30);
+  };
+  window.closeNoteEditor=function(){ var m=document.getElementById("sc-note-modal"); if(m) m.style.display="none"; editingId=null; };
+  function save(){
+    if(editingId==null) return;
+    var ta=document.getElementById("scn-ta"), btn=document.getElementById("scn-save");
+    var val=ta.value.trim();
+    btn.disabled=true; btn.innerHTML='<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Saving…';
+    if(typeof setStatus==="function") setStatus("saving");
+    supa.from("sessions").update({notes: val || null}).eq("id",editingId)
+      .then(function(res){
+        btn.disabled=false; btn.innerHTML='<i class="ti ti-check"></i> Save note';
+        if(res.error){ if(typeof setStatus==="function") setStatus("error"); alert("Couldn't save note: "+(res.error.message||res.error)); return; }
+        closeNoteEditor();
+        if(typeof loadSessions==="function") loadSessions();
+        if(typeof showToast==="function") showToast("📝","Note saved","Your session note was updated.");
+      })
+      .catch(function(err){ btn.disabled=false; btn.innerHTML='<i class="ti ti-check"></i> Save note'; if(typeof setStatus==="function") setStatus("error"); alert("Couldn't save note: "+(err.message||err)); });
+  }
+  document.addEventListener("click",function(e){
+    if(!e.target.closest) return;
+    var b=e.target.closest(".sc-note-btn");
+    if(b){ e.stopPropagation(); openNoteEditor(b.getAttribute("data-note-id")); return; }
+    if(e.target.closest("#scn-save")) save();
+  });
+  document.addEventListener("keydown",function(e){
+    var m=document.getElementById("sc-note-modal");
+    if(!m||m.style.display!=="flex") return;
+    if(e.key==="Escape") closeNoteEditor();
+    if((e.metaKey||e.ctrlKey)&&e.key==="Enter") save();
+  });
   ready(inject);
 })();
 </script>
