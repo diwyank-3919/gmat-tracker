@@ -2109,104 +2109,103 @@ body::before{
     </div>
 
     <!-- LOG + SESSIONS -->
-    <div class="main-grid">
-      <div class="card">
-       <div class="card-head">
-          <div class="card-title"><i class="ti ti-plus-circle"></i> Log a session</div>
-        </div>
-        <div class="timer-panel" id="timer-panel">
-          <div class="timer-head">
-            <div class="timer-label"><i class="ti ti-stopwatch"></i> Timed session</div>
-            <span class="timer-status" id="timer-status">Idle</span>
-          </div>
-          <div class="timer-display" id="timer-display">00:00:00</div>
-          <div class="timer-controls">
-            <select id="timer-topic" class="timer-select">
-              <option>Quant</option><option>RC</option><option>CR</option><option>DI</option><option>Mock test</option><option>Review</option>
-            </select>
-            <button id="timer-start-btn" class="timer-btn primary" onclick="timerStart()"><i class="ti ti-player-play"></i> Start</button>
-            <button id="timer-pause-btn" class="timer-btn" onclick="timerPause()" style="display:none;background:rgba(255,255,255,0.08)"><i class="ti ti-player-pause"></i> Pause</button>
-            <button id="timer-stop-btn" class="timer-btn stop" onclick="timerStop()" style="display:none"><i class="ti ti-check"></i> Save</button>
-            <button id="timer-discard-btn" class="timer-btn ghost" onclick="timerDiscard()" style="display:none" title="Discard"><i class="ti ti-x"></i></button>
-          </div>
-          <input type="text" id="timer-notes" placeholder="Quick note about this session… (optional)" maxlength="200"
-          style="margin-top:8px;width:100%;height:34px;font-size:12.5px;font-family:'Hanken Grotesk',sans-serif;font-weight:500;padding:0 11px;border:1px solid var(--border);border-radius:9px;background:var(--bg-input);color:var(--text-primary);outline:none;transition:border-color 0.15s"
-          onfocus="this.style.borderColor='rgba(135,141,255,0.45)'" onblur="this.style.borderColor='var(--border)'">
-        </div>
-        <div class="timer-divider"><span>or log manually</span></div>
-        <div class="form-grid">
-          <div class="field">
-            <label>Date</label>
-            <div style="display:flex;align-items:center;gap:6px;position:relative">
-              <button onclick="shiftDate(-1)" title="Previous day" style="width:32px;height:36px;flex-shrink:0;border:1px solid var(--border);border-radius:9px;background:rgba(255,255,255,0.05);color:var(--text-secondary);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(139,124,248,0.45)';this.style.color='var(--accent-bright)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'"><i class="ti ti-chevron-left"></i></button>
-              <div id="date-display" onclick="togglePicker()" style="flex:1;height:36px;border:1px solid var(--border);border-radius:9px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--text-primary);transition:all 0.15s;user-select:none" onmouseover="this.style.borderColor='rgba(139,124,248,0.45)'" onmouseout="this.style.borderColor='var(--border)'">
-                <i class="ti ti-calendar" style="color:var(--accent-bright);font-size:14px"></i>
-                <span id="date-display-text">Select date</span>
-              </div>
-              <button onclick="shiftDate(1)" title="Next day" style="width:32px;height:36px;flex-shrink:0;border:1px solid var(--border);border-radius:9px;background:rgba(255,255,255,0.05);color:var(--text-secondary);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(139,124,248,0.45)';this.style.color='var(--accent-bright)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'"><i class="ti ti-chevron-right"></i></button>
-              <input type="hidden" id="inp-date">
-              <div id="custom-picker" style="display:none;position:fixed;top:0;left:0;z-index:9999;background:rgba(15,12,26,0.97);backdrop-filter:blur(32px) saturate(200%);-webkit-backdrop-filter:blur(32px) saturate(200%);border:1px solid rgba(139,124,248,0.25);border-radius:13px;box-shadow:0 16px 48px rgba(0,0,0,0.60),0 0 0 1px rgba(139,124,248,0.10);padding:0;width:190px;overflow:hidden;font-family:'Satoshi',sans-serif">
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 8px 5px">
-                  <button onclick="pickerNav(-1)" style="width:24px;height:24px;border:none;border-radius:6px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);font-size:12px;transition:all 0.1s" onmouseover="this.style.background='rgba(139,124,248,0.15)';this.style.color='var(--accent-bright)'" onmouseout="this.style.background='transparent';this.style.color='var(--text-tertiary)'"><i class="ti ti-chevron-left"></i></button>
-                  <div id="picker-month-year" style="font-size:12px;font-weight:700;color:var(--text-primary);letter-spacing:-0.2px"></div>
-                  <button onclick="pickerNav(1)" style="width:24px;height:24px;border:none;border-radius:6px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);font-size:12px;transition:all 0.1s" onmouseover="this.style.background='rgba(139,124,248,0.15)';this.style.color='var(--accent-bright)'" onmouseout="this.style.background='transparent';this.style.color='var(--text-tertiary)'"><i class="ti ti-chevron-right"></i></button>
-                </div>
-                <div style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 6px 1px">
-                  <div style="text-align:center;font-size:9px;font-weight:700;color:var(--text-muted);padding:2px 0">M</div>
-                  <div style="text-align:center;font-size:9px;font-weight:700;color:var(--text-muted);padding:2px 0">T</div>
-                  <div style="text-align:center;font-size:9px;font-weight:700;color:var(--text-muted);padding:2px 0">W</div>
-                  <div style="text-align:center;font-size:9px;font-weight:700;color:var(--text-muted);padding:2px 0">T</div>
-                  <div style="text-align:center;font-size:9px;font-weight:700;color:var(--text-muted);padding:2px 0">F</div>
-                  <div style="text-align:center;font-size:9px;font-weight:700;color:rgba(139,124,248,0.55);padding:2px 0">S</div>
-                  <div style="text-align:center;font-size:9px;font-weight:700;color:rgba(139,124,248,0.55);padding:2px 0">S</div>
-                </div>
-                <div id="picker-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;padding:0 6px 5px"></div>
-                <div style="border-top:1px solid rgba(255,255,255,0.07);padding:5px 6px;display:flex;gap:3px">
-                  <button onclick="pickerSelectDate(dateStr(today))" style="flex:1;padding:4px 0;font-size:10px;font-weight:700;border:1px solid rgba(139,124,248,0.30);border-radius:6px;background:rgba(139,124,248,0.14);color:var(--accent-bright);cursor:pointer;font-family:inherit">Today</button>
-                  <button onclick="pickerSelectDate(dateStr(addDays(today,-1)))" style="flex:1;padding:4px 0;font-size:10px;font-weight:600;border:1px solid rgba(255,255,255,0.08);border-radius:6px;background:rgba(255,255,255,0.05);color:var(--text-secondary);cursor:pointer;font-family:inherit">Yest.</button>
-                  <button onclick="closePicker()" style="flex:1;padding:4px 0;font-size:10px;font-weight:600;border:1px solid rgba(255,255,255,0.06);border-radius:6px;background:rgba(255,255,255,0.03);color:var(--text-tertiary);cursor:pointer;font-family:inherit">✕</button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="field">
-            <label>Topic</label>
-            <select id="inp-topic">
-              <option>Quant</option><option>RC</option><option>CR</option>
-              <option>DI</option><option>Mock test</option><option>Review</option>
-            </select>
-          </div>
-          <div class="field full">
-            <label>Duration</label>
-            <div class="dur-wrap">
-              <input type="number" id="inp-hours" min="0" max="12" placeholder="0">
-              <span>hours</span>
-              <input type="number" id="inp-mins" min="0" max="59" placeholder="0">
-              <span>minutes</span>
-            </div>
-          </div>
-          <div class="field full">
-          <label>Notes <span style="color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">optional — what did you work on?</span></label>
-          <input type="text" id="inp-notes" placeholder="e.g. Struggled with probability, RC timing felt off…" maxlength="200">
-          </div>
-          <button class="log-btn" onclick="addSession()"><i class="ti ti-plus"></i> Add session</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head">
-          <div class="card-title"><i class="ti ti-list"></i> Sessions log</div>
-          <div style="font-size:11px;font-weight:650;color:var(--accent-bright)" id="sess-total-label"></div>
-        </div>
-        <div class="sess-tabs">
-          <button class="sess-tab active" onclick="setSessFilter('today')" id="sf-today">Today</button>
-          <button class="sess-tab" onclick="setSessFilter('week')" id="sf-week">This week</button>
-          <button class="sess-tab" onclick="setSessFilter('all')" id="sf-all">All time</button>
-        </div>
-        <div class="sess-scroll" id="sessions-list"><div class="empty-state">No sessions yet</div></div>
-      </div>
+<div class="main-grid">
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><i class="ti ti-plus-circle"></i> Log a session</div>
     </div>
+    <div class="timer-panel" id="timer-panel" style="padding:11px 14px 10px;margin-bottom:10px">
+      <div class="timer-head">
+        <div class="timer-label"><i class="ti ti-stopwatch"></i> Timed session</div>
+        <span class="timer-status" id="timer-status">Idle</span>
+      </div>
+      <div class="timer-display" id="timer-display" style="margin:6px 0 10px;font-size:34px">00:00:00</div>
+      <div class="timer-controls">
+        <select id="timer-topic" class="timer-select">
+          <option>Quant</option><option>RC</option><option>CR</option><option>DI</option><option>Mock test</option><option>Review</option>
+        </select>
+        <button id="timer-start-btn" class="timer-btn primary" onclick="timerStart()"><i class="ti ti-player-play"></i> Start</button>
+        <button id="timer-pause-btn" class="timer-btn" onclick="timerPause()" style="display:none;background:rgba(255,255,255,0.08)"><i class="ti ti-player-pause"></i> Pause</button>
+        <button id="timer-stop-btn" class="timer-btn stop" onclick="timerStop()" style="display:none"><i class="ti ti-check"></i> Save</button>
+        <button id="timer-discard-btn" class="timer-btn ghost" onclick="timerDiscard()" style="display:none" title="Discard"><i class="ti ti-x"></i></button>
+      </div>
+      <input type="text" id="timer-notes" placeholder="Quick note about this session… (optional)" maxlength="200"
+        style="margin-top:7px;width:100%;height:32px;font-size:12px;font-family:'Hanken Grotesk',sans-serif;font-weight:500;padding:0 11px;border:1px solid var(--border);border-radius:9px;background:var(--bg-input);color:var(--text-primary);outline:none;transition:border-color 0.15s"
+        onfocus="this.style.borderColor='rgba(135,141,255,0.45)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+    <div class="timer-divider"><span>or log manually</span></div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Date</label>
+        <div style="display:flex;align-items:center;gap:6px;position:relative">
+          <button onclick="shiftDate(-1)" title="Previous day" style="width:32px;height:36px;flex-shrink:0;border:1px solid var(--border);border-radius:9px;background:rgba(255,255,255,0.05);color:var(--text-secondary);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(139,124,248,0.45)';this.style.color='var(--accent-bright)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'"><i class="ti ti-chevron-left"></i></button>
+          <div id="date-display" onclick="togglePicker()" style="flex:1;height:36px;border:1px solid var(--border);border-radius:9px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--text-primary);transition:all 0.15s;user-select:none" onmouseover="this.style.borderColor='rgba(139,124,248,0.45)'" onmouseout="this.style.borderColor='var(--border)'">
+            <i class="ti ti-calendar" style="color:var(--accent-bright);font-size:14px"></i>
+            <span id="date-display-text">Select date</span>
+          </div>
+          <button onclick="shiftDate(1)" title="Next day" style="width:32px;height:36px;flex-shrink:0;border:1px solid var(--border);border-radius:9px;background:rgba(255,255,255,0.05);color:var(--text-secondary);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(139,124,248,0.45)';this.style.color='var(--accent-bright)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'"><i class="ti ti-chevron-right"></i></button>
+          <input type="hidden" id="inp-date">
+          <div id="custom-picker" style="display:none;position:fixed;top:0;left:0;z-index:9999;background:rgba(15,12,26,0.97);backdrop-filter:blur(32px) saturate(200%);-webkit-backdrop-filter:blur(32px) saturate(200%);border:1px solid rgba(139,124,248,0.25);border-radius:13px;box-shadow:0 16px 48px rgba(0,0,0,0.60),0 0 0 1px rgba(139,124,248,0.10);padding:0;width:190px;overflow:hidden;font-family:'Satoshi',sans-serif">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 8px 5px">
+              <button onclick="pickerNav(-1)" style="width:24px;height:24px;border:none;border-radius:6px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);font-size:12px;transition:all 0.1s" onmouseover="this.style.background='rgba(139,124,248,0.15)';this.style.color='var(--accent-bright)'" onmouseout="this.style.background='transparent';this.style.color='var(--text-tertiary)'"><i class="ti ti-chevron-left"></i></button>
+              <div id="picker-month-year" style="font-size:12px;font-weight:700;color:var(--text-primary);letter-spacing:-0.2px"></div>
+              <button onclick="pickerNav(1)" style="width:24px;height:24px;border:none;border-radius:6px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);font-size:12px;transition:all 0.1s" onmouseover="this.style.background='rgba(139,124,248,0.15)';this.style.color='var(--accent-bright)'" onmouseout="this.style.background='transparent';this.style.color='var(--text-tertiary)'"><i class="ti ti-chevron-right"></i></button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 6px 1px">
+              <div style="text-align:center;font-size:9px;font-weight:700;color:var(--text-muted);padding:2px 0">M</div>
+              <div style="text-align:center;font-size:9px;font-weight:700;color:var(--text-muted);padding:2px 0">T</div>
+              <div style="text-align:center;font-size:9px;font-weight:700;color:var(--text-muted);padding:2px 0">W</div>
+              <div style="text-align:center;font-size:9px;font-weight:700;color:var(--text-muted);padding:2px 0">T</div>
+              <div style="text-align:center;font-size:9px;font-weight:700;color:var(--text-muted);padding:2px 0">F</div>
+              <div style="text-align:center;font-size:9px;font-weight:700;color:rgba(139,124,248,0.55);padding:2px 0">S</div>
+              <div style="text-align:center;font-size:9px;font-weight:700;color:rgba(139,124,248,0.55);padding:2px 0">S</div>
+            </div>
+            <div id="picker-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;padding:0 6px 5px"></div>
+            <div style="border-top:1px solid rgba(255,255,255,0.07);padding:5px 6px;display:flex;gap:3px">
+              <button onclick="pickerSelectDate(dateStr(today))" style="flex:1;padding:4px 0;font-size:10px;font-weight:700;border:1px solid rgba(139,124,248,0.30);border-radius:6px;background:rgba(139,124,248,0.14);color:var(--accent-bright);cursor:pointer;font-family:inherit">Today</button>
+              <button onclick="pickerSelectDate(dateStr(addDays(today,-1)))" style="flex:1;padding:4px 0;font-size:10px;font-weight:600;border:1px solid rgba(255,255,255,0.08);border-radius:6px;background:rgba(255,255,255,0.05);color:var(--text-secondary);cursor:pointer;font-family:inherit">Yest.</button>
+              <button onclick="closePicker()" style="flex:1;padding:4px 0;font-size:10px;font-weight:600;border:1px solid rgba(255,255,255,0.06);border-radius:6px;background:rgba(255,255,255,0.03);color:var(--text-tertiary);cursor:pointer;font-family:inherit">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Topic</label>
+        <select id="inp-topic">
+          <option>Quant</option><option>RC</option><option>CR</option>
+          <option>DI</option><option>Mock test</option><option>Review</option>
+        </select>
+      </div>
+      <div class="field full">
+        <label>Duration</label>
+        <div class="dur-wrap">
+          <input type="number" id="inp-hours" min="0" max="12" placeholder="0">
+          <span>hours</span>
+          <input type="number" id="inp-mins" min="0" max="59" placeholder="0">
+          <span>minutes</span>
+        </div>
+      </div>
+      <div class="field full">
+        <label>Notes <span style="color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">optional — what did you work on?</span></label>
+        <input type="text" id="inp-notes" placeholder="e.g. Struggled with probability, RC timing felt off…" maxlength="200">
+      </div>
+      <button class="log-btn" onclick="addSession()"><i class="ti ti-plus"></i> Add session</button>
+    </div>
+  </div>
 
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><i class="ti ti-list"></i> Sessions log</div>
+      <div style="font-size:11px;font-weight:650;color:var(--accent-bright)" id="sess-total-label"></div>
+    </div>
+    <div class="sess-tabs">
+      <button class="sess-tab active" onclick="setSessFilter('today')" id="sf-today">Today</button>
+      <button class="sess-tab" onclick="setSessFilter('week')" id="sf-week">This week</button>
+      <button class="sess-tab" onclick="setSessFilter('all')" id="sf-all">All time</button>
+    </div>
+    <div class="sess-scroll" id="sessions-list"><div class="empty-state">No sessions yet</div></div>
+  </div>
+</div>
     <!-- FILTERS -->
     <div class="filter-bar">
       <button class="fpill active" onclick="setView('week')" id="f-week">Week</button>
