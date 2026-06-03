@@ -4038,6 +4038,7 @@ var sheldonBusy = false;
 var sheldonGreeted = false;
 
 function openSheldon() {
+  sheldonInitTone();
   document.getElementById('sheldonPanel').classList.add('open');
   document.getElementById('sheldonFab').classList.add('hidden');
   if (!sheldonGreeted) {
@@ -4053,6 +4054,30 @@ function closeSheldon() {
 function sheldonGrow(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
 function sheldonKeydown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sheldonSend(); } }
 function sheldonAsk(text) { document.getElementById('sheldonInput').value = text; sheldonSend(); }
+
+function sheldonApplyToneUI() {
+  var tone = localStorage.getItem('sheldon_tone') || 'playful';
+  var btn = document.getElementById('sheldonTone');
+  var label = document.getElementById('sheldonToneLabel');
+  if (!btn || !label) return;
+  if (tone === 'focused') {
+    btn.classList.add('focused');
+    btn.querySelector('.ti').className = 'ti ti-target';
+    label.textContent = 'Focused';
+    btn.title = 'Focused — straight answers, no jokes. Tap for Playful.';
+  } else {
+    btn.classList.remove('focused');
+    btn.querySelector('.ti').className = 'ti ti-mood-smile';
+    label.textContent = 'Playful';
+    btn.title = 'Playful — a little wit. Tap for Focused.';
+  }
+}
+function sheldonInitTone() { sheldonApplyToneUI(); }
+function sheldonToggleTone() {
+  var tone = localStorage.getItem('sheldon_tone') || 'playful';
+  localStorage.setItem('sheldon_tone', tone === 'focused' ? 'playful' : 'focused');
+  sheldonApplyToneUI();
+}
 
 function sheldonEscape(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function sheldonFormat(raw) {
@@ -4806,6 +4831,7 @@ function sheldonSend() {
       <h3>Sheldon</h3>
       <span><span class="sheldon-dot"></span>GMAT Coach</span>
     </div>
+    <button class="sheldon-tone" id="sheldonTone" onclick="sheldonToggleTone()" title="Toggle tone"><i class="ti ti-mood-smile"></i><span id="sheldonToneLabel">Playful</span></button>
     <button class="sheldon-close" onclick="closeSheldon()" aria-label="Close">&times;</button>
   </div>
   <div class="sheldon-messages" id="sheldonMessages"></div>
