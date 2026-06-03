@@ -579,8 +579,9 @@ body::after{
   padding:13px 16px;box-shadow:0 16px 48px rgba(0,0,0,0.50),0 0 40px rgba(139,124,248,0.20);
   display:flex;align-items:center;gap:11px;min-width:270px;
   transform:translateY(120%);transition:transform 0.4s cubic-bezier(.34,1.56,.64,1),opacity 0.3s;opacity:0;
+  pointer-events:none;
 }
-#milestone-toast.show{transform:translateY(0);opacity:1}
+#milestone-toast.show{transform:translateY(0);opacity:1;pointer-events:auto}
 .toast-icon{font-size:24px;flex-shrink:0;animation:firePulse 1.5s ease-in-out infinite}
 .toast-title{font-size:13px;font-weight:750;color:var(--text-primary)}
 .toast-sub{font-size:10.5px;color:var(--text-secondary);margin-top:2px}
