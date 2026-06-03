@@ -1749,6 +1749,41 @@ body::before{
 .sb-logo:hover .sb-logo-icon{
   box-shadow:inset 0 0 0 1px rgba(135,141,255,0.30), 0 6px 20px rgba(135,141,255,0.20) !important;
 }
+    /* ── Ring-card actionable layer ── */
+.ring-card-hint{
+  font-family:'Satoshi',sans-serif;
+  font-size:11px; line-height:1.45;
+  color:var(--text-tertiary);
+  margin:6px auto 0; max-width:19ch;
+}
+.ring-card-action{
+  display:inline-flex; align-items:center; gap:5px;
+  margin-top:10px; padding:5px 11px;
+  font-family:'Satoshi',sans-serif;
+  font-size:11px; font-weight:500;
+  color:#a5a0d4;
+  background:rgba(135,141,255,0.10);
+  border:1px solid rgba(135,141,255,0.22);
+  border-radius:8px; cursor:pointer;
+  transition:background .18s ease,border-color .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+.ring-card-action:hover{
+  background:rgba(135,141,255,0.18);
+  border-color:rgba(135,141,255,0.40);
+  transform:translateY(-1px);
+  box-shadow:0 4px 14px -6px rgba(135,141,255,0.5);
+}
+.ring-card-action i{font-size:13px;line-height:1}
+.ring-card-action--warn{
+  color:#f1c47a;
+  background:rgba(251,191,36,0.10);
+  border-color:rgba(251,191,36,0.22);
+}
+.ring-card-action--warn:hover{
+  background:rgba(251,191,36,0.17);
+  border-color:rgba(251,191,36,0.40);
+  box-shadow:0 4px 14px -6px rgba(251,191,36,0.5);
+}
   </style>
 </head>
 <body>
@@ -2105,6 +2140,10 @@ body::before{
           </div>
         </div>
         <div class="ring-card-desc" id="rs-readiness-desc">Building</div>
+        <div class="ring-card-hint" id="rs-readiness-hint">Solid base. Drill timing to push higher.</div>
+        <button type="button" class="ring-card-action" id="rs-readiness-action" onclick="rsGenerateStudyPlan()">
+          <i class="ti ti-sparkles"></i> Generate Study Plan
+        </button>
       </div>
       <!-- Pace Ring -->
       <div class="ring-card" style="animation-delay:0.09s">
@@ -2127,6 +2166,10 @@ body::before{
           </div>
         </div>
         <div class="ring-card-desc" id="rs-pace-desc">Track weekly goal</div>
+        <div class="ring-card-hint" id="rs-pace-hint">A session today closes the gap.</div>
+        <button type="button" class="ring-card-action ring-card-action--warn" id="rs-pace-action" onclick="rsRecoverWeek()">
+          <i class="ti ti-refresh"></i> Recover This Week
+        </button>
       </div>
       <!-- Focus Ring -->
       <div class="ring-card" style="animation-delay:0.13s">
@@ -2149,6 +2192,7 @@ body::before{
           </div>
         </div>
         <div class="ring-card-desc" id="rs-focus-desc">Session quality</div>
+        <div class="ring-card-hint" id="rs-focus-hint">Trim distractions to lift quality.</div>
       </div>
       <!-- Burnout Meter -->
       <div class="ring-card" style="animation-delay:0.17s">
@@ -3210,8 +3254,7 @@ function render(){
   // ── RING SUITE ──
   setRing("rs-readiness",readiness,182);
   document.getElementById("rs-readiness-val").textContent=readiness+"%";
-  var readDesc=readiness>=80?"Excellent":readiness>=60?"Good":readiness>=40?"Building":"Starting";
-  document.getElementById("rs-readiness-desc").textContent=readDesc+" readiness";
+  decorateRing("readiness",readiness);
 
   // elapsed-aware pace: minutes so far vs target through today, not the whole week
   var paceWs=startOfWeek(today), paceElapsedTarget=0;
@@ -3221,14 +3264,14 @@ function render(){
   var paceValEl=document.getElementById("rs-pace-val");
   paceValEl.textContent=pacePct+"%";
   paceValEl.style.color=pacePct>=80?"#34d399":pacePct>=50?"#fbbf24":"#fb7185";
-  document.getElementById("rs-pace-desc").textContent=pacePct>=100?"On track":pacePct>=80?"On pace":pacePct>=50?"Slightly behind":"Behind pace";
+  decorateRing("pace",Math.min(100,pacePct));
 
   // Focus score = quality sessions / total (sessions ≥ 60 min = quality)
   var qualitySessions=sessions.filter(function(s){return s.mins>=60;}).length;
   var focusPct=sessions.length?Math.round(qualitySessions/sessions.length*100):0;
   setRing("rs-focus",focusPct,182);
   document.getElementById("rs-focus-val").textContent=focusPct+"%";
-  document.getElementById("rs-focus-desc").textContent=qualitySessions+" quality sessions";
+  decorateRing("focus",focusPct);
 
   // Burnout meter: avg daily hours last 7 days vs target
   var avg7=0; for(var b=0;b<7;b++) avg7+=minsOn(dateStr(addDays(today,-b)));
@@ -4879,6 +4922,65 @@ function sheldonSend() {
     <button class="sheldon-send" id="sheldonSend" onclick="sheldonSend()" aria-label="Send"><i class="ti ti-send"></i></button>
   </div>
 </div>
+
+  <script>/* ── Ring actionable states (verdict + hint, derived from the value) ── */
+var RING_STATES = {
+  readiness:function(v){
+    if(v>=80) return {verdict:'Test-ready', color:'#34d399', hint:"Hold your routine — you're in the zone."};
+    if(v>=60) return {verdict:'Building',   color:'#878dff', hint:'Solid base. Drill timing to push higher.'};
+    return            {verdict:'Early',      color:'#fbbf24', hint:'Target your weakest topics first.'};
+  },
+  pace:function(v){
+    if(v>=100) return {verdict:'On pace',         color:'#34d399', hint:'Weekly goal met — keep it rolling.',           recover:false};
+    if(v>=70)  return {verdict:'Slightly behind', color:'#fbbf24', hint:'A session today closes the gap.',              recover:true};
+    return            {verdict:'Behind target',   color:'#fb7185', hint:'Two focused sessions gets you back on track.', recover:true};
+  },
+  focus:function(v){
+    if(v>=80) return {verdict:'Sharp',     color:'#34d399', hint:'Deep, uninterrupted sessions. Nice.'};
+    if(v>=55) return {verdict:'Steady',    color:'#60a5fa', hint:'Trim distractions to lift quality.'};
+    return            {verdict:'Scattered', color:'#fbbf24', hint:'Try shorter, single-topic blocks.'};
+  }
+};
+
+function decorateRing(key, value){
+  var s = RING_STATES[key] && RING_STATES[key](value);
+  if(!s) return;
+  var d = document.getElementById('rs-'+key+'-desc');
+  if(d){ d.textContent = s.verdict; d.style.color = s.color; }
+  var h = document.getElementById('rs-'+key+'-hint');
+  if(h) h.textContent = s.hint;
+  if(key==='pace'){
+    var btn = document.getElementById('rs-pace-action');
+    if(btn) btn.style.display = s.recover ? 'inline-flex' : 'none';
+  }
+}
+
+/* Burnout takes a status string, not a number */
+function decorateBurnout(level){ // 'ok' | 'moderate' | 'high'
+  var map = {
+    high:    {verdict:'High',     color:'#fb7185', hint:'Take a lighter day — recovery is progress.'},
+    moderate:{verdict:'Moderate', color:'#fbbf24', hint:'Watch the late nights this week.'},
+    ok:      {verdict:'Balanced', color:'#34d399', hint:'Sustainable load. Keep the rhythm.'}
+  };
+  var s = map[level] || map.ok;
+  var d = document.getElementById('rs-burnout-desc');
+  if(d){ d.textContent = s.verdict; d.style.color = s.color; }
+  var h = document.getElementById('rs-burnout-hint');
+  if(h) h.textContent = s.hint;
+}
+
+function rsGenerateStudyPlan(){
+  if(typeof openSheldon==="function"){
+    openSheldon();
+    setTimeout(function(){ if(typeof sheldonAsk==="function") sheldonAsk("Plan my study week based on my current progress."); }, 350);
+  }
+}
+function rsRecoverWeek(){
+  var el = document.getElementById("timer-panel");
+  if(el) el.scrollIntoView({behavior:"smooth", block:"center"});
+}
+  
+  </script>
 
 </body>
 </html>
