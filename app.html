@@ -1732,6 +1732,10 @@ body::before{
     /* ── Dim inactive nav items so the active one leads ── */
 .sb-item:not(.active){ color:rgba(245,247,250,0.65) !important; }
 .sb-item:not(.active):hover{ color:var(--text-primary) !important; }
+  /* ── LOGO LOCKUP — tighter gap, heavier wordmark, optical nudge ── */
+.sb-logo{ gap:8px !important; }
+.sb-logo-name, .mob-logo-name{ font-weight:700 !important; }
+.sb-logo-icon{ transform:translateY(-1px); }
   </style>
 </head>
 <body>
