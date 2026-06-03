@@ -1784,6 +1784,14 @@ body::before{
   border-color:rgba(251,191,36,0.40);
   box-shadow:0 4px 14px -6px rgba(251,191,36,0.5);
 }
+    /* Even up the ring suite — reserve button height on the button-less cards */
+.ring-card:nth-child(3)::after,
+.ring-card:nth-child(4)::after{
+  content:"";
+  display:block;
+  height:25px;       /* ≈ the action button's rendered height */
+  margin-top:10px;   /* matches .ring-card-action margin-top */
+}
   </style>
 </head>
 <body>
