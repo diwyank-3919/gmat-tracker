@@ -1722,6 +1722,16 @@ body::before{
 .kpi-label, .kpi.hero .kpi-label, .ec-eyebrow, .ring-label-top{
   color:#a5a0d4 !important;
 }
+    /* ── TITLE → Satoshi (not serif); dim sidebar topic labels ── */
+.topbar-title{
+  font-family:'Satoshi',sans-serif !important;
+  font-weight:700 !important;
+  letter-spacing:-0.01em !important;
+}
+.sb-topic-name{ color:rgba(245,247,250,0.65) !important; }
+    /* ── Dim inactive nav items so the active one leads ── */
+.sb-item:not(.active){ color:rgba(245,247,250,0.65) !important; }
+.sb-item:not(.active):hover{ color:var(--text-primary) !important; }
   </style>
 </head>
 <body>
