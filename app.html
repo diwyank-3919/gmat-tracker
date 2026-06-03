@@ -4006,14 +4006,30 @@ function signOut(){ supa.auth.signOut().then(function(){ location.reload(); }); 
 window.signInWithGoogle = signInWithGoogle;
 window.signOut = signOut;
 
+// Don't show login screen immediately; wait for auth state
+supa.auth.onAuthStateChange(function(event, session){
+  if(session) {
+    startApp();
+  } else if(event === "SIGNED_OUT") {
+    location.reload();
+  } else {
+    // Only show login if no hash token is being processed
+    if(!window.location.hash.includes("access_token")) {
+      document.documentElement.classList.remove("sc-authed");
+      document.documentElement.classList.add("sc-guest");
+      document.getElementById("auth-overlay").style.display = "flex";
+    }
+  }
+});
+
 supa.auth.getSession().then(function(res){
   var session = res.data && res.data.session;
   if(session) startApp();
-  else { document.documentElement.classList.remove("sc-authed"); document.documentElement.classList.add("sc-guest"); document.getElementById("auth-overlay").style.display = "flex"; }
-});
-supa.auth.onAuthStateChange(function(event, session){
-  if(session) startApp();
-  else if(event === "SIGNED_OUT") location.reload();
+  else if(!window.location.hash.includes("access_token")) {
+    document.documentElement.classList.remove("sc-authed");
+    document.documentElement.classList.add("sc-guest");
+    document.getElementById("auth-overlay").style.display = "flex";
+  }
 });
   /* ============ Sheldon Coach ============ */
 var sheldonHistory = [];
