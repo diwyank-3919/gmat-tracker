@@ -2302,6 +2302,12 @@ body::before{
             <button id="timer-discard-btn" class="timer-btn ghost" onclick="timerDiscard()" style="display:none" title="Discard"><i class="ti ti-x"></i></button>
           </div>
         </div>
+        <input type="text" id="timer-notes" placeholder="Quick note about this timed session… (optional)" maxlength="200"
+      style="margin:8px 0 4px;width:100%;height:32px;font-size:12px;font-family:'Hanken Grotesk',sans-serif;font-weight:500;padding:0 11px;border:1px solid var(--border);border-radius:9px;background:var(--bg-input);color:var(--text-primary);outline:none;transition:border-color 0.15s"
+      onfocus="this.style.borderColor='rgba(135,141,255,0.45)'" onblur="this.style.borderColor='var(--border)'">
+        <input type="text" id="timer-notes" placeholder="Quick note about this timed session… (optional)" maxlength="200"
+          style="margin:8px 0 4px;width:100%;height:32px;font-size:12px;font-family:'Hanken Grotesk',sans-serif;font-weight:500;padding:0 11px;border:1px solid var(--border);border-radius:9px;background:var(--bg-input);color:var(--text-primary);outline:none;transition:border-color 0.15s"
+          onfocus="this.style.borderColor='rgba(135,141,255,0.45)'" onblur="this.style.borderColor='var(--border)'">
         <div class="timer-divider"><span>or log manually</span></div>
         <div class="form-grid">
           <div class="field">
@@ -2354,9 +2360,17 @@ body::before{
               <span>minutes</span>
             </div>
           </div>
-          <button class="log-btn" onclick="addSession()"><i class="ti ti-plus"></i> Add session</button>
-        </div>
+          <div class="field full">
+        <label>Notes <span style="color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">optional — what did you work on?</span></label>
+        <input type="text" id="inp-notes" placeholder="e.g. Struggled with probability, RC timing felt off…" maxlength="200">
       </div>
+      <div class="field full">
+            <label>Notes <span style="color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">optional — what did you work on?</span></label>
+            <input type="text" id="inp-notes" placeholder="e.g. Struggled with probability, RC timing felt off…" maxlength="200">
+          </div>
+          <button class="log-btn" onclick="addSession()"><i class="ti ti-plus"></i> Add session</button>
+    </div>
+  </div>
 
       <div class="card">
         <div class="card-head">
@@ -3028,14 +3042,18 @@ function addSession(){
   var topic=document.getElementById("inp-topic").value;
   var h=parseInt(document.getElementById("inp-hours").value)||0;
   var m=parseInt(document.getElementById("inp-mins").value)||0;
+  var notes=(document.getElementById("inp-notes").value||"").trim();
   if(!d||h+m===0) return;
   var btn=document.querySelector(".log-btn"); btn.disabled=true; btn.textContent="Saving...";
   setStatus("saving");
-  supa.from("sessions").insert({date:d,topic:topic,mins:h*60+m,created_at:Date.now()})
+  var row={date:d, topic:topic, mins:h*60+m, created_at:Date.now()};
+  if(notes) row.notes=notes;
+  supa.from("sessions").insert(row)
     .then(function(res){
       if(res.error) throw res.error;
       document.getElementById("inp-hours").value="";
       document.getElementById("inp-mins").value="";
+      document.getElementById("inp-notes").value="";
       btn.disabled=false; btn.innerHTML='<i class="ti ti-plus"></i> Add session';
       loadSessions();
     })
@@ -4061,8 +4079,11 @@ render=function(){
     if(mins<1){if(!confirm("Less than a minute — log as 1 minute?"))return;mins=1;}
     var topic=state.topic||"Quant",btn=document.getElementById("timer-stop-btn");
     if(btn)btn.disabled=true; setStatus("saving");
-    supa.from("sessions").insert({date:(window.__timerLogDate||dateStr(today)),topic:topic,mins:mins,created_at:Date.now(),started_at:new Date(state.firstStart||(Date.now()-elapsedMs())).toISOString()})
-      .then(function(res){if(res.error)throw res.error;clear();stopTick();paint();if(btn)btn.disabled=false;if(typeof showToast==="function"){var _ld=window.__timerLogDate||dateStr(today);var _dl=_ld===dateStr(today)?"today":(_ld===dateStr(addDays(today,-1))?"yesterday":parseLocal(_ld).toLocaleDateString("en-IN",{day:"numeric",month:"short"}));showToast("⏱️","Session logged!",fmtH(mins)+" of "+topic+" added to "+_dl+".");}loadSessions();})
+    var timerNotes=(document.getElementById("timer-notes").value||"").trim();
+    var timerRow={date:(window.__timerLogDate||dateStr(today)),topic:topic,mins:mins,created_at:Date.now(),started_at:new Date(state.firstStart||(Date.now()-elapsedMs())).toISOString()};
+    if(timerNotes) timerRow.notes=timerNotes;
+    supa.from("sessions").insert(timerRow)
+      .then(function(res){if(res.error)throw res.error;clear();stopTick();paint();var tn=document.getElementById("timer-notes");if(tn)tn.value="";if(btn)btn.disabled=false;if(typeof showToast==="function"){var _ld=window.__timerLogDate||dateStr(today);var _dl=_ld===dateStr(today)?"today":(_ld===dateStr(addDays(today,-1))?"yesterday":parseLocal(_ld).toLocaleDateString("en-IN",{day:"numeric",month:"short"}));showToast("⏱️","Session logged!",fmtH(mins)+" of "+topic+" added to "+_dl+".");}loadSessions();})
       .catch(function(err){setStatus("error");alert("Save failed: "+(err.message||JSON.stringify(err)));if(btn)btn.disabled=false;});
   };
   try{var s=JSON.parse(localStorage.getItem(TKEY));if(s&&typeof s==="object")state=s;}catch(e){}
