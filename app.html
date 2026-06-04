@@ -2381,14 +2381,21 @@ body::before{
             </select>
           </div>
           <div class="field full">
-            <label>Duration</label>
-            <div class="dur-wrap">
-              <input type="number" id="inp-hours" min="0" max="12" placeholder="0">
-              <span>hours</span>
-              <input type="number" id="inp-mins" min="0" max="59" placeholder="0">
-              <span>minutes</span>
-            </div>
+        <label>Duration</label>
+        <div class="dur-wrap">
+          <input type="number" id="inp-hours" min="0" max="12" placeholder="0">
+          <span>hours</span>
+          <input type="number" id="inp-mins" min="0" max="59" placeholder="0">
+          <span>minutes</span>
+          <div class="sc-dur-presets">
+            <button type="button" class="sc-dur-chip" onclick="scSetDur(0,30)">30m</button>
+            <button type="button" class="sc-dur-chip" onclick="scSetDur(1,0)">1h</button>
+            <button type="button" class="sc-dur-chip" onclick="scSetDur(1,30)">1h 30m</button>
+            <button type="button" class="sc-dur-chip" onclick="scSetDur(2,0)">2h</button>
+            <button type="button" class="sc-dur-chip" onclick="scSetDur(3,0)">3h</button>
           </div>
+        </div>
+      </div>
           <div class="field full">
         <label>Notes <span style="color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">optional — what did you work on?</span></label>
         <input type="text" id="inp-notes" placeholder="e.g. Struggled with probability, RC timing felt off…" maxlength="200"
@@ -4143,7 +4150,7 @@ function signInWithGoogle(){
     options: { redirectTo: "https://scoreconsole.com/app.html" }
   });
 }
-function signOut(){ supa.auth.signOut().then(function(){ location.reload(); }); }
+function signOut(){ supa.auth.signOut().then(function(){ location.href="index.html"; }, function(){ location.href="index.html"; }); }
 window.signInWithGoogle = signInWithGoogle;
 window.signOut = signOut;
 
@@ -4152,7 +4159,7 @@ supa.auth.onAuthStateChange(function(event, session){
   if(session) {
     startApp();
   } else if(event === "SIGNED_OUT") {
-    location.reload();
+    location.href="index.html";
   } else {
     // Only show login if no hash token is being processed
     if(!window.location.hash.includes("access_token")) {
@@ -5522,6 +5529,88 @@ document.getElementById("share-modal").addEventListener("click",function(e){
 .sc-feed-ic{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;flex-shrink:0;}
 #sessions-list .sess-item.sc-feed{gap:10px !important;align-items:center;}
 </style>
+
+<style>
+.dur-wrap{flex-wrap:wrap;}
+.sc-dur-presets{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;}
+.sc-dur-chip{
+  font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;font-weight:600;
+  height:32px;padding:0 13px;border-radius:9px;cursor:pointer;
+  background:rgba(255,255,255,0.035);border:1px solid var(--border);
+  color:var(--text-secondary);transition:border-color .15s,background .15s,color .15s,transform .12s;
+}
+.sc-dur-chip:hover{border-color:rgba(135,141,255,0.45);color:var(--accent-bright);background:rgba(135,141,255,0.09);transform:translateY(-1px);}
+.sc-dur-chip:active{transform:scale(0.96);}
+.sc-dur-chip.sc-on{border-color:rgba(135,141,255,0.55);color:var(--accent-bright);background:rgba(135,141,255,0.14);}
+</style>
+<script>
+window.scSetDur=function(h,m){
+  var hi=document.getElementById("inp-hours"), mi=document.getElementById("inp-mins");
+  if(hi) hi.value=h?h:""; if(mi) mi.value=m?m:"";
+  var chips=document.querySelectorAll(".sc-dur-chip");
+  for(var i=0;i<chips.length;i++) chips[i].classList.remove("sc-on");
+  if(window.event&&window.event.target&&window.event.target.classList.contains("sc-dur-chip"))
+    window.event.target.classList.add("sc-on");
+};
+</script>
+
+<!-- ── LOG CARD: Timer / Manual segmented toggle ── -->
+<style>
+.sc-mode{display:inline-flex;gap:2px;background:rgba(255,255,255,0.04);padding:3px;border-radius:9px;border:1px solid var(--border-subtle);}
+.sc-mode-btn{font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;font-weight:600;padding:5px 14px;border-radius:7px;border:none;background:transparent;color:var(--text-secondary);cursor:pointer;transition:background .15s,color .15s;}
+.sc-mode-btn:hover{color:var(--text-primary);}
+.sc-mode-btn.sc-on{background:rgba(255,255,255,0.10);color:var(--text-primary);font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,0.3);}
+.sc-fade{animation:fadeUp 0.28s cubic-bezier(.34,1.56,.64,1) both;}
+</style>
+<script>
+(function(){
+  function ready(fn){ if(document.body) fn(); else document.addEventListener("DOMContentLoaded",fn); }
+  ready(function(){
+    var panel=document.getElementById("timer-panel"); if(!panel) return;
+    var card=panel.closest(".card"); if(!card) return;
+    var head=card.querySelector(".card-head"); if(!head) return;
+    if(document.getElementById("sc-mode")) return;
+
+    var quickNote=document.getElementById("timer-notes");
+    var formGrid=card.querySelector(".form-grid");
+    var divider=card.querySelector(".timer-divider");
+
+    var mode=document.createElement("div"); mode.id="sc-mode"; mode.className="sc-mode";
+    mode.innerHTML='<button type="button" class="sc-mode-btn sc-on" data-mode="timer">Timer</button>'
+                 +'<button type="button" class="sc-mode-btn" data-mode="manual">Manual</button>';
+    head.appendChild(mode);
+    var btns=mode.querySelectorAll(".sc-mode-btn");
+
+    function show(el,on){ if(el) el.style.display=on?"":"none"; }
+    var current="timer";
+    function setMode(m){
+      current=m; var manual=(m==="manual");
+      show(panel,!manual); show(quickNote,!manual);
+      show(divider,false);
+      show(formGrid,manual);
+      for(var i=0;i<btns.length;i++) btns[i].classList.toggle("sc-on",btns[i].getAttribute("data-mode")===m);
+      var grp=manual?formGrid:panel;
+      if(grp){ grp.classList.remove("sc-fade"); void grp.offsetWidth; grp.classList.add("sc-fade"); }
+      try{ localStorage.setItem("sc_log_mode",m); }catch(e){}
+    }
+    for(var i=0;i<btns.length;i++){
+      btns[i].addEventListener("click",function(){ setMode(this.getAttribute("data-mode")); });
+    }
+
+    var stored="timer"; try{ stored=localStorage.getItem("sc_log_mode")||"timer"; }catch(e){}
+    setMode(stored==="manual"?"manual":"timer");
+
+    // never hide a running timer: lock to Timer mode while a session is active
+    function timerActive(){ var st=document.getElementById("timer-status"); return !!st&&(st.textContent==="Recording"||st.textContent==="Paused"); }
+    setInterval(function(){
+      var active=timerActive();
+      var mb=mode.querySelector('.sc-mode-btn[data-mode="manual"]');
+      if(mb){ mb.style.opacity=active?"0.4":""; mb.style.pointerEvents=active?"none":""; }
+      if(active && current!=="timer") setMode("timer");
+    },500);
+  });
+})();
+</script>
 
 </body>
 </html>
