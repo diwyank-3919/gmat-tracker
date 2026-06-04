@@ -1705,6 +1705,10 @@ body::before{
 .sheldon-typing span { width: 7px; height: 7px; border-radius: 50%; background: #878dff; animation: sheldonBlink 1.2s infinite both; }
 .sheldon-typing span:nth-child(2) { animation-delay: .2s; }
 .sheldon-typing span:nth-child(3) { animation-delay: .4s; }
+.sheldon-thinking-text {
+  font-size: 12px; color: rgba(135,141,255,0.7); margin-left: 8px;
+  transition: opacity 0.2s ease; font-style: italic;
+}
 @keyframes sheldonBlink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
 
 .sheldon-input { display: flex; align-items: flex-end; gap: 8px; padding: 12px 14px; border-top: 1px solid rgba(255,255,255,.06); background: #0f131c; }
@@ -4212,15 +4216,50 @@ function sheldonRender(role, text) {
   wrap.appendChild(div);
   wrap.scrollTop = wrap.scrollHeight;
 }
+  function sheldonRenderStream(text) {
+  var wrap = document.getElementById('sheldonMessages');
+  var div = document.createElement('div');
+  div.className = 'sheldon-msg bot';
+  wrap.appendChild(div);
+  var words = text.split(' '); var i = 0;
+  function next() {
+    if (i >= words.length) { div.innerHTML = sheldonFormat(text); return; }
+    div.textContent = words.slice(0, ++i).join(' ');
+    wrap.scrollTop = wrap.scrollHeight;
+    setTimeout(next, 28);
+  }
+  next();
+}
+// Replace sheldonTyping(true) call — smarter indicator
+var THINKING = [
+  "Analyzing your study data…",
+  "Checking your patterns…", 
+  "Crunching the numbers…",
+  "Reviewing your progress…"
+];
+var _thinkIdx = 0, _thinkTimer = null;
+
 function sheldonTyping(on) {
   var wrap = document.getElementById('sheldonMessages');
   var existing = document.getElementById('sheldonTyping');
   if (on && !existing) {
     var t = document.createElement('div');
     t.className = 'sheldon-typing'; t.id = 'sheldonTyping';
-    t.innerHTML = '<span></span><span></span><span></span>';
+    t.innerHTML = '<span></span><span></span><span></span>'
+      + '<span class="sheldon-thinking-text">Sheldon is analyzing…</span>';
     wrap.appendChild(t); wrap.scrollTop = wrap.scrollHeight;
-  } else if (!on && existing) { existing.remove(); }
+    _thinkIdx = 0;
+    _thinkTimer = setInterval(function() {
+      _thinkIdx = (_thinkIdx + 1) % THINKING.length;
+      var el = document.querySelector('.sheldon-thinking-text');
+      if (el) { el.style.opacity = 0; setTimeout(function() { 
+        if (el) { el.textContent = "Sheldon is " + THINKING[_thinkIdx]; el.style.opacity = 1; }
+      }, 200); }
+    }, 1800);
+  } else if (!on && existing) { 
+    existing.remove(); 
+    if (_thinkTimer) { clearInterval(_thinkTimer); _thinkTimer = null; }
+  }
 }
 
 function buildSheldonContext() {
@@ -4320,7 +4359,7 @@ function sheldonSend() {
     var reply = res && res.data && res.data.reply;
     var err = (res && res.data && res.data.error) || (res && res.error && res.error.message);
     if (reply) {
-      sheldonRender('bot', reply);
+      sheldonRenderStream(reply);
       sheldonHistory.push({ role: 'assistant', content: reply });
     } else {
       sheldonRender('error', 'Sheldon hit a snag: ' + (err || 'no response') + '. Try again in a moment.');
