@@ -5112,6 +5112,45 @@ function rsRecoverWeek(){
   };
 })();
 </script>
+  <!-- ── REFINE: compact Log-a-session + fill Sessions log column ── -->
+<style>
+/* Log a session — tighten the whole card */
+.main-grid > .card:first-child{ padding:16px 18px !important; }
+.main-grid > .card:first-child .card-head{ margin-bottom:10px !important; }
+
+/* Timer panel — denser */
+#timer-panel{ padding:11px 13px 10px !important; margin-bottom:9px !important; }
+#timer-display{ font-size:29px !important; margin:4px 0 9px !important; }
+#timer-notes{ margin:7px 0 2px !important; height:31px !important; }
+.tlog-row{ margin-top:9px !important; padding-top:9px !important; }
+
+/* Manual section — less air, tighter rows */
+.main-grid > .card:first-child .timer-divider{ margin:9px 0 !important; }
+.main-grid > .card:first-child .form-grid{ gap:8px !important; }
+.main-grid > .card:first-child .field{ gap:4px !important; }
+#inp-notes{ height:34px !important; }
+.main-grid > .card:first-child .log-btn{ padding:9px !important; }
+
+/* ── Sessions log — fill the column instead of a 240px stub ── */
+.main-grid > .card:last-child{ display:flex; flex-direction:column; }
+.main-grid > .card:last-child .sess-tabs{ flex-shrink:0; }
+#sessions-list{
+  max-height:none !important;
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  padding-right:3px;
+}
+/* cleaner, slightly tighter rows */
+#sessions-list .sess-item{ padding:8px 11px !important; gap:10px !important; border-radius:10px; }
+#sessions-list .sess-topic{ font-size:12px; }
+
+/* on stacked mobile, don't force a tall flex column */
+@media(max-width:1000px){
+  .main-grid > .card:last-child{ display:block; }
+  #sessions-list{ max-height:300px !important; flex:none; }
+}
+</style>
 
 </body>
 </html>
