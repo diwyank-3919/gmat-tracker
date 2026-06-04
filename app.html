@@ -5612,5 +5612,48 @@ window.scSetDur=function(h,m){
 })();
 </script>
 
+<!-- ── Timer "Logging for" date → open the calendar on click ── -->
+<style>
+#tlog-date{cursor:pointer;border-radius:6px;padding:2px 6px;transition:background .15s,color .15s;}
+#tlog-date:hover{background:rgba(135,141,255,0.12);color:var(--accent-bright);}
+</style>
+<script>
+(function(){
+  function ready(fn){ if(document.body) fn(); else document.addEventListener("DOMContentLoaded",fn); }
+  ready(function(){
+    var lbl=document.getElementById("tlog-date"); if(!lbl) return;
+    var row=document.getElementById("tlog-row");
+    if(!document.getElementById("tlog-date-inp")){
+      var hid=document.createElement("input"); hid.type="hidden"; hid.id="tlog-date-inp";
+      (row||lbl.parentNode).appendChild(hid);
+    }
+    function relabel(ds){
+      var tS=dateStr(today), yS=dateStr(addDays(today,-1));
+      return ds===tS?"Today":ds===yS?"Yesterday":parseLocal(ds).toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"});
+    }
+    function applyDate(){
+      var inp=document.getElementById("tlog-date-inp"); if(!inp||!inp.value) return;
+      var ds=inp.value; if(ds>dateStr(today)) ds=dateStr(today); // no future logging
+      window.__timerLogDate=ds;
+      try{localStorage.setItem("sc_timer_logdate",ds);}catch(e){}
+      lbl.textContent=relabel(ds);
+      if(row){
+        var isToday=ds===dateStr(today);
+        row.classList.toggle("not-today",!isToday);
+        var n=document.getElementById("tlog-next"); if(n) n.disabled=isToday;
+      }
+    }
+    lbl.title="Pick a date";
+    lbl.addEventListener("click",function(e){
+      e.stopPropagation();
+      var cur=window.__timerLogDate||dateStr(today);
+      document.getElementById("tlog-date-inp").value=cur;
+      if(typeof openPicker==="function")
+        openPicker({inputId:"tlog-date-inp",textId:"tlog-date",displayId:"tlog-date",onSelect:applyDate});
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
