@@ -1837,6 +1837,7 @@ body::before{
       <div id="total-hrs-block" class="ec-cell" style="display:none">
         <div class="ec-cell-val ec-green" id="proj-total">--</div>
         <div class="ec-eyebrow">projected total</div>
+        <div class="ec-advice" id="proj-advice"></div>
       </div>
       <div id="score-progress-block" class="ec-cell" style="display:none">
         <div class="ec-cell-val" id="latest-mock-display">--</div>
@@ -1845,6 +1846,11 @@ body::before{
       <div id="gap-block" class="ec-cell" style="display:none">
         <div class="ec-cell-val ec-amber" id="score-gap">--</div>
         <div class="ec-eyebrow">gap to target</div>
+      </div>
+      <div class="ec-cell ec-target-cell" id="target-hours-cell">
+        <div class="ec-cell-val"><input type="number" id="target-hours-inp" onchange="saveExamSettings()" min="50" max="2000" placeholder="300" title="Total study hours you're aiming for"></div>
+        <div class="ec-eyebrow">target hours</div>
+        <div class="ec-hint">≥ 300h recommended</div>
       </div>
       <div class="ec-cell ec-target-cell">
         <div class="ec-cell-val"><input type="number" id="target-score-inp" onchange="saveExamSettings()" min="200" max="805" placeholder="735"></div>
@@ -2187,7 +2193,10 @@ body::before{
       </div>
       <div class="field full">
         <label>Notes <span style="color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">optional — what did you work on?</span></label>
-        <input type="text" id="inp-notes" placeholder="e.g. Struggled with probability, RC timing felt off…" maxlength="200">
+        <input type="text" id="inp-notes" placeholder="e.g. Struggled with probability, RC timing felt off…" maxlength="200"
+          style="width:100%;height:36px;font-size:12.5px;font-family:'Hanken Grotesk',sans-serif;font-weight:500;padding:0 11px;border:1px solid var(--border);border-radius:9px;background:var(--bg-input);color:var(--text-primary);outline:none;transition:border-color 0.15s,box-shadow 0.15s"
+          onfocus="this.style.borderColor='rgba(135,141,255,0.45)';this.style.boxShadow='0 0 0 3px rgba(135,141,255,0.14)'"
+          onblur="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
       </div>
       <button class="log-btn" onclick="addSession()"><i class="ti ti-plus"></i> Add session</button>
     </div>
@@ -3537,19 +3546,29 @@ function renderFullLog(){
 }
 
 var TARGET_SCORE=735;
+var TARGET_HOURS=300;
 var PREP_START_DATE=new Date(2026,3,25);
 
 function saveExamSettings(){
   var examDate=document.getElementById("exam-date-inp").value;
   var targetScore=parseInt(document.getElementById("target-score-inp").value)||735;
-  TARGET_SCORE=targetScore;localStorage.setItem("gmat_exam_date",examDate);localStorage.setItem("gmat_target_score",targetScore);
+  var targetHours=parseInt(document.getElementById("target-hours-inp").value)||300;
+  if(targetHours<50) targetHours=50;
+  TARGET_SCORE=targetScore; TARGET_HOURS=targetHours;
+  localStorage.setItem("gmat_exam_date",examDate);
+  localStorage.setItem("gmat_target_score",targetScore);
+  localStorage.setItem("gmat_target_hours",targetHours);
   updateExamCountdown();renderMockView();
 }
 function loadExamSettings(){
   var examDate=localStorage.getItem("gmat_exam_date")||"";
   var targetScore=parseInt(localStorage.getItem("gmat_target_score"))||735;
-  TARGET_SCORE=targetScore;
-  document.getElementById("exam-date-inp").value=examDate;document.getElementById("target-score-inp").value=targetScore;setDateDisplay("exam-date-inp","exam-date-text");
+  var targetHours=parseInt(localStorage.getItem("gmat_target_hours"))||300;
+  TARGET_SCORE=targetScore; TARGET_HOURS=targetHours;
+  document.getElementById("exam-date-inp").value=examDate;
+  document.getElementById("target-score-inp").value=targetScore;
+  document.getElementById("target-hours-inp").value=targetHours;
+  setDateDisplay("exam-date-inp","exam-date-text");
   updateExamCountdown();
 }
 function updateExamCountdown(){
@@ -3562,13 +3581,38 @@ function updateExamCountdown(){
   var examParts=examDateVal.split("-").map(Number);var examDate=new Date(examParts[0],examParts[1]-1,examParts[2]);
   var daysLeft=Math.max(0,Math.ceil((examDate-today)/(1000*60*60*24)));
   document.getElementById("days-left").textContent=daysLeft;
-  var totalStudied=sessions.reduce(function(a,s){return a+s.mins;},0)/60;
-  var GOAL_HRS=200,remaining=Math.max(0,GOAL_HRS-totalStudied);
+ var totalStudied=sessions.reduce(function(a,s){return a+s.mins;},0)/60;
+  var goalHrs=TARGET_HOURS;
+  var remaining=Math.max(0,goalHrs-totalStudied);
   var hrsPerDay=daysLeft>0?(remaining/daysLeft).toFixed(1):"0";
   document.getElementById("hrs-needed").textContent=hrsPerDay+"h";
   var sd=new Set(sessions.map(function(s){return s.date;})).size||1;
   var projected=totalStudied+(totalStudied/sd*daysLeft);
   document.getElementById("proj-total").textContent=Math.round(projected)+"h";
+
+  // ── PRESCRIPTIVE ADVICE: what should I do ──
+  var advEl=document.getElementById("proj-advice");
+  if(advEl){
+    var perDay=function(hrs){var mins=Math.round(hrs*60);return mins<60?(mins+" min"):((Math.round(hrs*10)/10)+"h");};
+    if(totalStudied<=0){
+      advEl.className="ec-advice";
+      advEl.textContent="Log a session to start your projection.";
+    } else if(daysLeft<=0){
+      advEl.className="ec-advice ontrack";
+      advEl.textContent="Exam day — trust your prep.";
+    } else {
+      var gap=goalHrs-projected;
+      if(gap>0.5){
+        var extra=gap/daysLeft;
+        advEl.className="ec-advice behind";
+        advEl.innerHTML="<span>"+Math.round(gap)+"h below your "+goalHrs+"h goal</span>"
+          +"<span class='ec-advice-rec'>+"+perDay(extra)+"/day to recover</span>";
+      } else {
+        advEl.className="ec-advice ontrack";
+        advEl.innerHTML="<span>On track — keep ~"+perDay(totalStudied/sd)+"/day</span>";
+      }
+    }
+  }
   var totalPrepDays=Math.ceil((examDate-PREP_START_DATE)/(1000*60*60*24));
   var doneDays=Math.ceil((today-PREP_START_DATE)/(1000*60*60*24));
   var prepPct=Math.min(100,Math.round(doneDays/totalPrepDays*100));
@@ -3786,16 +3830,17 @@ render=function(){
     if(h>0) return m>0?h+"h "+m+"m":h+"h";
     return m+"m";
   }
-  function animateEl(id, isTime, refText, duration){
+  function animateEl(id, isTime, fromVal, refText, duration){
     var el=document.getElementById(id); if(!el) return;
-   var target=parseMinutes(refText||el.textContent);
-    if(!target){el.textContent=refText;return;}
+    var target=parseMinutes(refText||el.textContent);
+    var from=fromVal||0;
+    if(target===from){el.textContent=refText;return;}
     var start=null;
     function step(ts){
       if(!start) start=ts;
       var prog=Math.min((ts-start)/duration,1);
       var eased=1-Math.pow(1-prog,4);
-      var cur=target*eased;
+      var cur=from+(target-from)*eased;
       el.textContent=isTime?formatLike(cur,true,refText):Math.round(cur).toLocaleString();
       if(prog<1) requestAnimationFrame(step);
       else el.textContent=refText;
@@ -3803,15 +3848,19 @@ render=function(){
     requestAnimationFrame(step);
   }
   render = function(){
-    // Capture pre-render values (will be 0 on first load, old value on update)
+    // Capture what's on screen BEFORE re-render — these become the "from" values
+    var fromVals={};
+    COUNTERS.forEach(function(c){
+      var el=document.getElementById(c.id);
+      fromVals[c.id]= el ? parseMinutes(el.textContent) : 0;
+    });
     _baseRender.apply(this, arguments);
-    // After base render sets the final text, animate from 0
+    // After base render sets the new text, tick from old → new
     setTimeout(function(){
       COUNTERS.forEach(function(c){
         var el=document.getElementById(c.id); if(!el) return;
         var finalText=el.textContent;
-        el.textContent=c.isTime?"0m":"0";
-        animateEl(c.id, c.isTime, finalText, 900);
+        animateEl(c.id, c.isTime, fromVals[c.id], finalText, 900);
       });
     }, 30);
   };
@@ -4266,6 +4315,11 @@ supa.auth.onAuthStateChange(function(event, session){
 .ec-target-cell .ec-cell-val{justify-content:flex-end}
 .ec-target-cell input{width:96px;height:42px;font-family:'Fraunces',serif;font-size:24px;font-weight:600;text-align:center;padding:0 8px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.92);outline:none}
 .ec-target-cell input:focus{border-color:var(--border-accent);box-shadow:0 0 0 3px rgba(135,141,255,0.14)}
+.ec-advice{display:block;font-size:11px;font-weight:600;margin-top:7px;line-height:1.4;max-width:210px}
+.ec-advice.behind{color:#f0bd6a}
+.ec-advice.ontrack{color:#46c98f}
+.ec-advice .ec-advice-rec{display:block;color:var(--text-secondary);font-weight:500;margin-top:2px}
+.ec-hint{font-size:9px;font-weight:600;color:var(--text-muted);margin-top:5px;letter-spacing:0.02em}
 @media(max-width:760px){
   .ec-identity{border-right:none;padding-right:0;width:100%}
   .ec-stats{gap:24px}
@@ -4460,6 +4514,43 @@ supa.auth.onAuthStateChange(function(event, session){
     paint();
   }
   ready(inject);
+})();
+</script>
+
+<!-- ── STREAK BUMP (pulse on increase) ── -->
+<style>
+@keyframes streakBump{
+  0%{transform:scale(1);text-shadow:0 0 0 rgba(70,201,143,0);}
+  35%{transform:scale(1.26);text-shadow:0 0 18px rgba(70,201,143,0.60);}
+  100%{transform:scale(1);text-shadow:0 0 0 rgba(70,201,143,0);}
+}
+.streak-bump{display:inline-block;animation:streakBump 0.7s cubic-bezier(.34,1.56,.64,1);}
+@media(prefers-reduced-motion:reduce){ .streak-bump{animation:none;} }
+</style>
+<script>
+(function(){
+  if(typeof render!=="function") return;
+  var _r=render, lastStreak=null;
+  function readStreak(){
+    var el=document.getElementById("streak-count")||document.getElementById("streak-chip");
+    return el ? (parseInt(el.textContent,10)||0) : 0;
+  }
+  function bump(id){
+    var el=document.getElementById(id); if(!el) return;
+    el.classList.remove("streak-bump"); void el.offsetWidth; // restart the animation
+    el.classList.add("streak-bump");
+    setTimeout(function(){ el.classList.remove("streak-bump"); }, 760);
+  }
+  render=function(){
+    _r.apply(this, arguments);
+    setTimeout(function(){
+      var cur=readStreak();
+      if(lastStreak!==null && cur>lastStreak){
+        ["mom-streak","streak-count","streak-chip"].forEach(bump);
+      }
+      lastStreak=cur;
+    }, 60);
+  };
 })();
 </script>
 
