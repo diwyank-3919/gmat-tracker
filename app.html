@@ -3946,16 +3946,17 @@ render=function(){
     if(h>0) return m>0?h+"h "+m+"m":h+"h";
     return m+"m";
   }
-  function animateEl(id, isTime, refText, duration){
+  function animateEl(id, isTime, fromVal, refText, duration){
     var el=document.getElementById(id); if(!el) return;
-   var target=parseMinutes(refText||el.textContent);
-    if(!target){el.textContent=refText;return;}
+    var target=parseMinutes(refText||el.textContent);
+    var from=fromVal||0;
+    if(target===from){el.textContent=refText;return;}
     var start=null;
     function step(ts){
       if(!start) start=ts;
       var prog=Math.min((ts-start)/duration,1);
       var eased=1-Math.pow(1-prog,4);
-      var cur=target*eased;
+      var cur=from+(target-from)*eased;
       el.textContent=isTime?formatLike(cur,true,refText):Math.round(cur).toLocaleString();
       if(prog<1) requestAnimationFrame(step);
       else el.textContent=refText;
@@ -3963,15 +3964,19 @@ render=function(){
     requestAnimationFrame(step);
   }
   render = function(){
-    // Capture pre-render values (will be 0 on first load, old value on update)
+    // Capture what's on screen BEFORE re-render — these become the "from" values
+    var fromVals={};
+    COUNTERS.forEach(function(c){
+      var el=document.getElementById(c.id);
+      fromVals[c.id]= el ? parseMinutes(el.textContent) : 0;
+    });
     _baseRender.apply(this, arguments);
-    // After base render sets the final text, animate from 0
+    // After base render sets the new text, tick from old → new
     setTimeout(function(){
       COUNTERS.forEach(function(c){
         var el=document.getElementById(c.id); if(!el) return;
         var finalText=el.textContent;
-        el.textContent=c.isTime?"0m":"0";
-        animateEl(c.id, c.isTime, finalText, 900);
+        animateEl(c.id, c.isTime, fromVals[c.id], finalText, 900);
       });
     }, 30);
   };
