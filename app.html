@@ -5012,5 +5012,42 @@ function rsRecoverWeek(){
   
   </script>
 
+<!-- ── STREAK BUMP (pulse on increase) ── -->
+<style>
+@keyframes streakBump{
+  0%{transform:scale(1);text-shadow:0 0 0 rgba(70,201,143,0);}
+  35%{transform:scale(1.26);text-shadow:0 0 18px rgba(70,201,143,0.60);}
+  100%{transform:scale(1);text-shadow:0 0 0 rgba(70,201,143,0);}
+}
+.streak-bump{display:inline-block;animation:streakBump 0.7s cubic-bezier(.34,1.56,.64,1);}
+@media(prefers-reduced-motion:reduce){ .streak-bump{animation:none;} }
+</style>
+<script>
+(function(){
+  if(typeof render!=="function") return;
+  var _r=render, lastStreak=null;
+  function readStreak(){
+    var el=document.getElementById("streak-count")||document.getElementById("streak-chip");
+    return el ? (parseInt(el.textContent,10)||0) : 0;
+  }
+  function bump(id){
+    var el=document.getElementById(id); if(!el) return;
+    el.classList.remove("streak-bump"); void el.offsetWidth; // restart the animation
+    el.classList.add("streak-bump");
+    setTimeout(function(){ el.classList.remove("streak-bump"); }, 760);
+  }
+  render=function(){
+    _r.apply(this, arguments);
+    setTimeout(function(){
+      var cur=readStreak();
+      if(lastStreak!==null && cur>lastStreak){
+        ["mom-streak","streak-count","streak-chip"].forEach(bump);
+      }
+      lastStreak=cur;
+    }, 60);
+  };
+})();
+</script>
+
 </body>
 </html>
