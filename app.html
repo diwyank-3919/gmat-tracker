@@ -3494,7 +3494,7 @@ function renderSessions(){
   total=filtered.reduce(function(a,s){return a+s.mins;},0);
   document.getElementById("sess-total-label").textContent=filtered.length?fmtH(total)+" total":"";
   if(!filtered.length){el.innerHTML='<div class="empty-state">No sessions for this period</div>';return;}
-  function winIcon(m){ return m>=120?"🔥":m>=60?"⭐":m>=30?"🎯":"📘"; }
+  var TI={"Quant":"ti-math","RC":"ti-book-2","CR":"ti-brain","DI":"ti-chart-dots","Mock test":"ti-clipboard-check","Review":"ti-refresh"};
   el.innerHTML=filtered.map(function(s){
     var isToday=s.date===ts;
     var dateLabel=isToday?"Today":parseLocal(s.date).toLocaleDateString("en-IN",{day:"numeric",month:"short"});
@@ -3503,7 +3503,7 @@ function renderSessions(){
       ? '<div style="font-size:10.5px;color:var(--text-tertiary);font-style:italic;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.notes+'</div>'
       : '';
     return '<div class="sess-item sc-feed">'
-      +'<span class="sc-feed-ic" style="background:'+col+'22;box-shadow:inset 0 0 0 1px '+col+'33">'+winIcon(s.mins)+'</span>'
+      +'<span class="sc-feed-ic" style="background:'+col+'18;color:'+col+';box-shadow:inset 0 0 0 1px '+col+'2e"><i class="ti '+(TI[s.topic]||"ti-circle")+'"></i></span>'
       +'<div class="sess-info" style="min-width:0">'
         +'<div style="display:flex;align-items:center;gap:6px"><span class="sess-topic">'+s.topic+'</span>'
         +(sessFilter!=="today"?'<span class="sess-date-tag">'+dateLabel+'</span>':'')+'</div>'
@@ -5189,14 +5189,7 @@ function rsRecoverWeek(){
     var panel=document.getElementById("timer-panel"); if(!panel) return;
     var card=panel.closest(".card"); if(!card) return;
 
-    if(!document.getElementById("sc-hero-strip")){
-      var strip=document.createElement("div"); strip.id="sc-hero-strip"; strip.className="sc-hero-strip";
-      strip.innerHTML=
-        '<div class="sc-hs"><span class="sc-hs-ic">🔥</span><span class="sc-hs-v" id="sc-hs-streak">0</span><span class="sc-hs-l">day streak</span></div>'+
-        '<div class="sc-hs"><span class="sc-hs-ic">🎯</span><span class="sc-hs-v" id="sc-hs-target">735</span><span class="sc-hs-l">target</span></div>'+
-        '<div class="sc-hs"><span class="sc-hs-ic">📈</span><span class="sc-hs-v" id="sc-hs-hours">0h</span><span class="sc-hs-l">completed</span></div>';
-      card.insertBefore(strip, panel);
-    }
+   // achievement strip removed — redundant with the Weekly Momentum card above
     if(!document.getElementById("sc-timer-meta")){
       var controls=panel.querySelector(".timer-controls");
       var meta=document.createElement("div"); meta.id="sc-timer-meta"; meta.className="sc-timer-meta";
@@ -5368,7 +5361,48 @@ function rsRecoverWeek(){
   </div>
 </div>
 
-  // ── SHARE MODAL ──
+<!-- ── READINESS BUMP ON SAVE (uses the dashboard's own readiness formula) ── -->
+<script>
+(function(){
+  function ready(fn){ if(document.body) fn(); else document.addEventListener("DOMContentLoaded",fn); }
+
+  // Mirror of the readiness math inside render() — kept identical so the number is real
+  function computeReadiness(){
+    if(typeof sessions==="undefined") return 0;
+    var ws=startOfWeek(today),wm=0,wt=0,i;
+    for(i=0;i<7;i++){var wd=addDays(ws,i);wm+=minsOn(dateStr(wd));wt+=targetFor(wd);}
+    var wpct=Math.min(100,Math.round(wm/wt*100)||0);
+    var PS=new Date(2026,3,25); PS.setHours(0,0,0,0);
+    var consistent=0,totalD=0,cur=new Date(PS);
+    while(cur<=today){ totalD++; var dm=minsOn(dateStr(cur)),dt=targetFor(cur); if(dm>0&&dm>=dt*0.8) consistent++; cur=addDays(cur,1); }
+    var cons=totalD>0?Math.min(100,Math.round(consistent/totalD*100)):0;
+    var streak=0,c=minsOn(dateStr(today))>0?new Date(today):addDays(today,-1);
+    while(true){var ds=dateStr(c); if(minsOn(ds)>0){streak++;c=addDays(c,-1);}else break;}
+    return Math.min(100,Math.round(cons*0.4+wpct*0.3+Math.min(100,streak*10)*0.3));
+  }
+  function snapshot(){ window.__rdSnap={val:computeReadiness(),t:Date.now()}; }
+
+  ready(function(){
+    if(typeof window.addSession==="function"){ var _a=window.addSession; window.addSession=function(){ snapshot(); return _a.apply(this,arguments); }; }
+    if(typeof window.timerStop==="function"){ var _s=window.timerStop; window.timerStop=function(){ snapshot(); return _s.apply(this,arguments); }; }
+
+    if(typeof render==="function"){
+      var _r=render;
+      render=function(){
+        _r.apply(this,arguments);
+        var snap=window.__rdSnap;
+        if(snap && (Date.now()-snap.t)<15000){
+          var after=computeReadiness(), delta=after-snap.val;
+          window.__rdSnap=null;
+          if(delta>0 && typeof showToast==="function"){
+            showToast("📈","+"+delta+"% readiness","You're at "+after+"% now — every session compounds.");
+          }
+        }
+      };
+    }
+  });
+})();
+   // ── SHARE MODAL ──
 function openShareModal(){
   populateShareCard();
   document.getElementById("share-modal").style.display="flex";
@@ -5483,48 +5517,6 @@ async function shareCopy(){
 document.getElementById("share-modal").addEventListener("click",function(e){
   if(e.target===this) closeShareModal();
 });
-
-<!-- ── READINESS BUMP ON SAVE (uses the dashboard's own readiness formula) ── -->
-<script>
-(function(){
-  function ready(fn){ if(document.body) fn(); else document.addEventListener("DOMContentLoaded",fn); }
-
-  // Mirror of the readiness math inside render() — kept identical so the number is real
-  function computeReadiness(){
-    if(typeof sessions==="undefined") return 0;
-    var ws=startOfWeek(today),wm=0,wt=0,i;
-    for(i=0;i<7;i++){var wd=addDays(ws,i);wm+=minsOn(dateStr(wd));wt+=targetFor(wd);}
-    var wpct=Math.min(100,Math.round(wm/wt*100)||0);
-    var PS=new Date(2026,3,25); PS.setHours(0,0,0,0);
-    var consistent=0,totalD=0,cur=new Date(PS);
-    while(cur<=today){ totalD++; var dm=minsOn(dateStr(cur)),dt=targetFor(cur); if(dm>0&&dm>=dt*0.8) consistent++; cur=addDays(cur,1); }
-    var cons=totalD>0?Math.min(100,Math.round(consistent/totalD*100)):0;
-    var streak=0,c=minsOn(dateStr(today))>0?new Date(today):addDays(today,-1);
-    while(true){var ds=dateStr(c); if(minsOn(ds)>0){streak++;c=addDays(c,-1);}else break;}
-    return Math.min(100,Math.round(cons*0.4+wpct*0.3+Math.min(100,streak*10)*0.3));
-  }
-  function snapshot(){ window.__rdSnap={val:computeReadiness(),t:Date.now()}; }
-
-  ready(function(){
-    if(typeof window.addSession==="function"){ var _a=window.addSession; window.addSession=function(){ snapshot(); return _a.apply(this,arguments); }; }
-    if(typeof window.timerStop==="function"){ var _s=window.timerStop; window.timerStop=function(){ snapshot(); return _s.apply(this,arguments); }; }
-
-    if(typeof render==="function"){
-      var _r=render;
-      render=function(){
-        _r.apply(this,arguments);
-        var snap=window.__rdSnap;
-        if(snap && (Date.now()-snap.t)<15000){
-          var after=computeReadiness(), delta=after-snap.val;
-          window.__rdSnap=null;
-          if(delta>0 && typeof showToast==="function"){
-            showToast("📈","+"+delta+"% readiness","You're at "+after+"% now — every session compounds.");
-          }
-        }
-      };
-    }
-  });
-})();
 </script>
 <style>
 .sc-feed-ic{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;flex-shrink:0;}
