@@ -13,6 +13,7 @@
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@500,700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px;height:100%}
@@ -1994,6 +1995,7 @@ body::before{
         <i class="ti ti-cloud" style="font-size:12px"></i> Connecting…
       </div>
       <button onclick="openTrash()" style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;color:var(--text-secondary);padding:5px 11px;border-radius:100px;border:1px solid var(--border);background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);cursor:pointer" title="View deleted sessions"><i class="ti ti-trash" style="font-size:12px"></i> Trash</button>
+      <button onclick="openShareModal()" style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;color:var(--text-secondary);padding:5px 11px;border-radius:100px;border:1px solid var(--border);background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);cursor:pointer"><i class="ti ti-share" style="font-size:12px"></i> Share</button>
       <span id="wow-badge" style="display:none;font-size:11px;font-weight:600;padding:5px 10px;border-radius:100px;border:1px solid"></span>
     </div>
   </div>
@@ -2328,7 +2330,7 @@ body::before{
             </select>
             <button id="timer-start-btn" class="timer-btn primary" onclick="timerStart()"><i class="ti ti-player-play"></i> Start</button>
             <button id="timer-pause-btn" class="timer-btn" onclick="timerPause()" style="display:none;background:rgba(255,255,255,0.08)"><i class="ti ti-player-pause"></i> Pause</button>
-            <button id="timer-stop-btn" class="timer-btn stop" onclick="timerStop()" style="display:none"><i class="ti ti-check"></i> Save</button>
+           <button id="timer-stop-btn" class="timer-btn stop" onclick="timerStop()" style="display:none"><i class="ti ti-check"></i> Finish session</button>
             <button id="timer-discard-btn" class="timer-btn ghost" onclick="timerDiscard()" style="display:none" title="Discard"><i class="ti ti-x"></i></button>
           </div>
         </div>
@@ -2394,13 +2396,13 @@ body::before{
           onfocus="this.style.borderColor='rgba(135,141,255,0.45)';this.style.boxShadow='0 0 0 3px rgba(135,141,255,0.14)'"
           onblur="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
       </div>
-          <button class="log-btn" onclick="addSession()"><i class="ti ti-plus"></i> Add session</button>
+          <button class="log-btn" onclick="addSession()"><i class="ti ti-plus"></i> Bank study time</button>
     </div>
   </div>
 
       <div class="card">
         <div class="card-head">
-          <div class="card-title"><i class="ti ti-list"></i> Sessions log</div>
+          <div class="card-title"><i class="ti ti-bolt"></i> Recent activity</div>
           <div style="font-size:11px;font-weight:650;color:var(--accent-bright)" id="sess-total-label"></div>
         </div>
         <div class="sess-tabs">
@@ -3080,10 +3082,10 @@ function addSession(){
       document.getElementById("inp-hours").value="";
       document.getElementById("inp-mins").value="";
       document.getElementById("inp-notes").value="";
-      btn.disabled=false; btn.innerHTML='<i class="ti ti-plus"></i> Add session';
+      btn.disabled=false; btn.innerHTML='<i class="ti ti-plus"></i> Bank study time';
       loadSessions();
     })
-    .catch(function(err){setStatus("error");alert("Save failed: "+(err.message||JSON.stringify(err)));btn.disabled=false;btn.innerHTML='<i class="ti ti-plus"></i> Add session';});
+    .catch(function(err){setStatus("error");alert("Save failed: "+(err.message||JSON.stringify(err)));btn.disabled=false;btn.innerHTML='<i class="ti ti-plus"></i> Bank study time';});
 }
 
 function delSession(id){
@@ -3492,16 +3494,18 @@ function renderSessions(){
   total=filtered.reduce(function(a,s){return a+s.mins;},0);
   document.getElementById("sess-total-label").textContent=filtered.length?fmtH(total)+" total":"";
   if(!filtered.length){el.innerHTML='<div class="empty-state">No sessions for this period</div>';return;}
+  function winIcon(m){ return m>=120?"🔥":m>=60?"⭐":m>=30?"🎯":"📘"; }
   el.innerHTML=filtered.map(function(s){
     var isToday=s.date===ts;
     var dateLabel=isToday?"Today":parseLocal(s.date).toLocaleDateString("en-IN",{day:"numeric",month:"short"});
+    var col=TC[s.topic]||"#888";
     var noteLine = s.notes
       ? '<div style="font-size:10.5px;color:var(--text-tertiary);font-style:italic;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.notes+'</div>'
       : '';
-    return '<div class="sess-item">'
-      +'<span class="sess-color" style="background:'+(TC[s.topic]||"#888")+'"></span>'
+    return '<div class="sess-item sc-feed">'
+      +'<span class="sc-feed-ic" style="background:'+col+'22;box-shadow:inset 0 0 0 1px '+col+'33">'+winIcon(s.mins)+'</span>'
       +'<div class="sess-info" style="min-width:0">'
-        +'<div style="display:flex;align-items:center"><span class="sess-topic">'+s.topic+'</span>'
+        +'<div style="display:flex;align-items:center;gap:6px"><span class="sess-topic">'+s.topic+'</span>'
         +(sessFilter!=="today"?'<span class="sess-date-tag">'+dateLabel+'</span>':'')+'</div>'
         +noteLine
       +'</div>'
@@ -3512,7 +3516,6 @@ function renderSessions(){
   }).join("");
   el.querySelectorAll(".sess-del").forEach(function(btn){btn.addEventListener("click",function(){delSession(this.getAttribute("data-id"));});});
 }
-
 function migrateFromLocalStorage(){
   var OLD_KEYS=["gmat_v3","gmat_sessions_v2","gmat_sessions"];
   var found=null,foundKey=null;
@@ -5150,6 +5153,382 @@ function rsRecoverWeek(){
   .main-grid > .card:last-child{ display:block; }
   #sessions-list{ max-height:300px !important; flex:none; }
 }
+</style>
+
+<!-- ── SESSION HERO: achievement strip + live timer + Sheldon ── -->
+<style>
+#sc-hero-strip{display:flex;gap:8px;margin:2px 0 13px;}
+.sc-hs{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:9px 6px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border-subtle);transition:border-color .15s,transform .15s;}
+.sc-hs:hover{border-color:rgba(135,141,255,0.22);transform:translateY(-1px);}
+.sc-hs-ic{font-size:15px;line-height:1;}
+.sc-hs-v{font-family:'Fraunces',serif;font-weight:600;font-size:17px;color:var(--text-primary);letter-spacing:-0.01em;margin-top:2px;}
+.sc-hs-l{font-size:8.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-tertiary);}
+
+/* hero timer */
+#timer-display{font-size:46px !important;text-align:center;letter-spacing:0.01em;margin:6px 0 8px !important;}
+.sc-timer-meta{display:none;text-align:center;margin:-2px 0 11px;}
+.sc-tm-topic{font-family:'Hanken Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--accent-bright);letter-spacing:0.01em;}
+.sc-tm-xp{font-size:11px;font-weight:600;color:#46c98f;margin-top:3px;}
+
+/* bigger, clearer controls */
+#timer-panel .timer-controls{gap:9px;}
+#timer-start-btn,#timer-pause-btn,#timer-stop-btn{flex:1;height:42px;justify-content:center;font-size:13.5px;}
+#timer-stop-btn{background:#46c98f !important;color:#0f1118 !important;}
+
+/* Sheldon insight line */
+.sc-sheldon{display:flex;align-items:flex-start;gap:8px;margin:11px 0 2px;padding:10px 13px;border-radius:12px;
+  background:linear-gradient(155deg,rgba(135,141,255,0.09),rgba(70,201,143,0.05));
+  border:1px solid rgba(135,141,255,0.18);font-size:11.5px;line-height:1.42;color:var(--text-secondary);}
+.sc-sheldon b{color:var(--text-primary);font-weight:700;}
+.sc-sh-ic{font-size:14px;line-height:1.25;flex-shrink:0;}
+</style>
+<script>
+(function(){
+  function ready(fn){ if(document.body) fn(); else document.addEventListener("DOMContentLoaded",fn); }
+  function inject(){
+    var panel=document.getElementById("timer-panel"); if(!panel) return;
+    var card=panel.closest(".card"); if(!card) return;
+
+    if(!document.getElementById("sc-hero-strip")){
+      var strip=document.createElement("div"); strip.id="sc-hero-strip"; strip.className="sc-hero-strip";
+      strip.innerHTML=
+        '<div class="sc-hs"><span class="sc-hs-ic">🔥</span><span class="sc-hs-v" id="sc-hs-streak">0</span><span class="sc-hs-l">day streak</span></div>'+
+        '<div class="sc-hs"><span class="sc-hs-ic">🎯</span><span class="sc-hs-v" id="sc-hs-target">735</span><span class="sc-hs-l">target</span></div>'+
+        '<div class="sc-hs"><span class="sc-hs-ic">📈</span><span class="sc-hs-v" id="sc-hs-hours">0h</span><span class="sc-hs-l">completed</span></div>';
+      card.insertBefore(strip, panel);
+    }
+    if(!document.getElementById("sc-timer-meta")){
+      var controls=panel.querySelector(".timer-controls");
+      var meta=document.createElement("div"); meta.id="sc-timer-meta"; meta.className="sc-timer-meta";
+      meta.innerHTML='<div class="sc-tm-topic" id="sc-tm-topic"></div><div class="sc-tm-xp" id="sc-tm-xp"></div>';
+      if(controls) panel.insertBefore(meta, controls);
+    }
+    if(!document.getElementById("sc-sheldon")){
+      var sh=document.createElement("div"); sh.id="sc-sheldon"; sh.className="sc-sheldon";
+      sh.innerHTML='<span class="sc-sh-ic">💡</span><span><b>Sheldon</b> — log a session and I\u2019ll read your focus patterns.</span>';
+      card.insertBefore(sh, panel.nextSibling);
+    }
+  }
+
+  function parseClock(t){ var p=(t||"").split(":").map(Number); if(p.length<3||p.some(isNaN)) return 0; return p[0]*60+p[1]+p[2]/60; }
+  function tick(){
+    var stEl=document.getElementById("timer-status"); if(!stEl) return;
+    var st=stEl.textContent||"";
+    var active=(st==="Recording"||st==="Paused");
+    var meta=document.getElementById("sc-timer-meta");
+    var mins=parseClock((document.getElementById("timer-display")||{}).textContent);
+    if(active&&mins>0){
+      if(meta) meta.style.display="block";
+      var sel=document.getElementById("timer-topic");
+      var tEl=document.getElementById("sc-tm-topic"); if(tEl) tEl.textContent=sel?sel.value:"";
+      var xp=Math.round(mins/6); // 10 XP / hour — matches the momentum card
+      var xEl=document.getElementById("sc-tm-xp"); if(xEl) xEl.textContent="+"+xp+" Study XP this session";
+    } else if(meta){ meta.style.display="none"; }
+  }
+
+  function updateStrip(){
+    var sc=document.getElementById("streak-chip");
+    var s=document.getElementById("sc-hs-streak"); if(s&&sc) s.textContent=sc.textContent;
+    var tg=document.getElementById("sc-hs-target"); if(tg) tg.textContent=(typeof TARGET_SCORE!=="undefined"?TARGET_SCORE:735);
+    var tc=document.getElementById("total-chip");
+    var h=document.getElementById("sc-hs-hours"); if(h&&tc) h.textContent=tc.textContent;
+
+    var sh=document.getElementById("sc-sheldon");
+    if(sh && typeof sessions!=="undefined"){
+      var tt={},tot=0; sessions.forEach(function(x){tt[x.topic]=(tt[x.topic]||0)+x.mins;tot+=x.mins;});
+      if(!tot){
+        sh.innerHTML='<span class="sc-sh-ic">💡</span><span><b>Sheldon</b> — log a session and I\u2019ll read your focus patterns.</span>';
+      } else {
+        var keys=Object.keys(tt).sort(function(a,b){return tt[b]-tt[a];});
+        var top=keys[0], share=Math.round(tt[top]/tot*100);
+        var ALL=["Quant","RC","CR","DI","Mock test","Review"], least=null, lv=Infinity;
+        ALL.forEach(function(k){var v=tt[k]||0; if(v<lv){lv=v;least=k;}});
+        var msg=top+" is "+share+"% of your logged time";
+        if(least&&least!==top) msg+=" — "+least+" is your lightest area, worth a session soon";
+        sh.innerHTML='<span class="sc-sh-ic">💡</span><span><b>Sheldon</b> — '+msg+'.</span>';
+      }
+    }
+  }
+
+  ready(function(){
+    inject();
+    if(typeof render==="function"){ var _r=render; render=function(){ _r.apply(this,arguments); try{updateStrip();}catch(e){} }; }
+    setInterval(tick,400); tick(); updateStrip();
+  });
+})();
+</script>
+
+  <div id="share-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(14px);z-index:2000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:linear-gradient(155deg,#141923,#1a2234);border:1px solid rgba(255,255,255,0.10);border-radius:20px;padding:24px;max-width:620px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,0.60);max-height:90vh;overflow-y:auto">
+
+    <!-- Modal header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div style="font-family:'Fraunces',serif;font-size:17px;font-weight:600;color:var(--text-primary)">Share your progress</div>
+        <div style="font-size:11.5px;color:var(--text-tertiary);margin-top:2px">Screenshot the card below and share it anywhere</div>
+      </div>
+      <button onclick="closeShareModal()" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--text-tertiary);font-size:16px;display:flex;align-items:center;justify-content:center">&times;</button>
+    </div>
+
+    <!-- THE CARD TO SCREENSHOT -->
+    <div id="share-card" style="background:linear-gradient(155deg,#141923,#1a2234);border:1px solid rgba(255,255,255,0.10);border-radius:16px;padding:24px;position:relative;overflow:hidden">
+
+      <!-- Card header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:9px">
+          <div style="width:32px;height:32px;border-radius:8px;background:#13161f;border:1px solid rgba(135,141,255,0.22);display:flex;align-items:center;justify-content:center">
+            <svg width="18" height="18" viewBox="0 0 32 32"><defs><linearGradient id="scg" x1="6" y1="26" x2="26" y2="6" gradientUnits="userSpaceOnUse"><stop stop-color="#8b7cf8"/><stop offset="1" stop-color="#5fd9a8"/></linearGradient></defs><circle cx="16" cy="16" r="11" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="3.4"/><path d="M22.3 7 A 11 11 0 1 1 9.7 7" fill="none" stroke="url(#scg)" stroke-width="3.4" stroke-linecap="round"/><circle cx="22.3" cy="7" r="2.4" fill="#6fe7b6"/></svg>
+          </div>
+          <div>
+            <div style="font-family:'Fraunces',serif;font-size:14px;font-weight:600;color:var(--text-primary)">Score Console</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:0.05em;text-transform:uppercase">GMAT Prep Tracker</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10.5px;color:rgba(255,255,255,0.38)" id="sc-share-date"></div>
+          <div style="font-family:'Fraunces',serif;font-size:13px;font-weight:600;color:#9aa0ff" id="sc-share-name"></div>
+        </div>
+      </div>
+
+      <!-- Hero stats row -->
+      <div style="display:grid;grid-template-columns:1fr 1px 1fr 1px 1fr 1px 1fr;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 0;margin-bottom:16px">
+        <div style="display:flex;flex-direction:column;align-items:center;padding:0 12px;text-align:center">
+          <div style="font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:#9aa0ff;letter-spacing:-0.01em;line-height:1" id="sc-h-total">—</div>
+          <div style="font-size:8.5px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.12em;margin-top:4px">Total hours</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.07)"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;padding:0 12px;text-align:center">
+          <div style="font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:#46c98f;letter-spacing:-0.01em;line-height:1" id="sc-h-streak">—</div>
+          <div style="font-size:8.5px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.12em;margin-top:4px">Day streak</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.07)"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;padding:0 12px;text-align:center">
+          <div style="font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:#f0bd6a;letter-spacing:-0.01em;line-height:1" id="sc-h-cons">—</div>
+          <div style="font-size:8.5px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.12em;margin-top:4px">Consistency</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.07)"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;padding:0 12px;text-align:center">
+          <div style="font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:var(--text-primary);letter-spacing:-0.01em;line-height:1" id="sc-h-days">—</div>
+          <div style="font-size:8.5px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.12em;margin-top:4px">Days left</div>
+        </div>
+      </div>
+
+      <!-- This week / month / mock -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+        <div style="background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:11px 13px">
+          <div style="font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:#46c98f;line-height:1;margin-bottom:4px" id="sc-today">—</div>
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:rgba(255,255,255,0.35)">Today</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:11px 13px">
+          <div style="font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:#9aa0ff;line-height:1;margin-bottom:4px" id="sc-week">—</div>
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:rgba(255,255,255,0.35)">This week</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:11px 13px">
+          <div style="font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:#f0bd6a;line-height:1;margin-bottom:4px" id="sc-mock">—</div>
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:rgba(255,255,255,0.35)">Latest mock</div>
+        </div>
+      </div>
+
+      <!-- Topic bars -->
+      <div style="margin-bottom:14px" id="sc-topic-bars"></div>
+
+      <!-- 30-day dots -->
+      <div style="margin-bottom:14px">
+        <div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.13em;color:rgba(255,255,255,0.30);margin-bottom:8px">30-day activity</div>
+        <div style="display:flex;gap:3px;flex-wrap:wrap" id="sc-streak-dots"></div>
+      </div>
+
+      <!-- Exam progress bar -->
+      <div id="sc-prog-wrap" style="display:none;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,0.38);margin-bottom:5px">
+          <span>Prep progress</span><span id="sc-prog-pct" style="color:#9aa0ff;font-weight:700">0%</span>
+        </div>
+        <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden">
+          <div id="sc-prog-fill" style="height:100%;border-radius:100px;background:linear-gradient(90deg,#878dff,#46c98f);width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Card footer -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid rgba(255,255,255,0.07)">
+        <div style="font-size:10px;color:rgba(255,255,255,0.28);font-weight:500">✦ scoreconsole.com</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:10px;font-weight:600;color:rgba(255,255,255,0.38)">
+          Target <span id="sc-target-badge" style="background:rgba(135,141,255,0.15);border:1px solid rgba(135,141,255,0.30);color:#9aa0ff;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700">735</span>
+        </div>
+      </div>
+
+    </div>
+    <!-- /share-card -->
+
+    <!-- Action buttons -->
+    <div style="display:flex;gap:9px;margin-top:16px;flex-wrap:wrap">
+      <button onclick="shareDownload()" style="flex:1;min-width:140px;padding:10px;background:#878dff;color:#0f1118;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px"><i class="ti ti-download"></i> Download PNG</button>
+      <button onclick="shareCopy()" style="flex:1;min-width:140px;padding:10px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;gap:7px"><i class="ti ti-copy"></i> Copy image</button>
+    </div>
+    <div id="share-status" style="font-size:11.5px;text-align:center;min-height:18px;margin-top:10px;color:var(--text-tertiary)"></div>
+  </div>
+</div>
+
+  // ── SHARE MODAL ──
+function openShareModal(){
+  populateShareCard();
+  document.getElementById("share-modal").style.display="flex";
+}
+function closeShareModal(){
+  document.getElementById("share-modal").style.display="none";
+  document.getElementById("share-status").textContent="";
+}
+
+function populateShareCard(){
+  var tot=sessions.reduce(function(a,s){return a+s.mins;},0);
+
+  // Header meta
+  document.getElementById("sc-share-date").textContent=today.toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"});
+  var uName=(document.querySelector(".topbar-title")||{}).textContent||"";
+  document.getElementById("sc-share-name").textContent=uName.replace("'s Dashboard","").replace(" Dashboard","").trim()||"Your Progress";
+
+  // Hero stats
+  document.getElementById("sc-h-total").textContent=tot>0?fmtH(tot):"0h";
+
+  var streak=0,cur=minsOn(dateStr(today))>0?new Date(today):addDays(today,-1);
+  while(minsOn(dateStr(cur))>0){streak++;cur=addDays(cur,-1);}
+  document.getElementById("sc-h-streak").textContent=streak+"🔥";
+
+  var PREP_START_SC=new Date(2026,3,25);PREP_START_SC.setHours(0,0,0,0);
+  var cD=0,tD=0,cc=new Date(PREP_START_SC);
+  while(cc<=today){tD++;var m=minsOn(dateStr(cc));if(m>0&&m>=targetFor(cc)*0.8)cD++;cc=addDays(cc,1);}
+  document.getElementById("sc-h-cons").textContent=tD>0?Math.min(100,Math.round(cD/tD*100))+"%":"—";
+
+  var examDateVal=localStorage.getItem("gmat_exam_date");
+  if(examDateVal){
+    var ep=examDateVal.split("-").map(Number),examD=new Date(ep[0],ep[1]-1,ep[2]);
+    var dLeft=Math.max(0,Math.ceil((examD-today)/86400000));
+    document.getElementById("sc-h-days").textContent=dLeft;
+    var totalDays=Math.ceil((examD-PREP_START_SC)/86400000);
+    var doneDays=Math.ceil((today-PREP_START_SC)/86400000);
+    var pct=Math.min(100,Math.max(0,Math.round(doneDays/totalDays*100)));
+    document.getElementById("sc-prog-pct").textContent=pct+"% of prep done";
+    document.getElementById("sc-prog-fill").style.width=pct+"%";
+    document.getElementById("sc-prog-wrap").style.display="block";
+  } else {
+    document.getElementById("sc-h-days").textContent="—";
+  }
+
+  // Small stat cards
+  var ws=startOfWeek(today),wm=0;
+  for(var i=0;i<7;i++) wm+=minsOn(dateStr(addDays(ws,i)));
+  document.getElementById("sc-today").textContent=minsOn(dateStr(today))>0?fmtH(minsOn(dateStr(today))):"0m";
+  document.getElementById("sc-week").textContent=wm>0?fmtH(wm):"0m";
+  var latestMock=window.mockScores&&window.mockScores.length?window.mockScores[window.mockScores.length-1].score:null;
+  document.getElementById("sc-mock").textContent=latestMock||"—";
+
+  // Target badge
+  document.getElementById("sc-target-badge").textContent=TARGET_SCORE;
+
+  // Topic bars
+  var topicTotals={};sessions.forEach(function(s){topicTotals[s.topic]=(topicTotals[s.topic]||0)+s.mins;});
+  var maxT=Math.max.apply(null,Object.values(topicTotals).concat([1]));
+  var tbEl=document.getElementById("sc-topic-bars");tbEl.innerHTML='<div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.13em;color:rgba(255,255,255,0.30);margin-bottom:8px">Hours by topic</div>';
+  ["Quant","RC","CR","DI","Mock test","Review"].forEach(function(t){
+    if(!(topicTotals[t]>0))return;
+    var pct=Math.round(topicTotals[t]/maxT*100);
+    var row=document.createElement("div");row.style.cssText="display:flex;align-items:center;gap:9px;margin-bottom:6px";
+    row.innerHTML='<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.65);width:48px;flex-shrink:0">'+t+'</div>'
+      +'<div style="flex:1;height:5px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+TC[t]+';border-radius:100px"></div></div>'
+      +'<div style="font-size:10.5px;font-weight:600;color:rgba(255,255,255,0.40);width:32px;text-align:right">'+fmtH(topicTotals[t])+'</div>';
+    tbEl.appendChild(row);
+  });
+
+  // 30-day dots
+  var dotWrap=document.getElementById("sc-streak-dots");dotWrap.innerHTML="";
+  for(var di=29;di>=0;di--){
+    var d2=addDays(today,-di),ds2=dateStr(d2),mins2=minsOn(ds2),tgt2=targetFor(d2);
+    var dot=document.createElement("div");
+    var col=mins2===0?"rgba(255,255,255,0.06)":mins2>=tgt2?"rgba(70,201,143,0.22)":"rgba(251,113,133,0.18)";
+    var brd=mins2===0?"rgba(255,255,255,0.08)":mins2>=tgt2?"rgba(70,201,143,0.35)":"rgba(251,113,133,0.28)";
+    dot.style.cssText="width:13px;height:13px;border-radius:3px;background:"+col+";border:1px solid "+brd+";flex-shrink:0";
+    dotWrap.appendChild(dot);
+  }
+}
+
+async function captureShareCard(){
+  document.getElementById("share-status").textContent="Generating image…";
+  var card=document.getElementById("share-card");
+  var canvas=await html2canvas(card,{backgroundColor:"#141923",scale:2,useCORS:true,logging:false});
+  return canvas;
+}
+async function shareDownload(){
+  var canvas=await captureShareCard();
+  var link=document.createElement("a");
+  link.download="gmat-progress-"+dateStr(today)+".png";
+  link.href=canvas.toDataURL("image/png");
+  link.click();
+  document.getElementById("share-status").textContent="✓ Downloaded!";
+  document.getElementById("share-status").style.color="var(--green)";
+}
+async function shareCopy(){
+  var canvas=await captureShareCard();
+  canvas.toBlob(async function(blob){
+    try{
+      await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);
+      document.getElementById("share-status").textContent="✓ Copied to clipboard!";
+      document.getElementById("share-status").style.color="var(--green)";
+    }catch(e){
+      document.getElementById("share-status").textContent="Copy failed — try Download instead.";
+      document.getElementById("share-status").style.color="var(--red)";
+    }
+  },"image/png");
+}
+
+// Close on backdrop click
+document.getElementById("share-modal").addEventListener("click",function(e){
+  if(e.target===this) closeShareModal();
+});
+
+<!-- ── READINESS BUMP ON SAVE (uses the dashboard's own readiness formula) ── -->
+<script>
+(function(){
+  function ready(fn){ if(document.body) fn(); else document.addEventListener("DOMContentLoaded",fn); }
+
+  // Mirror of the readiness math inside render() — kept identical so the number is real
+  function computeReadiness(){
+    if(typeof sessions==="undefined") return 0;
+    var ws=startOfWeek(today),wm=0,wt=0,i;
+    for(i=0;i<7;i++){var wd=addDays(ws,i);wm+=minsOn(dateStr(wd));wt+=targetFor(wd);}
+    var wpct=Math.min(100,Math.round(wm/wt*100)||0);
+    var PS=new Date(2026,3,25); PS.setHours(0,0,0,0);
+    var consistent=0,totalD=0,cur=new Date(PS);
+    while(cur<=today){ totalD++; var dm=minsOn(dateStr(cur)),dt=targetFor(cur); if(dm>0&&dm>=dt*0.8) consistent++; cur=addDays(cur,1); }
+    var cons=totalD>0?Math.min(100,Math.round(consistent/totalD*100)):0;
+    var streak=0,c=minsOn(dateStr(today))>0?new Date(today):addDays(today,-1);
+    while(true){var ds=dateStr(c); if(minsOn(ds)>0){streak++;c=addDays(c,-1);}else break;}
+    return Math.min(100,Math.round(cons*0.4+wpct*0.3+Math.min(100,streak*10)*0.3));
+  }
+  function snapshot(){ window.__rdSnap={val:computeReadiness(),t:Date.now()}; }
+
+  ready(function(){
+    if(typeof window.addSession==="function"){ var _a=window.addSession; window.addSession=function(){ snapshot(); return _a.apply(this,arguments); }; }
+    if(typeof window.timerStop==="function"){ var _s=window.timerStop; window.timerStop=function(){ snapshot(); return _s.apply(this,arguments); }; }
+
+    if(typeof render==="function"){
+      var _r=render;
+      render=function(){
+        _r.apply(this,arguments);
+        var snap=window.__rdSnap;
+        if(snap && (Date.now()-snap.t)<15000){
+          var after=computeReadiness(), delta=after-snap.val;
+          window.__rdSnap=null;
+          if(delta>0 && typeof showToast==="function"){
+            showToast("📈","+"+delta+"% readiness","You're at "+after+"% now — every session compounds.");
+          }
+        }
+      };
+    }
+  });
+})();
+</script>
+<style>
+.sc-feed-ic{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;flex-shrink:0;}
+#sessions-list .sess-item.sc-feed{gap:10px !important;align-items:center;}
 </style>
 
 </body>
