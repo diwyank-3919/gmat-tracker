@@ -5781,5 +5781,19 @@ window.scSetDur=function(h,m){
   overflow-y:auto !important;
 }
 </style>
+<style>
+/* Force the Recent activity card to a fixed height; scroll inside */
+.main-grid > .card:last-child{
+  max-height:470px !important;
+  display:flex !important;
+  flex-direction:column !important;
+}
+.main-grid > .card:last-child #sessions-list{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  max-height:none !important;
+  overflow-y:auto !important;
+}
+</style>
 </body>
 </html>
