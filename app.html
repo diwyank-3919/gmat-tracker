@@ -4424,18 +4424,24 @@
       margin-top: 10px;
     }
 
-    /* ── Compact timer: shorter dropdown + slim pause button ── */
+    /* ── Compact timer: unified 42px row ── */
     #timer-panel .timer-select,
     #timer-panel .cs-wrap {
       flex: 0 0 110px !important;
       width: 110px !important;
       min-width: 0 !important;
     }
+    #timer-panel .cs-trigger {
+      height: 42px !important;
+    }
     #timer-pause-btn {
       flex: 0 0 auto !important;
-      height: 36px !important;
-      padding: 0 13px !important;
+      height: 42px !important;
+      padding: 0 16px !important;
       font-size: 13px !important;
+      background: rgba(240,189,106,0.14) !important;
+      color: #f0bd6a !important;
+      border: 1px solid rgba(240,189,106,0.28) !important;
     }
   </style>
   <script>
@@ -7118,7 +7124,15 @@
         var st = document.getElementById("timer-status"); if (st) { st.textContent = state.running ? "Recording" : active ? "Paused" : "Idle"; st.className = "timer-status" + (state.running ? " running" : active ? " paused" : ""); }
         var sel = document.getElementById("timer-topic"); if (sel) { sel.disabled = active; if (active) sel.value = state.topic; }
         var sB = document.getElementById("timer-start-btn"), pB = document.getElementById("timer-pause-btn"), oB = document.getElementById("timer-stop-btn"), dB = document.getElementById("timer-discard-btn");
-        if (sB) { sB.style.display = state.running ? "none" : "inline-flex"; sB.innerHTML = (active && !state.running) ? '<i class="ti ti-player-play"></i> Resume' : '<i class="ti ti-player-play"></i> Start'; }
+        if (sB) {
+  sB.style.display = state.running ? "none" : "inline-flex";
+  sB.innerHTML = (active && !state.running) ? '<i class="ti ti-player-play"></i> Resume' : '<i class="ti ti-player-play"></i> Start';
+  var isResume = (active && !state.running);
+  sB.style.flex        = isResume ? '0 0 auto' : '1';
+  sB.style.background  = isResume ? 'rgba(255,255,255,0.06)' : '#878dff';
+  sB.style.color       = isResume ? 'var(--text-secondary)' : '#fff';
+  sB.style.border      = isResume ? '1px solid rgba(255,255,255,0.12)' : 'none';
+}
         if (pB) pB.style.display = state.running ? "inline-flex" : "none";
         if (oB) oB.style.display = active ? "inline-flex" : "none";
         if (dB) dB.style.display = active ? "inline-flex" : "none";
