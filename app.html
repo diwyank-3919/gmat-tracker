@@ -10126,18 +10126,13 @@
   </script>
   <style>
     /* Cap the right card to ~match the left card; list scrolls inside */
-    .main-grid {
-      align-items: stretch !important;
-    }
-
-    .main-grid>.card:last-child {
-      max-height: 440px !important;
+    .main-grid { align-items: start !important; }
+    .main-grid > .card:last-child {
       display: flex !important;
       flex-direction: column !important;
       overflow: hidden !important;
     }
-
-    .main-grid>.card:last-child #sessions-list {
+    .main-grid > .card:last-child #sessions-list {
       flex: 1 1 auto !important;
       min-height: 0 !important;
       max-height: none !important;
@@ -10184,6 +10179,19 @@
     }catch(e){}
   }
   ready(function(){setTimeout(function(){build();refresh();setInterval(refresh,1500);},600);});
+})();
+</script>
+<script>
+(function(){
+  function sync(){
+    var l=document.querySelector(".main-grid > .card:first-child");
+    var r=document.querySelector(".main-grid > .card:last-child");
+    if(!l||!r)return;
+    var h=l.offsetHeight;
+    if(h>0) r.style.height=h+"px";
+  }
+  function ready(fn){if(document.body)fn();else document.addEventListener("DOMContentLoaded",fn);}
+  ready(function(){ setTimeout(sync,700); setInterval(sync,1000); window.addEventListener("resize",sync); });
 })();
 </script>
 </body>
