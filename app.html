@@ -4129,9 +4129,6 @@ render=function(){
     var sel=document.getElementById("timer-topic"); if(sel){sel.disabled=active;if(active)sel.value=state.topic;}
     var sB=document.getElementById("timer-start-btn"),pB=document.getElementById("timer-pause-btn"),oB=document.getElementById("timer-stop-btn"),dB=document.getElementById("timer-discard-btn");
     if(sB){sB.style.display=state.running?"none":"inline-flex";sB.innerHTML=(active&&!state.running)?'<i class="ti ti-player-play"></i> Resume':'<i class="ti ti-player-play"></i> Start';}
-    var md=document.getElementById("manual-divider"),mf=document.getElementById("manual-form");
-    if(md)md.style.display=active?"none":"flex";
-    if(mf)mf.style.display=active?"none":"grid";
     if(oB)oB.style.display=active?"inline-flex":"none";
     if(dB)dB.style.display=active?"inline-flex":"none";
   }
@@ -5688,7 +5685,7 @@ window.scSetDur=function(h,m){
 }
 .sess-scroll{max-height:none;flex:1;overflow-y:auto;padding-right:2px;}
 .main-grid > .card:last-child{display:flex;flex-direction:column;}
-.main-grid > .card:last-child .sess-scroll{flex:1;min-height:0;max-height:calc(100vh - 220px);}
+.main-grid > .card:last-child .sess-scroll{flex:1;min-height:0;max-height:400px;}
 </style>
   <style>
 #all-sessions-modal{display:none;position:fixed;inset:0;z-index:1200;background:rgba(0,0,0,0.62);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);align-items:center;justify-content:center;padding:24px}
