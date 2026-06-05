@@ -4424,6 +4424,46 @@
       margin-top: 10px;
     }
 
+    /* ── PREMIUM DIALOG ENGINE ── */
+    #sc-dlg {
+      display:none;position:fixed;inset:0;z-index:99999;
+      align-items:center;justify-content:center;padding:24px;
+      background:rgba(0,0,0,0.52);
+      backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    }
+    #sc-dlg.scd-open { display:flex; }
+    .scd-card {
+      background:linear-gradient(155deg,#151a26,#1a2030);
+      border:1px solid rgba(255,255,255,0.11);border-radius:20px;
+      padding:28px 24px 22px;max-width:360px;width:100%;text-align:center;
+      box-shadow:0 40px 90px rgba(0,0,0,0.65),0 0 0 1px rgba(135,141,255,0.08),inset 0 1px 0 rgba(255,255,255,0.07);
+      animation:scdPop .28s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes scdPop{from{opacity:0;transform:scale(.90) translateY(10px)}to{opacity:1;transform:none}}
+    .scd-icon-wrap {
+      width:52px;height:52px;border-radius:15px;margin:0 auto 16px;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);
+    }
+    .scd-title {
+      font-family:'Fraunces',serif;font-size:18px;font-weight:600;
+      color:var(--text-primary);letter-spacing:-0.01em;margin-bottom:8px;
+    }
+    .scd-body { font-size:13.5px;color:var(--text-secondary);line-height:1.55;margin-bottom:24px; }
+    .scd-acts { display:flex;gap:8px; }
+    .scd-btn {
+      flex:1;height:40px;border:none;border-radius:10px;
+      font-family:'Hanken Grotesk',sans-serif;font-size:13px;font-weight:650;
+      cursor:pointer;transition:filter .14s,transform .1s;
+    }
+    .scd-btn:hover{filter:brightness(1.10)}.scd-btn:active{transform:scale(0.97)}
+    .scd-btn.scd-solo{flex:none;width:100%}
+    .scd-cancel{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10)!important;color:var(--text-secondary)}
+    .scd-cancel:hover{background:rgba(255,255,255,0.10);filter:none}
+    .scd-primary{background:#878dff;color:#0f1118}
+    .scd-danger {background:#fb7185;color:#0f1118}
+    .scd-warn   {background:#f0bd6a;color:#0f1118}
+
     /* ── Compact timer: unified 42px row ── */
     #timer-panel .timer-select,
     #timer-panel .cs-wrap {
@@ -6079,7 +6119,7 @@
           btn.disabled = false; btn.innerHTML = '<i class="ti ti-plus"></i> Bank study time';
           loadSessions();
         })
-        .catch(function (err) { setStatus("error"); alert("Save failed: " + (err.message || JSON.stringify(err))); btn.disabled = false; btn.innerHTML = '<i class="ti ti-plus"></i> Bank study time'; });
+        .catch(function (err) { setStatus("error"); scNotify("Save failed — " + (err.message || "check your connection"), 'error'); btn.disabled = false; btn.innerHTML = '<i class="ti ti-plus"></i> Bank study time'; });
     }
 
     function delSession(id) {
@@ -6096,9 +6136,16 @@
         .then(function (res) { if (res.error) { setStatus("error"); return; } loadTrashed(); loadSessions(); });
     }
     function permanentDelete(id) {
-      if (!confirm("Permanently delete? Cannot be undone.")) return;
-      setStatus("saving");
-      supa.from("sessions").delete().eq("id", id).then(function (res) { if (res.error) { setStatus("error"); return; } loadTrashed(); });
+      scConfirm({
+        title:'Delete forever?',
+        message:'This session cannot be recovered once removed.',
+        icon:'<i class="ti ti-trash-x" style="font-size:22px;color:var(--red)"></i>',
+        confirmLabel:'Delete permanently', cancelLabel:'Cancel', danger:true,
+        onConfirm:function(){
+          setStatus("saving");
+          supa.from("sessions").delete().eq("id", id).then(function (res) { if (res.error) { setStatus("error"); return; } loadTrashed(); });
+        }
+      });
     }
     function renderTrash(trashed) {
       var el = document.getElementById("trash-list"); if (!el) return;
@@ -6538,7 +6585,7 @@
       var OLD_KEYS = ["gmat_v3", "gmat_sessions_v2", "gmat_sessions"];
       var found = null, foundKey = null;
       OLD_KEYS.forEach(function (k) { var raw = localStorage.getItem(k); if (raw && !found) { try { found = JSON.parse(raw); foundKey = k; } catch (e) { } } });
-      if (!found || !found.length) { alert("No local data found to migrate."); return; }
+      if (!found || !found.length) { scNotify("No local session data found to migrate.", 'info'); return; }
       var modal = document.getElementById("migrate-modal");
       document.getElementById("migrate-count").textContent = found.length;
       document.getElementById("migrate-preview").textContent = found.slice(0, 3).map(function (s) { return s.date + " - " + s.topic + " - " + fmtH(s.mins); }).join("\n") + (found.length > 3 ? "\n...and " + (found.length - 3) + " more" : "");
@@ -6547,10 +6594,10 @@
         modal.style.display = "none"; setStatus("saving");
         var rows = found.map(function (s) { return { date: s.date, topic: s.topic, mins: s.mins, created_at: s.createdAt || s.created_at || Date.now() }; });
         supa.from("sessions").insert(rows).then(function (res) {
-          if (res.error) { setStatus("error"); alert("Migration failed: " + res.error.message); return; }
+         if (res.error) { setStatus("error"); scNotify("Migration failed — " + res.error.message, 'error'); return; }
           OLD_KEYS.forEach(function (k) { localStorage.removeItem(k); });
-          alert("Migrated " + rows.length + " sessions!"); loadSessions();
-        }).catch(function (err) { setStatus("error"); alert("Migration failed: " + err.message); });
+          showToast("✅", "Migration complete!", rows.length + " sessions imported successfully."); loadSessions();
+       }).catch(function (err) { setStatus("error"); scNotify("Migration failed — " + err.message, 'error'); });
       };
       document.getElementById("migrate-cancel").onclick = function () { modal.style.display = "none"; };
     }
@@ -6801,15 +6848,22 @@
       var date = document.getElementById("mock-date-inp").value; var score = parseInt(document.getElementById("mock-score-inp").value);
       var quant = parseInt(document.getElementById("mock-quant-inp").value) || null; var verbal = parseInt(document.getElementById("mock-verbal-inp").value) || null;
       var notes = document.getElementById("mock-notes-inp").value.trim();
-      if (!date || !score || score < 200 || score > 805) { alert("Please enter a valid date and score (200-805)"); return; }
+      if (!date || !score || score < 200 || score > 805) { scNotify("Enter a valid date and a score between 200–805.", 'warning'); return; }
       mockScores.push({ id: Date.now(), date: date, score: score, quant: quant, verbal: verbal, notes: notes });
       mockScores.sort(function (a, b) { return a.date.localeCompare(b.date); });
       saveMockScores(); window.mockScores = mockScores; closeAddMock(); renderMockView(); updateCommandCenter();
       showToast("📊", "Mock score logged!", "Score of " + score + " recorded. Keep pushing!");
     }
     function deleteMock(id) {
-      if (!confirm("Delete this mock score?")) return;
-      mockScores = mockScores.filter(function (m) { return m.id !== id; }); saveMockScores(); window.mockScores = mockScores; renderMockView(); updateCommandCenter();
+      scConfirm({
+        title:'Delete mock score?',
+        message:'This score will be removed from your history.',
+        icon:'<i class="ti ti-clipboard-x" style="font-size:22px;color:var(--red)"></i>',
+        confirmLabel:'Delete', cancelLabel:'Cancel', danger:true,
+        onConfirm:function(){
+          mockScores = mockScores.filter(function (m) { return m.id !== id; }); saveMockScores(); window.mockScores = mockScores; renderMockView(); updateCommandCenter();
+        }
+      });
     }
     function updateCommandCenter() {
       if (mockScores.length > 0) {
@@ -7139,18 +7193,39 @@
       }
       window.timerStart = function () { var sel = document.getElementById("timer-topic"); if (!state.running) { if (state.accMs === 0) { if (sel) state.topic = sel.value; state.firstStart = Date.now(); } state.running = true; state.startedAt = Date.now(); persist(); startTick(); paint(); } };
       window.timerPause = function () { if (state.running) { state.accMs = (state.accMs || 0) + (Date.now() - state.startedAt); state.running = false; state.startedAt = null; persist(); stopTick(); paint(); } };
-      window.timerDiscard = function () { if (!confirm("Discard this timed session?")) return; clear(); stopTick(); paint(); };
+      window.timerDiscard = function () {
+        var elapsed = Math.max(1, Math.round(elapsedMs()/60000));
+        scConfirm({
+          title:'Discard session?',
+          message: fmtH(elapsed*60) + ' of study time will not be saved.',
+          icon:'<i class="ti ti-player-stop" style="font-size:22px;color:var(--red)"></i>',
+          confirmLabel:'Yes, discard', cancelLabel:'Keep going', danger:true,
+          onConfirm:function(){ clear(); stopTick(); paint(); }
+        });
+      };
       window.timerStop = function () {
         var mins = Math.round(elapsedMs() / 60000);
-        if (mins < 1) { if (!confirm("Less than a minute — log as 1 minute?")) return; mins = 1; }
+        function doSave(m) {
         var topic = state.topic || "Quant", btn = document.getElementById("timer-stop-btn");
         if (btn) btn.disabled = true; setStatus("saving");
         var timerNotes = (document.getElementById("timer-notes").value || "").trim();
-        var timerRow = { date: (window.__timerLogDate || dateStr(today)), topic: topic, mins: mins, created_at: Date.now(), started_at: new Date(state.firstStart || (Date.now() - elapsedMs())).toISOString() };
+        var timerRow = { date: (window.__timerLogDate || dateStr(today)), topic: topic, mins: m, created_at: Date.now(), started_at: new Date(state.firstStart || (Date.now() - elapsedMs())).toISOString() };
         if (timerNotes) timerRow.notes = timerNotes;
         supa.from("sessions").insert(timerRow)
-          .then(function (res) { if (res.error) throw res.error; clear(); stopTick(); paint(); var tn = document.getElementById("timer-notes"); if (tn) tn.value = ""; if (btn) btn.disabled = false; if (typeof showToast === "function") { var _ld = window.__timerLogDate || dateStr(today); var _dl = _ld === dateStr(today) ? "today" : (_ld === dateStr(addDays(today, -1)) ? "yesterday" : parseLocal(_ld).toLocaleDateString("en-IN", { day: "numeric", month: "short" })); showToast("⏱️", "Session logged!", fmtH(mins) + " of " + topic + " added to " + _dl + "."); } loadSessions(); })
-          .catch(function (err) { setStatus("error"); alert("Save failed: " + (err.message || JSON.stringify(err))); if (btn) btn.disabled = false; });
+          .then(function (res) { if (res.error) throw res.error; clear(); stopTick(); paint(); var tn = document.getElementById("timer-notes"); if (tn) tn.value = ""; if (btn) btn.disabled = false; if (typeof showToast === "function") { var _ld = window.__timerLogDate || dateStr(today); var _dl = _ld === dateStr(today) ? "today" : (_ld === dateStr(addDays(today, -1)) ? "yesterday" : parseLocal(_ld).toLocaleDateString("en-IN", { day: "numeric", month: "short" })); showToast("⏱️", "Session logged!", fmtH(m) + " of " + topic + " added to " + _dl + "."); } loadSessions(); })
+          .catch(function (err) { setStatus("error"); scNotify("Save failed — " + (err.message || "check your connection"), 'error'); if (btn) btn.disabled = false; });
+        }
+        if (mins < 1) {
+          scConfirm({
+            title:'Short session',
+            message:'Less than a minute recorded — log as 1 minute?',
+            icon:'<i class="ti ti-clock" style="font-size:22px;color:var(--amber)"></i>',
+            confirmLabel:'Log 1 min', cancelLabel:'Cancel', warn:true,
+            onConfirm:function(){ doSave(1); }
+          });
+          return;
+        }
+        doSave(mins);
       };
       try { var s = JSON.parse(localStorage.getItem(TKEY)); if (s && typeof s === "object") state = s; } catch (e) { }
       if (state.running) startTick();
@@ -8850,12 +8925,12 @@
         supa.from("sessions").update({ notes: val || null }).eq("id", editingId)
           .then(function (res) {
             btn.disabled = false; btn.innerHTML = '<i class="ti ti-check"></i> Save note';
-            if (res.error) { if (typeof setStatus === "function") setStatus("error"); alert("Couldn't save note: " + (res.error.message || res.error)); return; }
+            if (res.error) { if (typeof setStatus === "function") setStatus("error"); scNotify("Couldn't save note — " + (res.error.message || "try again"), 'error'); return; }
             closeNoteEditor();
             if (typeof loadSessions === "function") loadSessions();
             if (typeof showToast === "function") showToast("📝", "Note saved", "Your session note was updated.");
           })
-          .catch(function (err) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-check"></i> Save note'; if (typeof setStatus === "function") setStatus("error"); alert("Couldn't save note: " + (err.message || err)); });
+          .catch(function (err) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-check"></i> Save note'; if (typeof setStatus === "function") setStatus("error"); scNotify("Couldn't save note — " + (err.message || "try again"), 'error'); });
       }
       document.addEventListener("click", function (e) {
         if (!e.target.closest) return;
@@ -10218,6 +10293,60 @@
   }
   function ready(fn){if(document.body)fn();else document.addEventListener("DOMContentLoaded",fn);}
   ready(function(){ setTimeout(sync,700); setInterval(sync,1000); window.addEventListener("resize",sync); });
+})();
+</script>
+  <script>
+/* ── PREMIUM DIALOG ENGINE — replaces all confirm() and alert() ── */
+(function(){
+  function inject(){
+    if(document.getElementById('sc-dlg')) return;
+    var d=document.createElement('div'); d.id='sc-dlg';
+    d.innerHTML='<div class="scd-card"><div class="scd-icon-wrap" id="scd-iw" style="display:none"></div>'
+      +'<div class="scd-title" id="scd-ti"></div><div class="scd-body" id="scd-bo"></div>'
+      +'<div class="scd-acts" id="scd-ac"></div></div>';
+    document.body.appendChild(d);
+    d.addEventListener('click',function(e){if(e.target===d)done(false);});
+  }
+  var _ok=null,_no=null;
+  function done(yes){
+    var d=document.getElementById('sc-dlg'); if(d) d.className='';
+    document.removeEventListener('keydown',onEsc);
+    var cb=yes?_ok:_no; _ok=_no=null; if(cb) cb();
+  }
+  function onEsc(e){if(e.key==='Escape')done(false);}
+
+  window.scConfirm=function(o){
+    inject();
+    _ok=o.onConfirm||null; _no=o.onCancel||null;
+    var iw=document.getElementById('scd-iw');
+    if(o.icon){iw.innerHTML=o.icon;iw.style.display='flex';}else{iw.style.display='none';}
+    document.getElementById('scd-ti').textContent=o.title||'Confirm';
+    document.getElementById('scd-bo').textContent=o.message||'';
+    var cc=o.danger?'scd-btn scd-danger':o.warn?'scd-btn scd-warn':'scd-btn scd-primary';
+    var ac=document.getElementById('scd-ac');
+    if(o.alertOnly){
+      ac.innerHTML='<button class="scd-btn scd-primary scd-solo" id="scd-ok">'+(o.confirmLabel||'Got it')+'</button>';
+    } else {
+      ac.innerHTML='<button class="scd-btn scd-cancel" id="scd-no">'+(o.cancelLabel||'Cancel')+'</button>'
+        +'<button class="'+cc+'" id="scd-ok">'+(o.confirmLabel||'Confirm')+'</button>';
+      document.getElementById('scd-no').onclick=function(){done(false);};
+    }
+    document.getElementById('scd-ok').onclick=function(){done(true);};
+    document.addEventListener('keydown',onEsc);
+    document.getElementById('sc-dlg').className='scd-open';
+  };
+
+  window.scNotify=function(msg,type){
+    type=type||'info';
+    var icons={
+      error:  '<i class="ti ti-alert-circle" style="font-size:22px;color:var(--red)"></i>',
+      warning:'<i class="ti ti-alert-triangle" style="font-size:22px;color:var(--amber)"></i>',
+      success:'<i class="ti ti-circle-check" style="font-size:22px;color:var(--green)"></i>',
+      info:   '<i class="ti ti-info-circle" style="font-size:22px;color:var(--accent-bright)"></i>'
+    };
+    var titles={error:'Something went wrong',warning:'Heads up',success:'All good',info:'Note'};
+    scConfirm({title:titles[type]||'Note',message:msg,icon:icons[type]||icons.info,alertOnly:true,confirmLabel:'Got it'});
+  };
 })();
 </script>
 </body>
