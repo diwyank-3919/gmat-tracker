@@ -3652,6 +3652,325 @@
       top: -1px;
     }
 
+    /* ── THEME TRANSITION — all surfaces fade together ── */
+    *, *::before, *::after {
+      transition-property: background, background-color, border-color, color, box-shadow, opacity;
+      transition-duration: 280ms;
+      transition-timing-function: ease;
+    }
+    /* Exclude elements that need their own transitions intact */
+    .brand-arc, .brand-dot, .ring-fill, [id*="rs-"],
+    .kpi-bar-fill, .sb-fill, .xp-fill, .t-fill,
+    .s-dot, .cal-cell, .intel-card, .ring-card,
+    .kpi, .card, .sidebar, .topbar,
+    .timer-btn, .log-btn, .sess-item,
+    #sheldonFab, #sheldonPanel {
+      transition-property: background, background-color, border-color, color,
+                           box-shadow, transform, opacity, filter;
+      transition-duration: 280ms, 280ms, 280ms, 280ms, 280ms, 0.3s, 280ms, 0.2s;
+      transition-timing-function: ease;
+    }
+
+    /* ── LIGHT THEME ── */
+    html.sc-light {
+      --bg-base: #f0f2f7;
+      --bg-card: linear-gradient(180deg, #ffffff, #f8f9fc);
+      --bg-card-hover: linear-gradient(180deg, #ffffff, #f2f4fa);
+      --bg-card-strong: #ffffff;
+      --bg-input: rgba(0, 0, 0, 0.05);
+      --bg-input-focus: rgba(0, 0, 0, 0.07);
+      --border: rgba(0, 0, 0, 0.09);
+      --border-subtle: rgba(0, 0, 0, 0.06);
+      --border-strong: rgba(0, 0, 0, 0.14);
+      --border-accent: rgba(100, 92, 220, 0.35);
+      --text-primary: #0f1118;
+      --text-secondary: rgba(15, 17, 24, 0.72);
+      --text-tertiary: rgba(15, 17, 24, 0.50);
+      --text-muted: rgba(15, 17, 24, 0.30);
+      --accent: #6458dc;
+      --accent-bright: #6458dc;
+      --accent-soft: rgba(100, 88, 220, 0.12);
+      --accent-glow: rgba(100, 88, 220, 0.25);
+      --green: #1a9e6b;
+      --green-bright: #158c5d;
+      --green-soft: rgba(26, 158, 107, 0.12);
+      --shadow-card: 0 1px 0 rgba(255,255,255,0.9) inset, 0 2px 12px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.06);
+      --shadow-card-hover: 0 1px 0 rgba(255,255,255,0.9) inset, 0 8px 28px rgba(0,0,0,0.12), 0 0 0 1px rgba(100,88,220,0.14);
+    }
+
+    html.sc-light body {
+      background: var(--bg-base);
+      color: var(--text-primary);
+    }
+    html.sc-light body::before {
+      background:
+        radial-gradient(900px 520px at 80% -8%, rgba(135,141,255,0.08), transparent 60%),
+        radial-gradient(720px 520px at 10% 6%, rgba(26,158,107,0.05), transparent 55%),
+        linear-gradient(180deg, #eef0f8, #f4f5fb) !important;
+    }
+    html.sc-light body::after { opacity: 0.025; }
+
+    /* Sidebar */
+    html.sc-light .sidebar {
+      background: rgba(255,255,255,0.88) !important;
+      border-right-color: rgba(0,0,0,0.08) !important;
+      box-shadow: 1px 0 0 rgba(0,0,0,0.05), inset -1px 0 20px rgba(0,0,0,0.02) !important;
+    }
+    html.sc-light .topbar {
+      background: rgba(255,255,255,0.80) !important;
+      border-bottom-color: rgba(0,0,0,0.08) !important;
+    }
+    html.sc-light .mob-header,
+    html.sc-light .mob-drawer {
+      background: rgba(255,255,255,0.97) !important;
+      border-color: rgba(0,0,0,0.08) !important;
+    }
+
+    /* Cards */
+    html.sc-light .card,
+    html.sc-light .kpi,
+    html.sc-light .ring-card { background: var(--bg-card) !important; border-color: var(--border) !important; }
+    html.sc-light .card:hover,
+    html.sc-light .kpi:hover { background: var(--bg-card-hover) !important; }
+    html.sc-light .momentum-card,
+    html.sc-light .banner {
+      background: linear-gradient(155deg, #f6f5ff, #f0f4fe) !important;
+      border-color: rgba(100,88,220,0.18) !important;
+    }
+    html.sc-light #exam-command {
+      background:
+        radial-gradient(130% 140% at 100% 0%, rgba(100,88,220,0.10), transparent 52%),
+        linear-gradient(165deg, #f8f7ff, #f2f4fe) !important;
+      border-color: rgba(100,88,220,0.22) !important;
+    }
+    html.sc-light .kpi.hero {
+      background:
+        radial-gradient(130% 140% at 100% 0%, rgba(100,88,220,0.08), transparent 55%),
+        linear-gradient(165deg, #f5f4ff, #f0f2fd) !important;
+      border-color: rgba(100,88,220,0.20) !important;
+    }
+    html.sc-light .intel-card {
+      background: rgba(0,0,0,0.025) !important;
+      border-color: rgba(0,0,0,0.08) !important;
+    }
+    html.sc-light .intel-card.positive { background: rgba(26,158,107,0.06) !important; border-color: rgba(26,158,107,0.18) !important; }
+    html.sc-light .intel-card.warning  { background: rgba(180,130,20,0.06)  !important; border-color: rgba(180,130,20,0.18)  !important; }
+    html.sc-light .intel-card.negative { background: rgba(200,50,70,0.05)   !important; border-color: rgba(200,50,70,0.16)   !important; }
+
+    /* Inputs, selects */
+    html.sc-light input,
+    html.sc-light select,
+    html.sc-light textarea {
+      background: var(--bg-input) !important;
+      border-color: var(--border) !important;
+      color: var(--text-primary) !important;
+      color-scheme: light !important;
+    }
+    html.sc-light input:focus,
+    html.sc-light select:focus,
+    html.sc-light textarea:focus {
+      border-color: var(--border-accent) !important;
+      background: var(--bg-input-focus) !important;
+    }
+    html.sc-light .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(0,0,0,0.35)' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+    }
+    html.sc-light .field select option { background: #fff; color: #0f1118; }
+
+    /* Session items */
+    html.sc-light .sess-item,
+    html.sc-light .asm-row {
+      background: rgba(0,0,0,0.025) !important;
+      border-color: rgba(0,0,0,0.07) !important;
+    }
+    html.sc-light .sess-item:hover { border-color: rgba(100,88,220,0.25) !important; background: rgba(100,88,220,0.05) !important; }
+
+    /* Topbar chips */
+    html.sc-light .tb-chip {
+      background: rgba(0,0,0,0.05) !important;
+      border-color: rgba(0,0,0,0.10) !important;
+      color: var(--text-secondary) !important;
+    }
+    html.sc-light .tb-chip.green { color: var(--green) !important; background: rgba(26,158,107,0.08) !important; border-color: rgba(26,158,107,0.20) !important; }
+    html.sc-light .tb-chip.amber { color: #a07010 !important; background: rgba(180,130,20,0.08) !important; border-color: rgba(180,130,20,0.20) !important; }
+    html.sc-light .tb-chip.purple { color: var(--accent) !important; background: rgba(100,88,220,0.08) !important; border-color: rgba(100,88,220,0.18) !important; }
+
+    /* Sidebar active */
+    html.sc-light .sb-item.active {
+      background: rgba(100,88,220,0.10) !important;
+      border-color: rgba(100,88,220,0.22) !important;
+      color: var(--accent) !important;
+    }
+    html.sc-light .sb-item.active::before { background: var(--accent) !important; }
+    html.sc-light .sb-item.active .ti { color: var(--accent) !important; }
+    html.sc-light .sb-item:not(.active) { color: rgba(15,17,24,0.62) !important; }
+    html.sc-light .sb-item:hover { background: rgba(0,0,0,0.04) !important; color: var(--text-primary) !important; }
+
+    /* Logo icon ring */
+    html.sc-light .sb-logo-icon,
+    html.sc-light .mob-logo-icon {
+      background: #fff !important;
+      box-shadow: inset 0 0 0 1px rgba(100,88,220,0.20), 0 2px 8px rgba(0,0,0,0.10) !important;
+    }
+
+    /* CTA button */
+    html.sc-light .log-btn { background: #6458dc !important; color: #fff !important; }
+    html.sc-light .log-btn:hover { background: #7268e8 !important; }
+
+    /* Timer panel */
+    html.sc-light #timer-panel {
+      background: linear-gradient(160deg, rgba(100,88,220,0.06), rgba(26,158,107,0.04)) !important;
+      border-color: rgba(0,0,0,0.08) !important;
+    }
+    html.sc-light .timer-btn.primary { background: #6458dc !important; }
+    html.sc-light .timer-btn.stop    { background: #1a9e6b !important; }
+    html.sc-light .timer-btn.ghost   { background: rgba(0,0,0,0.05) !important; border-color: rgba(0,0,0,0.12) !important; color: var(--text-secondary) !important; }
+
+    /* Streak/calendar */
+    html.sc-light .s-dot.met  { background: rgba(26,158,107,0.14) !important; border-color: rgba(26,158,107,0.28) !important; }
+    html.sc-light .s-dot.missed { background: rgba(200,50,70,0.10) !important; border-color: rgba(200,50,70,0.22) !important; }
+    html.sc-light .s-dot.empty { background: rgba(0,0,0,0.05) !important; border-color: rgba(0,0,0,0.09) !important; color: rgba(0,0,0,0.25) !important; }
+    html.sc-light .cal-cell { background: rgba(0,0,0,0.03) !important; border-color: rgba(0,0,0,0.08) !important; }
+    html.sc-light .cal-cell.has-data.met { background: rgba(26,158,107,0.10) !important; border-color: rgba(26,158,107,0.25) !important; }
+    html.sc-light .cal-cell.has-data.missed { background: rgba(200,50,70,0.08) !important; border-color: rgba(200,50,70,0.20) !important; }
+
+    /* Sheldon panel */
+    html.sc-light #sheldonPanel { background: #f8f9fc !important; border-color: rgba(100,88,220,0.18) !important; }
+    html.sc-light .sheldon-header { background: linear-gradient(180deg, rgba(100,88,220,0.06), transparent) !important; }
+    html.sc-light .sheldon-msg.bot { background: #eef0f8 !important; color: #0f1118 !important; border-color: rgba(0,0,0,0.07) !important; }
+    html.sc-light .sheldon-msg.user { background: linear-gradient(135deg, #6458dc, #5a4fd4) !important; color: #fff !important; }
+    html.sc-light .sheldon-input { background: #eff1f8 !important; border-top-color: rgba(0,0,0,0.07) !important; }
+    html.sc-light .sheldon-input textarea { background: #e8eaf2 !important; border-color: rgba(0,0,0,0.10) !important; color: #0f1118 !important; }
+    html.sc-light .sheldon-input textarea::placeholder { color: rgba(0,0,0,0.35) !important; }
+    html.sc-light #sheldonFab { box-shadow: 0 8px 28px rgba(100,88,220,0.30) !important; }
+
+    /* Modals */
+    html.sc-light #add-mock-modal > div,
+    html.sc-light #trash-modal > div,
+    html.sc-light .dt-card,
+    html.sc-light .asm-card,
+    html.sc-light .scn-card {
+      background: #ffffff !important;
+      border-color: rgba(0,0,0,0.10) !important;
+    }
+    html.sc-light .cs-menu,
+    html.sc-light #perfos-tip { background: #fff !important; border-color: rgba(0,0,0,0.10) !important; color: #0f1118 !important; }
+    html.sc-light #perfos-tip .tip-val { color: #0f1118 !important; }
+    html.sc-light #perfos-tip::after { background: #fff !important; }
+
+    /* XP bar */
+    html.sc-light .xp-fill { background: linear-gradient(90deg, #6458dc, #5aa0e8, #1a9e6b) !important; }
+    html.sc-light .sb-fill { background: var(--accent) !important; }
+
+    /* Footer */
+    html.sc-light .footer { border-top-color: rgba(0,0,0,0.08) !important; background: rgba(0,0,0,0.03) !important; }
+
+    /* Share card */
+    html.sc-light #share-modal > div,
+    html.sc-light .asm-card { box-shadow: 0 24px 60px rgba(0,0,0,0.15) !important; }
+
+    /* sc-today-foot */
+    html.sc-light #sc-today-foot { background: rgba(0,0,0,0.03) !important; border-color: rgba(0,0,0,0.07) !important; }
+
+    /* Momentum card stats */
+    html.sc-light .momentum-stat-val { color: var(--accent) !important; -webkit-text-fill-color: var(--accent) !important; }
+    html.sc-light .momentum-stat-val.green { color: var(--green) !important; -webkit-text-fill-color: var(--green) !important; }
+    html.sc-light .momentum-stat-val.amber { color: #a07010 !important; -webkit-text-fill-color: #a07010 !important; }
+    html.sc-light .kpi-value { color: #0f1118 !important; -webkit-text-fill-color: #0f1118 !important; }
+    html.sc-light .kpi-value.met { color: var(--green) !important; -webkit-text-fill-color: var(--green) !important; }
+    html.sc-light .ec-stat { color: #0f1118 !important; }
+    html.sc-light .ec-stat.ec-green { color: var(--green) !important; }
+    html.sc-light .ec-hero-num { background: linear-gradient(180deg,#0f1118 28%,#3a3580); -webkit-background-clip: text; background-clip: text; }
+    html.sc-light .kpi-label,
+    html.sc-light .ec-eyebrow,
+    html.sc-light .ring-label-top { color: rgba(15,17,24,0.42) !important; }
+    html.sc-light .card-title { color: #0f1118 !important; }
+    html.sc-light .card-title .ti { color: var(--accent) !important; }
+
+    /* Pf menu */
+    html.sc-light .pf-menu { background: #fff !important; border-color: rgba(0,0,0,0.10) !important; }
+    html.sc-light .pf-item:hover { background: rgba(200,50,70,0.08) !important; }
+
+    /* Chart axes will auto-adapt via JS below */
+    /* ── THEME TOGGLE ── */
+    .sc-theme-toggle {
+      position: relative;
+      width: 52px;
+      height: 28px;
+      flex-shrink: 0;
+      cursor: pointer;
+      outline: none;
+    }
+    .sc-theme-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .sct-track {
+      position: absolute;
+      inset: 0;
+      border-radius: 100px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      transition: background 280ms ease, border-color 280ms ease, box-shadow 280ms ease;
+      overflow: hidden;
+    }
+    html.sc-light .sct-track {
+      background: rgba(100,88,220,0.12);
+      border-color: rgba(100,88,220,0.28);
+    }
+    .sct-track::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 100%);
+      pointer-events: none;
+    }
+    .sct-thumb {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.28), 0 0 0 1px rgba(0,0,0,0.08);
+      transition: transform 280ms cubic-bezier(.34,1.56,.64,1), background 280ms ease, box-shadow 280ms ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    html.sc-light .sct-thumb {
+      transform: translateX(24px);
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(100,88,220,0.28), 0 0 0 1px rgba(100,88,220,0.12);
+    }
+    .sct-icon {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      transition: opacity 200ms ease, transform 200ms ease;
+    }
+    .sct-moon { color: #c4b5fd; opacity: 1; transform: rotate(0deg) scale(1); }
+    .sct-sun  { color: #f0a030; opacity: 0; transform: rotate(90deg) scale(0.6); }
+    html.sc-light .sct-moon { opacity: 0; transform: rotate(-90deg) scale(0.6); }
+    html.sc-light .sct-sun  { opacity: 1; transform: rotate(0deg) scale(1); }
+    /* Hover glow */
+    .sc-theme-toggle:hover .sct-track {
+      box-shadow: 0 0 0 3px rgba(139,124,248,0.14);
+    }
+    html.sc-light .sc-theme-toggle:hover .sct-track {
+      box-shadow: 0 0 0 3px rgba(100,88,220,0.16);
+    }
+    /* Flash ring on click */
+    .sct-track.sc-ring-flash { animation: sctFlash 0.4s ease; }
+    @keyframes sctFlash {
+      0%  { box-shadow: 0 0 0 0   rgba(139,124,248,0.0); }
+      40% { box-shadow: 0 0 0 6px rgba(139,124,248,0.28); }
+      100%{ box-shadow: 0 0 0 0   rgba(139,124,248,0.0); }
+    }
+    
+
     /* ════ PALETTE v2 — NAVY SURFACES (comment out this block to revert) ════ */
     :root {
       --bg-base: #0d1018;
@@ -4517,6 +4836,15 @@
           id="mob-streak">0</span></div>
       <div class="tb-chip green" style="font-size:10.5px;padding:4px 9px;"><i class="ti ti-target"></i><span
           id="mob-week">0</span>%</div>
+      <label class="sc-theme-toggle" style="margin-right:2px" title="Toggle theme" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTheme();}">
+            <input type="checkbox" aria-label="Toggle light mode" onchange="toggleTheme()">
+            <div class="sct-track">
+              <div class="sct-thumb">
+                <span class="sct-icon sct-moon"><i class="ti ti-moon-stars"></i></span>
+                <span class="sct-icon sct-sun"><i class="ti ti-sun"></i></span>
+              </div>
+            </div>
+          </label>
       <button class="mob-burger" onclick="openMobDrawer()" aria-label="Open menu"><i class="ti ti-menu-2"></i></button>
     </div>
   </div>
@@ -4761,6 +5089,16 @@
             style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;color:var(--text-secondary);padding:5px 11px;border-radius:100px;border:1px solid var(--border);background:rgba(255,255,255,0.05);backdrop-filter:blur(12px)">
             <i class="ti ti-cloud" style="font-size:12px"></i> Connecting…
           </div>
+          <!-- Theme toggle -->
+          <label class="sc-theme-toggle" title="Toggle light / dark mode" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTheme();}">
+            <input type="checkbox" id="sc-theme-chk" onchange="toggleTheme()" aria-label="Toggle light mode">
+            <div class="sct-track" id="sct-track">
+              <div class="sct-thumb">
+                <span class="sct-icon sct-moon"><i class="ti ti-moon-stars"></i></span>
+                <span class="sct-icon sct-sun"><i class="ti ti-sun"></i></span>
+              </div>
+            </div>
+          </label>
           <button onclick="openTrash()"
             style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;color:var(--text-secondary);padding:5px 11px;border-radius:100px;border:1px solid var(--border);background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);cursor:pointer"
             title="View deleted sessions"><i class="ti ti-trash" style="font-size:12px"></i> Trash</button>
@@ -10349,6 +10687,72 @@
   };
 })();
 </script>
+  <!-- ── THEME ENGINE ── -->
+  <script>
+    (function(){
+      var PREF_KEY = 'sc_theme';
+      var CHART_DARK = { grid: 'rgba(255,255,255,0.04)', tick: 'rgba(255,255,255,0.35)', tooltip_bg: 'rgba(15,12,26,0.95)', tooltip_border: 'rgba(139,124,248,0.28)', title: 'rgba(255,255,255,0.90)', body: 'rgba(255,255,255,0.55)' };
+      var CHART_LIGHT = { grid: 'rgba(0,0,0,0.06)',     tick: 'rgba(15,17,24,0.42)',    tooltip_bg: 'rgba(255,255,255,0.98)', tooltip_border: 'rgba(100,88,220,0.25)',    title: '#0f1118',                    body: 'rgba(15,17,24,0.62)' };
+
+      function getSystem(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; }
+      function getCurrent(){ return localStorage.getItem(PREF_KEY) || getSystem(); }
+
+      function applyTheme(theme, animate){
+        var html = document.documentElement;
+        if(animate){
+          // Full-page flash-free crossfade overlay
+          var veil = document.getElementById('sc-theme-veil');
+          if(!veil){ veil=document.createElement('div'); veil.id='sc-theme-veil'; veil.style.cssText='position:fixed;inset:0;z-index:999998;pointer-events:none;opacity:0;transition:opacity 180ms ease;background:'+(theme==='light'?'rgba(255,255,255,0.18)':'rgba(0,0,0,0.15)'); document.body.appendChild(veil); }
+          veil.style.opacity='1';
+          setTimeout(function(){ html.classList.toggle('sc-light', theme==='light'); updateCharts(theme); veil.style.opacity='0'; }, 120);
+        } else {
+          html.classList.toggle('sc-light', theme==='light');
+          updateCharts(theme);
+        }
+        // Sync all checkboxes
+        var chks = document.querySelectorAll('.sc-theme-toggle input');
+        for(var i=0;i<chks.length;i++) chks[i].checked = (theme==='light');
+        // Flash ring
+        var track = document.getElementById('sct-track');
+        if(track && animate){ track.classList.remove('sc-ring-flash'); void track.offsetWidth; track.classList.add('sc-ring-flash'); }
+      }
+
+      function updateCharts(theme){
+        if(typeof Chart === 'undefined') return;
+        var c = theme==='light' ? CHART_LIGHT : CHART_DARK;
+        Chart.defaults.color = c.tick;
+        Chart.defaults.borderColor = c.grid;
+        Chart.defaults.plugins.tooltip.backgroundColor = c.tooltip_bg;
+        Chart.defaults.plugins.tooltip.borderColor = c.tooltip_border;
+        Chart.defaults.plugins.tooltip.titleColor = c.title;
+        Chart.defaults.plugins.tooltip.bodyColor = c.body;
+        // Re-render existing charts
+        setTimeout(function(){
+          if(typeof renderChart === 'function') try{ renderChart(); }catch(e){}
+          if(typeof renderTopicDonut === 'function') try{ renderTopicDonut(); }catch(e){}
+          if(typeof renderTopicBars === 'function') try{ renderTopicBars(); }catch(e){}
+          if(typeof renderAnalytics === 'function') try{ renderAnalytics(); }catch(e){}
+        }, 150);
+      }
+
+      window.toggleTheme = function(){
+        var next = document.documentElement.classList.contains('sc-light') ? 'dark' : 'light';
+        localStorage.setItem(PREF_KEY, next);
+        applyTheme(next, true);
+      };
+
+      // Boot — no flash
+      var saved = getCurrent();
+      applyTheme(saved, false);
+
+      // Respect OS change if user hasn't overridden
+      if(window.matchMedia){
+        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function(e){
+          if(!localStorage.getItem(PREF_KEY)) applyTheme(e.matches?'light':'dark', true);
+        });
+      }
+    })();
+  </script>
 </body>
 
 </html>
