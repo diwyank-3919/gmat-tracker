@@ -364,7 +364,7 @@ body::after{
 .ring-card-desc{font-size:10.5px;font-weight:600;color:var(--text-secondary);margin-top:10px;text-align:center;line-height:1.3;}
 
 /* ── MAIN GRID ── */
-.main-grid{display:grid;grid-template-columns:1fr 300px;gap:14px;margin-bottom:14px}
+.main-grid{display:grid;grid-template-columns:1fr 380px;gap:14px;margin-bottom:14px}
 @media(max-width:1000px){.main-grid{grid-template-columns:1fr}}
 
 .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
@@ -3502,25 +3502,46 @@ function renderSessions(){
   document.getElementById("sess-total-label").textContent=filtered.length?fmtH(total)+" total":"";
   if(!filtered.length){el.innerHTML='<div class="empty-state">No sessions for this period</div>';return;}
   var TI={"Quant":"ti-math","RC":"ti-book-2","CR":"ti-brain","DI":"ti-chart-dots","Mock test":"ti-clipboard-check","Review":"ti-refresh"};
-  el.innerHTML=filtered.map(function(s){
-    var isToday=s.date===ts;
-    var dateLabel=isToday?"Today":parseLocal(s.date).toLocaleDateString("en-IN",{day:"numeric",month:"short"});
-    var col=TC[s.topic]||"#888";
-    var noteLine = s.notes
-      ? '<div style="font-size:10.5px;color:var(--text-tertiary);font-style:italic;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.notes+'</div>'
-      : '';
-    return '<div class="sess-item sc-feed">'
-      +'<span class="sc-feed-ic" style="background:'+col+'18;color:'+col+';box-shadow:inset 0 0 0 1px '+col+'2e"><i class="ti '+(TI[s.topic]||"ti-circle")+'"></i></span>'
-      +'<div class="sess-info" style="min-width:0">'
-        +'<div style="display:flex;align-items:center;gap:6px"><span class="sess-topic">'+s.topic+'</span>'
-        +(sessFilter!=="today"?'<span class="sess-date-tag">'+dateLabel+'</span>':'')+'</div>'
-        +noteLine
+
+  // Group by date
+  var groups={}, order=[];
+  filtered.forEach(function(s){
+    if(!groups[s.date]){groups[s.date]=[];order.push(s.date);}
+    groups[s.date].push(s);
+  });
+
+  el.innerHTML=order.map(function(date){
+    var isToday=date===ts;
+    var dayLabel=isToday?"Today":parseLocal(date).toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"});
+    var dayTotal=groups[date].reduce(function(a,s){return a+s.mins;},0);
+    var tgt=targetFor(parseLocal(date));
+    var met=dayTotal>=tgt;
+
+    var rows=groups[date].map(function(s){
+      var col=TC[s.topic]||"#888";
+      return '<div class="sess-item sc-feed">'
+        +'<span class="sc-feed-ic" style="width:28px;height:28px;font-size:13px;flex-shrink:0;border-radius:8px;display:flex;align-items:center;justify-content:center;background:'+col+'1a;color:'+col+';box-shadow:inset 0 0 0 1px '+col+'33"><i class="ti '+(TI[s.topic]||"ti-circle")+'"></i></span>'
+        +'<div class="sess-info" style="flex:1;min-width:0">'
+          +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">'
+            +'<span class="sess-topic" style="font-size:12px;font-weight:650;color:var(--text-primary)">'+s.topic+'</span>'
+            +'<span style="font-size:11px;font-weight:700;color:var(--accent-bright);margin-left:auto">'+fmtH(s.mins)+'</span>'
+          +'</div>'
+          +(s.notes?'<div style="font-size:10.5px;color:var(--text-tertiary);font-style:italic;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px" title="'+s.notes+'">'+s.notes+'</div>':'')
+        +'</div>'
+        +'<button class="sc-note-btn'+(s.notes?' has-note':'')+'" data-note-id="'+s.id+'" title="'+(s.notes?'Edit note':'Add note')+'" style="flex-shrink:0;opacity:0.7;color:'+(s.notes?'var(--accent-bright)':'var(--text-secondary)')+'"><i class="ti ti-pencil" style="font-size:12px"></i></button>'
+        +'<button class="sess-del" data-id="'+s.id+'" title="Delete" style="flex-shrink:0"><i class="ti ti-trash" style="font-size:11px"></i></button>'
+        +'</div>';
+    }).join("");
+
+    return '<div style="margin-bottom:8px">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;padding:0 2px;margin-bottom:4px">'
+        +'<span style="font-size:10.5px;font-weight:700;color:var(--text-tertiary);letter-spacing:0.04em">'+dayLabel+'</span>'
+        +'<span style="font-size:10px;font-weight:650;padding:1px 7px;border-radius:100px;background:'+(met?'rgba(70,201,143,0.12)':'rgba(255,255,255,0.05)')+';color:'+(met?'var(--green)':'var(--text-muted)')+'">'+fmtH(dayTotal)+(met?' ✓':'')+'</span>'
       +'</div>'
-      +'<span class="sess-dur">'+fmtH(s.mins)+'</span>'
-      +'<button class="sc-note-btn'+(s.notes?' has-note':'')+'" data-note-id="'+s.id+'" title="'+(s.notes?'Edit note':'Add note')+'" style="opacity:1;color:'+(s.notes?'var(--accent-bright)':'var(--text-secondary)')+'"><i class="ti ti-pencil" style="font-size:14px"></i></button>'
-      +'<button class="sess-del" data-id="'+s.id+'" title="Delete"><i class="ti ti-trash" style="font-size:12px"></i></button>'
+      +rows
       +'</div>';
   }).join("");
+
   el.querySelectorAll(".sess-del").forEach(function(btn){btn.addEventListener("click",function(){delSession(this.getAttribute("data-id"));});});
 }
 function migrateFromLocalStorage(){
@@ -5654,6 +5675,13 @@ window.scSetDur=function(h,m){
   });
 })();
 </script>
-
+<style>
+/* ── SESSION FEED REDESIGN ── */
+.sess-item.sc-feed{
+  padding:7px 9px;gap:7px;
+  align-items:flex-start;
+}
+.sess-scroll{max-height:none;flex:1;overflow-y:auto;}
+</style>
 </body>
 </html>
