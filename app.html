@@ -2337,8 +2337,8 @@ body::before{
         <input type="text" id="timer-notes" placeholder="Quick note about this timed session… (optional)" maxlength="200"
       style="margin:8px 0 4px;width:100%;height:32px;font-size:12px;font-family:'Hanken Grotesk',sans-serif;font-weight:500;padding:0 11px;border:1px solid var(--border);border-radius:9px;background:var(--bg-input);color:var(--text-primary);outline:none;transition:border-color 0.15s"
       onfocus="this.style.borderColor='rgba(135,141,255,0.45)'" onblur="this.style.borderColor='var(--border)'">
-        <div class="timer-divider"><span>or log manually</span></div>
-        <div class="form-grid">
+        <div class="timer-divider" id="manual-divider"><span>or log manually</span></div>
+        <div class="form-grid" id="manual-form">
           <div class="field">
             <label>Date</label>
             <div style="display:flex;align-items:center;gap:6px;position:relative">
@@ -4129,7 +4129,9 @@ render=function(){
     var sel=document.getElementById("timer-topic"); if(sel){sel.disabled=active;if(active)sel.value=state.topic;}
     var sB=document.getElementById("timer-start-btn"),pB=document.getElementById("timer-pause-btn"),oB=document.getElementById("timer-stop-btn"),dB=document.getElementById("timer-discard-btn");
     if(sB){sB.style.display=state.running?"none":"inline-flex";sB.innerHTML=(active&&!state.running)?'<i class="ti ti-player-play"></i> Resume':'<i class="ti ti-player-play"></i> Start';}
-    if(pB)pB.style.display=state.running?"inline-flex":"none";
+    var md=document.getElementById("manual-divider"),mf=document.getElementById("manual-form");
+    if(md)md.style.display=active?"none":"flex";
+    if(mf)mf.style.display=active?"none":"grid";
     if(oB)oB.style.display=active?"inline-flex":"none";
     if(dB)dB.style.display=active?"inline-flex":"none";
   }
@@ -5547,7 +5549,10 @@ document.getElementById("share-modal").addEventListener("click",function(e){
 });
 </script>
 <style>
-.sc-feed-ic{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;flex-shrink:0;}
+.sc-feed-ic{
+  width:28px;height:28px;font-size:13px;flex-shrink:0;
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+}
 #sessions-list .sess-item.sc-feed{gap:10px !important;align-items:center;}
 </style>
 
@@ -5681,7 +5686,9 @@ window.scSetDur=function(h,m){
   padding:7px 9px;gap:7px;
   align-items:flex-start;
 }
-.sess-scroll{max-height:none;flex:1;overflow-y:auto;}
+.sess-scroll{max-height:none;flex:1;overflow-y:auto;padding-right:2px;}
+.main-grid > .card:last-child{display:flex;flex-direction:column;}
+.main-grid > .card:last-child .sess-scroll{flex:1;min-height:0;max-height:calc(100vh - 220px);}
 </style>
 </body>
 </html>
