@@ -10126,20 +10126,121 @@
   </script>
   <style>
     /* Cap the right card to ~match the left card; list scrolls inside */
-    .main-grid { align-items: stretch !important; }
-    .main-grid > .card:last-child {
+    .main-grid {
+      align-items: stretch !important;
+    }
+
+    .main-grid>.card:last-child {
       max-height: 440px !important;
       display: flex !important;
       flex-direction: column !important;
       overflow: hidden !important;
     }
-    .main-grid > .card:last-child #sessions-list {
+
+    .main-grid>.card:last-child #sessions-list {
       flex: 1 1 auto !important;
       min-height: 0 !important;
       max-height: none !important;
       overflow-y: auto !important;
     }
   </style>
+  <style>
+    #sc-today-foot {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      padding: 14px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.025)
+    }
+
+    #sc-today-foot .stf-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 10px
+    }
+
+    #sc-today-foot .stf-l {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      color: var(--text-tertiary);
+      text-transform: uppercase
+    }
+
+    #sc-today-foot .stf-v {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary)
+    }
+
+    #sc-today-foot .stf-v small {
+      color: var(--text-tertiary);
+      font-weight: 600;
+      font-size: 11px
+    }
+
+    #sc-today-foot .stf-bar {
+      height: 6px;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.06);
+      overflow: hidden
+    }
+
+    #sc-today-foot .stf-fill {
+      height: 100%;
+      border-radius: 100px;
+      background: linear-gradient(90deg, var(--accent-bright), var(--green));
+      transition: width .6s cubic-bezier(.4, 0, .2, 1)
+    }
+
+    #sc-today-foot .stf-sub {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--text-tertiary)
+    }
+
+    #sc-today-foot .stf-sub b {
+      color: var(--text-secondary);
+      font-weight: 700
+    }
+  </style>
+  <script>
+    (function () {
+      function ready(fn) { if (document.body) fn(); else document.addEventListener("DOMContentLoaded", fn); }
+      function build() {
+        var card = document.querySelector(".main-grid > .card:first-child"); if (!card) return;
+        if (getComputedStyle(card).position === "static") card.style.position = "relative";
+        if (document.getElementById("sc-today-foot")) return;
+        var f = document.createElement("div"); f.id = "sc-today-foot";
+        f.innerHTML = '<div class="stf-top"><span class="stf-l">Today\u2019s progress</span><span class="stf-v" id="stf-val">\u2014</span></div>'
+          + '<div class="stf-bar"><div class="stf-fill" id="stf-fill" style="width:0%"></div></div>'
+          + '<div class="stf-sub"><span>All-time studied</span><b id="stf-total">\u2014</b></div>';
+        card.appendChild(f);
+      }
+      function refresh() {
+        try {
+          if (typeof sessions === "undefined" || typeof today === "undefined") return;
+          var f = document.getElementById("sc-today-foot"); if (!f) return;
+          var ts = dateStr(today);
+          var mins = sessions.filter(function (s) { return s.date === ts; }).reduce(function (a, s) { return a + s.mins; }, 0);
+          var tgt = targetFor(today) || 0;
+          var pct = tgt > 0 ? Math.min(100, Math.round(mins / tgt * 100)) : (mins > 0 ? 100 : 0);
+          var allMins = sessions.reduce(function (a, s) { return a + s.mins; }, 0);
+          var v = document.getElementById("stf-val"), fl = document.getElementById("stf-fill"), tt = document.getElementById("stf-total");
+          if (v) v.innerHTML = fmtH(mins) + ' <small>/ ' + fmtH(tgt) + ' \u00b7 ' + pct + '%</small>';
+          if (fl) fl.style.width = pct + "%";
+          if (tt) tt.textContent = fmtH(allMins);
+        } catch (e) { }
+      }
+      ready(function () { setTimeout(function () { build(); refresh(); setInterval(refresh, 1500); }, 600); });
+    })();
+  </script>
 </body>
 
 </html>
