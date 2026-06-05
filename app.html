@@ -364,7 +364,7 @@ body::after{
 .ring-card-desc{font-size:10.5px;font-weight:600;color:var(--text-secondary);margin-top:10px;text-align:center;line-height:1.3;}
 
 /* ── MAIN GRID ── */
-.main-grid{display:grid;grid-template-columns:1fr 380px;gap:14px;margin-bottom:14px}
+.main-grid{display:grid;grid-template-columns:1fr 380px;gap:14px;margin-bottom:14px;align-items:start}
 @media(max-width:1000px){.main-grid{grid-template-columns:1fr}}
 
 .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
@@ -5690,5 +5690,93 @@ window.scSetDur=function(h,m){
 .main-grid > .card:last-child{display:flex;flex-direction:column;}
 .main-grid > .card:last-child .sess-scroll{flex:1;min-height:0;max-height:calc(100vh - 220px);}
 </style>
+  <style>
+#all-sessions-modal{display:none;position:fixed;inset:0;z-index:1200;background:rgba(0,0,0,0.62);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);align-items:center;justify-content:center;padding:24px}
+.asm-card{background:linear-gradient(155deg,#151a26,#1a2030);border:1px solid rgba(255,255,255,0.10);border-radius:22px;width:min(680px,96vw);max-height:88vh;display:flex;flex-direction:column;box-shadow:0 40px 100px rgba(0,0,0,0.6),0 0 0 1px rgba(135,141,255,0.08);overflow:hidden;animation:asmIn .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes asmIn{from{opacity:0;transform:scale(.96) translateY(10px)}to{opacity:1;transform:none}}
+.asm-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:20px 24px 16px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0}
+.asm-title{font-family:'Fraunces',serif;font-size:19px;font-weight:600;color:var(--text-primary);letter-spacing:-0.01em}
+.asm-sub{font-size:11.5px;color:var(--text-tertiary);margin-top:2px}
+.asm-tabs{display:flex;gap:2px;background:rgba(255,255,255,0.04);padding:3px;border-radius:9px;border:1px solid rgba(255,255,255,0.06)}
+.asm-tab{font-size:11.5px;font-weight:550;padding:5px 12px;border-radius:7px;cursor:pointer;color:var(--text-secondary);border:none;background:transparent;font-family:inherit;transition:all .15s}
+.asm-tab.active{background:rgba(255,255,255,0.10);color:var(--text-primary);font-weight:700}
+.asm-close{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text-tertiary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;transition:all .15s}
+.asm-close:hover{background:var(--red-soft);color:var(--red);border-color:rgba(251,113,133,0.25)}
+.asm-body{padding:16px 24px 22px;overflow-y:auto;flex:1}
+.asm-day{margin-bottom:16px}
+.asm-day-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;padding:0 2px}
+.asm-day-label{font-size:12.5px;font-weight:700;color:var(--text-primary)}
+.asm-day-total{font-size:11px;font-weight:650;padding:2px 9px;border-radius:100px}
+.asm-row{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:11px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);margin-bottom:5px;transition:border-color .15s,transform .15s}
+.asm-row:hover{border-color:rgba(135,141,255,0.25);transform:translateX(2px)}
+.asm-ic{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px}
+.asm-info{flex:1;min-width:0}
+.asm-topic{font-size:13px;font-weight:650;color:var(--text-primary)}
+.asm-note{font-size:11px;color:var(--text-tertiary);font-style:italic;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.asm-dur{font-size:13px;font-weight:700;color:var(--accent-bright);flex-shrink:0}
+</style>
+<script>
+(function(){
+  function ready(fn){if(document.body)fn();else document.addEventListener("DOMContentLoaded",fn);}
+  var TI={"Quant":"ti-math","RC":"ti-book-2","CR":"ti-brain","DI":"ti-chart-dots","Mock test":"ti-clipboard-check","Review":"ti-refresh"};
+  var asmFilter="all";
+  function inject(){
+    var lbl=document.getElementById("sess-total-label");
+    if(lbl && !document.getElementById("asm-expand-btn")){
+      var b=document.createElement("button");
+      b.id="asm-expand-btn"; b.title="Expand all sessions";
+      b.style.cssText="margin-left:9px;background:rgba(135,141,255,0.10);border:1px solid rgba(135,141,255,0.22);border-radius:8px;width:26px;height:26px;cursor:pointer;color:var(--accent-bright);display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;transition:all .15s";
+      b.innerHTML='<i class="ti ti-arrows-diagonal" style="font-size:14px"></i>';
+      b.onmouseover=function(){this.style.background="rgba(135,141,255,0.18)";};
+      b.onmouseout=function(){this.style.background="rgba(135,141,255,0.10)";};
+      b.onclick=window.openAllSessions;
+      lbl.parentNode.appendChild(b);
+    }
+    if(!document.getElementById("all-sessions-modal")){
+      var m=document.createElement("div"); m.id="all-sessions-modal";
+      m.innerHTML='<div class="asm-card"><div class="asm-head"><div><div class="asm-title">All study sessions</div><div class="asm-sub" id="asm-sub"></div></div>'
+        +'<div style="display:flex;align-items:center;gap:10px"><div class="asm-tabs"><button class="asm-tab" data-f="today">Today</button><button class="asm-tab" data-f="week">This week</button><button class="asm-tab active" data-f="all">All time</button></div>'
+        +'<button class="asm-close" onclick="closeAllSessions()"><i class="ti ti-x"></i></button></div></div><div class="asm-body" id="asm-body"></div></div>';
+      m.addEventListener("click",function(e){if(e.target===m)closeAllSessions();});
+      document.body.appendChild(m);
+      m.querySelectorAll(".asm-tab").forEach(function(t){
+        t.addEventListener("click",function(){asmFilter=this.getAttribute("data-f");m.querySelectorAll(".asm-tab").forEach(function(x){x.classList.remove("active");});this.classList.add("active");renderAll();});
+      });
+    }
+  }
+  function renderAll(){
+    var body=document.getElementById("asm-body"); if(!body)return;
+    var ts=dateStr(today),ws=startOfWeek(today),we=addDays(ws,6);
+    var list=sessions.slice();
+    if(asmFilter==="today")list=list.filter(function(s){return s.date===ts;});
+    else if(asmFilter==="week")list=list.filter(function(s){return s.date>=dateStr(ws)&&s.date<=dateStr(we);});
+    list.sort(function(a,b){return b.date.localeCompare(a.date)||((b.created_at||0)-(a.created_at||0));});
+    var total=list.reduce(function(a,s){return a+s.mins;},0);
+    document.getElementById("asm-sub").textContent=list.length?(list.length+" sessions · "+fmtH(total)+" total"):"";
+    if(!list.length){body.innerHTML='<div class="empty-state" style="padding:40px 0">No sessions for this period</div>';return;}
+    var groups={},order=[];
+    list.forEach(function(s){if(!groups[s.date]){groups[s.date]=[];order.push(s.date);}groups[s.date].push(s);});
+    body.innerHTML=order.map(function(date){
+      var isToday=date===ts;
+      var dayLabel=isToday?"Today":parseLocal(date).toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"});
+      var dayTotal=groups[date].reduce(function(a,s){return a+s.mins;},0);
+      var tgt=targetFor(parseLocal(date)),met=dayTotal>=tgt;
+      var rows=groups[date].map(function(s){
+        var col=TC[s.topic]||"#888";
+        return '<div class="asm-row"><span class="asm-ic" style="background:'+col+'1a;color:'+col+';box-shadow:inset 0 0 0 1px '+col+'33"><i class="ti '+(TI[s.topic]||"ti-circle")+'"></i></span>'
+          +'<div class="asm-info"><div class="asm-topic">'+s.topic+'</div>'+(s.notes?'<div class="asm-note" title="'+s.notes+'">'+s.notes+'</div>':'')+'</div>'
+          +'<span class="asm-dur">'+fmtH(s.mins)+'</span></div>';
+      }).join("");
+      return '<div class="asm-day"><div class="asm-day-head"><span class="asm-day-label">'+dayLabel+'</span>'
+        +'<span class="asm-day-total" style="background:'+(met?'rgba(70,201,143,0.12)':'rgba(255,255,255,0.05)')+';color:'+(met?'var(--green)':'var(--text-muted)')+'">'+fmtH(dayTotal)+(met?' ✓':'')+'</span></div>'+rows+'</div>';
+    }).join("");
+  }
+  window.openAllSessions=function(){inject();renderAll();document.getElementById("all-sessions-modal").style.display="flex";};
+  window.closeAllSessions=function(){var m=document.getElementById("all-sessions-modal");if(m)m.style.display="none";};
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"){var m=document.getElementById("all-sessions-modal");if(m&&m.style.display==="flex")closeAllSessions();}});
+  ready(function(){setTimeout(inject,400);});
+})();
+</script>
+</body>
 </body>
 </html>
