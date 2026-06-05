@@ -10125,14 +10125,14 @@
     })();
   </script>
   <style>
-    /* Left card drives the row height; right card stretches to match and scrolls inside */
-    .main-grid { align-items: stretch !important; }
+    /* Cap the right card to ~match the left card; list scrolls inside */
+    .main-grid { align-items: start !important; }
     .main-grid > .card:last-child {
-      align-self: stretch !important;
+      max-height: 440px !important;
+      align-self: start !important;
       display: flex !important;
       flex-direction: column !important;
       overflow: hidden !important;
-      min-height: 0 !important;
     }
     .main-grid > .card:last-child #sessions-list {
       flex: 1 1 auto !important;
