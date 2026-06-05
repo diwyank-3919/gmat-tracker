@@ -4157,7 +4157,7 @@ var _appStarted = false;
 function startApp(){
   document.documentElement.classList.remove("sc-guest");
   document.documentElement.classList.add("sc-authed");
-  document.getElementById("auth-overlay").style.display = "none";
+  var _ov=document.getElementById("auth-overlay"); if(_ov) _ov.style.display = "none";
   if(_appStarted) return;
   _appStarted = true;
   loadSessions();
