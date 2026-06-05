@@ -4416,15 +4416,26 @@
       box-shadow: 0 4px 14px -6px rgba(251, 191, 36, 0.5);
     }
 
-    /* Even up the ring suite — reserve button height on the button-less cards */
     .ring-card:nth-child(3)::after,
     .ring-card:nth-child(4)::after {
       content: "";
       display: block;
       height: 25px;
-      /* ≈ the action button's rendered height */
       margin-top: 10px;
-      /* matches .ring-card-action margin-top */
+    }
+
+    /* ── Compact timer: shorter dropdown + slim pause button ── */
+    #timer-panel .timer-select,
+    #timer-panel .cs-wrap {
+      flex: 0 0 110px !important;
+      width: 110px !important;
+      min-width: 0 !important;
+    }
+    #timer-pause-btn {
+      flex: 0 0 auto !important;
+      height: 36px !important;
+      padding: 0 13px !important;
+      font-size: 13px !important;
     }
   </style>
   <script>
@@ -5086,7 +5097,7 @@
                   <button id="timer-start-btn" class="timer-btn primary" onclick="timerStart()"><i
                       class="ti ti-player-play"></i> Start</button>
                   <button id="timer-pause-btn" class="timer-btn" onclick="timerPause()"
-                    style="display:none;background:rgba(255,255,255,0.08)"><i class="ti ti-player-pause"></i>
+                    style="display:none;background:rgba(240,189,106,0.15);color:#f0bd6a;border:1px solid rgba(240,189,106,0.28)"><i class="ti ti-player-pause"></i>
                     Pause</button>
                   <button id="timer-stop-btn" class="timer-btn stop" onclick="timerStop()" style="display:none"><i
                       class="ti ti-check"></i> Finish session</button>
@@ -7108,6 +7119,7 @@
         var sel = document.getElementById("timer-topic"); if (sel) { sel.disabled = active; if (active) sel.value = state.topic; }
         var sB = document.getElementById("timer-start-btn"), pB = document.getElementById("timer-pause-btn"), oB = document.getElementById("timer-stop-btn"), dB = document.getElementById("timer-discard-btn");
         if (sB) { sB.style.display = state.running ? "none" : "inline-flex"; sB.innerHTML = (active && !state.running) ? '<i class="ti ti-player-play"></i> Resume' : '<i class="ti ti-player-play"></i> Start'; }
+        if (pB) pB.style.display = state.running ? "inline-flex" : "none";
         if (oB) oB.style.display = active ? "inline-flex" : "none";
         if (dB) dB.style.display = active ? "inline-flex" : "none";
       }
