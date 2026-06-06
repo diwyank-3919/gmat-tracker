@@ -12499,7 +12499,7 @@
         document.getElementById('el-dropzone').style.display = m === 'upload' ? '' : 'none';
         document.getElementById('el-file-chosen').style.display = 'none';
         document.getElementById('el-pastezone').style.display = m === 'paste' ? '' : 'none';
-        elFileText = null; elFileName = null;
+        elFileText = null; elFileName = null; window.__elStats = null;
       };
 
       /* ── drag / drop ── */
@@ -12513,7 +12513,7 @@
       };
       window.elFileChosen = function (e) { var f = e.target.files && e.target.files[0]; if (f) elLoadFile(f); };
       window.elClearFile = function () {
-        elFileText = null; elFileName = null;
+        elFileText = null; elFileName = null; window.__elStats = null;
         document.getElementById('el-file-chosen').style.display = 'none';
         document.getElementById('el-dropzone').style.display = '';
         document.getElementById('el-file-input').value = '';
@@ -12570,6 +12570,7 @@
         if (n > best) { best = n; hIdx = i; }
       });
       var headers = rows[hIdx].map(function (c) { return String(c).trim(); });
+
       var records = [];
       for (var i = hIdx + 1; i < rows.length; i++) {
         var r = rows[i], pairs = [];
@@ -12581,9 +12582,61 @@
         }
         if (pairs.length) records.push(pairs.join(' | '));
       }
-      return { headers: headers.filter(Boolean), records: records };
+
+      // deterministic stats straight from the columns
+      var find = function (n) { return headers.findIndex(function (h) { return h.toLowerCase().indexOf(n.toLowerCase()) === 0; }); };
+      var qtC = find('Question Type'), corC = find('Correct Choice'), selC = find('Selected Choice');
+      var total = 0, wrong = 0, correct = 0, byType = {};
+      for (var j = hIdx + 1; j < rows.length; j++) {
+        var rr = rows[j], qt = qtC >= 0 ? String(rr[qtC] || '').trim() : '';
+        if (!qt) continue;
+        total++; byType[qt] = (byType[qt] || 0) + 1;
+        var cor = corC >= 0 ? String(rr[corC] || '').trim().toUpperCase() : '';
+        var sel = selC >= 0 ? String(rr[selC] || '').trim().toUpperCase() : '';
+        if (cor && sel) { if (cor === sel) correct++; else wrong++; }
+      }
+      var answered = correct + wrong;
+      var stats = (qtC >= 0 && total) ? {
+        totalErrors: total,
+        accuracy: answered ? Math.round(correct / answered * 100) : null,
+        errorDNA: Object.keys(byType).map(function (k) {
+          return { category: k, section: 'Verbal', count: byType[k], pct: Math.round(byType[k] / total * 100) };
+        }).sort(function (a, b) { return b.count - a.count; })
+      } : null;
+
+      return { headers: headers.filter(Boolean), records: records, stats: stats };
     }
 
+    // rank by data volume; skip hidden + empty sheets; richest first
+    var parsed = wb.SheetNames.map(function (n, i) {
+      var meta = wb.Workbook && wb.Workbook.Sheets && wb.Workbook.Sheets[i];
+      var hidden = meta && meta.Hidden;        // 0 visible, 1 hidden, 2 very hidden
+      var p = hidden ? null : parseSheet(wb.Sheets[n]);
+      return { name: n, p: p, score: p ? p.records.length : 0 };
+    }).filter(function (x) { return x.p && x.score > 0; })
+      .sort(function (a, b) { return b.score - a.score; });
+
+    window.__elStats = parsed.length ? parsed[0].p.stats : null;   // stats from richest sheet (your CR log)
+
+    var lines = [];
+    parsed.forEach(function (s) {
+      lines.push('=== Sheet: ' + s.name + ' (' + s.score + ' rows) ===');
+      lines.push('Columns: ' + s.p.headers.join(', '));
+      lines.push(s.p.records.join('\n'));
+      lines.push('');
+    });
+
+    elFileText = lines.join('\n');
+    elShowFilePill(f);
+
+    if (typeof showToast === 'function') {
+      showToast('📊', 'Excel loaded',
+        (parsed[0] ? parsed[0].score + ' rows from ' + parsed[0].name : 'ready') + ' · ready for Sheldon');
+    }
+  } catch (err) {
+    alert('Excel parse error: ' + err.message);
+  }
+}
     // rank sheets by how much real data they carry; richest first, drop empties
     var parsed = wb.SheetNames.map(function (n) {
       var p = parseSheet(wb.Sheets[n]);
@@ -12678,6 +12731,7 @@
             + '  "motivationalNote": "<one warm, specific sentence of encouragement>"\n'
             + '}\n\n'
             + 'Student context: ' + JSON.stringify(studyCtx) + '\n\n'
+            + (window.__elStats ? 'Verified stats (use these EXACT numbers; do NOT recount; OMIT totalErrors, accuracy and errorDNA from your own JSON): ' + JSON.stringify(window.__elStats) + '\n\n' : '')
             + 'Error log (first 40000 chars):\n' + rawText.slice(0, 40000);
 
           var res = await supa.functions.invoke('sheldon', {
@@ -12692,6 +12746,14 @@
           var raw = (res.data && res.data.reply) || '';
           var clean = raw.replace(/```json|```/g, '').trim();
           var analysis = JSON.parse(clean);
+
+          // trust the sheet, not the model, for the numbers
+          if (window.__elStats) {
+            analysis.totalErrors = window.__elStats.totalErrors;
+            analysis.accuracy    = window.__elStats.accuracy;
+            analysis.errorDNA    = window.__elStats.errorDNA;
+            analysis.avgTimePerQ = null;   // time column is unusable — show "—" not a fake "1m 30s"
+          }
 
           clearInterval(loadTick);
 
