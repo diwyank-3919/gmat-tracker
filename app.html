@@ -11850,24 +11850,16 @@
             + 'Student context: ' + JSON.stringify(studyCtx) + '\n\n'
             + 'Error log (first 6000 chars):\n' + rawText.slice(0, 6000);
 
-          var res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${apiKey}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              model: "llama-3.3-70b-versatile",
-              messages: [
-                { role: "system", content: SHELDON_SYSTEM_PROMPT + toneDirective },
-                ...fullMessages
-              ],
-              max_tokens: 800,
-              temperature: 0.7
-            })
+          var res = await supa.functions.invoke('sheldon', {
+            body: {
+              message: prompt,
+              context: studyCtx,
+              history: [],
+              jsonMode: true
+            }
           });
-          var data = await res.json();
-          var raw = (data.content || []).map(function (c) { return c.text || ''; }).join('');
+          if (res.error) throw new Error(res.error.message || 'Sheldon edge function error');
+          var raw = (res.data && res.data.reply) || '';
           var clean = raw.replace(/```json|```/g, '').trim();
           var analysis = JSON.parse(clean);
 
