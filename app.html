@@ -6376,14 +6376,15 @@
           <!-- Drop zone -->
           <div id="el-dropzone" class="el-dropzone" ondragover="elDragOver(event)" ondragleave="elDragLeave(event)"
             ondrop="elDrop(event)" onclick="document.getElementById('el-file-input').click()">
-            <input type="file" id="el-file-input" accept=".pdf,.txt,.csv,.md" style="display:none"
+            <input type="file" id="el-file-input" accept=".pdf,.txt,.csv,.md,.xlsx,.xls" style="display:none"
               onchange="elFileChosen(event)">
             <div class="el-dz-icon"><i class="ti ti-file-text"></i></div>
             <div class="el-dz-title">Drop your error log here</div>
-            <div class="el-dz-sub">PDF, TXT, CSV, or Markdown · up to 5 MB</div>
+            <div class="el-dz-sub">PDF, TXT, CSV, Excel, or Markdown · up to 5 MB</div>
             <div class="el-dz-formats">
               <span class="el-fmt-chip">OfficialPrep CSV</span>
               <span class="el-fmt-chip">GMAT Club export</span>
+              <span class="el-fmt-chip">Excel tracker</span>
               <span class="el-fmt-chip">Any text/notes</span>
             </div>
           </div>
@@ -11771,21 +11772,89 @@
       function elLoadFile(f) {
         if (f.size > 5 * 1024 * 1024) { alert('File too large — max 5 MB.'); return; }
         elFileName = f.name;
+        var isExcel = /\.(xlsx|xls)$/i.test(f.name);
         var reader = new FileReader();
+
         reader.onload = function (e) {
-          elFileText = e.target.result;
-          document.getElementById('el-dropzone').style.display = 'none';
-          var pill = document.getElementById('el-file-chosen');
-          pill.style.display = 'flex';
-          document.getElementById('el-file-name').textContent = f.name;
-          document.getElementById('el-file-size').textContent = '(' + Math.round(f.size / 1024) + 'KB)';
+          if (isExcel) {
+            try {
+              // SheetJS is available as XLSX in this environment
+              var XLSX = window.XLSX;
+              if (!XLSX) {
+                // lazy-load SheetJS if not already present
+                var s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+                s.onload = function () { elParseExcel(e.target.result, f); };
+                document.head.appendChild(s);
+                return;
+              }
+              elParseExcel(e.target.result, f);
+            } catch (err) {
+              alert('Could not read Excel file: ' + err.message);
+            }
+          } else {
+            elFileText = e.target.result;
+            elShowFilePill(f);
+          }
         };
-        if (f.type === 'application/pdf') {
-          // For PDFs, try text extraction hint; falls back to binary
-          reader.readAsText(f);
+
+        if (isExcel) {
+          reader.readAsArrayBuffer(f);
         } else {
           reader.readAsText(f);
         }
+      }
+
+      function elParseExcel(arrayBuffer, f) {
+        try {
+          var XLSX = window.XLSX;
+          var wb = XLSX.read(arrayBuffer, { type: 'array' });
+          var lines = [];
+
+          wb.SheetNames.forEach(function (sheetName) {
+            var ws = wb.Sheets[sheetName];
+            var json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+            if (!json.length) return;
+
+            // Sheet header as context
+            lines.push('=== Sheet: ' + sheetName + ' ===');
+
+            // Column headers
+            var headers = Object.keys(json[0]);
+            lines.push(headers.join(' | '));
+            lines.push(headers.map(function () { return '---'; }).join(' | '));
+
+            // Rows — pipe-separated for readability
+            json.forEach(function (row) {
+              var vals = headers.map(function (h) {
+                var v = row[h];
+                return v === null || v === undefined ? '' : String(v).trim();
+              });
+              lines.push(vals.join(' | '));
+            });
+
+            lines.push(''); // blank line between sheets
+          });
+
+          elFileText = lines.join('\n');
+          elShowFilePill(f);
+
+          // Show a quick count so user knows it worked
+          var rowCount = elFileText.split('\n').length;
+          if (typeof showToast === 'function') {
+            showToast('📊', 'Excel loaded', '' + wb.SheetNames.length + ' sheet' + (wb.SheetNames.length > 1 ? 's' : '') + ' · ready for Sheldon');
+          }
+        } catch (err) {
+          alert('Excel parse error: ' + err.message);
+        }
+      }
+
+      function elShowFilePill(f) {
+        document.getElementById('el-dropzone').style.display = 'none';
+        var pill = document.getElementById('el-file-chosen');
+        pill.style.display = 'flex';
+        document.getElementById('el-file-name').textContent = f.name;
+        document.getElementById('el-file-size').textContent = '(' + Math.round(f.size / 1024) + 'KB)';
       }
 
       /* ── analyse ── */
