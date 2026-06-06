@@ -3689,6 +3689,909 @@
       transition-timing-function: ease;
     }
 
+    /* ════ PARCHMENT THEME — third option (html.sc-parch) ════ */
+    html.sc-parch {
+      --bg-base: #f5f0e8;
+      --bg-card: linear-gradient(160deg, #f9f6ef 0%, #f7f2e8 100%);
+      --bg-card-hover: linear-gradient(160deg, #f9f6ef 0%, #f3edd8 100%);
+      --bg-card-strong: #ffffff;
+      --bg-input: rgba(90, 70, 40, 0.05);
+      --bg-input-focus: rgba(90, 70, 40, 0.085);
+      --border: rgba(90, 70, 40, 0.14);
+      --border-subtle: rgba(90, 70, 40, 0.09);
+      --border-strong: rgba(90, 70, 40, 0.22);
+      --border-accent: rgba(92, 122, 90, 0.40);
+      --text-primary: #2d2518;
+      --text-secondary: rgba(45, 37, 24, 0.72);
+      --text-tertiary: rgba(45, 37, 24, 0.50);
+      --text-muted: rgba(45, 37, 24, 0.30);
+      --accent: #5c7a5a;
+      --accent-bright: #6b8c68;
+      --accent-soft: rgba(92, 122, 90, 0.12);
+      --accent-glow: rgba(92, 122, 90, 0.22);
+      --green: #5c7a5a;
+      --green-bright: #4e6b4c;
+      --green-soft: rgba(92, 122, 90, 0.12);
+      --green-glow: rgba(92, 122, 90, 0.20);
+      --red: #b85c38;
+      --red-soft: rgba(184, 92, 56, 0.11);
+      --amber: #c47f2a;
+      --amber-soft: rgba(196, 127, 42, 0.12);
+      --blue: #5a5494;
+      --blue-soft: rgba(90, 84, 148, 0.11);
+      --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.70) inset, 0 2px 8px rgba(90, 70, 40, 0.08), 0 4px 20px rgba(90, 70, 40, 0.06), 0 0 0 1px rgba(90, 70, 40, 0.10);
+      --shadow-card-hover: 0 1px 0 rgba(255, 255, 255, 0.80) inset, 0 6px 24px rgba(90, 70, 40, 0.13), 0 2px 8px rgba(90, 70, 40, 0.08), 0 0 0 1px rgba(90, 70, 40, 0.14);
+    }
+
+    html.sc-parch body {
+      background: var(--bg-base);
+      color: var(--text-primary)
+    }
+
+    html.sc-parch body::before {
+      background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+        radial-gradient(ellipse 80% 60% at 90% 5%, rgba(92, 122, 90, 0.08) 0%, transparent 55%),
+        radial-gradient(ellipse 70% 50% at 5% 90%, rgba(196, 127, 42, 0.07) 0%, transparent 55%),
+        linear-gradient(160deg, #f2ece0 0%, #f6f1e6 40%, #ede8db 100%) !important;
+      animation: bgDrift 50s ease-in-out infinite alternate;
+    }
+
+    html.sc-parch body::after {
+      opacity: 0.05
+    }
+
+    html.sc-parch .sidebar {
+      background: rgba(242, 236, 224, 0.90) !important;
+      border-right: 1px solid var(--border) !important;
+      box-shadow: 1px 0 0 rgba(255, 255, 255, 0.60), 4px 0 20px rgba(90, 70, 40, 0.05) !important
+    }
+
+    html.sc-parch .topbar {
+      background: rgba(242, 236, 224, 0.78) !important;
+      border-bottom: 1px solid var(--border-subtle) !important;
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.60), 0 2px 12px rgba(90, 70, 40, 0.05) !important
+    }
+
+    html.sc-parch .mob-header {
+      background: rgba(242, 236, 224, 0.95) !important;
+      border-bottom-color: var(--border-subtle) !important
+    }
+
+    html.sc-parch .mob-drawer {
+      background: rgba(244, 238, 227, 0.98) !important;
+      border-right-color: var(--border) !important
+    }
+
+    html.sc-parch .card,
+    html.sc-parch .kpi,
+    html.sc-parch .ring-card {
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border) !important;
+      box-shadow: var(--shadow-card) !important
+    }
+
+    html.sc-parch .card:hover,
+    html.sc-parch .kpi:hover {
+      background: var(--bg-card-hover) !important;
+      box-shadow: var(--shadow-card-hover) !important;
+      backdrop-filter: none !important
+    }
+
+    html.sc-parch .momentum-card,
+    html.sc-parch .banner {
+      background: linear-gradient(155deg, #faf7f0, #f4eede) !important;
+      border-color: var(--border) !important
+    }
+
+    html.sc-parch .kpi:nth-child(1) {
+      box-shadow: var(--shadow-card), 0 -2px 0 0 rgba(92, 122, 90, 0.45) inset !important
+    }
+
+    html.sc-parch .kpi:nth-child(2),
+    html.sc-parch .kpi:nth-child(3) {
+      box-shadow: var(--shadow-card), 0 -2px 0 0 rgba(196, 127, 42, 0.45) inset !important
+    }
+
+    html.sc-parch .kpi:nth-child(4),
+    html.sc-parch .kpi:nth-child(5) {
+      box-shadow: var(--shadow-card), 0 -2px 0 0 rgba(184, 92, 56, 0.42) inset !important
+    }
+
+    html.sc-parch .ring-card:nth-child(1) {
+      box-shadow: var(--shadow-card), 0 -2px 0 0 rgba(92, 122, 90, 0.45) inset !important
+    }
+
+    html.sc-parch .ring-card:nth-child(2) {
+      box-shadow: var(--shadow-card), 0 -2px 0 0 rgba(196, 127, 42, 0.45) inset !important
+    }
+
+    html.sc-parch .ring-card:nth-child(3) {
+      box-shadow: var(--shadow-card), 0 -2px 0 0 rgba(90, 84, 148, 0.45) inset !important
+    }
+
+    html.sc-parch .ring-card:nth-child(4) {
+      box-shadow: var(--shadow-card), 0 -2px 0 0 rgba(184, 92, 56, 0.42) inset !important
+    }
+
+    html.sc-parch #exam-command {
+      background: radial-gradient(130% 140% at 100% 0%, rgba(92, 122, 90, 0.10), transparent 52%), radial-gradient(120% 130% at 0% 110%, rgba(196, 127, 42, 0.06), transparent 50%), linear-gradient(160deg, #faf8f1, #f4eedd) !important;
+      border: 1px solid rgba(92, 122, 90, 0.22) !important;
+      box-shadow: var(--shadow-card) !important
+    }
+
+    html.sc-parch .kpi.hero {
+      background: radial-gradient(130% 140% at 100% 0%, rgba(92, 122, 90, 0.10), transparent 55%), linear-gradient(160deg, #f6faf2, #f0f5e6) !important;
+      border: 1px solid rgba(92, 122, 90, 0.22) !important;
+      box-shadow: var(--shadow-card), 0 -2px 0 0 rgba(92, 122, 90, 0.50) inset !important
+    }
+
+    html.sc-parch #exam-command input[type="date"],
+    html.sc-parch #exam-command input[type="number"] {
+      border-color: var(--border) !important;
+      color: var(--text-primary) !important;
+      background: rgba(255, 255, 255, 0.55) !important
+    }
+
+    html.sc-parch .intel-card {
+      background: #faf7f0 !important;
+      border: 1px solid var(--border) !important;
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.70) inset, 0 2px 8px rgba(90, 70, 40, 0.05) !important
+    }
+
+    html.sc-parch .intel-card.positive {
+      background: #f1f6ec !important;
+      border-color: rgba(92, 122, 90, 0.24) !important
+    }
+
+    html.sc-parch .intel-card.warning {
+      background: #fbf4e4 !important;
+      border-color: rgba(196, 127, 42, 0.24) !important
+    }
+
+    html.sc-parch .intel-card.negative {
+      background: #fbeee7 !important;
+      border-color: rgba(184, 92, 56, 0.22) !important
+    }
+
+    html.sc-parch .intel-card.neutral {
+      background: #f4f2ec !important;
+      border-color: rgba(90, 84, 148, 0.18) !important
+    }
+
+    html.sc-parch .kpi-value {
+      color: var(--text-primary) !important;
+      -webkit-text-fill-color: var(--text-primary) !important
+    }
+
+    html.sc-parch .kpi-value.met {
+      color: var(--green) !important;
+      -webkit-text-fill-color: var(--green) !important
+    }
+
+    html.sc-parch .kpi-label,
+    html.sc-parch .ec-eyebrow,
+    html.sc-parch .ring-label-top {
+      color: var(--text-tertiary) !important;
+      letter-spacing: 0.12em !important
+    }
+
+    html.sc-parch .card-title,
+    html.sc-parch .topbar-title {
+      color: var(--text-primary) !important
+    }
+
+    html.sc-parch .card-title .ti {
+      color: var(--accent) !important
+    }
+
+    html.sc-parch .topbar-date,
+    html.sc-parch .donut-center-sub,
+    html.sc-parch .ring-card-hint {
+      color: var(--text-tertiary) !important
+    }
+
+    html.sc-parch .momentum-stat-val {
+      color: var(--accent) !important;
+      -webkit-text-fill-color: var(--accent) !important
+    }
+
+    html.sc-parch .momentum-stat-val.green {
+      color: var(--green) !important;
+      -webkit-text-fill-color: var(--green) !important
+    }
+
+    html.sc-parch .momentum-stat-val.amber {
+      color: var(--amber) !important;
+      -webkit-text-fill-color: var(--amber) !important
+    }
+
+    html.sc-parch .momentum-stat-label {
+      color: var(--text-tertiary) !important
+    }
+
+    html.sc-parch .ec-hero-num {
+      background: linear-gradient(180deg, #2d2518 30%, #5c7a5a) !important;
+      -webkit-background-clip: text !important;
+      background-clip: text !important;
+      -webkit-text-fill-color: transparent !important
+    }
+
+    html.sc-parch .ec-stat {
+      color: var(--text-primary) !important;
+      -webkit-text-fill-color: var(--text-primary) !important
+    }
+
+    html.sc-parch .ec-stat.ec-green {
+      color: var(--green) !important;
+      -webkit-text-fill-color: var(--green) !important
+    }
+
+    html.sc-parch .ec-stat.ec-amber {
+      color: var(--amber) !important;
+      -webkit-text-fill-color: var(--amber) !important
+    }
+
+    html.sc-parch .timer-label {
+      color: var(--text-tertiary) !important
+    }
+
+    html.sc-parch .timer-label .ti {
+      color: var(--accent) !important
+    }
+
+    html.sc-parch .timer-display,
+    html.sc-parch .timer-display.running,
+    html.sc-parch .donut-center-val,
+    html.sc-parch .banner-title {
+      color: var(--text-primary) !important
+    }
+
+    html.sc-parch .ring-card-desc,
+    html.sc-parch .banner-sub {
+      color: var(--text-secondary) !important
+    }
+
+    html.sc-parch .sb-item:not(.active) {
+      color: var(--text-secondary) !important
+    }
+
+    html.sc-parch .sb-item:not(.active):hover {
+      background: rgba(90, 70, 40, 0.06) !important;
+      color: var(--text-primary) !important;
+      box-shadow: none !important
+    }
+
+    html.sc-parch .sb-item.active {
+      background: rgba(92, 122, 90, 0.14) !important;
+      color: var(--accent) !important;
+      border: 1px solid rgba(92, 122, 90, 0.26) !important;
+      box-shadow: 0 1px 4px rgba(92, 122, 90, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.50) !important
+    }
+
+    html.sc-parch .sb-item.active::before {
+      background: var(--accent) !important;
+      box-shadow: none !important
+    }
+
+    html.sc-parch .sb-item.active .ti {
+      color: var(--accent) !important
+    }
+
+    html.sc-parch .sb-section-label,
+    html.sc-parch .sb-today-label {
+      color: var(--text-muted) !important
+    }
+
+    html.sc-parch .sb-today-val {
+      color: var(--text-primary) !important
+    }
+
+    html.sc-parch .sb-today-sub,
+    html.sc-parch .sb-progress-label span:first-child {
+      color: var(--text-secondary) !important
+    }
+
+    html.sc-parch .sb-progress-label span:last-child {
+      color: var(--text-primary) !important
+    }
+
+    html.sc-parch .sb-track,
+    html.sc-parch .sb-topic-track {
+      background: rgba(90, 70, 40, 0.10) !important
+    }
+
+    html.sc-parch .sb-topic-name {
+      color: var(--text-secondary) !important
+    }
+
+    html.sc-parch .sb-topic-hours {
+      color: var(--accent) !important;
+      background: rgba(92, 122, 90, 0.10) !important;
+      border-color: rgba(92, 122, 90, 0.20) !important
+    }
+
+    html.sc-parch .sb-logo-name,
+    html.sc-parch .mob-logo-name {
+      color: var(--text-primary) !important
+    }
+
+    html.sc-parch .sb-logo-icon,
+    html.sc-parch .mob-logo-icon {
+      background: #2d2518 !important;
+      box-shadow: 0 2px 8px rgba(45, 37, 24, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.06) !important
+    }
+
+    html.sc-parch .tb-chip,
+    html.sc-parch #sync-status,
+    html.sc-parch .pf-btn {
+      background: rgba(255, 255, 255, 0.65) !important;
+      border-color: var(--border) !important;
+      color: var(--text-secondary) !important;
+      box-shadow: 0 1px 3px rgba(90, 70, 40, 0.07) !important
+    }
+
+    html.sc-parch .tb-chip.green {
+      color: var(--green) !important;
+      background: rgba(92, 122, 90, 0.12) !important;
+      border-color: rgba(92, 122, 90, 0.25) !important
+    }
+
+    html.sc-parch .tb-chip.amber {
+      color: var(--amber) !important;
+      background: rgba(196, 127, 42, 0.11) !important;
+      border-color: rgba(196, 127, 42, 0.25) !important
+    }
+
+    html.sc-parch .tb-chip.purple {
+      color: var(--accent) !important;
+      background: rgba(92, 122, 90, 0.12) !important;
+      border-color: rgba(92, 122, 90, 0.25) !important
+    }
+
+    html.sc-parch input,
+    html.sc-parch select,
+    html.sc-parch textarea {
+      background: rgba(90, 70, 40, 0.05) !important;
+      border-color: var(--border) !important;
+      color: var(--text-primary) !important;
+      color-scheme: light !important;
+      accent-color: var(--accent) !important
+    }
+
+    html.sc-parch input::placeholder,
+    html.sc-parch textarea::placeholder {
+      color: var(--text-muted) !important
+    }
+
+    html.sc-parch input:focus,
+    html.sc-parch select:focus,
+    html.sc-parch textarea:focus {
+      border-color: rgba(92, 122, 90, 0.45) !important;
+      background: rgba(92, 122, 90, 0.05) !important;
+      box-shadow: 0 0 0 3px rgba(92, 122, 90, 0.12) !important
+    }
+
+    html.sc-parch .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(45,37,24,0.38)' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+      background-repeat: no-repeat !important;
+      background-position: right 11px center !important
+    }
+
+    html.sc-parch .field select option {
+      background: #f9f6ef;
+      color: #2d2518
+    }
+
+    html.sc-parch .log-btn {
+      background: var(--accent) !important;
+      color: #fff !important;
+      box-shadow: 0 3px 10px rgba(92, 122, 90, 0.30) !important;
+      animation: none !important
+    }
+
+    html.sc-parch .log-btn:hover {
+      background: #6b8c68 !important
+    }
+
+    html.sc-parch .timer-btn.primary {
+      background: var(--accent) !important;
+      color: #fff !important
+    }
+
+    html.sc-parch .timer-btn.stop {
+      background: var(--amber) !important;
+      color: #fff !important
+    }
+
+    html.sc-parch .timer-btn.ghost {
+      background: rgba(90, 70, 40, 0.06) !important;
+      border-color: var(--border) !important;
+      color: var(--text-secondary) !important
+    }
+
+    html.sc-parch #timer-pause-btn {
+      background: rgba(196, 127, 42, 0.14) !important;
+      color: var(--amber) !important;
+      border: 1px solid rgba(196, 127, 42, 0.28) !important
+    }
+
+    html.sc-parch .timer-status {
+      background: rgba(90, 70, 40, 0.05) !important;
+      border-color: var(--border) !important;
+      color: var(--text-tertiary) !important
+    }
+
+    html.sc-parch .timer-status.running {
+      color: var(--green) !important;
+      background: rgba(92, 122, 90, 0.10) !important;
+      border-color: rgba(92, 122, 90, 0.28) !important
+    }
+
+    html.sc-parch .timer-status.paused {
+      color: var(--amber) !important;
+      background: rgba(196, 127, 42, 0.10) !important;
+      border-color: rgba(196, 127, 42, 0.28) !important
+    }
+
+    html.sc-parch .sess-item,
+    html.sc-parch .asm-row,
+    html.sc-parch .dt-row {
+      background: rgba(90, 70, 40, 0.025) !important;
+      border-color: var(--border-subtle) !important
+    }
+
+    html.sc-parch .sess-item:hover,
+    html.sc-parch .asm-row:hover {
+      background: rgba(92, 122, 90, 0.05) !important;
+      border-color: rgba(92, 122, 90, 0.22) !important
+    }
+
+    html.sc-parch .sess-topic,
+    html.sc-parch .asm-topic,
+    html.sc-parch .dt-stat-v {
+      color: var(--text-primary) !important
+    }
+
+    html.sc-parch .sess-dur,
+    html.sc-parch .asm-dur {
+      color: var(--accent) !important
+    }
+
+    html.sc-parch .sess-date-tag {
+      background: rgba(90, 70, 40, 0.05) !important;
+      border-color: var(--border-subtle) !important;
+      color: var(--text-tertiary) !important
+    }
+
+    html.sc-parch .empty-state {
+      color: var(--text-muted) !important
+    }
+
+    html.sc-parch .fpill,
+    html.sc-parch .trend-dropdown {
+      background: rgba(255, 255, 255, 0.65) !important;
+      border-color: var(--border) !important;
+      color: var(--text-secondary) !important
+    }
+
+    html.sc-parch .fpill:hover {
+      border-color: rgba(92, 122, 90, 0.32) !important;
+      color: var(--accent) !important;
+      background: rgba(92, 122, 90, 0.06) !important
+    }
+
+    html.sc-parch .fpill.active {
+      background: rgba(92, 122, 90, 0.12) !important;
+      border-color: rgba(92, 122, 90, 0.30) !important;
+      color: var(--accent) !important
+    }
+
+    html.sc-parch .fsep {
+      background: var(--border) !important
+    }
+
+    html.sc-parch .frange {
+      color: var(--text-secondary) !important
+    }
+
+    html.sc-parch .sess-tabs {
+      background: rgba(90, 70, 40, 0.04) !important;
+      border-color: var(--border-subtle) !important
+    }
+
+    html.sc-parch .sess-tab {
+      color: var(--text-secondary) !important
+    }
+
+    html.sc-parch .sess-tab.active {
+      background: rgba(255, 255, 255, 0.85) !important;
+      color: var(--text-primary) !important;
+      box-shadow: 0 1px 4px rgba(90, 70, 40, 0.10) !important
+    }
+
+    html.sc-parch .s-dot.met,
+    html.sc-parch .cal-cell.has-data.met {
+      background: rgba(92, 122, 90, 0.13) !important;
+      border-color: rgba(92, 122, 90, 0.26) !important;
+      color: var(--green) !important
+    }
+
+    html.sc-parch .s-dot.missed,
+    html.sc-parch .cal-cell.has-data.missed {
+      background: rgba(184, 92, 56, 0.10) !important;
+      border-color: rgba(184, 92, 56, 0.22) !important;
+      color: var(--red) !important
+    }
+
+    html.sc-parch .s-dot.empty,
+    html.sc-parch .cal-cell {
+      background: rgba(90, 70, 40, 0.035) !important;
+      border-color: var(--border-subtle) !important;
+      color: var(--text-muted) !important
+    }
+
+    html.sc-parch .cal-cell:hover {
+      background: rgba(92, 122, 90, 0.07) !important;
+      border-color: rgba(92, 122, 90, 0.28) !important;
+      color: var(--accent) !important
+    }
+
+    html.sc-parch .cal-cell.is-today {
+      border-color: rgba(92, 122, 90, 0.48) !important;
+      box-shadow: 0 0 0 2px rgba(92, 122, 90, 0.10) !important
+    }
+
+    html.sc-parch .kpi-bar,
+    html.sc-parch .xp-track,
+    html.sc-parch .t-track {
+      background: rgba(90, 70, 40, 0.08) !important
+    }
+
+    html.sc-parch .kpi-delta.up {
+      color: var(--green) !important;
+      background: rgba(92, 122, 90, 0.10) !important;
+      border-color: rgba(92, 122, 90, 0.20) !important
+    }
+
+    html.sc-parch .kpi-delta.down,
+    html.sc-parch .kpi-delta.neutral {
+      color: var(--text-secondary) !important;
+      background: rgba(90, 70, 40, 0.05) !important;
+      border-color: var(--border) !important
+    }
+
+    html.sc-parch .kpi-sub,
+    html.sc-parch .t-val {
+      color: var(--text-tertiary) !important
+    }
+
+    html.sc-parch .xp-fill,
+    html.sc-parch #exam-progress-bar {
+      background: linear-gradient(90deg, var(--accent), var(--amber)) !important;
+      box-shadow: none !important
+    }
+
+    html.sc-parch .sb-fill {
+      background: var(--accent) !important;
+      box-shadow: none !important
+    }
+
+    html.sc-parch #exam-progress-pct {
+      color: var(--accent) !important
+    }
+
+    html.sc-parch .ring-card-action {
+      color: var(--accent) !important;
+      background: rgba(92, 122, 90, 0.08) !important;
+      border-color: rgba(92, 122, 90, 0.22) !important
+    }
+
+    html.sc-parch .ring-card-action:hover {
+      background: rgba(92, 122, 90, 0.14) !important;
+      border-color: rgba(92, 122, 90, 0.36) !important
+    }
+
+    html.sc-parch .ring-card-action--warn {
+      color: var(--amber) !important;
+      background: rgba(196, 127, 42, 0.10) !important;
+      border-color: rgba(196, 127, 42, 0.22) !important
+    }
+
+    html.sc-parch .donut-pill {
+      background: rgba(90, 70, 40, 0.04) !important;
+      border-color: var(--border-subtle) !important;
+      color: var(--text-secondary) !important
+    }
+
+    html.sc-parch #add-mock-modal>div,
+    html.sc-parch #migrate-modal>div,
+    html.sc-parch #trash-modal>div,
+    html.sc-parch .dt-card,
+    html.sc-parch .asm-card,
+    html.sc-parch .scn-card,
+    html.sc-parch .cs-menu,
+    html.sc-parch .pf-menu,
+    html.sc-parch #perfos-tip {
+      background: #f9f6ef !important;
+      border-color: var(--border) !important;
+      box-shadow: 0 32px 80px rgba(90, 70, 40, 0.20), 0 0 0 1px var(--border) !important
+    }
+
+    html.sc-parch .dt-stat {
+      background: rgba(90, 70, 40, 0.03) !important;
+      border-color: var(--border-subtle) !important
+    }
+
+    html.sc-parch .dt-stat-k,
+    html.sc-parch .dt-stat-s {
+      color: var(--text-tertiary) !important
+    }
+
+    html.sc-parch .cs-trigger {
+      background: rgba(90, 70, 40, 0.05) !important;
+      border-color: var(--border) !important;
+      color: var(--text-primary) !important
+    }
+
+    html.sc-parch .cs-trigger.open {
+      border-color: rgba(92, 122, 90, 0.45) !important;
+      background: rgba(92, 122, 90, 0.05) !important;
+      box-shadow: 0 0 0 3px rgba(92, 122, 90, 0.12) !important
+    }
+
+    html.sc-parch .cs-chev {
+      color: var(--text-tertiary) !important
+    }
+
+    html.sc-parch .cs-opt {
+      color: var(--text-secondary) !important
+    }
+
+    html.sc-parch .cs-opt:hover {
+      background: rgba(92, 122, 90, 0.07) !important;
+      color: var(--accent) !important
+    }
+
+    html.sc-parch .cs-opt.sel {
+      color: var(--accent) !important
+    }
+
+    html.sc-parch #custom-picker {
+      background: rgba(249, 246, 239, 0.98) !important;
+      border-color: rgba(92, 122, 90, 0.22) !important
+    }
+
+    html.sc-parch #picker-month-year {
+      color: var(--text-primary) !important
+    }
+
+    html.sc-parch #perfos-tip::after {
+      background: #f9f6ef !important;
+      border-color: var(--border) !important
+    }
+
+    html.sc-parch #perfos-tip .tip-val {
+      color: var(--text-primary) !important
+    }
+
+    html.sc-parch #perfos-tip .tip-date {
+      color: var(--text-tertiary) !important
+    }
+
+    html.sc-parch #sheldonPanel {
+      background: #f4eee1 !important;
+      border-color: rgba(92, 122, 90, 0.20) !important;
+      box-shadow: 0 24px 60px rgba(90, 70, 40, 0.18) !important
+    }
+
+    html.sc-parch .sheldon-header {
+      background: linear-gradient(180deg, rgba(92, 122, 90, 0.07), transparent) !important;
+      border-bottom-color: var(--border-subtle) !important
+    }
+
+    html.sc-parch .sheldon-title h3 {
+      color: var(--text-primary) !important
+    }
+
+    html.sc-parch .sheldon-title span {
+      color: var(--text-tertiary) !important
+    }
+
+    html.sc-parch .sheldon-msg.bot {
+      background: #f9f6ef !important;
+      color: var(--text-primary) !important;
+      border-color: var(--border) !important
+    }
+
+    html.sc-parch .sheldon-msg.user {
+      background: linear-gradient(135deg, var(--accent), #4e6b4c) !important;
+      color: #fff !important
+    }
+
+    html.sc-parch .sheldon-input {
+      background: #efe8da !important;
+      border-top-color: var(--border-subtle) !important
+    }
+
+    html.sc-parch .sheldon-input textarea {
+      background: #f9f6ef !important;
+      border-color: var(--border) !important;
+      color: var(--text-primary) !important
+    }
+
+    html.sc-parch .sheldon-chip {
+      background: rgba(92, 122, 90, 0.07) !important;
+      border-color: rgba(92, 122, 90, 0.20) !important;
+      color: var(--accent) !important
+    }
+
+    html.sc-parch #sheldonFab {
+      background: linear-gradient(135deg, var(--accent), var(--amber)) !important;
+      color: #fff !important;
+      box-shadow: 0 8px 24px rgba(92, 122, 90, 0.28) !important
+    }
+
+    html.sc-parch .pf-name {
+      color: var(--text-primary) !important
+    }
+
+    html.sc-parch .pf-email {
+      color: var(--text-tertiary) !important
+    }
+
+    html.sc-parch .pf-item {
+      color: var(--text-secondary) !important
+    }
+
+    html.sc-parch .pf-item:hover {
+      background: var(--red-soft) !important;
+      color: var(--red) !important
+    }
+
+    html.sc-parch .pf-head {
+      border-bottom-color: var(--border-subtle) !important
+    }
+
+    html.sc-parch .footer {
+      border-top-color: var(--border-subtle) !important;
+      background: rgba(90, 70, 40, 0.02) !important;
+      color: var(--text-muted) !important
+    }
+
+    html.sc-parch .footer strong {
+      color: var(--text-secondary) !important
+    }
+
+    html.sc-parch .sc-mode {
+      background: rgba(90, 70, 40, 0.04) !important;
+      border-color: var(--border-subtle) !important
+    }
+
+    html.sc-parch .sc-mode-btn {
+      color: var(--text-secondary) !important
+    }
+
+    html.sc-parch .sc-mode-btn.sc-on {
+      background: rgba(255, 255, 255, 0.85) !important;
+      color: var(--text-primary) !important
+    }
+
+    html.sc-parch .sc-sheldon {
+      background: linear-gradient(155deg, rgba(92, 122, 90, 0.06), rgba(196, 127, 42, 0.04)) !important;
+      border-color: rgba(92, 122, 90, 0.16) !important;
+      color: var(--text-secondary) !important
+    }
+
+    html.sc-parch .sc-sheldon b {
+      color: var(--text-primary) !important
+    }
+
+    html.sc-parch .sc-dur-chip {
+      background: rgba(90, 70, 40, 0.04) !important;
+      border-color: var(--border) !important;
+      color: var(--text-secondary) !important
+    }
+
+    html.sc-parch .sc-dur-chip:hover,
+    html.sc-parch .sc-dur-chip.sc-on {
+      border-color: rgba(92, 122, 90, 0.42) !important;
+      color: var(--accent) !important;
+      background: rgba(92, 122, 90, 0.10) !important
+    }
+
+    html.sc-parch .tlog-label {
+      color: var(--text-tertiary) !important
+    }
+
+    html.sc-parch .tlog-date {
+      color: var(--text-primary) !important
+    }
+
+    html.sc-parch .tlog-row.not-today .tlog-date {
+      color: var(--accent) !important
+    }
+
+    html.sc-parch .tlog-nav {
+      border-color: var(--border) !important;
+      background: rgba(255, 255, 255, 0.60) !important;
+      color: var(--text-secondary) !important
+    }
+
+    html.sc-parch .tlog-today {
+      border-color: rgba(92, 122, 90, 0.28) !important;
+      background: rgba(92, 122, 90, 0.08) !important;
+      color: var(--accent) !important
+    }
+
+    html.sc-parch #sc-today-foot {
+      background: rgba(90, 70, 40, 0.025) !important;
+      border-color: var(--border-subtle) !important
+    }
+
+    html.sc-parch ::-webkit-scrollbar-thumb {
+      background: rgba(92, 122, 90, 0.25) !important
+    }
+
+    html.sc-parch ::-webkit-scrollbar-thumb:hover {
+      background: rgba(92, 122, 90, 0.40) !important
+    }
+
+    html.sc-parch #share-modal>div {
+      background: #f4eee1 !important;
+      border-color: var(--border) !important
+    }
+
+    html.sc-parch .el-dropzone {
+      background: rgba(90, 70, 40, 0.02) !important;
+      border-color: rgba(90, 70, 40, 0.18) !important
+    }
+
+    html.sc-parch .el-dropzone:hover,
+    html.sc-parch .el-dropzone.drag-over {
+      border-color: rgba(92, 122, 90, 0.50) !important;
+      background: rgba(92, 122, 90, 0.05) !important
+    }
+
+    html.sc-parch .el-mode-btn.el-mode-on {
+      background: rgba(92, 122, 90, 0.14) !important;
+      border-color: rgba(92, 122, 90, 0.40) !important;
+      color: var(--accent) !important
+    }
+
+    html.sc-parch .el-analyse-btn {
+      background: var(--accent) !important;
+      color: #fff !important
+    }
+
+    /* three-position toggle: dark(left) → parchment(center) → light(right) */
+    .sct-leaf {
+      color: #6b8c68;
+      opacity: 0;
+      transform: rotate(90deg) scale(0.6)
+    }
+
+    html.sc-parch .sct-track {
+      background: rgba(92, 122, 90, 0.14);
+      border-color: rgba(92, 122, 90, 0.30)
+    }
+
+    html.sc-parch .sct-thumb {
+      transform: translateX(12px);
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(92, 122, 90, 0.28)
+    }
+
+    html.sc-parch .sct-moon {
+      opacity: 0;
+      transform: rotate(-90deg) scale(0.6)
+    }
+
+    html.sc-parch .sct-leaf {
+      opacity: 1;
+      transform: rotate(0deg) scale(1)
+    }
+
     /* ── LIGHT THEME ── */
     html.sc-light {
       --bg-base: #eef0f8;
@@ -5949,6 +6852,7 @@
           <div class="sct-thumb">
             <span class="sct-icon sct-moon"><i class="ti ti-moon-stars"></i></span>
             <span class="sct-icon sct-sun"><i class="ti ti-sun"></i></span>
+            <span class="sct-icon sct-leaf"><i class="ti ti-leaf"></i></span>
           </div>
         </div>
       </label>
@@ -6208,6 +7112,7 @@
               <div class="sct-thumb">
                 <span class="sct-icon sct-moon"><i class="ti ti-moon-stars"></i></span>
                 <span class="sct-icon sct-sun"><i class="ti ti-sun"></i></span>
+                <span class="sct-icon sct-leaf"><i class="ti ti-leaf"></i></span>
               </div>
             </div>
           </label>
@@ -12009,33 +12914,37 @@
       var PREF_KEY = 'sc_theme';
       var CHART_DARK = { grid: 'rgba(255,255,255,0.04)', tick: 'rgba(255,255,255,0.35)', tooltip_bg: 'rgba(15,12,26,0.95)', tooltip_border: 'rgba(139,124,248,0.28)', title: 'rgba(255,255,255,0.90)', body: 'rgba(255,255,255,0.55)' };
       var CHART_LIGHT = { grid: 'rgba(0,0,0,0.06)', tick: 'rgba(15,17,24,0.42)', tooltip_bg: 'rgba(255,255,255,0.98)', tooltip_border: 'rgba(100,88,220,0.25)', title: '#0f1118', body: 'rgba(15,17,24,0.62)' };
+      var CHART_PARCH = { grid: 'rgba(90,70,40,0.08)', tick: 'rgba(45,37,24,0.50)', tooltip_bg: '#f9f6ef', tooltip_border: 'rgba(92,122,90,0.30)', title: '#2d2518', body: 'rgba(45,37,24,0.62)' };
 
       function getSystem() { return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; }
       function getCurrent() { return localStorage.getItem(PREF_KEY) || getSystem(); }
 
       function applyTheme(theme, animate) {
         var html = document.documentElement;
-        if (animate) {
-          // Full-page flash-free crossfade overlay
-          var veil = document.getElementById('sc-theme-veil');
-          if (!veil) { veil = document.createElement('div'); veil.id = 'sc-theme-veil'; veil.style.cssText = 'position:fixed;inset:0;z-index:999998;pointer-events:none;opacity:0;transition:opacity 180ms ease;background:' + (theme === 'light' ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.15)'); document.body.appendChild(veil); }
-          veil.style.opacity = '1';
-          setTimeout(function () { html.classList.toggle('sc-light', theme === 'light'); updateCharts(theme); veil.style.opacity = '0'; }, 120);
-        } else {
-          html.classList.toggle('sc-light', theme === 'light');
+        function setClasses() {
+          html.classList.remove('sc-light', 'sc-parch');
+          if (theme === 'light') html.classList.add('sc-light');
+          else if (theme === 'parch') html.classList.add('sc-parch');
           updateCharts(theme);
         }
-        // Sync all checkboxes
+        if (animate) {
+          var veil = document.getElementById('sc-theme-veil');
+          if (!veil) { veil = document.createElement('div'); veil.id = 'sc-theme-veil'; veil.style.cssText = 'position:fixed;inset:0;z-index:999998;pointer-events:none;opacity:0;transition:opacity 180ms ease'; document.body.appendChild(veil); }
+          veil.style.background = (theme === 'dark' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.18)');
+          veil.style.opacity = '1';
+          setTimeout(function () { setClasses(); veil.style.opacity = '0'; }, 120);
+        } else {
+          setClasses();
+        }
         var chks = document.querySelectorAll('.sc-theme-toggle input');
-        for (var i = 0; i < chks.length; i++) chks[i].checked = (theme === 'light');
-        // Flash ring
+        for (var i = 0; i < chks.length; i++) chks[i].checked = (theme !== 'dark');
         var track = document.getElementById('sct-track');
         if (track && animate) { track.classList.remove('sc-ring-flash'); void track.offsetWidth; track.classList.add('sc-ring-flash'); }
       }
 
       function updateCharts(theme) {
         if (typeof Chart === 'undefined') return;
-        var c = theme === 'light' ? CHART_LIGHT : CHART_DARK;
+        var c = theme === 'light' ? CHART_LIGHT : theme === 'parch' ? CHART_PARCH : CHART_DARK;
         Chart.defaults.color = c.tick;
         Chart.defaults.borderColor = c.grid;
         Chart.defaults.plugins.tooltip.backgroundColor = c.tooltip_bg;
@@ -12052,7 +12961,10 @@
       }
 
       window.toggleTheme = function () {
-        var next = document.documentElement.classList.contains('sc-light') ? 'dark' : 'light';
+        var html = document.documentElement;
+        var cur = html.classList.contains('sc-light') ? 'light' : html.classList.contains('sc-parch') ? 'parch' : 'dark';
+        var order = ['dark', 'parch', 'light'];
+        var next = order[(order.indexOf(cur) + 1) % order.length];
         localStorage.setItem(PREF_KEY, next);
         applyTheme(next, true);
       };
@@ -12556,88 +13468,88 @@
       }
 
       function elParseExcel(arrayBuffer, f) {
-  try {
-    var XLSX = window.XLSX;
-    var wb = XLSX.read(arrayBuffer, { type: 'array' });
+        try {
+          var XLSX = window.XLSX;
+          var wb = XLSX.read(arrayBuffer, { type: 'array' });
 
-    function parseSheet(ws) {
-      var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', blankrows: false });
-      if (!rows.length) return null;
-      // real header = row with the most non-empty cells (beats title + merged-group rows)
-      var hIdx = 0, best = -1;
-      rows.forEach(function (r, i) {
-        var n = r.filter(function (c) { return String(c).trim() !== ''; }).length;
-        if (n > best) { best = n; hIdx = i; }
-      });
-      var headers = rows[hIdx].map(function (c) { return String(c).trim(); });
+          function parseSheet(ws) {
+            var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', blankrows: false });
+            if (!rows.length) return null;
+            // real header = row with the most non-empty cells (beats title + merged-group rows)
+            var hIdx = 0, best = -1;
+            rows.forEach(function (r, i) {
+              var n = r.filter(function (c) { return String(c).trim() !== ''; }).length;
+              if (n > best) { best = n; hIdx = i; }
+            });
+            var headers = rows[hIdx].map(function (c) { return String(c).trim(); });
 
-      var records = [];
-      for (var i = hIdx + 1; i < rows.length; i++) {
-        var r = rows[i], pairs = [];
-        for (var c = 0; c < headers.length; c++) {
-          var key = headers[c]; if (!key) continue;
-          var val = r[c];
-          if (val === '' || val === null || val === undefined) continue;
-          pairs.push(key + ': ' + String(val).replace(/\r?\n/g, ' ').trim());
+            var records = [];
+            for (var i = hIdx + 1; i < rows.length; i++) {
+              var r = rows[i], pairs = [];
+              for (var c = 0; c < headers.length; c++) {
+                var key = headers[c]; if (!key) continue;
+                var val = r[c];
+                if (val === '' || val === null || val === undefined) continue;
+                pairs.push(key + ': ' + String(val).replace(/\r?\n/g, ' ').trim());
+              }
+              if (pairs.length) records.push(pairs.join(' | '));
+            }
+
+            // deterministic stats straight from the columns
+            var find = function (n) { return headers.findIndex(function (h) { return h.toLowerCase().indexOf(n.toLowerCase()) === 0; }); };
+            var qtC = find('Question Type'), corC = find('Correct Choice'), selC = find('Selected Choice');
+            var total = 0, wrong = 0, correct = 0, byType = {};
+            for (var j = hIdx + 1; j < rows.length; j++) {
+              var rr = rows[j], qt = qtC >= 0 ? String(rr[qtC] || '').trim() : '';
+              if (!qt) continue;
+              total++; byType[qt] = (byType[qt] || 0) + 1;
+              var cor = corC >= 0 ? String(rr[corC] || '').trim().toUpperCase() : '';
+              var sel = selC >= 0 ? String(rr[selC] || '').trim().toUpperCase() : '';
+              if (cor && sel) { if (cor === sel) correct++; else wrong++; }
+            }
+            var answered = correct + wrong;
+            var stats = (qtC >= 0 && total) ? {
+              totalErrors: total,
+              accuracy: answered ? Math.round(correct / answered * 100) : null,
+              errorDNA: Object.keys(byType).map(function (k) {
+                return { category: k, section: 'Verbal', count: byType[k], pct: Math.round(byType[k] / total * 100) };
+              }).sort(function (a, b) { return b.count - a.count; })
+            } : null;
+
+            return { headers: headers.filter(Boolean), records: records, stats: stats };
+          }
+
+          // rank by data volume; skip hidden + empty sheets; richest first
+          var parsed = wb.SheetNames.map(function (n, i) {
+            var meta = wb.Workbook && wb.Workbook.Sheets && wb.Workbook.Sheets[i];
+            var hidden = meta && meta.Hidden;        // 0 visible, 1 hidden, 2 very hidden
+            var p = hidden ? null : parseSheet(wb.Sheets[n]);
+            return { name: n, p: p, score: p ? p.records.length : 0 };
+          }).filter(function (x) { return x.p && x.score > 0; })
+            .sort(function (a, b) { return b.score - a.score; });
+
+          window.__elStats = parsed.length ? parsed[0].p.stats : null;   // stats from richest sheet (your CR log)
+
+          var lines = [];
+          parsed.forEach(function (s) {
+            lines.push('=== Sheet: ' + s.name + ' (' + s.score + ' rows) ===');
+            lines.push('Columns: ' + s.p.headers.join(', '));
+            lines.push(s.p.records.join('\n'));
+            lines.push('');
+          });
+
+          elFileText = lines.join('\n');
+          elShowFilePill(f);
+
+          if (typeof showToast === 'function') {
+            showToast('📊', 'Excel loaded',
+              (parsed[0] ? parsed[0].score + ' rows from ' + parsed[0].name : 'ready') + ' · ready for Sheldon');
+          }
+        } catch (err) {
+          alert('Excel parse error: ' + err.message);
         }
-        if (pairs.length) records.push(pairs.join(' | '));
       }
 
-      // deterministic stats straight from the columns
-      var find = function (n) { return headers.findIndex(function (h) { return h.toLowerCase().indexOf(n.toLowerCase()) === 0; }); };
-      var qtC = find('Question Type'), corC = find('Correct Choice'), selC = find('Selected Choice');
-      var total = 0, wrong = 0, correct = 0, byType = {};
-      for (var j = hIdx + 1; j < rows.length; j++) {
-        var rr = rows[j], qt = qtC >= 0 ? String(rr[qtC] || '').trim() : '';
-        if (!qt) continue;
-        total++; byType[qt] = (byType[qt] || 0) + 1;
-        var cor = corC >= 0 ? String(rr[corC] || '').trim().toUpperCase() : '';
-        var sel = selC >= 0 ? String(rr[selC] || '').trim().toUpperCase() : '';
-        if (cor && sel) { if (cor === sel) correct++; else wrong++; }
-      }
-      var answered = correct + wrong;
-      var stats = (qtC >= 0 && total) ? {
-        totalErrors: total,
-        accuracy: answered ? Math.round(correct / answered * 100) : null,
-        errorDNA: Object.keys(byType).map(function (k) {
-          return { category: k, section: 'Verbal', count: byType[k], pct: Math.round(byType[k] / total * 100) };
-        }).sort(function (a, b) { return b.count - a.count; })
-      } : null;
-
-      return { headers: headers.filter(Boolean), records: records, stats: stats };
-    }
-
-    // rank by data volume; skip hidden + empty sheets; richest first
-    var parsed = wb.SheetNames.map(function (n, i) {
-      var meta = wb.Workbook && wb.Workbook.Sheets && wb.Workbook.Sheets[i];
-      var hidden = meta && meta.Hidden;        // 0 visible, 1 hidden, 2 very hidden
-      var p = hidden ? null : parseSheet(wb.Sheets[n]);
-      return { name: n, p: p, score: p ? p.records.length : 0 };
-    }).filter(function (x) { return x.p && x.score > 0; })
-      .sort(function (a, b) { return b.score - a.score; });
-
-    window.__elStats = parsed.length ? parsed[0].p.stats : null;   // stats from richest sheet (your CR log)
-
-    var lines = [];
-    parsed.forEach(function (s) {
-      lines.push('=== Sheet: ' + s.name + ' (' + s.score + ' rows) ===');
-      lines.push('Columns: ' + s.p.headers.join(', '));
-      lines.push(s.p.records.join('\n'));
-      lines.push('');
-    });
-
-    elFileText = lines.join('\n');
-    elShowFilePill(f);
-
-    if (typeof showToast === 'function') {
-      showToast('📊', 'Excel loaded',
-        (parsed[0] ? parsed[0].score + ' rows from ' + parsed[0].name : 'ready') + ' · ready for Sheldon');
-    }
-  } catch (err) {
-    alert('Excel parse error: ' + err.message);
-  }
-}
-  
       function elShowFilePill(f) {
         document.getElementById('el-dropzone').style.display = 'none';
         var pill = document.getElementById('el-file-chosen');
@@ -12725,8 +13637,8 @@
           // trust the sheet, not the model, for the numbers
           if (window.__elStats) {
             analysis.totalErrors = window.__elStats.totalErrors;
-            analysis.accuracy    = window.__elStats.accuracy;
-            analysis.errorDNA    = window.__elStats.errorDNA;
+            analysis.accuracy = window.__elStats.accuracy;
+            analysis.errorDNA = window.__elStats.errorDNA;
             analysis.avgTimePerQ = null;   // time column is unusable — show "—" not a fake "1m 30s"
           }
 
