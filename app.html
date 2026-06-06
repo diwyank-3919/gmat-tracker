@@ -12637,32 +12637,7 @@
     alert('Excel parse error: ' + err.message);
   }
 }
-    // rank sheets by how much real data they carry; richest first, drop empties
-    var parsed = wb.SheetNames.map(function (n) {
-      var p = parseSheet(wb.Sheets[n]);
-      return { name: n, p: p, score: p ? p.records.length : 0 };
-    }).filter(function (x) { return x.p && x.score > 0; })
-      .sort(function (a, b) { return b.score - a.score; });
-
-    var lines = [];
-    parsed.forEach(function (s) {
-      lines.push('=== Sheet: ' + s.name + ' (' + s.score + ' rows) ===');
-      lines.push('Columns: ' + s.p.headers.join(', '));
-      lines.push(s.p.records.join('\n'));
-      lines.push('');
-    });
-
-    elFileText = lines.join('\n');
-    elShowFilePill(f);
-
-    if (typeof showToast === 'function') {
-      showToast('📊', 'Excel loaded', parsed.length + ' sheet' + (parsed.length > 1 ? 's' : '') + ' · ' +
-        (parsed[0] ? parsed[0].score + ' rows from ' + parsed[0].name : 'ready') + ' · ready for Sheldon');
-    }
-  } catch (err) {
-    alert('Excel parse error: ' + err.message);
-  }
-}
+  
       function elShowFilePill(f) {
         document.getElementById('el-dropzone').style.display = 'none';
         var pill = document.getElementById('el-file-chosen');
