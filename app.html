@@ -12556,49 +12556,60 @@
       }
 
       function elParseExcel(arrayBuffer, f) {
-        try {
-          var XLSX = window.XLSX;
-          var wb = XLSX.read(arrayBuffer, { type: 'array' });
-          var lines = [];
+  try {
+    var XLSX = window.XLSX;
+    var wb = XLSX.read(arrayBuffer, { type: 'array' });
 
-          wb.SheetNames.forEach(function (sheetName) {
-            var ws = wb.Sheets[sheetName];
-            var json = XLSX.utils.sheet_to_json(ws, { defval: '' });
-            if (!json.length) return;
-
-            // Sheet header as context
-            lines.push('=== Sheet: ' + sheetName + ' ===');
-
-            // Column headers
-            var headers = Object.keys(json[0]);
-            lines.push(headers.join(' | '));
-            lines.push(headers.map(function () { return '---'; }).join(' | '));
-
-            // Rows — pipe-separated for readability
-            json.forEach(function (row) {
-              var vals = headers.map(function (h) {
-                var v = row[h];
-                return v === null || v === undefined ? '' : String(v).trim();
-              });
-              lines.push(vals.join(' | '));
-            });
-
-            lines.push(''); // blank line between sheets
-          });
-
-          elFileText = lines.join('\n');
-          elShowFilePill(f);
-
-          // Show a quick count so user knows it worked
-          var rowCount = elFileText.split('\n').length;
-          if (typeof showToast === 'function') {
-            showToast('📊', 'Excel loaded', '' + wb.SheetNames.length + ' sheet' + (wb.SheetNames.length > 1 ? 's' : '') + ' · ready for Sheldon');
-          }
-        } catch (err) {
-          alert('Excel parse error: ' + err.message);
+    function parseSheet(ws) {
+      var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', blankrows: false });
+      if (!rows.length) return null;
+      // real header = row with the most non-empty cells (beats title + merged-group rows)
+      var hIdx = 0, best = -1;
+      rows.forEach(function (r, i) {
+        var n = r.filter(function (c) { return String(c).trim() !== ''; }).length;
+        if (n > best) { best = n; hIdx = i; }
+      });
+      var headers = rows[hIdx].map(function (c) { return String(c).trim(); });
+      var records = [];
+      for (var i = hIdx + 1; i < rows.length; i++) {
+        var r = rows[i], pairs = [];
+        for (var c = 0; c < headers.length; c++) {
+          var key = headers[c]; if (!key) continue;
+          var val = r[c];
+          if (val === '' || val === null || val === undefined) continue;
+          pairs.push(key + ': ' + String(val).replace(/\r?\n/g, ' ').trim());
         }
+        if (pairs.length) records.push(pairs.join(' | '));
       }
+      return { headers: headers.filter(Boolean), records: records };
+    }
 
+    // rank sheets by how much real data they carry; richest first, drop empties
+    var parsed = wb.SheetNames.map(function (n) {
+      var p = parseSheet(wb.Sheets[n]);
+      return { name: n, p: p, score: p ? p.records.length : 0 };
+    }).filter(function (x) { return x.p && x.score > 0; })
+      .sort(function (a, b) { return b.score - a.score; });
+
+    var lines = [];
+    parsed.forEach(function (s) {
+      lines.push('=== Sheet: ' + s.name + ' (' + s.score + ' rows) ===');
+      lines.push('Columns: ' + s.p.headers.join(', '));
+      lines.push(s.p.records.join('\n'));
+      lines.push('');
+    });
+
+    elFileText = lines.join('\n');
+    elShowFilePill(f);
+
+    if (typeof showToast === 'function') {
+      showToast('📊', 'Excel loaded', parsed.length + ' sheet' + (parsed.length > 1 ? 's' : '') + ' · ' +
+        (parsed[0] ? parsed[0].score + ' rows from ' + parsed[0].name : 'ready') + ' · ready for Sheldon');
+    }
+  } catch (err) {
+    alert('Excel parse error: ' + err.message);
+  }
+}
       function elShowFilePill(f) {
         document.getElementById('el-dropzone').style.display = 'none';
         var pill = document.getElementById('el-file-chosen');
@@ -12667,7 +12678,7 @@
             + '  "motivationalNote": "<one warm, specific sentence of encouragement>"\n'
             + '}\n\n'
             + 'Student context: ' + JSON.stringify(studyCtx) + '\n\n'
-            + 'Error log (first 6000 chars):\n' + rawText.slice(0, 6000);
+            + 'Error log (first 40000 chars):\n' + rawText.slice(0, 40000);
 
           var res = await supa.functions.invoke('sheldon', {
             body: {
