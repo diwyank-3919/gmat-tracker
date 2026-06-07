@@ -4592,6 +4592,124 @@
       transform: rotate(0deg) scale(1)
     }
 
+    /* ════ PARCHMENT v2 — TACTILE CARD STOCK ════ */
+    html.sc-parch {
+      --bg-card:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.035'/%3E%3C/svg%3E"),
+        linear-gradient(157deg, #fbf8f2 0%, #f6f0e4 100%);
+      --bg-card-hover:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.04'/%3E%3C/svg%3E"),
+        linear-gradient(157deg, #fdfaf4 0%, #f5efe0 100%);
+      --shadow-card:
+        inset 0 1px 0 rgba(255, 255, 255, 0.95),
+        inset 0 -1px 0 rgba(90, 70, 40, 0.05),
+        0 1px 1px rgba(90, 70, 40, 0.05),
+        0 3px 6px rgba(90, 70, 40, 0.07),
+        0 8px 18px rgba(90, 70, 40, 0.08),
+        0 16px 36px rgba(90, 70, 40, 0.09),
+        0 0 0 1px rgba(90, 70, 40, 0.10);
+      --shadow-card-hover:
+        inset 0 1px 0 rgba(255, 255, 255, 1),
+        inset 0 -1px 0 rgba(90, 70, 40, 0.06),
+        0 2px 4px rgba(90, 70, 40, 0.08),
+        0 10px 20px rgba(90, 70, 40, 0.12),
+        0 22px 48px rgba(90, 70, 40, 0.17),
+        0 34px 70px rgba(90, 70, 40, 0.12),
+        0 0 0 1px rgba(90, 70, 40, 0.12);
+    }
+
+    /* Crisp hairline + tighter radius across the card family */
+    html.sc-parch .card,
+    html.sc-parch .kpi,
+    html.sc-parch .ring-card,
+    html.sc-parch .momentum-card,
+    html.sc-parch .banner,
+    html.sc-parch #exam-command {
+      border: 1px solid rgba(90, 70, 40, 0.13) !important;
+      border-radius: 16px !important;
+      box-shadow: var(--shadow-card) !important;
+    }
+
+    /* The lift — pick it up */
+    html.sc-parch .card,
+    html.sc-parch .kpi,
+    html.sc-parch .ring-card {
+      transition: transform .32s cubic-bezier(.34, 1.56, .64, 1), box-shadow .26s ease, background .2s ease !important;
+    }
+
+    html.sc-parch .card:hover,
+    html.sc-parch .kpi:hover,
+    html.sc-parch .ring-card:hover {
+      transform: translateY(-6px) scale(1.012) !important;
+      box-shadow: var(--shadow-card-hover) !important;
+      backdrop-filter: none !important;
+    }
+
+    /* Colored index-tab on the top edge (survives hover — it's a pseudo, not a shadow) */
+    html.sc-parch .kpi,
+    html.sc-parch .ring-card {
+      position: relative;
+    }
+
+    html.sc-parch .kpi::before,
+    html.sc-parch .ring-card::before {
+      content: '' !important;
+      display: block !important;
+      position: absolute;
+      top: 0;
+      left: 16px;
+      right: 16px;
+      height: 3px;
+      border-radius: 0 0 4px 4px;
+      opacity: 0.9;
+      z-index: 4;
+      pointer-events: none;
+      background: #5c7a5a;
+    }
+
+    html.sc-parch .kpi:nth-child(2)::before,
+    html.sc-parch .kpi:nth-child(3)::before {
+      background: #c47f2a
+    }
+
+    html.sc-parch .kpi:nth-child(4)::before,
+    html.sc-parch .kpi:nth-child(5)::before {
+      background: #b85c38
+    }
+
+    html.sc-parch .ring-card:nth-child(2)::before {
+      background: #c47f2a
+    }
+
+    html.sc-parch .ring-card:nth-child(3)::before {
+      background: #5a5494
+    }
+
+    html.sc-parch .ring-card:nth-child(4)::before {
+      background: #b85c38
+    }
+
+    /* Hero + exam command: richer warm wash, same crisp edge */
+    html.sc-parch .kpi.hero,
+    html.sc-parch #exam-command {
+      box-shadow: var(--shadow-card), 0 0 0 1px rgba(92, 122, 90, 0.16) !important;
+    }
+
+    /* CONTRAST FIX — exam date chip was near-white on cream */
+    html.sc-parch .ec-date-chip {
+      background: rgba(255, 255, 255, 0.62) !important;
+      border-color: var(--border) !important;
+      color: var(--text-primary) !important;
+    }
+
+    html.sc-parch .ec-date-chip .ti {
+      color: var(--accent) !important;
+    }
+
+    html.sc-parch #exam-date-text {
+      color: var(--text-primary) !important;
+    }
+
     /* ── LIGHT THEME ── */
     html.sc-light {
       --bg-base: #eef0f8;
@@ -12910,7 +13028,7 @@
   </script>
   <!-- ── THEME ENGINE ── -->
   <script>
-   (function () {
+    (function () {
       var PREF_KEY = 'sc_theme';
       var CHART_DARK = { grid: 'rgba(255,255,255,0.04)', tick: 'rgba(255,255,255,0.35)', tooltip_bg: 'rgba(15,12,26,0.95)', tooltip_border: 'rgba(139,124,248,0.28)', title: 'rgba(255,255,255,0.90)', body: 'rgba(255,255,255,0.55)' };
       var CHART_LIGHT = { grid: 'rgba(0,0,0,0.06)', tick: 'rgba(15,17,24,0.42)', tooltip_bg: 'rgba(255,255,255,0.98)', tooltip_border: 'rgba(100,88,220,0.25)', title: '#0f1118', body: 'rgba(15,17,24,0.62)' };
@@ -13809,6 +13927,30 @@
         // Transition opacity on loading message
         var lm = document.getElementById('el-loading-msg');
         if (lm) lm.style.transition = 'opacity .2s ease';
+      });
+    })();
+  </script>
+  <script>
+    (function () {
+      if (typeof Chart === 'undefined') return;
+      Chart.register({
+        id: 'scLightAxis',
+        beforeUpdate: function (chart) {
+          var root = document.documentElement;
+          var parch = root.classList.contains('sc-parch');
+          var light = root.classList.contains('sc-light');
+          if (!parch && !light) return;            // dark mode keeps its own colors
+          var tick = parch ? 'rgba(45,37,24,0.58)' : 'rgba(15,17,24,0.52)';
+          var grid = parch ? 'rgba(90,70,40,0.10)' : 'rgba(0,0,0,0.07)';
+          var scales = chart.options.scales || {};
+          Object.keys(scales).forEach(function (k) {
+            var s = scales[k]; if (!s) return;
+            if (s.ticks) s.ticks.color = tick;
+            if (s.grid) s.grid.color = grid;
+            if (s.angleLines) s.angleLines.color = grid;
+            if (s.pointLabels) s.pointLabels.color = tick;
+          });
+        }
       });
     })();
   </script>
