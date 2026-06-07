@@ -12917,7 +12917,7 @@
       var CHART_PARCH = { grid: 'rgba(90,70,40,0.08)', tick: 'rgba(45,37,24,0.50)', tooltip_bg: '#f9f6ef', tooltip_border: 'rgba(92,122,90,0.30)', title: '#2d2518', body: 'rgba(45,37,24,0.62)' };
 
       function getSystem() { return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; }
-      function getCurrent() { return localStorage.getItem(PREF_KEY) || getSystem(); }
+      function getCurrent() { return localStorage.getItem(PREF_KEY) || 'dark'; }
 
       function applyTheme(theme, animate) {
         var html = document.documentElement;
@@ -12972,15 +12972,6 @@
       // Boot — no flash
       var saved = getCurrent();
       applyTheme(saved, false);
-
-      // Respect OS change if user hasn't overridden
-      if (window.matchMedia) {
-        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function (e) {
-          if (!localStorage.getItem(PREF_KEY)) applyTheme(e.matches ? 'light' : 'dark', true);
-        });
-      }
-    })();
-  </script>
 
   <!-- ══ ERROR LOG: STYLES ══ -->
   <style>
