@@ -12910,13 +12910,12 @@
   </script>
   <!-- ── THEME ENGINE ── -->
   <script>
-    (function () {
+   (function () {
       var PREF_KEY = 'sc_theme';
       var CHART_DARK = { grid: 'rgba(255,255,255,0.04)', tick: 'rgba(255,255,255,0.35)', tooltip_bg: 'rgba(15,12,26,0.95)', tooltip_border: 'rgba(139,124,248,0.28)', title: 'rgba(255,255,255,0.90)', body: 'rgba(255,255,255,0.55)' };
       var CHART_LIGHT = { grid: 'rgba(0,0,0,0.06)', tick: 'rgba(15,17,24,0.42)', tooltip_bg: 'rgba(255,255,255,0.98)', tooltip_border: 'rgba(100,88,220,0.25)', title: '#0f1118', body: 'rgba(15,17,24,0.62)' };
       var CHART_PARCH = { grid: 'rgba(90,70,40,0.08)', tick: 'rgba(45,37,24,0.50)', tooltip_bg: '#f9f6ef', tooltip_border: 'rgba(92,122,90,0.30)', title: '#2d2518', body: 'rgba(45,37,24,0.62)' };
 
-      function getSystem() { return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; }
       function getCurrent() { return localStorage.getItem(PREF_KEY) || 'dark'; }
 
       function applyTheme(theme, animate) {
@@ -12951,7 +12950,6 @@
         Chart.defaults.plugins.tooltip.borderColor = c.tooltip_border;
         Chart.defaults.plugins.tooltip.titleColor = c.title;
         Chart.defaults.plugins.tooltip.bodyColor = c.body;
-        // Re-render existing charts
         setTimeout(function () {
           if (typeof renderChart === 'function') try { renderChart(); } catch (e) { }
           if (typeof renderTopicDonut === 'function') try { renderTopicDonut(); } catch (e) { }
@@ -12969,7 +12967,6 @@
         applyTheme(next, true);
       };
 
-      // Boot — no flash
       var saved = getCurrent();
       applyTheme(saved, false);
     })();
