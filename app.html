@@ -6151,6 +6151,33 @@
       color: #fff;
     }
 
+    /* Timer plate (static, matches the countdown look) */
+    #timer-display.plated { display: inline-flex; align-items: center; gap: 0.18em; -webkit-text-fill-color: initial; }
+    #timer-display.plated .tl-colon {
+      font-family: 'Fraunces', serif; font-weight: 600; line-height: 1; padding: 0 0.03em;
+      color: rgba(244,238,226,0.5); -webkit-text-fill-color: rgba(244,238,226,0.5);
+    }
+    #timer-display.plated .tl-plate {
+      display: inline-flex; position: relative; overflow: hidden; border-radius: 0.18em;
+      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 0.08em 0.24em rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.12);
+    }
+    #timer-display.plated .tl-plate::before {
+      content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+      background: linear-gradient(180deg, rgba(20,24,38,0.65) 0%, transparent 32%, transparent 68%, rgba(20,24,38,0.65) 100%);
+    }
+    #timer-display.plated .tl-win {
+      position: relative; width: 0.7em; height: 1.18em; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #timer-display.plated .tl-win + .tl-win { border-left: 1px solid rgba(0,0,0,0.35); box-shadow: inset 1px 0 0 rgba(255,255,255,0.05); }
+    #timer-display.plated .tl-cell {
+      font-family: 'Fraunces', serif; font-weight: 600; line-height: 1;
+      color: #f4eee2 !important; -webkit-text-fill-color: #f4eee2 !important;
+    }
+    #timer-display.plated.running .tl-cell { color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; }
+
     .timer-controls {
       display: flex;
       align-items: center;
@@ -9964,11 +9991,31 @@
       function clear() { state = { running: false, topic: state.topic || "Quant", startedAt: null, accMs: 0 }; localStorage.removeItem(TKEY); }
       function elapsedMs() { var e = state.accMs || 0; if (state.running && state.startedAt) e += Date.now() - state.startedAt; return e; }
       function fmtClock(ms) { var t = Math.floor(ms / 1000), h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60; function p(n) { return String(n).padStart(2, "0"); } return p(h) + ":" + p(m) + ":" + p(s); }
+      function renderTimerPlate(el, str) {
+        el.classList.add("plated");
+        if (el.getAttribute("data-plated") !== "1") {
+          el.innerHTML = ""; el._cells = [];
+          str.split(":").forEach(function (g, gi) {
+            if (gi > 0) { var c = document.createElement("span"); c.className = "tl-colon"; c.textContent = ":"; el.appendChild(c); }
+            var plate = document.createElement("div"); plate.className = "tl-plate";
+            for (var i = 0; i < g.length; i++) {
+              var w = document.createElement("div"); w.className = "tl-win";
+              var cell = document.createElement("div"); cell.className = "tl-cell"; cell.textContent = g[i];
+              w.appendChild(cell); plate.appendChild(w); el._cells.push(cell);
+            }
+            el.appendChild(plate);
+          });
+          el.setAttribute("data-plated", "1");
+        } else {
+          var d = str.replace(/:/g, "");
+          for (var k = 0; k < el._cells.length; k++) { if (el._cells[k].textContent !== d[k]) el._cells[k].textContent = d[k]; }
+        }
+      }
       function startTick() { if (!tickInt) tickInt = setInterval(paint, 500); }
       function stopTick() { if (tickInt) { clearInterval(tickInt); tickInt = null; } }
       function paint() {
         var active = state.running || state.accMs > 0;
-        var disp = document.getElementById("timer-display"); if (disp) { disp.textContent = fmtClock(elapsedMs()); disp.classList.toggle("running", state.running); }
+        var disp = document.getElementById("timer-display"); if (disp) { renderTimerPlate(disp, fmtClock(elapsedMs())); disp.classList.toggle("running", state.running); }
         var st = document.getElementById("timer-status"); if (st) { st.textContent = state.running ? "Recording" : active ? "Paused" : "Idle"; st.className = "timer-status" + (state.running ? " running" : active ? " paused" : ""); }
         var sel = document.getElementById("timer-topic"); if (sel) { sel.disabled = active; if (active) sel.value = state.topic; }
         var sB = document.getElementById("timer-start-btn"), pB = document.getElementById("timer-pause-btn"), oB = document.getElementById("timer-stop-btn"), dB = document.getElementById("timer-discard-btn");
