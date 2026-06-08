@@ -9581,7 +9581,7 @@
       var SPIN = 3, digits = String(Math.max(0, target)).split("").map(Number);
 
       digits.forEach(function (d, i) {
-        var box = document.createElement("div"); box.className = "dl-box";
+        var box = document.createElement("div"); box.className = "dl-win";
         var strip = document.createElement("div"); strip.className = "dl-strip";
         var cells = SPIN * 10 + d + 2;
         for (var k = 0; k < cells; k++) {
