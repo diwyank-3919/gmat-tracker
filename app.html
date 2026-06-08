@@ -6936,37 +6936,33 @@
 }
 .ec-hero-num { animation: ecHeroBreath 5s ease-in-out 1s infinite; }
 
-/* ── Rolling metallic-drum countdown ── */
-#days-left.rolling { display: flex; gap: 8px; }
-#days-left.rolling .dl-box {
-  position: relative; width: 0.62em; height: 1em; overflow: hidden; border-radius: 0.16em;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.10) 0%, transparent 16%),
-    linear-gradient(180deg, transparent 28%, rgba(255,255,255,0.16) 30%, transparent 32%),
-    linear-gradient(180deg, #14111d 0%, #322d47 30%, #454060 47%, #2a2640 57%, #131019 100%);
-  border: 1px solid rgba(255,255,255,0.10);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.22),
-    inset 0 -1px 0 rgba(0,0,0,0.60),
-    inset 1px 0 0 rgba(255,255,255,0.05),
-    inset -1px 0 0 rgba(0,0,0,0.40),
-    0 0.16em 0.42em rgba(0,0,0,0.50);
+/* Rolling unified-plate countdown */
+#days-left.rolling {
+  display: inline-flex; position: relative; overflow: hidden; border-radius: 0.22em; animation: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 0.10em 0.30em rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.12);
+  /* reset the gradient-text clip that .ec-hero-num applies, so the plate fill/border show */
+  -webkit-background-clip: border-box; background-clip: border-box; -webkit-text-fill-color: initial;
 }
-#days-left.rolling .dl-box::before {   /* curved-drum vignette */
-  content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none;
-  background: linear-gradient(180deg, rgba(8,6,14,0.92) 0%, rgba(8,6,14,0) 30%, rgba(8,6,14,0) 70%, rgba(8,6,14,0.92) 100%);
+#days-left.rolling::before {            /* unified drum curve across the whole plate */
+  content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: linear-gradient(180deg, rgba(20,24,38,0.70) 0%, transparent 34%, transparent 66%, rgba(20,24,38,0.70) 100%);
 }
-#days-left.rolling .dl-box::after {    /* center seam */
-  content: ''; position: absolute; top: 50%; left: 0.1em; right: 0.1em; height: 1px; z-index: 4;
-  background: rgba(0,0,0,0.50); box-shadow: 0 1px 0 rgba(255,255,255,0.07);
+#days-left.rolling .dl-win {
+  position: relative; width: 0.66em; height: 1em; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+#days-left.rolling .dl-win + .dl-win {  /* center divider between digits */
+  border-left: 1px solid rgba(0,0,0,0.35);
+  box-shadow: inset 1px 0 0 rgba(255,255,255,0.05);
 }
 #days-left.rolling .dl-strip { display: flex; flex-direction: column; will-change: transform; }
 #days-left.rolling .dl-cell {
   height: 1em; display: flex; align-items: center; justify-content: center; line-height: 1;
   font-family: 'Fraunces', serif;
-  background: linear-gradient(180deg, #ffffff 26%, #cdc6ef);
+  background: linear-gradient(180deg, #ffffff 30%, #efe7da);   /* warm white, matches 735 / 3.8h */
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-  text-shadow: 0 2px 3px rgba(0,0,0,0.45);
 }
 @media (prefers-reduced-motion: reduce) { #days-left.rolling .dl-strip { transition: none !important; } }
 
