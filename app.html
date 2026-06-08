@@ -6960,9 +6960,10 @@
 #days-left.rolling .dl-strip { display: flex; flex-direction: column; will-change: transform; }
 #days-left.rolling .dl-cell {
   height: 1em; display: flex; align-items: center; justify-content: center; line-height: 1;
-  font-family: 'Fraunces', serif;
-  background: linear-gradient(180deg, #ffffff 30%, #efe7da);   /* warm white, matches 735 / 3.8h */
-  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  font-family: 'Fraunces', serif; font-weight: 600;
+  color: #f4eee2;                    /* warm white, matches 3.8h / 735 */
+  -webkit-text-fill-color: #f4eee2;  /* override the transparent fill inherited from .ec-hero-num */
+  background: none;
 }
 @media (prefers-reduced-motion: reduce) { #days-left.rolling .dl-strip { transition: none !important; } }
 
