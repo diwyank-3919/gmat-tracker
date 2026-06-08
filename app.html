@@ -6931,16 +6931,17 @@
     }
     /* Days left — the heartbeat of the countdown */
 @keyframes ecHeroBreath {
-  0%, 100% { filter: drop-shadow(0 0 0 rgba(139,124,248,0)) brightness(1); }
-  50%      { filter: drop-shadow(0 0 22px rgba(139,124,248,0.60)) brightness(1.08); }
+  0%, 100% { filter: drop-shadow(0 0 0 transparent) brightness(1); }
+  50%      { filter: drop-shadow(0 3px 20px var(--accent-glow)) brightness(1.06); }
 }
-.ec-hero-num { animation: ecHeroBreath 4.5s ease-in-out infinite !important; }
+.ec-hero-num { animation: ecHeroBreath 5s ease-in-out 1s infinite; }
 
+/* Target score — the north star you're aiming at */
 @keyframes ecTargetGlow {
-  0%, 100% { filter: drop-shadow(0 0 0 rgba(196,127,42,0)) brightness(1); }
-  50%      { filter: drop-shadow(0 0 16px rgba(196,127,42,0.85)) brightness(1.05); }
+  0%, 100% { box-shadow: 0 0 0 1px rgba(196,127,42,0.18), 0 0 0 rgba(196,127,42,0); }
+  50%      { box-shadow: 0 0 0 1px rgba(196,127,42,0.45), 0 0 22px rgba(196,127,42,0.24); }
 }
-.ec-target-cell input { animation: ecTargetGlow 4.5s ease-in-out infinite !important; }
+.ec-target-cell input { animation: ecTargetGlow 4.5s ease-in-out infinite; }
 .ec-target-cell input:focus { animation: none; }   /* go calm while they edit */
     @media (prefers-reduced-motion: reduce) {
   .ec-hero-num, .ec-target-cell input { animation: none !important; }
