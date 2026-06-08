@@ -6929,6 +6929,25 @@
       color: #f0bd6a !important;
       border: 1px solid rgba(240, 189, 106, 0.28) !important;
     }
+    /* Days left — the heartbeat of the countdown */
+@keyframes ecHeroBreath {
+  0%, 100% { filter: drop-shadow(0 0 0 transparent) brightness(1); }
+  50%      { filter: drop-shadow(0 3px 20px var(--accent-glow)) brightness(1.06); }
+}
+.ec-hero-num { animation: ecHeroBreath 5s ease-in-out 1s infinite; }
+
+/* Target score — the north star you're aiming at */
+@keyframes ecTargetGlow {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(196,127,42,0.18), 0 0 0 rgba(196,127,42,0); }
+  50%      { box-shadow: 0 0 0 1px rgba(196,127,42,0.45), 0 0 22px rgba(196,127,42,0.24); }
+}
+.ec-target-cell input { animation: ecTargetGlow 4.5s ease-in-out infinite; }
+.ec-target-cell input:focus { animation: none; }   /* go calm while they edit */
+
+/* respect people who don't want motion */
+@media (prefers-reduced-motion: reduce) {
+  .ec-hero-num, .ec-target-cell input { animation: none !important; }
+}
   </style>
   <script>
     !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]), t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.crossOrigin = "anonymous", p.async = !0, p.src = s.api_host.replace(".i.posthog.com", "io.posthog.com") + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + " (stub)" }, o = "init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
@@ -10846,7 +10865,7 @@
 
     .ec-stats {
       display: flex;
-      align-items: flex-start;
+      align-items: flex-end;
       gap: 34px;
       flex: 1;
       flex-wrap: wrap;
