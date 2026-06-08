@@ -12512,6 +12512,31 @@
       color: var(--accent-bright);
       background: rgba(135, 141, 255, 0.14);
     }
+
+    /* ── Duration: clean two-row layout on mobile ── */
+    @media (max-width: 640px) {
+      .dur-wrap {
+        gap: 7px 8px;
+        align-items: center;
+      }
+      .dur-wrap > input {
+        width: 54px;
+      }
+      /* full-width forces the chips onto their own row */
+      .sc-dur-presets {
+        margin-left: 0;
+        width: 100%;
+        gap: 5px;
+        flex-wrap: nowrap;
+      }
+      .sc-dur-chip {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 0 4px;
+        font-size: 11px;
+        white-space: nowrap;
+      }
+    }
   </style>
   <script>
     window.scSetDur = function (h, m) {
