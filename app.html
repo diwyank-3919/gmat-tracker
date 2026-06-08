@@ -9422,18 +9422,59 @@
     var PREP_START_DATE = new Date(2026, 3, 25);
 
     function saveExamSettings() {
-      var examDate = document.getElementById("exam-date-inp").value;
-      var targetScore = parseInt(document.getElementById("target-score-inp").value) || 735;
-      TARGET_SCORE = targetScore; localStorage.setItem("gmat_exam_date", examDate); localStorage.setItem("gmat_target_score", targetScore);
-      updateExamCountdown(); renderMockView();
-    }
+  var examDate = document.getElementById("exam-date-inp").value;
+  var targetScore = parseInt(document.getElementById("target-score-inp").value) || 735;
+  TARGET_SCORE = targetScore;
+  localStorage.setItem("gmat_exam_date", examDate);
+  localStorage.setItem("gmat_target_score", targetScore);
+  updateExamCountdown(); renderMockView();
+  // sync to the account so it follows you across devices
+  supa.auth.getUser().then(function (r) {
+    var uid = r && r.data && r.data.user && r.data.user.id;
+    if (!uid) return;
+    supa.from("user_settings").upsert(
+      { user_id: uid, exam_date: examDate || null, target_score: targetScore, updated_at: new Date().toISOString() },
+      { onConflict: "user_id" }
+    ).then(function (res) { if (res.error) console.warn("settings sync failed:", res.error.message); });
+  });
+}
     function loadExamSettings() {
-      var examDate = localStorage.getItem("gmat_exam_date") || "";
-      var targetScore = parseInt(localStorage.getItem("gmat_target_score")) || 735;
-      TARGET_SCORE = targetScore;
-      document.getElementById("exam-date-inp").value = examDate; document.getElementById("target-score-inp").value = targetScore; setDateDisplay("exam-date-inp", "exam-date-text");
-      updateExamCountdown();
-    }
+  // 1. instant paint from local cache
+  var examDate = localStorage.getItem("gmat_exam_date") || "";
+  var targetScore = parseInt(localStorage.getItem("gmat_target_score")) || 735;
+  TARGET_SCORE = targetScore;
+  document.getElementById("exam-date-inp").value = examDate;
+  document.getElementById("target-score-inp").value = targetScore;
+  setDateDisplay("exam-date-inp", "exam-date-text");
+  updateExamCountdown();
+  // 2. fetch the account's saved settings
+  supa.auth.getUser().then(function (r) {
+    var uid = r && r.data && r.data.user && r.data.user.id;
+    if (!uid) return;
+    supa.from("user_settings").select("exam_date,target_score").eq("user_id", uid).maybeSingle()
+      .then(function (res) {
+        if (res.error) return;                       // table/RLS issue — keep local
+        if (!res.data) {                              // no cloud row yet → push local up
+          if (examDate || targetScore !== 735) saveExamSettings();
+          return;
+        }
+        var d = res.data;
+        if (d.exam_date) {
+          document.getElementById("exam-date-inp").value = d.exam_date;
+          localStorage.setItem("gmat_exam_date", d.exam_date);
+          setDateDisplay("exam-date-inp", "exam-date-text");
+        }
+        if (d.target_score) {
+          TARGET_SCORE = d.target_score;
+          document.getElementById("target-score-inp").value = d.target_score;
+          localStorage.setItem("gmat_target_score", d.target_score);
+        }
+        updateExamCountdown();
+        if (typeof renderMockView === "function") renderMockView();
+        if (typeof render === "function") render();
+      });
+  });
+}
     function updateExamCountdown() {
       var examDateVal = document.getElementById("exam-date-inp").value;
       var show = !!examDateVal;
