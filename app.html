@@ -9490,7 +9490,14 @@
       var hrsPerDay = daysLeft > 0 ? (remaining / daysLeft).toFixed(1) : "0";
       document.getElementById("hrs-needed").textContent = hrsPerDay + "h";
       var sd = new Set(sessions.map(function (s) { return s.date; })).size || 1;
-      var projected = totalStudied + (totalStudied / sd * daysLeft);
+      var sd = new Set(sessions.map(function (s) { return s.date; })).size;
+      if (totalStudied > 0 && sd > 0) {
+        var projected = totalStudied + (totalStudied / sd * daysLeft);
+        document.getElementById("proj-total").textContent = Math.round(projected) + "h";
+      } else {
+        // no sessions yet (or still loading) — don't show a misleading 0h
+        document.getElementById("proj-total").textContent = "—";
+      }
       document.getElementById("proj-total").textContent = Math.round(projected) + "h";
       var totalPrepDays = Math.ceil((examDate - PREP_START_DATE) / (1000 * 60 * 60 * 24));
       var doneDays = Math.ceil((today - PREP_START_DATE) / (1000 * 60 * 60 * 24));
