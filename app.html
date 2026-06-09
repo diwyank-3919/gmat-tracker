@@ -7047,13 +7047,20 @@
     <style>
     /* ── SPLIT-FLAP TIMER (mechanical flip clock) ── */
     #timer-display.flip-clock {
-      display: flex; align-items: center; justify-content: center;
-      gap: 7px; perspective: 950px; margin: 8px 0 12px !important;
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      perspective: 950px;
+      margin: 8px 0 12px !important;
     }
     #timer-display .flap {
+      flex: 0 0 auto;
       position: relative; width: 45px; height: 64px;
       font-family: 'Fraunces', serif; font-weight: 600;
-      font-size: 44px; line-height: 64px; color: #f4eee2;
+      font-size: 46px; line-height: 64px; color: #f4eee2;
       border-radius: 9px; filter: drop-shadow(0 8px 16px rgba(0,0,0,.45));
     }
     #timer-display.running .flap { color: #ffffff; }
@@ -7062,7 +7069,10 @@
       overflow: hidden; backface-visibility: hidden;
       background: linear-gradient(180deg, #222a3a, #1a2030);
     }
-    #timer-display .flap-piece span { position: absolute; left: 0; right: 0; height: 240%; text-align: center; }
+    #timer-display .flap-piece span {
+      position: absolute; left: 0; right: 0; height: 200%;
+      line-height: 64px; text-align: center;
+    }
     #timer-display .flap-top {
       top: 0; border-radius: 9px 9px 0 0; border-bottom: 1px solid #05070b;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
@@ -7093,15 +7103,13 @@
     #timer-display.running .flap-colon i { opacity: .5; }
     #timer-display .flap-colon.tick i { opacity: .9; box-shadow: 0 0 8px rgba(244,238,226,.4); }
     @media (max-width: 560px) {
-      #timer-display .flap { width: 34px; height: 48px; font-size: 33px; line-height: 48px; border-radius: 7px; }
+      #timer-display .flap { width: 34px; height: 48px; font-size: 35px; line-height: 48px; border-radius: 7px; }
       #timer-display .flap-colon { gap: 8px; }
     }
     @media (prefers-reduced-motion: reduce) {
       #timer-display .flap.flipping .flap-fold.flap-top,
       #timer-display .flap.flipping .flap-fold.flap-bottom { animation: none; }
     }
-  </style>
-
   </style>
   <script>
     !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]), t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.crossOrigin = "anonymous", p.async = !0, p.src = s.api_host.replace(".i.posthog.com", "io.posthog.com") + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + " (stub)" }, o = "init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
