@@ -7044,6 +7044,63 @@
     z-index: 1000 !important;
   }
 }
+    <style>
+    /* ── SPLIT-FLAP TIMER (mechanical flip clock) ── */
+    #timer-display.flip-clock {
+      display: flex; align-items: center; justify-content: center;
+      gap: 7px; perspective: 950px; margin: 8px 0 12px !important;
+    }
+    #timer-display .flap {
+      position: relative; width: 45px; height: 64px;
+      font-family: 'Fraunces', serif; font-weight: 600;
+      font-size: 44px; line-height: 64px; color: #f4eee2;
+      border-radius: 9px; filter: drop-shadow(0 8px 16px rgba(0,0,0,.45));
+    }
+    #timer-display.running .flap { color: #ffffff; }
+    #timer-display .flap-piece {
+      position: absolute; left: 0; right: 0; height: 50%;
+      overflow: hidden; backface-visibility: hidden;
+      background: linear-gradient(180deg, #222a3a, #1a2030);
+    }
+    #timer-display .flap-piece span { position: absolute; left: 0; right: 0; height: 240%; text-align: center; }
+    #timer-display .flap-top {
+      top: 0; border-radius: 9px 9px 0 0; border-bottom: 1px solid #05070b;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+    }
+    #timer-display .flap-top span { top: 0; }
+    #timer-display .flap-bottom {
+      bottom: 0; border-radius: 0 0 9px 9px;
+      background: linear-gradient(180deg, #161c2a, #141925);
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,.5);
+    }
+    #timer-display .flap-bottom span { bottom: 0; }
+    #timer-display .flap::after {
+      content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px;
+      transform: translateY(-.5px); background: rgba(255,255,255,.06); z-index: 6; pointer-events: none;
+    }
+    #timer-display .flap-fold { z-index: 5; }
+    #timer-display .flap-fold.flap-top { transform-origin: 50% 100%; }
+    #timer-display .flap-fold.flap-bottom { transform-origin: 50% 0%; transform: rotateX(90deg); }
+    #timer-display .flap.flipping .flap-fold.flap-top { animation: scFoldDown .28s ease-in forwards; }
+    #timer-display .flap.flipping .flap-fold.flap-bottom { animation: scFoldUp .26s .28s ease-out forwards; }
+    @keyframes scFoldDown { 0% { transform: rotateX(0); } 100% { transform: rotateX(-90deg); } }
+    @keyframes scFoldUp { 0% { transform: rotateX(90deg); } 100% { transform: rotateX(0); } }
+    #timer-display .flap-colon { display: flex; flex-direction: column; gap: 11px; padding: 0 2px; }
+    #timer-display .flap-colon i {
+      width: 5px; height: 5px; border-radius: 50%; background: #cfcabd;
+      opacity: .30; transition: opacity .15s ease;
+    }
+    #timer-display.running .flap-colon i { opacity: .5; }
+    #timer-display .flap-colon.tick i { opacity: .9; box-shadow: 0 0 8px rgba(244,238,226,.4); }
+    @media (max-width: 560px) {
+      #timer-display .flap { width: 34px; height: 48px; font-size: 33px; line-height: 48px; border-radius: 7px; }
+      #timer-display .flap-colon { gap: 8px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #timer-display .flap.flipping .flap-fold.flap-top,
+      #timer-display .flap.flipping .flap-fold.flap-bottom { animation: none; }
+    }
+  </style>
 
   </style>
   <script>
@@ -9992,23 +10049,52 @@
       function elapsedMs() { var e = state.accMs || 0; if (state.running && state.startedAt) e += Date.now() - state.startedAt; return e; }
       function fmtClock(ms) { var t = Math.floor(ms / 1000), h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60; function p(n) { return String(n).padStart(2, "0"); } return p(h) + ":" + p(m) + ":" + p(s); }
       function renderTimerPlate(el, str) {
-        el.classList.add("plated");
-        if (el.getAttribute("data-plated") !== "1") {
-          el.innerHTML = ""; el._cells = [];
-          str.split(":").forEach(function (g, gi) {
-            if (gi > 0) { var c = document.createElement("span"); c.className = "tl-colon"; c.textContent = ":"; el.appendChild(c); }
-            var plate = document.createElement("div"); plate.className = "tl-plate";
-            for (var i = 0; i < g.length; i++) {
-              var w = document.createElement("div"); w.className = "tl-win";
-              var cell = document.createElement("div"); cell.className = "tl-cell"; cell.textContent = g[i];
-              w.appendChild(cell); plate.appendChild(w); el._cells.push(cell);
+        var digits = str.replace(/:/g, "");
+        if (el.getAttribute("data-flip") !== "1") {
+          el.classList.remove("plated");
+          el.removeAttribute("data-plated");
+          el.classList.add("flip-clock");
+          el.innerHTML = ""; el._flaps = []; el._colons = [];
+          var groups = [2, 2, 2], di = 0;
+          groups.forEach(function (count, gi) {
+            for (var i = 0; i < count; i++) {
+              var f = document.createElement("div");
+              f.className = "flap";
+              var v = digits[di] || "0";
+              f.innerHTML =
+                '<div class="flap-piece flap-top"><span>' + v + '</span></div>' +
+                '<div class="flap-piece flap-bottom"><span>' + v + '</span></div>' +
+                '<div class="flap-piece flap-fold flap-top"><span>' + v + '</span></div>' +
+                '<div class="flap-piece flap-fold flap-bottom"><span>' + v + '</span></div>';
+              f.dataset.val = v;
+              el.appendChild(f); el._flaps.push(f); di++;
             }
-            el.appendChild(plate);
+            if (gi < groups.length - 1) {
+              var c = document.createElement("div");
+              c.className = "flap-colon"; c.innerHTML = "<i></i><i></i>";
+              el.appendChild(c); el._colons.push(c);
+            }
           });
-          el.setAttribute("data-plated", "1");
-        } else {
-          var d = str.replace(/:/g, "");
-          for (var k = 0; k < el._cells.length; k++) { if (el._cells[k].textContent !== d[k]) el._cells[k].textContent = d[k]; }
+          el.setAttribute("data-flip", "1");
+          return;
+        }
+        for (var j = 0; j < el._flaps.length; j++) {
+          var flap = el._flaps[j], nv = digits[j] || "0", cur = flap.dataset.val;
+          if (cur === nv) continue;
+          var sTop = flap.querySelector(".flap-top:not(.flap-fold) span");
+          var sBot = flap.querySelector(".flap-bottom:not(.flap-fold) span");
+          var fTop = flap.querySelector(".flap-fold.flap-top span");
+          var fBot = flap.querySelector(".flap-fold.flap-bottom span");
+          fTop.textContent = cur; sTop.textContent = nv; fBot.textContent = nv;
+          flap.classList.remove("flipping"); void flap.offsetWidth; flap.classList.add("flipping");
+          (function (bottomSpan, val, fp) {
+            var done = function () { bottomSpan.textContent = val; fp.dataset.val = val; };
+            fp.querySelector(".flap-fold.flap-bottom").addEventListener("animationend", done, { once: true });
+            setTimeout(done, 620);
+          })(sBot, nv, flap);
+          if (j === el._flaps.length - 1) {
+            el._colons.forEach(function (cc) { cc.classList.add("tick"); setTimeout(function () { cc.classList.remove("tick"); }, 320); });
+          }
         }
       }
       function startTick() { if (!tickInt) tickInt = setInterval(paint, 500); }
