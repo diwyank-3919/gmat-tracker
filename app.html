@@ -10062,6 +10062,13 @@
           el.classList.remove("plated");
           el.removeAttribute("data-plated");
           el.classList.add("flip-clock");
+          el.style.setProperty("display", "flex", "important");
+          el.style.setProperty("flex-direction", "row", "important");
+          el.style.setProperty("flex-wrap", "nowrap", "important");
+          el.style.setProperty("align-items", "center");
+          el.style.setProperty("justify-content", "center");
+          el.style.setProperty("gap", "7px");
+          el.style.setProperty("perspective", "950px");
           el.innerHTML = ""; el._flaps = []; el._colons = [];
           var groups = [2, 2, 2], di = 0;
           groups.forEach(function (count, gi) {
