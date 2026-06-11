@@ -14389,6 +14389,276 @@
   });
 })();
   </script>
+
+  <!-- ════ DEMO MODE + GUIDED TOUR — active only on app.html?demo=1 ════ -->
+<style id="sc-demo-css">
+  html.sc-demo #auth-overlay{display:none!important}
+  html.sc-demo .shell{display:grid!important}
+  @media(max-width:900px){
+    html.sc-demo .shell{display:block!important}
+    html.sc-demo .mob-header{display:flex!important}
+  }
+  #sc-demo-pill{position:fixed;left:212px;bottom:18px;z-index:9990;display:flex;align-items:center;gap:9px;
+    padding:9px 13px;border-radius:100px;background:rgba(13,16,24,0.93);border:1px solid rgba(135,141,255,0.35);
+    box-shadow:0 10px 30px rgba(0,0,0,.45);backdrop-filter:blur(16px);font-family:'Hanken Grotesk',sans-serif}
+  #sc-demo-pill .dp-tag{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9aa0ff}
+  #sc-demo-pill .dp-txt{font-size:11.5px;color:rgba(245,247,250,.65)}
+  #sc-demo-pill button{font-family:inherit;font-size:11px;font-weight:700;border-radius:100px;cursor:pointer;padding:5px 11px;border:none}
+  #sc-demo-pill .dp-tour{background:#878dff;color:#0f1118}
+  #sc-demo-pill .dp-exit{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:rgba(245,247,250,.75)}
+  @media(max-width:900px){#sc-demo-pill{left:14px}}
+  @media(max-width:640px){#sc-demo-pill .dp-txt{display:none}
+    #sc-demo-pill{bottom:calc(88px + env(safe-area-inset-bottom,0px))}}
+  #sc-tour-hl{position:fixed;z-index:99990;border-radius:16px;pointer-events:none;
+    box-shadow:0 0 0 9999px rgba(5,8,16,.72),0 0 0 2px rgba(135,141,255,.85),0 0 34px rgba(135,141,255,.5);
+    transition:all .35s cubic-bezier(.4,0,.2,1)}
+  #sc-tour-tip{position:fixed;z-index:99991;width:300px;max-width:calc(100vw - 28px);
+    background:linear-gradient(155deg,#171c2a,#11151f);border:1px solid rgba(135,141,255,.35);border-radius:16px;
+    padding:16px 17px 15px;box-shadow:0 24px 60px rgba(0,0,0,.6);font-family:'Hanken Grotesk',sans-serif;
+    transition:opacity .25s ease}
+  #sc-tour-tip h4{margin:0 0 6px;font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:#f5f7fa;padding-right:24px}
+  #sc-tour-tip p{margin:0;font-size:12.5px;line-height:1.5;color:rgba(245,247,250,.68)}
+  .sct-row{display:flex;align-items:center;gap:7px;margin-top:14px}
+  .sct-dots2{display:flex;gap:4px;margin-right:auto}
+  .sct-dots2 i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.16)}
+  .sct-dots2 i.on{background:#878dff}
+  #sc-tour-tip button{font-family:inherit;font-size:11.5px;font-weight:700;border-radius:8px;cursor:pointer;padding:7px 13px;border:none}
+  .sct-go{background:#878dff;color:#0f1118}
+  .sct-bk{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14)!important;color:rgba(245,247,250,.7)}
+  .sct-x{position:absolute;top:9px;right:9px;width:24px;height:24px;padding:0!important;background:rgba(255,255,255,.06);color:rgba(245,247,250,.5);border-radius:7px}
+</style>
+<script id="sc-demo-js">
+(function () {
+  if (!/[?&]demo=1/.test(location.search)) return;
+  document.documentElement.classList.add('sc-demo', 'sc-authed');
+  document.documentElement.classList.remove('sc-guest');
+  var guard = setInterval(function () { document.documentElement.classList.remove('sc-guest'); }, 400);
+  setTimeout(function () { clearInterval(guard); }, 6000);
+
+  /* deterministic PRNG — demo looks identical for every visitor */
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  var rnd = mulberry32(42);
+  function ri(min, max) { return min + Math.floor(rnd() * (max - min + 1)); }
+
+  /* ── seed data ── */
+  var seq = 0, DB = { sessions: [], trash: [], analyses: [] };
+  var NOTES = {
+    Quant: ['Probability sets — slow on weighted avg', 'Number props drill, 85% acc', 'Geometry timing improving'],
+    CR: ['Prethinking before options — getting faster', 'Boldface set, 7/10', 'Assumption Qs — negation test helps'],
+    RC: ['Long passage still 4m+', 'Inference Qs solid today'],
+    DI: ['Graphs set — careless on units', 'MSR practice, 2 misses'],
+    Review: ['Error log review — CR patterns', 'Redid last week\u2019s misses'],
+    'Mock test': ['Full mock, timed conditions']
+  };
+  function note(t) { var a = NOTES[t] || []; return rnd() < 0.45 && a.length ? a[Math.floor(rnd() * a.length)] : null; }
+  function mk(ds, topic, mins, hour) {
+    var p = ds.split('-').map(Number), st = new Date(p[0], p[1] - 1, p[2], hour, ri(0, 40));
+    var row = { id: 'demo-' + (++seq), date: ds, topic: topic, mins: mins, deleted: false,
+      created_at: st.getTime() + mins * 60000, started_at: st.toISOString() };
+    var n = note(topic); if (n) row.notes = n; return row;
+  }
+  (function seed() {
+    var T = ['Quant', 'CR', 'RC', 'DI', 'Review'];
+    for (var i = 46; i >= 0; i--) {
+      var d = addDays(today, -i), ds = dateStr(d), we = isWE(d);
+      if (i > 6 && rnd() < 0.16) continue; /* rest days — never in the last week, keeps a live streak */
+      var want = we ? ri(300, 400) : ri(160, 240), used = 0, hour = we ? 10 : 18, n = we ? 3 : 2;
+      for (var k = 0; k < n && used < want; k++) {
+        var t = (i % 9 === 0 && k === 0 && we) ? 'Mock test' : T[ri(0, T.length - 1)];
+        var m = Math.min(want - used, t === 'Mock test' ? 165 : ri(45, 110)); if (m < 30) m = 30;
+        DB.sessions.push(mk(ds, t, m, hour)); used += m; hour += Math.ceil(m / 60) + 1;
+      }
+    }
+  })();
+  var demoExam = dateStr(addDays(today, 45));
+  var demoMocks = [
+    { id: 1, date: dateStr(addDays(today, -40)), score: 595, quant: 78, verbal: 80, notes: 'Baseline mock' },
+    { id: 2, date: dateStr(addDays(today, -27)), score: 625, quant: 80, verbal: 82, notes: 'Quant pacing better' },
+    { id: 3, date: dateStr(addDays(today, -14)), score: 645, quant: 82, verbal: 83, notes: '' },
+    { id: 4, date: dateStr(addDays(today, -4)), score: 665, quant: 83, verbal: 85, notes: 'CR still costing points' }];
+  var demoAnalysis = {
+    summary: 'Comprehension is strong, but most misses trace back to skipping prethinking and never re-engaging the correct answer after a miss.',
+    totalErrors: 83, accuracy: 64, avgTimePerQ: '2m 05s',
+    errorDNA: [
+      { category: 'Prethinking skipped', section: 'Verbal', count: 34, pct: 41 },
+      { category: 'Trap answer chosen', section: 'Verbal', count: 18, pct: 22 },
+      { category: 'Assumption gaps', section: 'Verbal', count: 13, pct: 16 },
+      { category: 'Timing pressure', section: 'Verbal', count: 10, pct: 12 },
+      { category: 'Misread stimulus', section: 'Verbal', count: 8, pct: 9 }],
+    topWeaknesses: [
+      { title: 'Prethinking collapse', detail: 'Jumping to options before forming an expected answer.', severity: 'high' },
+      { title: 'No post-miss review of the right answer', detail: 'Correct choices are never properly engaged after a miss.', severity: 'high' }],
+    drillPlan: [
+      { title: 'Cover-the-options drill', detail: '10 CR Qs/day: write your predicted answer before looking at choices.', timeEst: '40 min', priority: 'high' },
+      { title: 'Right-answer autopsies', detail: 'For every miss, write why the correct choice is correct in one sentence.', timeEst: '25 min', priority: 'high' },
+      { title: 'Boldface pattern set', detail: '15 boldface Qs across 3 days, untimed first pass.', timeEst: '45 min', priority: 'medium' }],
+    fullAnalysis: '<p><strong>The headline:</strong> this is a process-quality problem, not a knowledge or speed problem. Comprehension of the stimulus is consistently solid.</p><p>The dominant pattern (\u224841% of errors) is <strong>skipped prethinking</strong> \u2014 going straight to the answer choices and letting them frame your thinking. That is exactly where trap answers live.</p><ul><li>Force a written prediction before reading options</li><li>After any miss, engage the <strong>correct</strong> answer, not just your wrong one</li><li>Keep timing drills out of the loop until accuracy stabilises</li></ul>',
+    motivationalNote: 'Your accuracy ceiling is much higher than your current score \u2014 the fix is a habit, not a rebuild.'
+  };
+  DB.analyses.push({ id: 'demo-an-1', label: 'CR error log — sample', filename: 'cr-errors.xlsx',
+    created_at: new Date(today.getTime() - 3 * 86400000).toISOString(), sheldon_analysis: demoAnalysis });
+
+  /* ── sandboxed localStorage: demo keys live in memory, real keys untouched ── */
+  var DLS = { gmat_exam_date: demoExam, gmat_target_score: '735',
+    gmat_mock_scores: JSON.stringify(demoMocks), perfos_timer: '' };
+  var _g = localStorage.getItem.bind(localStorage), _s = localStorage.setItem.bind(localStorage);
+  localStorage.getItem = function (k) { return (k in DLS) ? DLS[k] : _g(k); };
+  localStorage.setItem = function (k, v) { if (k in DLS) { DLS[k] = String(v); return; } _s(k, v); };
+
+  /* ── fake Supabase: chainable builder over the in-memory DB ── */
+  function table(name) {
+    var op = 'select', payload = null, eqs = [], single = false;
+    function run() {
+      if (name === 'sessions') {
+        if (op === 'select') {
+          var del = eqs.some(function (f) { return f[0] === 'deleted' && f[1] === true; });
+          var src = del ? DB.trash : DB.sessions;
+          return { data: src.slice().sort(function (a, b) { return b.date.localeCompare(a.date) || ((b.created_at || 0) - (a.created_at || 0)); }), error: null };
+        }
+        if (op === 'insert') {
+          var rows = Array.isArray(payload) ? payload : [payload];
+          rows.forEach(function (r) { DB.sessions.push(Object.assign({ id: 'demo-' + (++seq), deleted: false }, r)); });
+          return { data: rows, error: null };
+        }
+        if (op === 'update') {
+          var id = (eqs.find(function (f) { return f[0] === 'id'; }) || [])[1];
+          var i = DB.sessions.findIndex(function (s) { return String(s.id) === String(id); });
+          var j = DB.trash.findIndex(function (s) { return String(s.id) === String(id); });
+          if (payload && payload.deleted === true && i > -1) { DB.trash.push(Object.assign(DB.sessions[i], { deleted: true })); DB.sessions.splice(i, 1); }
+          else if (payload && payload.deleted === false && j > -1) { DB.sessions.push(Object.assign(DB.trash[j], { deleted: false })); DB.trash.splice(j, 1); }
+          else if (i > -1) Object.assign(DB.sessions[i], payload);
+          else if (j > -1) Object.assign(DB.trash[j], payload);
+          return { data: null, error: null };
+        }
+        if (op === 'delete') {
+          var id2 = (eqs.find(function (f) { return f[0] === 'id'; }) || [])[1];
+          DB.trash = DB.trash.filter(function (s) { return String(s.id) !== String(id2); });
+          DB.sessions = DB.sessions.filter(function (s) { return String(s.id) !== String(id2); });
+          return { data: null, error: null };
+        }
+      }
+      if (name === 'user_settings') {
+        if (op === 'select') return { data: single ? { exam_date: DLS.gmat_exam_date, target_score: 735 } : [{ exam_date: DLS.gmat_exam_date, target_score: 735 }], error: null };
+        return { data: null, error: null };
+      }
+      if (name === 'error_analyses') {
+        if (op === 'select') return { data: DB.analyses.slice(), error: null };
+        if (op === 'insert') { DB.analyses.unshift(Object.assign({ id: 'demo-an-' + (++seq), created_at: new Date().toISOString() }, payload)); return { data: null, error: null }; }
+        return { data: null, error: null };
+      }
+      return { data: [], error: null };
+    }
+    var b = {
+      select: function () { op = 'select'; return b; },
+      insert: function (p) { op = 'insert'; payload = p; return b; },
+      update: function (p) { op = 'update'; payload = p; return b; },
+      upsert: function () { op = 'upsert'; return b; },
+      delete: function () { op = 'delete'; return b; },
+      eq: function (k, v) { eqs.push([k, v]); return b; },
+      order: function () { return b; }, limit: function () { return b; },
+      maybeSingle: function () { single = true; return b; },
+      then: function (res, rej) { return Promise.resolve().then(run).then(res, rej); },
+      catch: function (fn) { return b.then(null, fn); }
+    };
+    return b;
+  }
+  supa.from = function (n) { return table(n); };
+  var demoUser = { id: 'demo-user', email: 'demo@scoreconsole.com', user_metadata: { full_name: 'Demo Explorer' } };
+  supa.auth.getUser = function () { return Promise.resolve({ data: { user: demoUser } }); };
+  supa.functions = { invoke: function (name, opts) {
+    return new Promise(function (res) { setTimeout(function () {
+      if (name === 'ai-insights') return res({ data: { insights: [
+        { type: 'positive', icon: '📈', text: 'Mock trend is up +70 in 5 weeks', sub: '595 → 665 — trajectory toward 735 is realistic' },
+        { type: 'warning', icon: '🧠', text: 'CR is your highest-leverage fix', sub: 'Prethinking drills would convert the most points fastest' },
+        { type: 'positive', icon: '🔥', text: '7-day streak and counting', sub: 'Consistency is the engine — protect it' }] } });
+      var msg = ((opts && opts.body && opts.body.message) || '').toLowerCase(), reply;
+      if (opts && opts.body && opts.body.jsonMode) reply = JSON.stringify(demoAnalysis);
+      else if (msg.indexOf('weak') > -1) reply = "Based on your data, **CR** is the clear leverage point. Comprehension is fine — the misses come from skipping prethinking. For the next 10 CR questions, **write a predicted answer before reading the options**.\n\n- Accuracy first, timing later\n- Autopsy every miss: why is the *right* answer right?";
+      else if (msg.indexOf('track') > -1 || msg.indexOf('plan') > -1) reply = "You're trending well — mocks went **595 → 665** in five weeks with 45 days to go. To hit **735**:\n\n- Mon–Wed: CR prethinking drills (40m) + Quant sets\n- Thu: RC long-passage timing\n- Sat: full mock · Sun: deep error review\n\nKeep the weekday 3h target and this is very much in range.";
+      else reply = "This is a **demo** of Sheldon, your AI coach. In the full app I read your live dashboard — hours, streak, mocks, topic split — and answer with specifics. Try asking *\"What's my weakest topic?\"* or *\"Am I on track?\"*";
+      res({ data: { reply: reply } });
+    }, 900); });
+  } };
+
+  /* mock scores were read from real localStorage at parse time — swap in the demo set */
+  mockScores = JSON.parse(DLS.gmat_mock_scores); window.mockScores = mockScores;
+
+  /* status chip + identity */
+  window.setStatus = function () { var el = document.getElementById('sync-status'); if (el) { el.innerHTML = '<i class="ti ti-flask" style="font-size:12px"></i> Demo'; el.style.color = 'var(--accent-bright)'; } };
+  window.setStatus();
+  var _sv = window.switchView;
+  window.switchView = function (v) { _sv.apply(this, arguments); if (v === 'dashboard') { var t = document.querySelector('.topbar-title'); if (t) t.textContent = 'Demo Dashboard'; } };
+  var tt = document.querySelector('.topbar-title'); if (tt) tt.textContent = 'Demo Dashboard';
+  var ft = document.querySelector('.footer strong'); if (ft) ft.textContent = 'Demo Explorer';
+  setTimeout(function () {
+    var b = document.getElementById('pf-btn-txt'); if (b) b.textContent = 'DE';
+    var n = document.getElementById('pf-name'); if (n) n.textContent = 'Demo Explorer';
+    var e = document.getElementById('pf-email'); if (e) e.textContent = 'demo@scoreconsole.com';
+  }, 900);
+  window.signOut = function () { location.href = 'index.html'; };
+
+  /* ── boot the app on demo data ── */
+  loadSessions();
+  loadExamSettings();
+
+  /* ── demo pill ── */
+  var pill = document.createElement('div'); pill.id = 'sc-demo-pill';
+  pill.innerHTML = '<span class="dp-tag">Demo</span><span class="dp-txt">Sample data · nothing is saved</span>'
+    + '<button class="dp-tour" onclick="scTourStart()">Take the tour</button>'
+    + '<button class="dp-exit" onclick="location.href=\'app.html\'">Sign in</button>';
+  document.body.appendChild(pill);
+
+  /* ── guided tour ── */
+  var STEPS = [
+    { sel: '#exam-command', t: 'Exam Command Center', b: 'Your countdown, target score, latest mock and the gap to close — the whole mission on one line. Set the exam date and everything recalibrates.' },
+    { sel: '.kpi-row', t: 'Daily & weekly pulse', b: 'Today, this week, this month, all-time — each with trends and targets. Green means the day\u2019s goal was hit (3h weekdays, 6h weekends).' },
+    { sel: '.ring-suite', t: 'Readiness rings', b: 'Readiness, Weekly Pace, Focus quality and a Burnout meter — each with a verdict and a suggested next action.' },
+    { sel: '.intel-panel', t: 'Smart Insights', b: 'Pattern detection on your study data — pace vs last week, topic balance, score trajectory. \u201cAsk Sheldon\u201d upgrades these with AI.' },
+    { sel: '.main-grid > .card:first-child', t: 'Log a session', b: 'Run the live timer (it survives page reloads) or log manually with quick-pick durations. Notes attach to every session.' },
+    { sel: '#nav-mock', mob: '.mob-burger', t: 'Mock scores & more', b: 'Track practice-test scores against your target, then explore Analytics, the full Calendar, and the AI-powered Error Log.' },
+    { sel: '#sheldonFab', t: 'Meet Sheldon', b: 'Your AI coach. He reads this dashboard — hours, streak, mocks, weak topics — and answers with specifics. Try \u201cAm I on track?\u201d' }
+  ];
+  var ti = -1, hl = null, tip = null;
+  function ensure() {
+    if (!hl) { hl = document.createElement('div'); hl.id = 'sc-tour-hl'; document.body.appendChild(hl); }
+    if (!tip) { tip = document.createElement('div'); tip.id = 'sc-tour-tip'; document.body.appendChild(tip); }
+  }
+  function place(target) {
+    var r = target.getBoundingClientRect(), pad = 8;
+    hl.style.left = (r.left - pad) + 'px'; hl.style.top = (r.top - pad) + 'px';
+    hl.style.width = (r.width + pad * 2) + 'px'; hl.style.height = (r.height + pad * 2) + 'px';
+    var tw = tip.offsetWidth || 300, th = tip.offsetHeight || 160;
+    var top = r.bottom + 14, left = r.left + r.width / 2 - tw / 2;
+    if (top + th > window.innerHeight - 12) top = Math.max(12, r.top - th - 14);
+    left = Math.max(12, Math.min(left, window.innerWidth - tw - 12));
+    tip.style.left = left + 'px'; tip.style.top = top + 'px'; tip.style.opacity = 1;
+  }
+  function show(i) {
+    var s = STEPS[i], sel = (window.innerWidth <= 900 && s.mob) ? s.mob : s.sel;
+    var target = document.querySelector(sel);
+    if (!target) { move(i < ti ? -1 : 1); return; }
+    ensure(); ti = i;
+    var dots = ''; for (var k = 0; k < STEPS.length; k++) dots += '<i class="' + (k === i ? 'on' : '') + '"></i>';
+    tip.style.opacity = 0;
+    tip.innerHTML = '<button class="sct-x" onclick="scTourEnd()"><i class="ti ti-x"></i></button>'
+      + '<h4>' + s.t + '</h4><p>' + s.b + '</p>'
+      + '<div class="sct-row"><span class="sct-dots2">' + dots + '</span>'
+      + (i > 0 ? '<button class="sct-bk" onclick="scTourMove(-1)">Back</button>' : '')
+      + '<button class="sct-go" onclick="scTourMove(1)">' + (i === STEPS.length - 1 ? 'Finish' : 'Next') + '</button></div>';
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(function () { place(target); }, 420);
+  }
+  function move(dir) { var n = ti + dir; if (n < 0) n = 0; if (n >= STEPS.length) { scTourEnd(); return; } show(n); }
+  window.scTourMove = function (d) { move(d); };
+  window.scTourStart = function () { switchView('dashboard'); ti = -1; setTimeout(function () { show(0); }, 250); };
+  window.scTourEnd = function () { if (hl) hl.remove(); if (tip) tip.remove(); hl = tip = null; ti = -1; };
+  window.addEventListener('resize', function () { if (ti > -1 && hl) show(ti); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ti > -1) scTourEnd(); });
+
+  /* auto-start the tour once the dashboard has painted */
+  setTimeout(function () { scTourStart(); }, 1200);
+})();
+</script>
 </body>
 
 </html>
