@@ -6377,8 +6377,9 @@
 
     .sheldon-title {
       flex: 1;
-      line-height: 1.2;
-    }
+      min-width: 0;        /* add this */
+      overflow: hidden;     /* optional, prevents text overflow issues */
+}
 
     .sheldon-title h3 {
       margin: 0;
