@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Endurance — 1915</title>
+<title>The Ship Is Yours</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Cormorant+Garamond:ital@1&display=swap" rel="stylesheet">
@@ -13,7 +13,6 @@
   html,body{height:100%;overflow:hidden;background:var(--ink)}
   body{font-family:'Cormorant Garamond',serif;color:var(--frost);-webkit-user-select:none;user-select:none}
 
-  /* ---- entry ---- */
   #gate{position:fixed;inset:0;z-index:100;background:var(--ink);display:flex;flex-direction:column;
     align-items:center;justify-content:center;gap:30px;transition:opacity 1.8s ease}
   #gate.away{opacity:0;pointer-events:none}
@@ -28,97 +27,53 @@
     cursor:pointer;font-family:'Cormorant Garamond',serif;padding:4px 10px}
   #quietBtn:hover{color:var(--dim)}
 
-  /* ---- film ---- */
   #film{position:fixed;inset:0;opacity:0;transition:opacity 2.6s ease}
   #film.on{opacity:1}
-  #stage{position:fixed;inset:0;perspective:1300px;overflow:hidden}
-  #wrap{position:absolute;inset:-6%;will-change:transform}
+  #stage{position:fixed;inset:0;perspective:1300px}
+  #wrap{position:absolute;inset:0;will-change:transform;transform-style:preserve-3d}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 
-  /* the photographic plates */
-  .plate{position:absolute;inset:0;opacity:0;transition:opacity 2.8s ease}
-  .plate.live{opacity:1}
-  .plate img{
-    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-    filter:grayscale(1) contrast(1.12) brightness(.86);
-    will-change:transform;
-  }
-  .plate.live img{animation:kb 34s ease-in-out infinite alternate}
-  @keyframes kb{from{transform:scale(1.06) translate(0,0)}to{transform:scale(1.17) translate(-1.6%,1.2%)}}
-  .plate:nth-child(2).live img{animation-name:kb2}
-  @keyframes kb2{from{transform:scale(1.08) translate(1%,0)}to{transform:scale(1.18) translate(-.8%,-1.4%)}}
-  .plate:nth-child(3).live img{animation-name:kb3}
-  @keyframes kb3{from{transform:scale(1.07) translate(-1%,.8%)}to{transform:scale(1.16) translate(1.2%,-.6%)}}
-
-  /* cinematic grade: cold navy multiply + faint top light */
-  #grade{position:fixed;inset:0;z-index:5;pointer-events:none;
-    background:
-      linear-gradient(180deg, rgba(10,16,26,.42) 0%, rgba(7,11,18,.18) 40%, rgba(4,6,10,.55) 100%),
-      radial-gradient(110% 80% at 50% 0%, rgba(96,128,170,.16), transparent 55%);
-    mix-blend-mode:multiply}
-  #cool{position:fixed;inset:0;z-index:6;pointer-events:none;background:#16263c;mix-blend-mode:color;opacity:.5}
-  #vig{position:fixed;inset:0;z-index:8;pointer-events:none;
-    background:radial-gradient(125% 100% at 50% 42%, transparent 48%, rgba(0,0,0,.66) 100%)}
-  #grain{position:fixed;inset:-50%;z-index:9;pointer-events:none;opacity:.06;
+  .bar{position:fixed;left:0;right:0;height:5vh;background:#000;z-index:38;pointer-events:none}
+  .bar.top{top:0}.bar.bot{bottom:0}
+  #vig{position:fixed;inset:0;pointer-events:none;z-index:20;
+    background:radial-gradient(125% 100% at 50% 42%, transparent 50%, rgba(0,0,0,.62) 100%)}
+  #grain{position:fixed;inset:-50%;z-index:21;pointer-events:none;opacity:.05;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.7'/%3E%3C/svg%3E");
     animation:gr .9s steps(4) infinite}
   @keyframes gr{0%{transform:translate(0,0)}25%{transform:translate(-2%,1.5%)}50%{transform:translate(1.5%,-2%)}75%{transform:translate(-1%,-1%)}100%{transform:translate(2%,2%)}}
 
-  /* drifting polar mist */
-  .mist{position:fixed;left:-60%;width:220%;height:34vh;z-index:7;pointer-events:none;opacity:.5;
-    background:radial-gradient(60% 100% at 30% 50%, rgba(190,210,235,.10), transparent 70%),
-               radial-gradient(50% 90% at 70% 40%, rgba(190,210,235,.07), transparent 70%)}
-  #mist1{bottom:-6vh;animation:drift1 56s linear infinite}
-  #mist2{bottom:14vh;opacity:.32;animation:drift2 84s linear infinite}
-  @keyframes drift1{from{transform:translateX(-6%)}to{transform:translateX(6%)}}
-  @keyframes drift2{from{transform:translateX(5%)}to{transform:translateX(-5%)}}
-  #mist1,#mist2{animation-direction:alternate;animation-timing-function:ease-in-out}
-
-  /* frost veil canvas (wipe it with the cursor) + motes */
-  #veil{position:fixed;inset:0;z-index:10;pointer-events:none}
-  #motes{position:fixed;inset:0;z-index:11;pointer-events:none}
-
-  /* ---- words: almost none ---- */
-  #foot{position:fixed;z-index:30;left:clamp(24px,5vw,72px);bottom:7.5vh;pointer-events:none}
+  #foot{position:fixed;z-index:30;left:clamp(26px,6vw,96px);bottom:9vh;pointer-events:none}
   #foot>*{opacity:0;transform:translateY(14px);transition:opacity 1.6s ease,transform 1.6s ease}
   #foot.in>*{opacity:1;transform:none}
   #foot.in .ln{transition-delay:.8s}
   #foot.in .cr{transition-delay:1.8s}
   #foot.in .cta{transition-delay:2.6s}
   .ln{font-style:italic;font-size:clamp(17px,2vw,23px);color:var(--frost);text-shadow:0 1px 18px rgba(0,0,0,.8)}
-  .cr{margin-top:10px;font-family:'Anton',sans-serif;font-size:10px;letter-spacing:.42em;color:rgba(221,232,242,.42)}
+  .cr{margin-top:10px;font-family:'Anton',sans-serif;font-size:10px;letter-spacing:.42em;color:rgba(221,232,242,.4)}
   .cta{margin-top:20px;pointer-events:auto}
   #helmBtn{font-family:'Anton',sans-serif;font-size:11px;letter-spacing:.34em;color:var(--frost);
     background:rgba(4,8,14,.3);border:1px solid rgba(221,232,242,.3);padding:12px 20px 10px 25px;cursor:pointer;
     backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);transition:all .35s}
   #helmBtn:hover,#helmBtn:focus-visible{border-color:var(--frost);box-shadow:0 0 22px rgba(190,215,255,.2);outline:none}
 
-  /* plate dots */
-  #plates{position:fixed;z-index:30;right:clamp(20px,4vw,52px);bottom:7.5vh;display:flex;gap:14px;align-items:center}
-  .pdot{width:8px;height:8px;border-radius:50%;border:1px solid rgba(221,232,242,.5);background:transparent;
-    cursor:pointer;padding:0;transition:all .4s}
-  .pdot.on{background:var(--frost);box-shadow:0 0 10px rgba(190,215,255,.5)}
-  #soundBtn{width:38px;height:38px;background:rgba(4,8,14,.3);border:1px solid rgba(221,232,242,.25);cursor:pointer;
-    color:var(--dim);display:flex;align-items:center;justify-content:center;transition:all .3s;margin-left:10px;
+  #soundBtn{position:fixed;z-index:30;right:clamp(20px,4vw,52px);bottom:9vh;width:42px;height:42px;
+    background:rgba(4,8,14,.3);border:1px solid rgba(221,232,242,.22);cursor:pointer;color:var(--dim);
+    display:flex;align-items:center;justify-content:center;transition:all .3s;
     backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
   #soundBtn:hover{color:var(--frost);border-color:rgba(221,232,242,.45)}
-  #soundBtn .eq{display:inline-flex;gap:2.5px;align-items:flex-end;height:11px}
+  #soundBtn .eq{display:inline-flex;gap:2.5px;align-items:flex-end;height:12px}
   #soundBtn .eq i{width:2px;background:currentColor;animation:eq 1.1s ease-in-out infinite}
-  #soundBtn .eq i:nth-child(1){height:5px}
-  #soundBtn .eq i:nth-child(2){height:11px;animation-delay:.2s}
-  #soundBtn .eq i:nth-child(3){height:7px;animation-delay:.45s}
+  #soundBtn .eq i:nth-child(1){height:6px}
+  #soundBtn .eq i:nth-child(2){height:12px;animation-delay:.2s}
+  #soundBtn .eq i:nth-child(3){height:8px;animation-delay:.45s}
   #soundBtn.off .eq i{animation:none;height:2px}
   @keyframes eq{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
 
-  #offline{position:fixed;inset:0;z-index:2;display:none;align-items:center;justify-content:center;
-    font-style:italic;color:var(--dim);font-size:18px;text-align:center;padding:0 30px}
-
   @media (max-width:760px){
-    #foot{bottom:12vh;right:24px}
-    #plates{bottom:5vh;right:50%;transform:translateX(50%)}
+    #foot{bottom:8vh;right:24px}
+    #soundBtn{bottom:auto;top:7vh}
   }
-  @media (prefers-reduced-motion:reduce){
-    #grain,#gate .ring,.plate.live img,#mist1,#mist2{animation:none}
-  }
+  @media (prefers-reduced-motion:reduce){#grain,#gate .ring{animation:none}}
 </style>
 </head>
 <body>
@@ -130,94 +85,38 @@
 </div>
 
 <div id="film">
-  <div id="offline">The plates are missing — place the three Hurley photographs in an <b>&nbsp;img/&nbsp;</b> folder beside this file<br>(endurance-bow.jpg · endurance-night.jpg · endurance-pack.jpg), or check the connection and reload.</div>
-  <div id="stage"><div id="wrap">
-    <!-- Frank Hurley, 1914–1917 expedition plates. Public domain. Served by Wikimedia Commons. -->
-    <div class="plate" data-pos="center 38%">
-      <img alt="Frank Hurley photographing beneath the towering bow of Endurance, 1915"
-        src="img/endurance-bow.jpg"
-        data-alt1="https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Frank_Hurley_photographing_under_the_bows_of_the_%27Endurance%27%2C_1915_(3523860471).jpg/1920px-Frank_Hurley_photographing_under_the_bows_of_the_%27Endurance%27%2C_1915_(3523860471).jpg"
-        data-alt2="https://upload.wikimedia.org/wikipedia/commons/6/67/Frank_Hurley_photographing_under_the_bows_of_the_%27Endurance%27%2C_1915_(3523860471).jpg"
-        data-alt3="https://commons.wikimedia.org/wiki/Special:FilePath/Frank_Hurley_photographing_under_the_bows_of_the_%27Endurance%27%2C_1915_(3523860471).jpg">
-    </div>
-    <div class="plate" data-pos="center 28%">
-      <img alt="Endurance at night, rimed with frost, lit by twenty flashes — The Long, Long Night"
-        src="img/endurance-night.jpg"
-        data-alt1="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Sailing_ship_Endurance_trapped_and_crushed_by_ice_in_the_Antarctic%2C_1915_(exbt-ice-LongNight).jpg/1600px-Sailing_ship_Endurance_trapped_and_crushed_by_ice_in_the_Antarctic%2C_1915_(exbt-ice-LongNight).jpg"
-        data-alt2="https://upload.wikimedia.org/wikipedia/commons/c/c6/Sailing_ship_Endurance_trapped_and_crushed_by_ice_in_the_Antarctic%2C_1915_(exbt-ice-LongNight).jpg"
-        data-alt3="https://commons.wikimedia.org/wiki/Special:FilePath/Sailing_ship_Endurance_trapped_and_crushed_by_ice_in_the_Antarctic%2C_1915_(exbt-ice-LongNight).jpg">
-    </div>
-    <div class="plate" data-pos="center 45%">
-      <img alt="Endurance beset in the pack ice of the Weddell Sea"
-        src="img/endurance-pack.jpg"
-        data-alt1="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Glimpse_of_the_Endurance_Shackleton_Expedition_1914-17_Hurley_a090018.jpg/1280px-Glimpse_of_the_Endurance_Shackleton_Expedition_1914-17_Hurley_a090018.jpg"
-        data-alt2="https://upload.wikimedia.org/wikipedia/commons/b/b9/Glimpse_of_the_Endurance_Shackleton_Expedition_1914-17_Hurley_a090018.jpg"
-        data-alt3="https://commons.wikimedia.org/wiki/Special:FilePath/Glimpse_of_the_Endurance_Shackleton_Expedition_1914-17_Hurley_a090018.jpg">
-    </div>
-  </div></div>
-
-  <div id="grade"></div><div id="cool"></div>
-  <div class="mist" id="mist1"></div><div class="mist" id="mist2"></div>
-  <canvas id="veil"></canvas>
-  <canvas id="motes"></canvas>
-  <div id="vig"></div><div id="grain"></div>
-
+  <div id="stage"><div id="wrap"><canvas id="c"></canvas></div></div>
   <div id="foot">
     <div class="ln">One sailor. One course. All the way home.</div>
-    <div class="cr">FRANK HURLEY &nbsp;·&nbsp; 1915 &nbsp;·&nbsp; THE ENDURANCE</div>
+    <div class="cr">69° SOUTH &nbsp;·&nbsp; THE PACK ICE &nbsp;·&nbsp; NIGHT WATCH</div>
     <div class="cta"><button id="helmBtn">TAKE THE HELM</button></div>
   </div>
-
-  <div id="plates">
-    <button class="pdot on" data-i="0" aria-label="Plate 1"></button>
-    <button class="pdot" data-i="1" aria-label="Plate 2"></button>
-    <button class="pdot" data-i="2" aria-label="Plate 3"></button>
-    <button id="soundBtn" class="off" aria-label="Toggle sound (M)">
-      <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
-    </button>
-  </div>
+  <button id="soundBtn" class="off" aria-label="Toggle sound (M)">
+    <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
+  </button>
+  <div class="bar top"></div><div class="bar bot"></div>
+  <div id="vig"></div><div id="grain"></div>
 </div>
 
 <script>
 (function(){
 "use strict";
 var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var cv = document.getElementById("c"), ctx = cv.getContext("2d");
+var DW = 1600, DH = 1000, dpr = 1, S = 1, OX = 0, OY = 0;
 
-/* ---------- plates ---------- */
-var plates = Array.prototype.slice.call(document.querySelectorAll(".plate"));
-var pdots  = Array.prototype.slice.call(document.querySelectorAll(".pdot"));
-var failed = 0;
-plates.forEach(function(p){
-  var img = p.querySelector("img");
-  img.style.objectPosition = p.getAttribute("data-pos");
-  img.addEventListener("error", function(){
-    var next = img.getAttribute("data-alt1") || img.getAttribute("data-alt2") || img.getAttribute("data-alt3");
-    if (next){
-      if (img.getAttribute("data-alt1")) img.removeAttribute("data-alt1");
-      else if (img.getAttribute("data-alt2")) img.removeAttribute("data-alt2");
-      else img.removeAttribute("data-alt3");
-      img.src = next; return;
-    }
-    failed++;                                  // local + all remote sources exhausted
-    if (failed >= plates.length) document.getElementById("offline").style.display = "flex";
-  });
-});
-var cur = 0, autoTimer = null;
-function show(i){
-  cur = (i + plates.length) % plates.length;
-  plates.forEach(function(p, k){ p.classList.toggle("live", k === cur); });
-  pdots.forEach(function(d, k){ d.classList.toggle("on", k === cur); });
-}
-function auto(){
-  clearTimeout(autoTimer);
-  autoTimer = setTimeout(function(){ show(cur + 1); gust(.5); auto(); }, 21000);
-}
-pdots.forEach(function(d){
-  d.addEventListener("click", function(){ show(+d.getAttribute("data-i")); gust(.6); creak(.8); auto(); });
-});
-show(0);
+function mk(w, h){ var c = document.createElement("canvas"); c.width = w; c.height = h; return c; }
 
-/* ---------- wind ---------- */
+function resize(){
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
+  S  = Math.max(innerWidth / DW, innerHeight / DH);
+  OX = (innerWidth - DW * S) / 2;
+  OY = innerHeight - DH * S;
+}
+resize(); addEventListener("resize", resize);
+
+/* ============ wind ============ */
 var wind = { val:.45, gust:0, gustV:0, bias:0, base:.45 };
 function gust(s){ wind.gustV = Math.max(wind.gustV, s); }
 (function loopG(){ gust(.4 + Math.random()*.8); setTimeout(loopG, 9000 + Math.random()*9000); })();
@@ -229,119 +128,620 @@ function stepWind(dt){
   if (REDUCED) wind.val = .12;
 }
 
-/* ---------- parallax camera ---------- */
-var wrap = document.getElementById("wrap");
-var nmx = 0, nmy = 0, tmx = 0, tmy = 0, camZoom = REDUCED ? 1 : 1.06;
-var PX = -9999, PY = -9999;
-function setPointer(x, y){
-  PX = x; PY = y;
-  tmx = (x / innerWidth) * 2 - 1; tmy = (y / innerHeight) * 2 - 1;
+/* ============ pointer ============ */
+var px = -9999, py = -9999, nmx = 0, nmy = 0, tmx = 0, tmy = 0;
+function setPointer(cx, cy){
+  px = (cx - OX) / S; py = (cy - OY) / S;
+  tmx = (cx / innerWidth) * 2 - 1; tmy = (cy / innerHeight) * 2 - 1;
   wind.bias = tmx * .2;
 }
 addEventListener("mousemove", function(e){ setPointer(e.clientX, e.clientY); });
 addEventListener("touchmove", function(e){ if(e.touches[0]) setPointer(e.touches[0].clientX, e.touches[0].clientY); }, {passive:true});
 
-/* ---------- frost veil: breathe on the glass, wipe to see her ---------- */
-var veil = document.getElementById("veil"), vctx = veil.getContext("2d");
-var fog = document.createElement("canvas"), fctx = fog.getContext("2d");
-function buildFog(){
-  veil.width = innerWidth; veil.height = innerHeight;
-  fog.width = innerWidth; fog.height = innerHeight;
-  fctx.clearRect(0, 0, fog.width, fog.height);
-  var n = Math.round((innerWidth * innerHeight) / 16000);
-  for (var i = 0; i < n; i++){
-    var x = Math.random() * fog.width, y = Math.random() * fog.height;
-    var r = 40 + Math.random() * 130;
-    var g = fctx.createRadialGradient(x, y, 0, x, y, r);
-    var a = .05 + Math.random() * .085;
-    g.addColorStop(0, "rgba(196,214,236," + a.toFixed(3) + ")");
-    g.addColorStop(1, "rgba(196,214,236,0)");
-    fctx.fillStyle = g;
-    fctx.beginPath(); fctx.arc(x, y, r, 0, 6.2832); fctx.fill();
+/* ============ geometry anchors (shared by paint + threads) ============ */
+var FORE_HEAD = [664, 80], MAIN_HEAD = [876, -70], MIZZ_HEAD = [1066, 210];
+var SPRIT_TIP = [350, 690], JIB_TIP = [228, 748], STEM_HEAD = [596, 545];
+var FY1 = [[505,205],[790,168]], FY2 = [[470,300],[820,258]], FY3 = [[430,402],[855,352]];
+var MY1 = [[740,150],[1050,100]], MY2 = [[752,52],[1035,8]];
+function railY(x){
+  if (x <= 900) return 545 + (x - 596) * (602 - 545) / (900 - 596);
+  return 602 + (x - 900) * (632 - 602) / (1135 - 900);
+}
+
+/* ============ threads (stripe physics) ============ */
+var ropes = [], hangs = [], dots = [];
+function rope(a, b, sag, amp, w, alpha, dotAtB){
+  var r = { a:a, b:b, sag:sag, amp:amp, w:w, al:alpha,
+            ph:Math.random()*6.28, sp:.7 + Math.random()*1.1,
+            ox:0, oy:0, vx:0, vy:0, en:0, cx:0, cy:0 };
+  ropes.push(r);
+  if (dotAtB) dot(b[0], b[1], 2.4 + Math.random()*1.1);
+  return r;
+}
+function hang(x, y, len, amp, w, alpha){
+  hangs.push({ x:x, y:y, len:len, amp:amp, w:w, al:alpha,
+               ph:Math.random()*6.28, sp:1 + Math.random()*1.2 });
+}
+function dot(x, y, r){ dots.push({ x:x, y:y, r:r, ph:Math.random()*6.28, en:0 }); }
+
+rope(FORE_HEAD, SPRIT_TIP, 14, 3.5, 1.5, .9, true);
+rope(FORE_HEAD, JIB_TIP,   16, 4,   1.2, .75, true);
+rope([660,160], [420,660], 14, 3.5, 1.1, .65, false);
+rope(MAIN_HEAD, [706,570], 18, 3,   1.3, .75, true);
+rope(MAIN_HEAD, FORE_HEAD, 10, 2.5, 1.1, .7, false);
+rope(MIZZ_HEAD, MAIN_HEAD.slice(), 10, 2.5, 1, .5, false);
+rope([470,628], [632,840], 8, 2.5, .9, .5, false);
+rope(JIB_TIP,  [470,690], 6, 2.5, .9, .55, false);
+rope([470,690],[632,845], 6, 2,   .9, .45, false);
+
+var foreFan = [];
+[636, 678, 720, 762, 804, 846].forEach(function(x){
+  foreFan.push(rope(FORE_HEAD, [x, railY(x)], 8, 2.6, 1.05, .8, true));
+});
+rope(FORE_HEAD, [560, 640], 6, 2, .85, .35, true);
+rope(FORE_HEAD, [578, 608], 6, 2, .85, .3, true);
+
+var mainFan = [];
+[884, 920, 956, 992, 1028, 1064].forEach(function(x){
+  mainFan.push(rope(MAIN_HEAD, [x, railY(x)], 10, 2.8, 1.05, .72, true));
+});
+
+[1086, 1110, 1132, 1152].forEach(function(x){
+  rope(MIZZ_HEAD, [x, railY(Math.min(x,1135))], 7, 2.4, .95, .45, true);
+});
+rope(MIZZ_HEAD, [1158, 648], 8, 2.6, .95, .42, true);
+
+rope(FORE_HEAD, FY1[0], 6, 2.6, .95, .65, true);  rope(FORE_HEAD, FY1[1], 6, 2.6, .95, .65, true);
+rope(FORE_HEAD, FY2[0], 8, 3,   .95, .6, true);   rope(FORE_HEAD, FY2[1], 8, 3, .95, .6, true);
+rope([660,170], FY3[0], 10, 3.2, .95, .55, true); rope([660,170], FY3[1], 10, 3.2, .95, .55, true);
+rope(MAIN_HEAD, MY1[0], 8, 2.8, .95, .6, true);   rope(MAIN_HEAD, MY1[1], 8, 2.8, .95, .6, true);
+
+rope(FY1[1], [880,330], 26, 9,  .9, .5, false);
+rope(FY2[1], [885,430], 30, 10, .9, .45, false);
+rope(FY3[1], [892,510], 32, 11, .9, .45, false);
+rope(MY1[1], [1070,330], 22, 8, .9, .42, false);
+rope(FY3[0], [596,560], 26, 10, .85, .4, false);
+rope([1150,205], [1158,640], 12, 5, .9, .42, true);
+rope([1240,545], [1160,640], 8,  4, .9, .38, true);
+
+rope(FY1[0], [660,190], 10, 3, .75, .45, false);  rope([660,190], FY1[1], 10, 3, .75, .45, false);
+rope(FY2[0], [665,282], 11, 3.4, .75, .4, false); rope([665,282], FY2[1], 11, 3.4, .75, .4, false);
+
+hang([790,168], 150, 15, .9, .62);
+hang([820,258], 125, 13, .85, .55);
+hang([1050,100], 165, 16, .9, .55);
+hang([668,95],  185, 17, .9, .62);
+hang([505,205], 120, 13, .85, .5);
+hang([1066,215], 110, 12, .85, .45);
+
+dot(FORE_HEAD[0], FORE_HEAD[1], 3.6);
+dot(MIZZ_HEAD[0], MIZZ_HEAD[1], 3);
+dot(SPRIT_TIP[0], SPRIT_TIP[1], 2.8);
+dot(JIB_TIP[0], JIB_TIP[1], 2.5);
+
+var exciteCool = 0;
+function distToSeg(x, y, ax, ay, bx, by){
+  var dx = bx-ax, dy = by-ay, L2 = dx*dx + dy*dy;
+  var t = L2 ? Math.max(0, Math.min(1, ((x-ax)*dx + (y-ay)*dy) / L2)) : 0;
+  return Math.hypot(x-(ax+dx*t), y-(ay+dy*t));
+}
+function stepRopes(t, dt){
+  var W = wind.val, R = 170, K = 16, DAMP = 5.5;
+  for (var i = 0; i < ropes.length; i++){
+    var r = ropes[i];
+    var mx = (r.a[0] + r.b[0]) / 2, my = (r.a[1] + r.b[1]) / 2 + r.sag;
+    var dxp = mx + r.ox - px, dyp = my + r.oy - py;
+    var d = Math.hypot(dxp, dyp);
+    if (d < R && d > .001){
+      var f = (1 - d/R) * 1500;
+      r.vx += (dxp/d) * f * dt; r.vy += (dyp/d) * f * dt;
+    }
+    if (px > -999 && distToSeg(px, py, r.a[0], r.a[1], r.b[0], r.b[1]) < 22){
+      r.en = Math.min(2.2, r.en + dt * 7);
+      if (exciteCool <= 0){ creak(.35); exciteCool = 2.8; }
+    }
+    r.en *= Math.pow(.5, dt);
+    r.vx += (-K * r.ox) * dt; r.vy += (-K * r.oy) * dt;
+    r.vx *= Math.pow(.5, dt * DAMP); r.vy *= Math.pow(.5, dt * DAMP);
+    r.ox += r.vx * dt; r.oy += r.vy * dt;
+    var wob = Math.sin(t*r.sp + r.ph) * r.amp * W * (1 + r.en)
+            + Math.sin(t*r.sp*2.3 + r.ph*1.7) * r.amp * .3 * W;
+    r.cx = mx + r.ox + W * r.sag * .5 + wob * .45;
+    r.cy = my + r.oy + wob;
   }
-  /* heavier at the edges, clear toward the ship */
-  var edge = fctx.createRadialGradient(fog.width/2, fog.height*.45, Math.min(fog.width,fog.height)*.22,
-                                       fog.width/2, fog.height*.45, Math.max(fog.width,fog.height)*.75);
-  edge.addColorStop(0, "rgba(196,214,236,0)");
-  edge.addColorStop(1, "rgba(196,214,236,.16)");
-  fctx.fillStyle = edge; fctx.fillRect(0, 0, fog.width, fog.height);
-  vctx.clearRect(0, 0, veil.width, veil.height);
-  vctx.drawImage(fog, 0, 0);
+  exciteCool -= dt;
+  for (var j = 0; j < dots.length; j++){
+    var dd = dots[j];
+    var dist = Math.hypot(dd.x - px, dd.y - py);
+    var tgt = dist < 120 ? (1 - dist/120) : 0;
+    dd.en += (tgt - dd.en) * Math.min(1, dt * 6);
+  }
 }
-buildFog();
+function quadAt(r, f){
+  var u = 1 - f;
+  return [ u*u*r.a[0] + 2*u*f*r.cx + f*f*r.b[0],
+           u*u*r.a[1] + 2*u*f*r.cy + f*f*r.b[1] ];
+}
 
-function stepVeil(dt){
-  /* slow regrowth of the frost */
-  vctx.globalCompositeOperation = "source-over";
-  vctx.globalAlpha = Math.min(1, dt * .07);
-  vctx.drawImage(fog, 0, 0);
-  vctx.globalAlpha = 1;
-  /* the wipe */
-  if (PX > -999 && !REDUCED){
-    vctx.globalCompositeOperation = "destination-out";
-    var g = vctx.createRadialGradient(PX, PY, 0, PX, PY, 110);
-    g.addColorStop(0, "rgba(0,0,0,.5)");
-    g.addColorStop(1, "rgba(0,0,0,0)");
-    vctx.fillStyle = g;
-    vctx.beginPath(); vctx.arc(PX, PY, 110, 0, 6.2832); vctx.fill();
-    vctx.globalCompositeOperation = "source-over";
+/* ============ PAINTED LAYERS (built once — this is where the realism lives) ============ */
+var skyL = mk(DW, DH), iceL = mk(DW, DH), shipL = mk(DW, DH);
+var fogTile = mk(512, 256);
+
+function buildFogTile(){
+  var g = fogTile.getContext("2d");
+  g.clearRect(0,0,512,256);
+  for (var i = 0; i < 46; i++){
+    var x = Math.random()*512, y = Math.random()*256, r = 30 + Math.random()*70;
+    var gr = g.createRadialGradient(x, y, 0, x, y, r);
+    var a = .05 + Math.random()*.07;
+    gr.addColorStop(0, "rgba(168,190,218," + a.toFixed(3) + ")");
+    gr.addColorStop(1, "rgba(168,190,218,0)");
+    g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.fill();
   }
 }
 
-/* ---------- frost motes ---------- */
-var mc = document.getElementById("motes"), mctx = mc.getContext("2d");
-var motes = [];
-function fitMotes(){
-  mc.width = innerWidth; mc.height = innerHeight;
-  var n = REDUCED ? 0 : Math.round(innerWidth / 26);
-  motes = [];
-  for (var i = 0; i < n; i++) motes.push({
-    x: Math.random()*innerWidth, y: Math.random()*innerHeight,
-    z: .3 + Math.random()*.7, ph: Math.random()*6.28 });
+function buildSky(){
+  var g = skyL.getContext("2d");
+  /* deep night fading to a luminous fog bank at the horizon — the ship will be a silhouette against this */
+  var grd = g.createLinearGradient(0, 0, 0, DH);
+  grd.addColorStop(0,   "#04060a");
+  grd.addColorStop(.45, "#080d15");
+  grd.addColorStop(.72, "#111a26");
+  grd.addColorStop(.86, "#1c2a3c");
+  grd.addColorStop(1,   "#233248");
+  g.fillStyle = grd; g.fillRect(0, 0, DW, DH);
+  /* broad horizon glow behind the ship */
+  var hg = g.createRadialGradient(820, 880, 60, 820, 880, 900);
+  hg.addColorStop(0, "rgba(150,180,215,.20)");
+  hg.addColorStop(.5, "rgba(120,150,190,.08)");
+  hg.addColorStop(1, "rgba(120,150,190,0)");
+  g.fillStyle = hg; g.fillRect(0, 0, DW, DH);
+  /* moon upper-right with wide halo */
+  var mh = g.createRadialGradient(1300, 150, 0, 1300, 150, 420);
+  mh.addColorStop(0, "rgba(206,222,242,.22)");
+  mh.addColorStop(.35, "rgba(206,222,242,.07)");
+  mh.addColorStop(1, "rgba(206,222,242,0)");
+  g.fillStyle = mh; g.fillRect(800, -300, 1000, 950);
+  var md = g.createRadialGradient(1290, 140, 4, 1300, 150, 34);
+  md.addColorStop(0, "#f1f6fb"); md.addColorStop(.7, "#c2cfdd"); md.addColorStop(1, "#93a2b3");
+  g.beginPath(); g.arc(1300, 150, 32, 0, 6.2832); g.fillStyle = md; g.fill();
+  /* a few thin cloud streaks across the moon */
+  g.fillStyle = "rgba(10,16,26,.4)";
+  g.beginPath(); g.ellipse(1290, 144, 90, 7, -.06, 0, 6.2832); g.fill();
+  g.fillStyle = "rgba(10,16,26,.3)";
+  g.beginPath(); g.ellipse(1330, 168, 110, 6, .04, 0, 6.2832); g.fill();
 }
-fitMotes();
-addEventListener("resize", function(){ buildFog(); fitMotes(); });
 
-function stepMotes(t, dt){
-  mctx.clearRect(0, 0, innerWidth, innerHeight);
-  mctx.fillStyle = "rgba(226,237,248,1)";
+function buildIce(){
+  var g = iceL.getContext("2d");
+  var grd = g.createLinearGradient(0, 820, 0, DH);
+  grd.addColorStop(0, "#1a2535"); grd.addColorStop(.4, "#0e1622"); grd.addColorStop(1, "#060a11");
+  g.fillStyle = grd;
+  g.beginPath(); g.moveTo(-50, 838);
+  var ridge = [[120,826],[300,840],[520,822],[760,842],[980,824],[1200,840],[1420,826],[1700,840]];
+  ridge.forEach(function(p){ g.lineTo(p[0], p[1]); });
+  g.lineTo(DW+50, DH+50); g.lineTo(-50, DH+50); g.closePath(); g.fill();
+  /* moonlight streak running toward the viewer from under the moon */
+  var st = g.createLinearGradient(0, 830, 0, DH);
+  st.addColorStop(0, "rgba(190,212,238,.16)"); st.addColorStop(1, "rgba(190,212,238,0)");
+  g.fillStyle = st;
+  g.beginPath();
+  g.moveTo(1240, 836); g.lineTo(1360, 836); g.lineTo(1520, DH); g.lineTo(1080, DH);
+  g.closePath(); g.fill();
+  /* faint crest light along the ridge line */
+  g.strokeStyle = "rgba(196,216,240,.22)"; g.lineWidth = 1.4;
+  g.beginPath(); g.moveTo(-50, 838);
+  ridge.forEach(function(p){ g.lineTo(p[0], p[1]); });
+  g.stroke();
+  /* pressure ridge slabs — dark wedges, lit crests */
+  function slab(x, y, w, h, tilt){
+    g.save(); g.translate(x, y); g.rotate(tilt);
+    var sg = g.createLinearGradient(0, -h, 0, 4);
+    sg.addColorStop(0, "#28384e"); sg.addColorStop(.25, "#15202e"); sg.addColorStop(1, "#0a101a");
+    g.fillStyle = sg;
+    g.beginPath(); g.moveTo(-w/2, 0); g.lineTo(-w*.18, -h); g.lineTo(w*.22, -h*.75); g.lineTo(w/2, 0);
+    g.closePath(); g.fill();
+    g.strokeStyle = "rgba(206,224,246,.4)"; g.lineWidth = 1.2;
+    g.beginPath(); g.moveTo(-w*.18, -h); g.lineTo(w*.22, -h*.75); g.stroke();
+    g.restore();
+  }
+  slab(300, 880, 120, 34, -.04); slab(520, 905, 160, 26, .05);
+  slab(905, 882, 130, 40, .03);  slab(1120, 906, 170, 30, -.05);
+  slab(180, 930, 140, 24, .06);  slab(700, 935, 200, 22, -.03);
+  /* baked sparkle */
+  for (var i = 0; i < 260; i++){
+    var x = Math.random()*DW, y = 836 + Math.random()*(DH-836);
+    g.globalAlpha = .04 + Math.random()*.12;
+    g.fillStyle = "#cfe0f2";
+    g.fillRect(x, y, 1.2, 1.2);
+  }
+  g.globalAlpha = 1;
+  /* light pool under the hull */
+  var pool = g.createRadialGradient(840, 900, 30, 840, 900, 560);
+  pool.addColorStop(0, "rgba(180,205,238,.09)"); pool.addColorStop(1, "rgba(180,205,238,0)");
+  g.fillStyle = pool;
+  g.beginPath(); g.ellipse(840, 900, 620, 150, 0, 0, 6.2832); g.fill();
+}
+
+function buildShip(){
+  var g = shipL.getContext("2d");
+  var RIM = "rgba(206,224,248,";
+
+  function line(x1,y1,x2,y2,w,c){ g.strokeStyle=c; g.lineWidth=w;
+    g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2,y2); g.stroke(); }
+  /* a spar = dark core + one moonlit edge + faint frost glow. No cartoon outlines. */
+  function spar(x1,y1,x2,y2,w){
+    line(x1,y1,x2,y2,w,"#0c121b");
+    g.save(); g.shadowColor = "rgba(190,214,244,.55)"; g.shadowBlur = 5;
+    line(x1+1.2,y1,x2+1.2,y2, Math.max(1, w*.28), RIM + ".5)");
+    g.restore();
+  }
+  function furlDark(a, b, lumps, seed){
+    g.beginPath(); g.moveTo(a[0], a[1] + 2);
+    for (var i = 1; i <= lumps; i++){
+      var t0 = (i - .5)/lumps, t1 = i/lumps;
+      var mx = a[0] + (b[0]-a[0])*t0, my = a[1] + (b[1]-a[1])*t0 + 12 + ((seed*i*7919)%5);
+      var ex = a[0] + (b[0]-a[0])*t1, ey = a[1] + (b[1]-a[1])*t1 + 2;
+      g.quadraticCurveTo(mx, my, ex, ey);
+    }
+    g.closePath();
+    var gdt = g.createLinearGradient(0, a[1], 0, a[1]+18);
+    gdt.addColorStop(0, "#1d2735"); gdt.addColorStop(1, "#0d1420");
+    g.fillStyle = gdt; g.fill();
+    /* snow resting on top of the furled canvas */
+    g.save(); g.shadowColor = "rgba(200,222,248,.6)"; g.shadowBlur = 4;
+    g.strokeStyle = RIM + ".55)"; g.lineWidth = 1.2;
+    g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.stroke();
+    g.restore();
+  }
+
+  /* ---- masts & yards first (hull covers their feet) ---- */
+  spar(1086, 618, 1066, 205, 6);
+  line(1052, 332, 1082, 328, 2.4, "#0c121b");
+  spar(1070, 250, 1150, 205, 2.4);
+  spar(1078, 560, 1240, 545, 2.6);
+  spar(916, 602, 876, -80, 9);
+  line(862, 182, 902, 178, 2.6, "#0c121b");
+  spar(MY1[0][0], MY1[0][1], MY1[1][0], MY1[1][1], 3);
+  spar(MY2[0][0], MY2[0][1], MY2[1][0], MY2[1][1], 2.6);
+  furlDark(MY1[0], MY1[1], 6, 3);
+  spar(706, 585, 664, 70, 8);
+  line(644, 302, 686, 297, 2.6, "#0c121b");
+  spar(FY1[0][0], FY1[0][1], FY1[1][0], FY1[1][1], 3);
+  spar(FY2[0][0], FY2[0][1], FY2[1][0], FY2[1][1], 3);
+  spar(FY3[0][0], FY3[0][1], FY3[1][0], FY3[1][1], 3.2);
+  furlDark(FY1[0], FY1[1], 5, 1); furlDark(FY2[0], FY2[1], 6, 2); furlDark(FY3[0], FY3[1], 7, 4);
+
+  /* ---- hull: one towering silhouette mass ---- */
+  function hullPath(){
+    g.beginPath();
+    g.moveTo(596, 545);
+    g.quadraticCurveTo(740, 580, 900, 602);
+    g.quadraticCurveTo(1030, 620, 1135, 632);
+    g.lineTo(1160, 645);
+    g.lineTo(1158, 745);
+    g.quadraticCurveTo(1000, 825, 760, 870);
+    g.lineTo(640, 890);
+    g.quadraticCurveTo(610, 720, 596, 545);
+    g.closePath();
+  }
+  hullPath();
+  var hg = g.createLinearGradient(560, 545, 1180, 820);
+  hg.addColorStop(0,  "#131c29");
+  hg.addColorStop(.4, "#0c1320");
+  hg.addColorStop(1,  "#070b13");
+  g.fillStyle = hg; g.fill();
+
+  /* starboard bow facet — catches the horizon glow, gives the bow its 3-D wedge */
+  g.beginPath();
+  g.moveTo(596, 545);
+  g.quadraticCurveTo(548, 640, 606, 860);
+  g.lineTo(640, 890);
+  g.quadraticCurveTo(610, 720, 596, 545);
+  g.closePath();
+  var fg = g.createLinearGradient(548, 560, 640, 860);
+  fg.addColorStop(0, "#243144"); fg.addColorStop(.6, "#16202e"); fg.addColorStop(1, "#0c1320");
+  g.fillStyle = fg; g.fill();
+
+  /* texture inside the hull: planking value bands + speckle, clipped */
+  g.save(); hullPath(); g.clip();
+  for (var b = 0; b < 7; b++){
+    var by = 612 + b*38;
+    g.fillStyle = (b % 2) ? "rgba(255,255,255,.018)" : "rgba(0,0,0,.05)";
+    g.beginPath();
+    g.moveTo(560, by);
+    g.quadraticCurveTo(880, by + 18, 1180, by + 30);
+    g.lineTo(1180, by + 30 + 19);
+    g.quadraticCurveTo(880, by + 18 + 19, 560, by + 19);
+    g.closePath(); g.fill();
+  }
+  for (var sp = 0; sp < 900; sp++){
+    var sx = 560 + Math.random()*620, sy = 545 + Math.random()*345;
+    g.globalAlpha = .02 + Math.random()*.05;
+    g.fillStyle = Math.random() < .5 ? "#000" : "#aebfd4";
+    g.fillRect(sx, sy, 1.3, 1.3);
+  }
+  g.globalAlpha = 1;
+  /* frost mottling clinging to the bow and rail */
+  for (var fm = 0; fm < 26; fm++){
+    var fx = 596 + Math.random()*120 * (Math.random()*Math.random()),
+        fy = 560 + Math.random()*300;
+    var fr = 6 + Math.random()*22;
+    var fgg = g.createRadialGradient(fx, fy, 0, fx, fy, fr);
+    fgg.addColorStop(0, "rgba(196,216,242,.06)");
+    fgg.addColorStop(1, "rgba(196,216,242,0)");
+    g.fillStyle = fgg; g.beginPath(); g.arc(fx, fy, fr, 0, 6.2832); g.fill();
+  }
+  g.restore();
+
+  /* rim light — only where the moon would catch her */
+  g.save();
+  g.shadowColor = "rgba(190,214,244,.7)"; g.shadowBlur = 10;
+  g.strokeStyle = RIM + ".7)"; g.lineWidth = 2;
+  g.beginPath(); g.moveTo(640, 890); g.quadraticCurveTo(610, 720, 596, 545); g.stroke(); /* stem */
+  g.strokeStyle = RIM + ".5)"; g.lineWidth = 1.6;
+  g.beginPath(); g.moveTo(596, 545);
+  g.quadraticCurveTo(740, 580, 900, 602);
+  g.quadraticCurveTo(1030, 620, 1140, 632); g.stroke();                                   /* sheer */
+  g.restore();
+  /* second, dimmer inner rail line for depth */
+  g.strokeStyle = RIM + ".14)"; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(606, 556);
+  g.quadraticCurveTo(744, 590, 900, 611);
+  g.quadraticCurveTo(1028, 628, 1136, 640); g.stroke();
+
+  /* deck furniture as silhouettes with lit tops */
+  function box(x, y, w, h){
+    g.fillStyle = "#0a101a"; g.fillRect(x, y - h, w, h);
+    g.save(); g.shadowColor = "rgba(190,214,244,.5)"; g.shadowBlur = 4;
+    g.strokeStyle = RIM + ".4)"; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(x, y - h); g.lineTo(x + w, y - h); g.stroke();
+    g.restore();
+  }
+  box(760, 600, 70, 18); box(960, 615, 60, 16);
+  /* lifeboat hanging from davits */
+  g.strokeStyle = RIM + ".35)"; g.lineWidth = 1.2;
+  g.beginPath(); g.moveTo(884, 588); g.quadraticCurveTo(896, 572, 906, 588); g.stroke();
+  g.beginPath(); g.moveTo(940, 592); g.quadraticCurveTo(952, 576, 962, 592); g.stroke();
+  g.fillStyle = "#0b1119";
+  g.beginPath(); g.moveTo(880, 596);
+  g.quadraticCurveTo(922, 582, 966, 598);
+  g.quadraticCurveTo(922, 606, 880, 596); g.closePath(); g.fill();
+  g.save(); g.shadowColor = "rgba(190,214,244,.4)"; g.shadowBlur = 3;
+  g.strokeStyle = RIM + ".4)"; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(880, 596); g.quadraticCurveTo(922, 582, 966, 598); g.stroke();
+  g.restore();
+  /* stanchion ticks — barely-there */
+  g.strokeStyle = RIM + ".16)"; g.lineWidth = 1;
+  for (var sx2 = 640; sx2 <= 1120; sx2 += 44){
+    var sy2 = railY(sx2);
+    g.beginPath(); g.moveTo(sx2, sy2); g.lineTo(sx2, sy2 + 12); g.stroke();
+  }
+
+  /* cathead + hanging anchor at the bow */
+  spar(620, 596, 588, 588, 3);
+  g.strokeStyle = RIM + ".5)"; g.lineWidth = 1.1;
+  g.beginPath(); g.moveTo(592, 590); g.lineTo(592, 622); g.stroke();
+  g.strokeStyle = RIM + ".6)"; g.lineWidth = 1.6;
+  g.beginPath(); g.moveTo(592, 622); g.lineTo(592, 654); g.stroke();
+  g.beginPath(); g.moveTo(580, 644); g.quadraticCurveTo(592, 664, 604, 644); g.stroke();
+  g.beginPath(); g.moveTo(585, 628); g.lineTo(599, 628); g.stroke();
+  /* hawse hole */
+  g.fillStyle = "#04070c";
+  g.beginPath(); g.ellipse(646, 608, 6, 4.2, -.2, 0, 6.2832); g.fill();
+
+  /* bowsprit thrusting at the viewer */
+  spar(596, 545, 350, 690, 5);
+  spar(350, 690, 228, 748, 2.2);
+  spar(470, 628, 470, 690, 1.6);
+
+  /* her name, barely caught by the light */
+  g.save();
+  g.translate(700, 590); g.rotate(.1);
+  g.font = "12px Anton, sans-serif";
+  g.fillStyle = RIM + ".3)";
+  g.fillText("E N D U R E", 0, 0);
+  g.restore();
+
+  /* ice rafted against the cutwater */
+  g.fillStyle = "#0f1722";
+  g.beginPath(); g.moveTo(540, 902);
+  [[576,864],[610,882],[648,854],[692,880],[736,858],[788,886],[850,864],[920,892]].forEach(function(p){ g.lineTo(p[0], p[1]); });
+  g.lineTo(980, 912); g.lineTo(540, 912); g.closePath(); g.fill();
+  g.save(); g.shadowColor = "rgba(196,218,244,.5)"; g.shadowBlur = 4;
+  g.strokeStyle = RIM + ".4)"; g.lineWidth = 1.1;
+  g.beginPath(); g.moveTo(540, 902);
+  [[576,864],[610,882],[648,854],[692,880],[736,858],[788,886],[850,864],[920,892]].forEach(function(p){ g.lineTo(p[0], p[1]); });
+  g.stroke();
+  g.restore();
+
+  /* ---- atmosphere does the rest: fade the stern into haze, sink the hull bottom into ice mist ---- */
+  g.globalCompositeOperation = "destination-out";
+  var fade = g.createLinearGradient(1010, 0, 1230, 0);
+  fade.addColorStop(0, "rgba(0,0,0,0)"); fade.addColorStop(1, "rgba(0,0,0,.55)");
+  g.fillStyle = fade; g.fillRect(1010, -100, 280, DH + 200);
+  var sink = g.createLinearGradient(0, 845, 0, 925);
+  sink.addColorStop(0, "rgba(0,0,0,0)"); sink.addColorStop(1, "rgba(0,0,0,.6)");
+  g.fillStyle = sink; g.fillRect(0, 845, DW, 90);
+  g.globalCompositeOperation = "source-over";
+}
+
+buildFogTile(); buildSky(); buildIce(); buildShip();
+
+/* ============ dynamic bits ============ */
+var stars = [], motes = [];
+for (var i = 0; i < 120; i++) stars.push({ x:Math.random()*DW, y:Math.random()*DH*.55,
+  r:.4 + Math.random()*1, ph:Math.random()*6.28, sp:.4 + Math.random()*1.4 });
+var MOTES = REDUCED ? 0 : 42;
+for (var m = 0; m < MOTES; m++) motes.push({ x:Math.random()*DW, y:Math.random()*DH,
+  z:.3 + Math.random()*.7, ph:Math.random()*6.28 });
+
+function drawStars(t){
+  ctx.fillStyle = "#dfe9f4";
+  for (var i = 0; i < stars.length; i++){
+    var s = stars[i];
+    ctx.globalAlpha = .25 + .4 * Math.abs(Math.sin(t*s.sp + s.ph));
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.2832); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+function drawFogBand(t, y, h, speed, alpha){
+  var off = ((t * speed) % 512 + 512) % 512;
+  ctx.globalAlpha = alpha;
+  for (var x = -off; x < DW; x += 512){
+    ctx.drawImage(fogTile, x, y, 512, h);
+    ctx.drawImage(fogTile, x + 256, y + h*.2, 512, h);
+  }
+  ctx.globalAlpha = 1;
+}
+function drawMotes(t, dt){
+  ctx.fillStyle = "rgba(226,237,248,1)";
   for (var i = 0; i < motes.length; i++){
     var f = motes[i];
     f.y += (8 + 22*f.z) * dt;
     f.x += (wind.val * 26 * f.z + Math.sin(t + f.ph) * 7 * f.z) * dt;
-    /* drift away from the cursor — a touch of the stripe field */
-    var dx = f.x - PX, dy = f.y - PY, d = Math.hypot(dx, dy);
+    var dx = f.x - px, dy = f.y - py, d = Math.hypot(dx, dy);
     if (d < 130 && d > .001){
       var push = (1 - d/130) * 60 * dt;
       f.x += dx/d * push; f.y += dy/d * push;
     }
-    if (f.y > innerHeight + 6){ f.y = -6; f.x = Math.random()*innerWidth; }
-    if (f.x > innerWidth + 6) f.x = -6; else if (f.x < -6) f.x = innerWidth + 6;
-    mctx.globalAlpha = .10 + f.z * .2;
-    mctx.beginPath(); mctx.arc(f.x, f.y, .6 + f.z, 0, 6.2832); mctx.fill();
+    if (f.y > DH + 6){ f.y = -6; f.x = Math.random()*DW; }
+    if (f.x > DW + 6) f.x = -6; else if (f.x < -6) f.x = DW + 6;
+    ctx.globalAlpha = .1 + f.z * .18;
+    ctx.beginPath(); ctx.arc(f.x, f.y, .6 + f.z, 0, 6.2832); ctx.fill();
   }
-  mctx.globalAlpha = 1;
+  ctx.globalAlpha = 1;
+}
+function drawFigure(t){
+  var fx = 408, fy = 893;
+  var lg = ctx.createRadialGradient(fx+10, fy, 2, fx+10, fy, 70);
+  lg.addColorStop(0, "rgba(255,214,160,.13)"); lg.addColorStop(1, "rgba(255,214,160,0)");
+  ctx.fillStyle = lg;
+  ctx.beginPath(); ctx.ellipse(fx+10, fy, 80, 22, 0, 0, 6.2832); ctx.fill();
+  ctx.strokeStyle = "#06090e"; ctx.fillStyle = "#06090e"; ctx.lineCap = "round";
+  ctx.beginPath(); ctx.arc(fx, fy - 26, 3.6, 0, 6.2832); ctx.fill();
+  ctx.lineWidth = 3.4; ctx.beginPath(); ctx.moveTo(fx, fy-22); ctx.lineTo(fx, fy-8); ctx.stroke();
+  ctx.lineWidth = 2.6;
+  ctx.beginPath(); ctx.moveTo(fx, fy-8); ctx.lineTo(fx-4, fy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(fx, fy-8); ctx.lineTo(fx+4, fy); ctx.stroke();
+  ctx.lineWidth = 2.2;
+  ctx.beginPath(); ctx.moveTo(fx, fy-18); ctx.lineTo(fx+9, fy-12); ctx.stroke();
+  var flick = .8 + .2 * Math.sin(t*9) * Math.sin(t*3.7);
+  ctx.fillStyle = "rgba(255,216,160," + (.85*flick).toFixed(2) + ")";
+  ctx.beginPath(); ctx.arc(fx + 10, fy - 10, 2.2, 0, 6.2832); ctx.fill();
+  var lh = ctx.createRadialGradient(fx+10, fy-10, 0, fx+10, fy-10, 26);
+  lh.addColorStop(0, "rgba(255,216,160," + (.28*flick).toFixed(2) + ")");
+  lh.addColorStop(1, "rgba(255,216,160,0)");
+  ctx.fillStyle = lh;
+  ctx.beginPath(); ctx.arc(fx + 10, fy - 10, 26, 0, 6.2832); ctx.fill();
+  ctx.lineCap = "butt";
 }
 
-/* ---------- loop ---------- */
-var last = performance.now();
+function drawThreads(t){
+  ctx.lineCap = "round";
+  for (var i = 0; i < ropes.length; i++){
+    var r = ropes[i];
+    ctx.strokeStyle = "rgba(196,220,250," + (r.al * .2 * (1 + r.en*.6)).toFixed(3) + ")";
+    ctx.lineWidth = r.w * 3.2;
+    ctx.beginPath(); ctx.moveTo(r.a[0], r.a[1]);
+    ctx.quadraticCurveTo(r.cx, r.cy, r.b[0], r.b[1]); ctx.stroke();
+  }
+  for (var j = 0; j < ropes.length; j++){
+    var q = ropes[j];
+    var shimmer = .82 + .18 * Math.sin(t * q.sp * 1.7 + q.ph * 2);
+    ctx.strokeStyle = "rgba(222,236,250," + (q.al * shimmer).toFixed(3) + ")";
+    ctx.lineWidth = q.w;
+    ctx.beginPath(); ctx.moveTo(q.a[0], q.a[1]);
+    ctx.quadraticCurveTo(q.cx, q.cy, q.b[0], q.b[1]); ctx.stroke();
+  }
+  ctx.lineWidth = .7;
+  [foreFan, mainFan].forEach(function(fan){
+    for (var p = 0; p < fan.length - 1; p++){
+      for (var f = .34; f <= .92; f += .085){
+        var A = quadAt(fan[p], f), B = quadAt(fan[p+1], f);
+        if (A[1] < 0 && B[1] < 0) continue;
+        ctx.strokeStyle = "rgba(208,226,246,.22)";
+        ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
+      }
+    }
+  });
+  var W = wind.val;
+  for (var h = 0; h < hangs.length; h++){
+    var H = hangs[h];
+    var ang = W*.5 + Math.sin(t*H.sp + H.ph)*.22*W + Math.sin(t*H.sp*2.7 + H.ph)*.07*W;
+    var ex = H.x + Math.sin(ang)*H.len, ey = H.y + Math.cos(ang)*H.len;
+    ctx.strokeStyle = "rgba(222,236,250," + H.al + ")"; ctx.lineWidth = H.w;
+    ctx.beginPath(); ctx.moveTo(H.x, H.y);
+    ctx.quadraticCurveTo(H.x + Math.sin(ang*.5)*H.len*.5, H.y + Math.cos(ang*.5)*H.len*.55, ex, ey);
+    ctx.stroke();
+    ctx.fillStyle = "rgba(228,239,250,.8)";
+    ctx.beginPath(); ctx.arc(ex, ey, 1.7, 0, 6.2832); ctx.fill();
+  }
+  for (var d = 0; d < dots.length; d++){
+    var D = dots[d];
+    var pulse = .8 + .2 * Math.sin(t*1.6 + D.ph);
+    var rr = D.r * pulse * (1 + D.en * .9);
+    var gl = ctx.createRadialGradient(D.x, D.y, 0, D.x, D.y, rr * 5);
+    gl.addColorStop(0, "rgba(206,228,252," + (.35 + D.en*.4).toFixed(2) + ")");
+    gl.addColorStop(1, "rgba(206,228,252,0)");
+    ctx.fillStyle = gl;
+    ctx.beginPath(); ctx.arc(D.x, D.y, rr * 5, 0, 6.2832); ctx.fill();
+    ctx.fillStyle = "rgba(240,247,253," + (.85 + D.en*.15).toFixed(2) + ")";
+    ctx.beginPath(); ctx.arc(D.x, D.y, rr, 0, 6.2832); ctx.fill();
+  }
+  /* pennant */
+  var segs = 9, segL = 7.5;
+  ctx.fillStyle = "rgba(228,239,250,.85)";
+  ctx.beginPath();
+  var topP = [], botP = [];
+  for (var n = 0; n <= segs; n++){
+    var fx = FORE_HEAD[0] + n*segL*(.6 + W*.5);
+    var fy = FORE_HEAD[1] - 6 + Math.sin(t*3.4 + n*.85)*(1 + n*.55)*W*1.6 + n*.3;
+    var th = 5.5*(1 - n/segs) + .6;
+    topP.push([fx, fy - th/2]); botP.push([fx, fy + th/2]);
+  }
+  ctx.moveTo(topP[0][0], topP[0][1]);
+  for (var n2 = 1; n2 <= segs; n2++) ctx.lineTo(topP[n2][0], topP[n2][1]);
+  for (var n3 = segs; n3 >= 0; n3--) ctx.lineTo(botP[n3][0], botP[n3][1]);
+  ctx.closePath(); ctx.fill();
+}
+
+/* ============ main loop ============ */
+var wrap = document.getElementById("wrap");
+var camZoom = REDUCED ? 1 : 1.1;
+var last = performance.now(), shipT = 0;
+
 function frame(now){
   var dt = Math.min(.05, (now - last)/1000); last = now;
   var t = now/1000;
   stepWind(dt);
+  shipT += dt * (.6 + wind.val*.8);
   nmx += (tmx - nmx)*Math.min(1, dt*4); nmy += (tmy - nmy)*Math.min(1, dt*4);
-  if (!REDUCED && camZoom > 1) camZoom += (1 - camZoom)*Math.min(1, dt*.25);
-  var sway = Math.sin(t*.5) * .3 * wind.val;
-  wrap.style.transform = "scale(" + camZoom.toFixed(4) + ")"
-    + " translate(" + (nmx*-16) + "px," + (nmy*-10) + "px)"
-    + " rotateY(" + (nmx*2.2) + "deg) rotateX(" + (-nmy*1.4) + "deg)"
-    + " rotate(" + sway.toFixed(3) + "deg)";
-  stepVeil(dt);
-  stepMotes(t, dt);
+  if (!REDUCED && camZoom > 1) camZoom += (1 - camZoom)*Math.min(1, dt*.3);
+  wrap.style.transform = "scale(" + camZoom.toFixed(4) + ") rotateY(" + (nmx*3) + "deg) rotateX(" + (-nmy*1.8) + "deg)";
+
+  var lean = (Math.sin(shipT*.8)*.5 + Math.sin(shipT*2.1)*.12) * wind.val * 9;
+  stepRopes(t, dt);
+
+  ctx.setTransform(dpr*S, 0, 0, dpr*S, dpr*OX, dpr*OY);
+  ctx.drawImage(skyL, 0, 0);
+  drawStars(t);
+  ctx.drawImage(iceL, 0, 0);
+  drawFogBand(t, 4, 700, 240, .35);                       /* haze bank behind her */
+  ctx.save();
+  ctx.transform(1, 0, -lean/880, 1, lean, 0);             /* she leans with the wind */
+  ctx.drawImage(shipL, 0, 0);
+  drawThreads(t);
+  ctx.restore();
+  drawFogBand(t, 9, 620, 180, .22);                       /* fog crossing the hull — scale */
+  drawFigure(t);
+  drawFogBand(t, 14, 780, 260, .16);                      /* breath of fog in the foreground */
+  drawMotes(t, dt);
+
   requestAnimationFrame(frame);
 }
 
-/* ---------- audio: wind / creak / groan / bell ---------- */
+/* ============ audio ============ */
 var AC = null, master = null, windGain = null, soundOn = false;
 function buildAudio(){
   if (AC) return;
@@ -420,16 +820,16 @@ function setSound(on){
   if (AC && master) master.gain.setTargetAtTime(on ? 1 : 0, AC.currentTime, .5);
 }
 
-/* ---------- entry / ui ---------- */
+/* ============ entry / ui ============ */
 function begin(withSound){
   buildAudio();
   if (AC && AC.state === "suspended") AC.resume();
   setSound(!!withSound && !!AC);
   document.getElementById("gate").classList.add("away");
   document.getElementById("film").classList.add("on");
-  setTimeout(function(){ document.getElementById("foot").classList.add("in"); }, 1400);
-  gust(.9); auto();
-  if (withSound) setTimeout(function(){ creak(1); }, 1600);
+  setTimeout(function(){ document.getElementById("foot").classList.add("in"); }, 1200);
+  gust(.9);
+  if (withSound) setTimeout(function(){ creak(1); }, 1500);
 }
 document.getElementById("boardBtn").addEventListener("click", function(){ begin(true); });
 document.getElementById("quietBtn").addEventListener("click", function(){ begin(false); });
@@ -440,13 +840,9 @@ document.getElementById("soundBtn").addEventListener("click", function(){
 });
 document.getElementById("helmBtn").addEventListener("click", function(){
   gust(1.5); bell(); creak(1.2);
-  if (!REDUCED) camZoom = 1.04;
+  if (!REDUCED) camZoom = 1.045;
 });
-addEventListener("keydown", function(e){
-  if (e.key === "m" || e.key === "M") document.getElementById("soundBtn").click();
-  if (e.key === "ArrowRight"){ show(cur + 1); auto(); }
-  if (e.key === "ArrowLeft"){ show(cur - 1); auto(); }
-});
+addEventListener("keydown", function(e){ if (e.key === "m" || e.key === "M") document.getElementById("soundBtn").click(); });
 
 requestAnimationFrame(frame);
 })();
