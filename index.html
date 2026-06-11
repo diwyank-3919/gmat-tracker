@@ -9622,20 +9622,34 @@ function computeConsistency() {
       var curWeekTot = 0; for (var l = 0; l < 7; l++) curWeekTot += minsOn(dateStr(addDays(today, -l)));
       renderDelta("total-delta", curWeekTot, prevWeekTot, "min");
 
-      // ── SPARKLINES — interactive, with real axes ──
+      // ── SPARKLINES — interactive, windows clamped to first logged session ──
       requestAnimationFrame(function () {
-        var n, fmtTick = function (d, opts) { return d.toLocaleDateString("en-IN", opts); };
+        var n, fi, fmtTick = function (d, opts) { return d.toLocaleDateString("en-IN", opts); };
 
+        // earliest session date — every chart starts here (never earlier)
+        var firstDs = null;
+        for (fi = 0; fi < sessions.length; fi++) {
+          if (!firstDs || sessions[fi].date < firstDs) firstDs = sessions[fi].date;
+        }
+        var firstD = firstDs ? parseLocal(firstDs) : today;
+        var WK = 7 * 86400000;
+
+        // TODAY — daily, from first session (max 7 days, min 2 points)
+        var dayStart = addDays(today, -6);
+        if (firstD > dayStart) dayStart = new Date(firstD);
+        if (dayStart >= today) dayStart = addDays(today, -1);
         var last7 = [], last7L = [];
-        for (n = 6; n >= 0; n--) {
-          var d7 = addDays(today, -n);
-          last7.push(minsOn(dateStr(d7)) / 60);
-          last7L.push(fmtTick(d7, { weekday: "short", day: "numeric" }));
+        for (var dD = new Date(dayStart); dD <= today; dD = addDays(dD, 1)) {
+          last7.push(minsOn(dateStr(dD)) / 60);
+          last7L.push(fmtTick(dD, { weekday: "short", day: "numeric" }));
         }
         drawSparkline("spark-today", last7, "#878dff", "rgba(135,141,255,0.18)", last7L, 4);
 
+        // THIS WEEK — weekly, from first session's week (max 4, min 2)
+        var wkCount = Math.round((startOfWeek(today) - startOfWeek(firstD)) / WK) + 1;
+        wkCount = Math.max(2, Math.min(4, wkCount));
         var last4w = [], last4wL = [];
-        for (n = 3; n >= 0; n--) {
+        for (n = wkCount - 1; n >= 0; n--) {
           var ws2 = startOfWeek(addDays(today, -n * 7)), wt2 = 0;
           for (var n3 = 0; n3 < 7; n3++) wt2 += minsOn(dateStr(addDays(ws2, n3)));
           last4w.push(wt2 / 60);
@@ -9643,8 +9657,11 @@ function computeConsistency() {
         }
         drawSparkline("spark-week", last4w, "rgba(52,211,153,0.85)", "rgba(52,211,153,0.15)", last4wL, 4);
 
+        // THIS MONTH — monthly, from first session's month (max 6, min 2)
+        var moCount = (today.getFullYear() - firstD.getFullYear()) * 12 + (today.getMonth() - firstD.getMonth()) + 1;
+        moCount = Math.max(2, Math.min(6, moCount));
         var last6m = [], last6mL = [];
-        for (n = 5; n >= 0; n--) {
+        for (n = moCount - 1; n >= 0; n--) {
           var mRef = new Date(today.getFullYear(), today.getMonth() - n, 1);
           var mMe = new Date(mRef.getFullYear(), mRef.getMonth() + 1, 0), mt = 0;
           for (var dd3 = new Date(mRef); dd3 <= mMe; dd3 = addDays(dd3, 1)) mt += minsOn(dateStr(dd3));
@@ -9653,8 +9670,18 @@ function computeConsistency() {
         }
         drawSparkline("spark-month", last6m, "rgba(251,191,36,0.85)", "rgba(251,191,36,0.14)", last6mL, 6);
 
-        var cumul = [], cumulL = [], running = 0;
-        for (n = 11; n >= 0; n--) {
+        // ALL TIME — weekly cumulative, from first session's week (max 12 visible,
+        // min 2), seeded with any hours older than the window so the curve always
+        // ends at the true all-time total
+        var twCount = Math.round((startOfWeek(today) - startOfWeek(firstD)) / WK) + 1;
+        twCount = Math.max(2, Math.min(12, twCount));
+        var winStartStr = dateStr(startOfWeek(addDays(today, -(twCount - 1) * 7)));
+        var running = 0;
+        for (fi = 0; fi < sessions.length; fi++) {
+          if (sessions[fi].date < winStartStr) running += sessions[fi].mins;
+        }
+        var cumul = [], cumulL = [];
+        for (n = twCount - 1; n >= 0; n--) {
           var ws3 = startOfWeek(addDays(today, -n * 7));
           for (var n6 = 0; n6 < 7; n6++) running += minsOn(dateStr(addDays(ws3, n6)));
           cumul.push(running / 60);
@@ -9662,7 +9689,6 @@ function computeConsistency() {
         }
         drawSparkline("spark-total", cumul, "rgba(251,113,133,0.85)", "rgba(251,113,133,0.12)", cumulL, 4);
       });
-
       // ── RING SUITE ──
       setRing("rs-readiness", readiness, 182);
       document.getElementById("rs-readiness-val").textContent = readiness + "%";
