@@ -55,7 +55,6 @@ body{
   overflow-x:hidden;
   font-variant-numeric:tabular-nums;
 }
-/* Ambient atmosphere */
 body::before{
   content:'';position:fixed;inset:0;z-index:-2;
   background:
@@ -140,7 +139,6 @@ h1 .em{font-style:italic;font-weight:400;background:linear-gradient(120deg,#cfd2
 .hero-note{font-size:12.5px;color:var(--text-4)}
 .hero-note b{color:var(--text-3);font-weight:600}
 
-/* staggered hero reveal */
 .hero .eyebrow,.hero h1,.hero .lede,.hero .hero-cta,.hero .hero-note,.hero .preview{
   opacity:0;transform:translateY(18px);animation:rise .8s var(--ease) forwards;
 }
@@ -151,7 +149,7 @@ h1 .em{font-style:italic;font-weight:400;background:linear-gradient(120deg,#cfd2
 .hero .preview{animation-delay:.38s;transform:translateY(34px)}
 @keyframes rise{to{opacity:1;transform:translateY(0)}}
 
-/* ── PRODUCT PREVIEW (CSS-built console card) ── */
+/* ── PRODUCT PREVIEW ── */
 .preview{
   position:relative;max-width:920px;margin:64px auto 0;
 }
@@ -177,7 +175,6 @@ h1 .em{font-style:italic;font-weight:400;background:linear-gradient(120deg,#cfd2
 @media(max-width:680px){.console{grid-template-columns:1fr;padding:14px}}
 .pcard{background:var(--surface-2);border:1px solid var(--border-soft);border-radius:14px;padding:16px}
 .pcard-label{font-size:9.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px}
-/* exam command preview */
 .p-exam{grid-column:1/-1;display:flex;align-items:center;gap:24px;flex-wrap:wrap;
   background:radial-gradient(130% 160% at 100% 0%,rgba(135,141,255,0.16),transparent 55%),var(--surface-2)}
 .p-exam .num{font-family:'Fraunces',serif;font-weight:600;font-size:46px;line-height:.9;letter-spacing:-0.02em}
@@ -187,23 +184,20 @@ h1 .em{font-style:italic;font-weight:400;background:linear-gradient(120deg,#cfd2
 .p-exam .stat .v.amber{color:var(--amber)}
 .p-exam .stat .k{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-3)}
 .p-exam .spacer{flex:1;min-width:10px}
-/* ring */
 .p-ring{display:flex;align-items:center;gap:16px}
 .p-ring svg{flex-shrink:0}
 .ring-track{fill:none;stroke:rgba(255,255,255,0.08);stroke-width:7}
 .ring-fill{fill:none;stroke:var(--green);stroke-width:7;stroke-linecap:round;transform:rotate(-90deg);transform-origin:center;
   stroke-dasharray:163;stroke-dashoffset:163;animation:ring 1.6s var(--ease) .9s forwards}
-@keyframes ring{to{stroke-dashoffset:46}} /* ~72% */
+@keyframes ring{to{stroke-dashoffset:46}}
 .p-ring .big{font-family:'Fraunces',serif;font-weight:600;font-size:30px;line-height:1}
 .p-ring .sub{font-size:11px;color:var(--text-3);margin-top:3px}
-/* mini bar chart */
 .p-chart{display:flex;align-items:flex-end;gap:7px;height:74px;margin-top:4px}
 .p-chart .bar{flex:1;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,rgba(70,201,143,.85),rgba(70,201,143,.2));transform-origin:bottom;animation:grow .9s var(--ease) both}
 .p-chart .bar.low{background:linear-gradient(180deg,rgba(251,113,133,.7),rgba(251,113,133,.15))}
 @keyframes grow{from{transform:scaleY(0)}}
 .p-days{display:flex;gap:7px;margin-top:7px}
 .p-days span{flex:1;text-align:center;font-size:8.5px;color:var(--text-4);font-weight:600}
-/* kpi mini */
 .p-kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .p-kpi{background:rgba(255,255,255,0.025);border:1px solid var(--border-soft);border-radius:11px;padding:11px 12px}
 .p-kpi .k{font-size:8.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3)}
@@ -219,11 +213,10 @@ section{position:relative}
 .sec-title{font-family:'Fraunces',serif;font-weight:500;letter-spacing:-0.02em;line-height:1.05;font-size:clamp(28px,4.4vw,46px)}
 .sec-lede{font-size:16px;color:var(--text-2);max-width:50ch;margin-top:16px}
 
-/* reveal on scroll */
 .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
 .reveal.in{opacity:1;transform:none}
 
-/* ── MARQUEE / TRUST STRIP ── */
+/* ── TRUST STRIP ── */
 .strip{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(255,255,255,0.012)}
 .strip-inner{display:flex;flex-wrap:wrap;gap:14px 40px;justify-content:center;padding:26px 0}
 .strip-item{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--text-2)}
@@ -231,7 +224,7 @@ section{position:relative}
   background:rgba(135,141,255,0.12);color:var(--accent-bright);font-size:12px;font-weight:800}
 .strip-item b{color:var(--text);font-weight:600}
 
-/* ── HIGHLIGHTS ACCORDION ── */
+/* ── ACCORDION ── */
 .hl-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:40px}
 .acc{display:flex;flex-direction:column;gap:12px;max-width:760px;margin:0 auto}
 .acc-item{
@@ -261,7 +254,7 @@ section{position:relative}
 @media(max-width:560px){.acc-body{padding:0 22px 22px 22px}}
 .acc-body b{color:var(--text);font-weight:600}
 
-/* ── BENTO FEATURE GRID ── */
+/* ── BENTO ── */
 .bento{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 @media(max-width:900px){.bento{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.bento{grid-template-columns:1fr}}
@@ -281,7 +274,6 @@ section{position:relative}
 .f-ic.green svg{stroke:var(--green)}
 .f-ic.amber{background:rgba(240,189,106,0.12);border-color:rgba(240,189,106,0.22)}
 .f-ic.amber svg{stroke:var(--amber)}
-/* sparkline deco in wide card */
 .f-spark{display:flex;align-items:flex-end;gap:5px;height:48px;margin-top:18px}
 .f-spark span{flex:1;border-radius:4px 4px 1px 1px;background:linear-gradient(180deg,var(--accent),rgba(135,141,255,.15))}
 
@@ -354,6 +346,7 @@ footer{border-top:1px solid var(--border);padding:46px 0 40px;margin-top:90px}
     <p class="lede">Score Console turns every study session into a signal — tracking your hours, reading your rhythm, and projecting where your GMAT score is heading. Prep stops being a guess.</p>
     <div class="hero-cta">
       <a class="btn btn-primary" href="https://scoreconsole.com/app.html">Open your console <span class="arr">→</span></a>
+      <a class="btn btn-ghost" href="app.html?demo=1"><span style="font-size:15px">▶</span> Try the live demo</a>
       <a class="btn btn-ghost" href="#highlights">See the highlights</a>
     </div>
     <p class="hero-note">Free · Sign in with Google · <b>Syncs across every device</b></p>
@@ -361,7 +354,6 @@ footer{border-top:1px solid var(--border);padding:46px 0 40px;margin-top:90px}
     <!-- CSS PRODUCT PREVIEW -->
     <div class="preview" aria-hidden="true">
       <div class="console">
-        <!-- exam command -->
         <div class="pcard p-exam">
           <div><div class="num">42</div><div class="acc-tag" style="margin-top:7px;display:inline-block">days to exam</div></div>
           <div class="spacer"></div>
@@ -369,7 +361,6 @@ footer{border-top:1px solid var(--border);padding:46px 0 40px;margin-top:90px}
           <div class="stat"><span class="v green">214h</span><span class="k">projected total</span></div>
           <div class="stat"><span class="v amber">+45</span><span class="k">gap to target</span></div>
         </div>
-        <!-- consistency ring -->
         <div class="pcard">
           <div class="pcard-label">Consistency</div>
           <div class="p-ring">
@@ -388,7 +379,6 @@ footer{border-top:1px solid var(--border);padding:46px 0 40px;margin-top:90px}
           </div>
           <div class="p-days"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
         </div>
-        <!-- kpis -->
         <div class="pcard">
           <div class="pcard-label">At a glance</div>
           <div class="p-kpis">
@@ -418,7 +408,7 @@ footer{border-top:1px solid var(--border);padding:46px 0 40px;margin-top:90px}
   </div>
 </div>
 
-<!-- HIGHLIGHTS (accordion) -->
+<!-- HIGHLIGHTS -->
 <section class="sec-pad" id="highlights">
   <div class="wrap">
     <div class="hl-head reveal">
@@ -428,7 +418,6 @@ footer{border-top:1px solid var(--border);padding:46px 0 40px;margin-top:90px}
       </div>
       <p class="sec-lede">A focused toolkit that quietly does the bookkeeping — so your attention stays on studying, not spreadsheets.</p>
     </div>
-
     <div class="acc reveal" id="acc">
       <div class="acc-item open">
         <button class="acc-btn" aria-expanded="true"><span class="acc-plus"></span><span class="acc-title">Smart session timer</span><span class="acc-tag">Core</span></button>
@@ -512,7 +501,7 @@ footer{border-top:1px solid var(--border);padding:46px 0 40px;margin-top:90px}
   <div class="cta-band reveal">
     <h2>Your best score starts with one logged session.</h2>
     <p>Join your console, set your exam date, and let the data do the worrying.</p>
-   <a class="btn btn-primary" href="https://scoreconsole.com/app.html" style="height:48px;padding:0 26px;font-size:15px">Open Score Console <span class="arr">→</span></a>
+    <a class="btn btn-primary" href="https://scoreconsole.com/app.html" style="height:48px;padding:0 26px;font-size:15px">Open Score Console <span class="arr">→</span></a>
   </div>
 </section>
 
@@ -549,18 +538,15 @@ footer{border-top:1px solid var(--border);padding:46px 0 40px;margin-top:90px}
 </footer>
 
 <script>
-// nav background on scroll
 var nav=document.getElementById('nav');
 function onScroll(){ nav.classList.toggle('scrolled', window.scrollY>12); }
 onScroll(); window.addEventListener('scroll',onScroll,{passive:true});
 
-// accordion
 document.getElementById('acc').addEventListener('click',function(e){
   var btn=e.target.closest('.acc-btn'); if(!btn) return;
   var item=btn.parentElement;
   var panel=item.querySelector('.acc-panel');
   var isOpen=item.classList.contains('open');
-  // close all
   document.querySelectorAll('.acc-item').forEach(function(it){
     it.classList.remove('open');
     it.querySelector('.acc-btn').setAttribute('aria-expanded','false');
@@ -572,13 +558,11 @@ document.getElementById('acc').addEventListener('click',function(e){
     panel.style.maxHeight=panel.scrollHeight+'px';
   }
 });
-// open the first panel initially
 (function(){var f=document.querySelector('.acc-item.open .acc-panel'); if(f) f.style.maxHeight=f.scrollHeight+'px';})();
 window.addEventListener('resize',function(){
   var o=document.querySelector('.acc-item.open .acc-panel'); if(o) o.style.maxHeight=o.scrollHeight+'px';
 });
 
-// scroll reveal
 if('IntersectionObserver' in window){
   var io=new IntersectionObserver(function(entries){
     entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
