@@ -7111,6 +7111,453 @@ body, .card, .kpi, .ring-card, .momentum-card, .banner, .intel-card,
       #timer-display .flap.flipping .flap-fold.flap-bottom { animation: none; }
     }
   </style>
+  <!-- ════════════════════════════════════════════════════════════════════
+     SCORE CONSOLE — LIGHT THEME v2 · "Studio Daylight"
+     PASTE LOCATION: app.html — as a NEW <style> block, immediately
+     BEFORE the closing </head> tag (after the last existing </style>).
+     It must come AFTER the old html.sc-light block so it wins the cascade.
+     Do NOT delete the old light block yet — this fully overrides it.
+     ════════════════════════════════════════════════════════════════════ -->
+<style id="sc-light-v2">
+  /* ── 1 · TOKENS — porcelain page, ink typography, true indigo accent ── */
+  html.sc-light {
+    --bg-base: #F3F5FA;
+    --bg-card: #FFFFFF;
+    --bg-card-hover: #FFFFFF;
+    --bg-card-strong: #FFFFFF;
+    --bg-input: #F4F6FB;
+    --bg-input-focus: #EEF1FA;
+    --border: #E5E8F2;
+    --border-subtle: #EDEFF6;
+    --border-strong: #D6DBEA;
+    --border-accent: rgba(88, 94, 230, 0.45);
+    --text-primary: #171B2E;
+    --text-secondary: rgba(23, 27, 46, 0.66);
+    --text-tertiary: rgba(23, 27, 46, 0.45);
+    --text-muted: rgba(23, 27, 46, 0.28);
+    --accent: #585EE6;
+    --accent-bright: #4A50D8;
+    --accent-soft: rgba(88, 94, 230, 0.08);
+    --accent-glow: rgba(88, 94, 230, 0.20);
+    --green: #0E9F6E;
+    --green-bright: #0B8A5F;
+    --green-soft: rgba(14, 159, 110, 0.10);
+    --green-glow: rgba(14, 159, 110, 0.18);
+    --red: #E5484D;
+    --red-soft: rgba(229, 72, 77, 0.08);
+    --amber: #B45309;
+    --amber-soft: rgba(217, 119, 6, 0.10);
+    --blue: #2563EB;
+    --blue-soft: rgba(37, 99, 235, 0.08);
+    --shadow-card:
+      0 1px 2px rgba(23, 27, 46, 0.04),
+      0 8px 24px -12px rgba(23, 27, 46, 0.10);
+    --shadow-card-hover:
+      0 2px 4px rgba(23, 27, 46, 0.05),
+      0 18px 44px -14px rgba(64, 70, 190, 0.18);
+  }
+
+  html.sc-light body { background: var(--bg-base); color: var(--text-primary); }
+  html.sc-light body::before {
+    background:
+      radial-gradient(900px 480px at 88% -6%, rgba(88, 94, 230, 0.07) 0%, transparent 60%),
+      radial-gradient(700px 460px at 4% 100%, rgba(14, 159, 110, 0.05) 0%, transparent 55%),
+      linear-gradient(170deg, #F6F7FC 0%, #F3F5FA 55%, #EFF2F9 100%) !important;
+  }
+  html.sc-light body::after { opacity: 0.015; }
+  html.sc-light ::selection { background: rgba(88, 94, 230, 0.16); }
+
+  /* ── 2 · SURFACES — white cards, hairlines, calm uniform elevation ── */
+  html.sc-light .card,
+  html.sc-light .kpi,
+  html.sc-light .ring-card,
+  html.sc-light .momentum-card,
+  html.sc-light .banner {
+    background: #FFFFFF !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow-card) !important;
+  }
+  html.sc-light .card:hover,
+  html.sc-light .kpi:hover {
+    background: #FFFFFF !important;
+    border-color: #D9DDF0 !important;
+    box-shadow: var(--shadow-card-hover) !important;
+    backdrop-filter: none !important;
+  }
+  /* kill the old colored top-edge insets — every nth-child variant */
+  html.sc-light .kpi:nth-child(1), html.sc-light .kpi:nth-child(2),
+  html.sc-light .kpi:nth-child(3), html.sc-light .kpi:nth-child(4),
+  html.sc-light .kpi:nth-child(5) { box-shadow: var(--shadow-card) !important; }
+  html.sc-light .kpi:nth-child(1):hover, html.sc-light .kpi:nth-child(2):hover,
+  html.sc-light .kpi:nth-child(3):hover, html.sc-light .kpi:nth-child(4):hover,
+  html.sc-light .kpi:nth-child(5):hover { box-shadow: var(--shadow-card-hover) !important; }
+  html.sc-light .ring-card:nth-child(1), html.sc-light .ring-card:nth-child(2),
+  html.sc-light .ring-card:nth-child(3), html.sc-light .ring-card:nth-child(4) {
+    background: #FFFFFF !important;
+    box-shadow: var(--shadow-card) !important;
+  }
+  html.sc-light .ring-card:nth-child(1):hover, html.sc-light .ring-card:nth-child(2):hover,
+  html.sc-light .ring-card:nth-child(3):hover, html.sc-light .ring-card:nth-child(4):hover {
+    box-shadow: var(--shadow-card-hover) !important;
+  }
+  /* Consistency hero — clean white with a quiet green keyline, not a green wash */
+  html.sc-light .kpi.hero,
+  html.sc-light .kpi.hero:hover {
+    background: #FFFFFF !important;
+    border: 1px solid rgba(14, 159, 110, 0.30) !important;
+    box-shadow: var(--shadow-card), inset 0 2px 0 0 rgba(14, 159, 110, 0.55) !important;
+  }
+  html.sc-light .kpi.hero .kpi-label { color: var(--green) !important; }
+
+  /* ── 3 · SIGNATURE — Exam Command Center stays dark navy (inverted hero).
+        Scoped variables flip every inline var() inside it to dark-context. ── */
+  html.sc-light #exam-command {
+    --text-primary: #F5F7FF;
+    --text-secondary: rgba(236, 239, 255, 0.74);
+    --text-tertiary: rgba(236, 239, 255, 0.52);
+    --text-muted: rgba(236, 239, 255, 0.34);
+    --border: rgba(255, 255, 255, 0.14);
+    --border-subtle: rgba(255, 255, 255, 0.09);
+    --border-accent: rgba(159, 166, 255, 0.50);
+    --bg-input: rgba(255, 255, 255, 0.06);
+    --bg-input-focus: rgba(255, 255, 255, 0.10);
+    --accent: #9FA6FF;
+    --accent-bright: #B3B8FF;
+    --green: #5FD9A8;
+    --amber: #F0BD6A;
+    background:
+      radial-gradient(120% 160% at 100% 0%, rgba(130, 137, 255, 0.22), transparent 55%),
+      radial-gradient(110% 140% at 0% 112%, rgba(70, 201, 143, 0.10), transparent 52%),
+      linear-gradient(150deg, #161B3A 0%, #11152D 55%, #0E1226 100%) !important;
+    border: 1px solid rgba(130, 137, 255, 0.30) !important;
+    box-shadow:
+      0 24px 60px -24px rgba(22, 27, 70, 0.45),
+      0 2px 8px rgba(22, 27, 70, 0.18) !important;
+  }
+  html.sc-light #exam-command .ec-eyebrow { color: rgba(186, 192, 255, 0.62) !important; }
+  html.sc-light #exam-command .ec-hero-num {
+    background: linear-gradient(180deg, #FFFFFF 28%, #CBC4F0) !important;
+    -webkit-background-clip: text !important; background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+  }
+  html.sc-light #exam-command .ec-cell-val {
+    color: #F5F7FF !important; -webkit-text-fill-color: #F5F7FF !important;
+  }
+  html.sc-light #exam-command .ec-cell-val.ec-green { color: #5FD9A8 !important; -webkit-text-fill-color: #5FD9A8 !important; }
+  html.sc-light #exam-command .ec-cell-val.ec-amber { color: #F0BD6A !important; -webkit-text-fill-color: #F0BD6A !important; }
+  html.sc-light #exam-command .ec-date-chip {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+    color: rgba(255, 255, 255, 0.92) !important;
+  }
+  html.sc-light #exam-command .ec-date-chip .ti { color: #B3B8FF !important; }
+  html.sc-light #exam-command #exam-date-text { color: rgba(255, 255, 255, 0.92) !important; }
+  html.sc-light #exam-command .ec-target-cell input {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    color: #FFFFFF !important;
+    color-scheme: dark !important;
+  }
+  html.sc-light #exam-command .ec-target-cell input:focus {
+    border-color: rgba(159, 166, 255, 0.60) !important;
+    box-shadow: 0 0 0 3px rgba(159, 166, 255, 0.18) !important;
+  }
+  html.sc-light #exam-command #exam-progress-pct { color: #B3B8FF !important; }
+  html.sc-light #exam-command #exam-progress-bar {
+    background: linear-gradient(90deg, #8B92FF, #5FD9A8) !important;
+  }
+  html.sc-light #exam-command .ec-empty { color: rgba(186, 192, 255, 0.85) !important; }
+
+  /* ── 4 · TYPOGRAPHY & NUMBERS — ink, with semantic green ── */
+  html.sc-light .kpi-value { color: var(--text-primary) !important; -webkit-text-fill-color: var(--text-primary) !important; }
+  html.sc-light .kpi-value.met { color: var(--green) !important; -webkit-text-fill-color: var(--green) !important; }
+  html.sc-light .kpi-label, html.sc-light .ring-label-top {
+    color: rgba(23, 27, 46, 0.42) !important; letter-spacing: 0.12em !important;
+  }
+  html.sc-light .card-title, html.sc-light .topbar-title { color: var(--text-primary) !important; }
+  html.sc-light .card-title .ti { color: var(--accent) !important; }
+  html.sc-light .topbar-date { color: var(--text-tertiary) !important; }
+  html.sc-light .kpi-sub { color: var(--text-tertiary) !important; }
+  html.sc-light .momentum-stat-val { color: var(--accent) !important; -webkit-text-fill-color: var(--accent) !important; }
+  html.sc-light .momentum-stat-val.green { color: var(--green) !important; -webkit-text-fill-color: var(--green) !important; }
+  html.sc-light .momentum-stat-val.amber { color: #C2410C !important; -webkit-text-fill-color: #C2410C !important; }
+  html.sc-light .momentum-stat-label { color: var(--text-tertiary) !important; }
+  html.sc-light .donut-center-val, html.sc-light .banner-title { color: var(--text-primary) !important; }
+  html.sc-light .banner-sub, html.sc-light .ring-card-desc { color: var(--text-secondary) !important; }
+  html.sc-light .ring-card-hint, html.sc-light .donut-center-sub { color: var(--text-tertiary) !important; }
+  /* ring values keep their dynamic state colors, darkened for white paper */
+  html.sc-light .ring-card-val { filter: saturate(1.15) brightness(0.72); }
+
+  /* ── 5 · KPI ICON TILES — restore tinted identity (dark rule bleeds through) ── */
+  html.sc-light .kpi-icon.violet { background: rgba(88, 94, 230, 0.10) !important; color: #585EE6 !important; }
+  html.sc-light .kpi-icon.green  { background: rgba(14, 159, 110, 0.10) !important; color: #0E9F6E !important; }
+  html.sc-light .kpi-icon.amber  { background: rgba(217, 119, 6, 0.12) !important;  color: #C2410C !important; }
+  html.sc-light .kpi-icon.rose   { background: rgba(229, 72, 77, 0.10) !important;  color: #E5484D !important; }
+  html.sc-light .kpi:hover .kpi-icon { box-shadow: none !important; transform: scale(1.08) !important; }
+
+  /* ── 6 · CHROME — sidebar, topbar, mobile ── */
+  html.sc-light .sidebar {
+    background: #FFFFFF !important;
+    border-right: 1px solid var(--border) !important;
+    box-shadow: 4px 0 24px -16px rgba(23, 27, 46, 0.10) !important;
+  }
+  html.sc-light .topbar {
+    background: rgba(255, 255, 255, 0.84) !important;
+    border-bottom: 1px solid var(--border) !important;
+    box-shadow: 0 2px 16px -10px rgba(23, 27, 46, 0.12) !important;
+  }
+  html.sc-light .mob-header { background: rgba(255, 255, 255, 0.94) !important; border-bottom-color: var(--border) !important; }
+  html.sc-light .mob-drawer { background: #FFFFFF !important; border-right-color: var(--border) !important; }
+  html.sc-light .sb-logo-icon, html.sc-light .mob-logo-icon {
+    background: #13161F !important;
+    box-shadow: inset 0 0 0 1px rgba(130, 137, 255, 0.30), 0 4px 12px -4px rgba(23, 27, 46, 0.40) !important;
+  }
+  html.sc-light .sb-logo-name, html.sc-light .mob-logo-name { color: var(--text-primary) !important; }
+  html.sc-light .sb-item:not(.active) { color: rgba(23, 27, 46, 0.58) !important; }
+  html.sc-light .sb-item:not(.active):hover {
+    background: #F2F4FB !important; color: var(--text-primary) !important; box-shadow: none !important;
+  }
+  html.sc-light .sb-item.active {
+    background: rgba(88, 94, 230, 0.09) !important;
+    color: #4A50D8 !important;
+    border: 1px solid rgba(88, 94, 230, 0.22) !important;
+    box-shadow: none !important;
+    font-weight: 700;
+  }
+  html.sc-light .sb-item.active::before { background: #585EE6 !important; box-shadow: none !important; }
+  html.sc-light .sb-item.active .ti { color: #585EE6 !important; }
+  html.sc-light .sb-section-label { color: rgba(23, 27, 46, 0.32) !important; }
+  html.sc-light .sb-topic-name { color: rgba(23, 27, 46, 0.60) !important; }
+  html.sc-light .sb-topic-hours {
+    color: #4A50D8 !important; background: rgba(88, 94, 230, 0.08) !important;
+    border-color: rgba(88, 94, 230, 0.18) !important;
+  }
+  html.sc-light .sb-topic-track, html.sc-light .sb-track { background: #ECEFF6 !important; }
+  html.sc-light .sb-today-label { color: rgba(23, 27, 46, 0.38) !important; }
+  html.sc-light .sb-today-val { color: var(--text-primary) !important; }
+  html.sc-light .sb-today-sub, html.sc-light .sb-progress-label span:first-child { color: var(--text-secondary) !important; }
+  html.sc-light .sb-progress-label span:last-child { color: var(--text-primary) !important; }
+
+  /* topbar chips — soft tinted pills instead of flat white */
+  html.sc-light .tb-chip, html.sc-light #sync-status {
+    background: #F4F6FB !important; border-color: var(--border) !important;
+    color: var(--text-secondary) !important; box-shadow: none !important;
+  }
+  html.sc-light .tb-chip.purple { color: #4A50D8 !important; background: rgba(88, 94, 230, 0.08) !important; border-color: rgba(88, 94, 230, 0.22) !important; }
+  html.sc-light .tb-chip.green  { color: #0B8A5F !important; background: rgba(14, 159, 110, 0.09) !important; border-color: rgba(14, 159, 110, 0.22) !important; }
+  html.sc-light .tb-chip.amber  { color: #B45309 !important; background: rgba(217, 119, 6, 0.09) !important; border-color: rgba(217, 119, 6, 0.22) !important; }
+
+  /* ── 7 · CONTROLS — inputs, selects, buttons, picker ── */
+  html.sc-light input, html.sc-light select, html.sc-light textarea {
+    background: var(--bg-input) !important;
+    border-color: var(--border) !important;
+    color: var(--text-primary) !important;
+    color-scheme: light !important;
+    accent-color: var(--accent) !important;
+  }
+  html.sc-light input::placeholder, html.sc-light textarea::placeholder { color: var(--text-muted) !important; }
+  html.sc-light input:focus, html.sc-light select:focus, html.sc-light textarea:focus {
+    border-color: rgba(88, 94, 230, 0.50) !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 0 0 3px rgba(88, 94, 230, 0.13) !important;
+  }
+  html.sc-light .field select option { background: #FFFFFF; color: #171B2E; }
+  html.sc-light .log-btn {
+    background: var(--accent) !important; color: #FFFFFF !important;
+    box-shadow: 0 8px 18px -8px rgba(88, 94, 230, 0.65) !important; animation: none !important;
+  }
+  html.sc-light .log-btn:hover { background: #4A50D8 !important; box-shadow: 0 10px 24px -8px rgba(88, 94, 230, 0.75) !important; }
+  html.sc-light .timer-btn.primary { background: var(--accent) !important; color: #fff !important; box-shadow: 0 6px 14px -6px rgba(88, 94, 230, 0.6) !important; }
+  html.sc-light .timer-btn.stop { background: var(--green) !important; color: #fff !important; box-shadow: 0 6px 14px -6px rgba(14, 159, 110, 0.55) !important; }
+  html.sc-light .timer-btn.ghost { background: #F4F6FB !important; border-color: var(--border) !important; color: var(--text-secondary) !important; }
+  html.sc-light #timer-pause-btn { background: rgba(217, 119, 6, 0.10) !important; color: #B45309 !important; border: 1px solid rgba(217, 119, 6, 0.28) !important; }
+  html.sc-light .timer-panel {
+    background: linear-gradient(160deg, rgba(88, 94, 230, 0.05), rgba(14, 159, 110, 0.03)) !important;
+    border: 1px solid var(--border) !important;
+  }
+  html.sc-light .timer-status { background: #F4F6FB !important; border-color: var(--border) !important; color: var(--text-tertiary) !important; }
+  html.sc-light .timer-status.running { color: #0B8A5F !important; background: rgba(14, 159, 110, 0.10) !important; border-color: rgba(14, 159, 110, 0.28) !important; }
+  html.sc-light .timer-status.paused { color: #B45309 !important; background: rgba(217, 119, 6, 0.10) !important; border-color: rgba(217, 119, 6, 0.28) !important; }
+  html.sc-light .timer-label { color: var(--text-tertiary) !important; }
+  html.sc-light .timer-label .ti { color: var(--accent) !important; }
+  /* flip clock stays a dark instrument on the white card — fix only the colon dots */
+  html.sc-light #timer-display .flap-colon i { background: #8A90A8 !important; }
+  /* date picker */
+  html.sc-light #custom-picker {
+    background: #FFFFFF !important;
+    border-color: var(--border) !important;
+    box-shadow: 0 16px 44px -12px rgba(23, 27, 46, 0.22) !important;
+  }
+  html.sc-light #picker-month-year { color: var(--text-primary) !important; }
+  /* custom select */
+  html.sc-light .cs-trigger { background: var(--bg-input) !important; border-color: var(--border) !important; color: var(--text-primary) !important; }
+  html.sc-light .cs-trigger.open { border-color: rgba(88, 94, 230, 0.50) !important; background: #FFFFFF !important; box-shadow: 0 0 0 3px rgba(88, 94, 230, 0.13) !important; }
+  html.sc-light .cs-chev { color: var(--text-muted) !important; }
+  html.sc-light .cs-menu { background: #FFFFFF !important; border-color: var(--border) !important; box-shadow: 0 16px 40px -12px rgba(23, 27, 46, 0.20) !important; }
+  html.sc-light .cs-opt { color: var(--text-secondary) !important; }
+  html.sc-light .cs-opt:hover { background: rgba(88, 94, 230, 0.07) !important; color: #4A50D8 !important; }
+  html.sc-light .cs-opt.sel { color: #4A50D8 !important; }
+  /* duration chips */
+  html.sc-light .sc-dur-chip { background: #F4F6FB !important; border-color: var(--border) !important; color: var(--text-secondary) !important; }
+  html.sc-light .sc-dur-chip:hover, html.sc-light .sc-dur-chip.sc-on {
+    border-color: rgba(88, 94, 230, 0.45) !important; color: #4A50D8 !important; background: rgba(88, 94, 230, 0.08) !important;
+  }
+
+  /* ── 8 · COMPONENTS — intel, momentum, sessions, calendar, streak ── */
+  html.sc-light .intel-card { background: #FAFBFE !important; border: 1px solid var(--border) !important; box-shadow: none !important; }
+  html.sc-light .intel-card.positive { background: #F0FAF5 !important; border-color: rgba(14, 159, 110, 0.24) !important; }
+  html.sc-light .intel-card.warning  { background: #FDF8EC !important; border-color: rgba(217, 119, 6, 0.24) !important; }
+  html.sc-light .intel-card.negative { background: #FDF1F2 !important; border-color: rgba(229, 72, 77, 0.22) !important; }
+  html.sc-light .intel-card.neutral  { background: #F4F5FE !important; border-color: rgba(88, 94, 230, 0.20) !important; }
+  html.sc-light .intel-card:hover { box-shadow: 0 8px 20px -10px rgba(23, 27, 46, 0.14) !important; }
+  html.sc-light .intel-text { color: var(--text-primary) !important; }
+  html.sc-light .intel-sub { color: var(--text-tertiary) !important; }
+  html.sc-light .momentum-card {
+    background:
+      radial-gradient(110% 140% at 100% 0%, rgba(88, 94, 230, 0.06), transparent 55%),
+      #FFFFFF !important;
+  }
+  html.sc-light .banner {
+    background: linear-gradient(120deg, rgba(88, 94, 230, 0.05), rgba(14, 159, 110, 0.04)) , #FFFFFF !important;
+  }
+  html.sc-light .sess-item, html.sc-light .asm-row, html.sc-light .dt-row {
+    background: #F8F9FD !important; border-color: var(--border-subtle) !important;
+  }
+  html.sc-light .sess-item:hover, html.sc-light .asm-row:hover {
+    background: rgba(88, 94, 230, 0.05) !important; border-color: rgba(88, 94, 230, 0.24) !important;
+  }
+  html.sc-light .sess-topic, html.sc-light .asm-topic, html.sc-light .dt-stat-v, html.sc-light .dt-row-topic { color: var(--text-primary) !important; }
+  html.sc-light .sess-dur, html.sc-light .asm-dur, html.sc-light .dt-row-dur { color: #4A50D8 !important; }
+  html.sc-light .sess-date-tag { background: #EEF0F8 !important; border-color: var(--border-subtle) !important; color: var(--text-tertiary) !important; }
+  html.sc-light .sess-tabs, html.sc-light .asm-tabs { background: #EFF1F8 !important; border-color: var(--border-subtle) !important; }
+  html.sc-light .sess-tab, html.sc-light .asm-tab { color: var(--text-secondary) !important; }
+  html.sc-light .sess-tab.active, html.sc-light .asm-tab.active {
+    background: #FFFFFF !important; color: var(--text-primary) !important;
+    box-shadow: 0 1px 4px rgba(23, 27, 46, 0.10) !important;
+  }
+  html.sc-light .fpill { background: #FFFFFF !important; border-color: var(--border) !important; color: var(--text-secondary) !important; box-shadow: none !important; }
+  html.sc-light .fpill:hover { border-color: rgba(88, 94, 230, 0.40) !important; color: #4A50D8 !important; background: rgba(88, 94, 230, 0.06) !important; }
+  html.sc-light .fpill.active { background: rgba(88, 94, 230, 0.10) !important; border-color: rgba(88, 94, 230, 0.32) !important; color: #4A50D8 !important; box-shadow: none !important; }
+  html.sc-light .frange { color: var(--text-secondary) !important; }
+  html.sc-light .fsep { background: var(--border-strong) !important; }
+  /* calendars */
+  html.sc-light .cal-cell { background: #F6F7FC !important; border-color: var(--border-subtle) !important; color: var(--text-muted) !important; }
+  html.sc-light .cal-cell:hover { background: rgba(88, 94, 230, 0.07) !important; border-color: rgba(88, 94, 230, 0.30) !important; color: #4A50D8 !important; box-shadow: none !important; }
+  html.sc-light .cal-cell.has-data.met { background: rgba(14, 159, 110, 0.08) !important; border-color: rgba(14, 159, 110, 0.26) !important; color: var(--green) !important; }
+  html.sc-light .cal-cell.has-data.missed { background: rgba(229, 72, 77, 0.06) !important; border-color: rgba(229, 72, 77, 0.20) !important; color: var(--red) !important; }
+  html.sc-light .cal-cell.is-today { border-color: rgba(88, 94, 230, 0.50) !important; box-shadow: 0 0 0 2px rgba(88, 94, 230, 0.10) !important; }
+  html.sc-light #big-cal-grid > div { box-shadow: inset 0 0 0 1px rgba(23, 27, 46, 0.06) !important; }
+  html.sc-light #heatmap > div > div { box-shadow: inset 0 0 0 1px rgba(23, 27, 46, 0.07) !important; }
+  /* streak dots */
+  html.sc-light .s-dot.met { background: rgba(14, 159, 110, 0.12) !important; border-color: rgba(14, 159, 110, 0.28) !important; color: var(--green) !important; }
+  html.sc-light .s-dot.missed { background: rgba(229, 72, 77, 0.08) !important; border-color: rgba(229, 72, 77, 0.20) !important; color: var(--red) !important; }
+  html.sc-light .s-dot.empty { background: #F2F4FA !important; border-color: var(--border-subtle) !important; color: var(--text-muted) !important; }
+  /* progress tracks */
+  html.sc-light .kpi-bar, html.sc-light .xp-track, html.sc-light .t-track { background: #ECEFF6 !important; }
+  html.sc-light .xp-fill { background: linear-gradient(90deg, var(--accent), var(--green)) !important; box-shadow: none !important; }
+  html.sc-light .kpi-delta.up { color: #0B8A5F !important; background: rgba(14, 159, 110, 0.09) !important; border-color: rgba(14, 159, 110, 0.22) !important; }
+  html.sc-light .kpi-delta.down, html.sc-light .kpi-delta.neutral {
+    color: var(--text-tertiary) !important; background: #F4F6FB !important; border-color: var(--border) !important;
+  }
+  html.sc-light .donut-pill { background: #F4F6FB !important; border-color: var(--border-subtle) !important; color: var(--text-secondary) !important; }
+  html.sc-light .t-val { color: var(--text-tertiary) !important; }
+  html.sc-light .ring-card-action { color: #4A50D8 !important; background: rgba(88, 94, 230, 0.08) !important; border-color: rgba(88, 94, 230, 0.24) !important; }
+  html.sc-light .ring-card-action:hover { background: rgba(88, 94, 230, 0.14) !important; border-color: rgba(88, 94, 230, 0.40) !important; box-shadow: 0 4px 12px -6px rgba(88, 94, 230, 0.45) !important; }
+  html.sc-light .ring-card-action--warn { color: #B45309 !important; background: rgba(217, 119, 6, 0.08) !important; border-color: rgba(217, 119, 6, 0.24) !important; }
+  html.sc-light #sc-today-foot { background: #F8F9FD !important; border-color: var(--border-subtle) !important; }
+  html.sc-light .tlog-nav { background: #FFFFFF !important; border-color: var(--border) !important; color: var(--text-secondary) !important; }
+  html.sc-light .tlog-date { color: var(--text-primary) !important; }
+  html.sc-light .tlog-row.not-today .tlog-date { color: #4A50D8 !important; }
+  html.sc-light .tlog-today { background: rgba(88, 94, 230, 0.08) !important; border-color: rgba(88, 94, 230, 0.28) !important; color: #4A50D8 !important; }
+  html.sc-light .sc-sheldon {
+    background: linear-gradient(155deg, rgba(88, 94, 230, 0.05), rgba(14, 159, 110, 0.04)) !important;
+    border-color: rgba(88, 94, 230, 0.18) !important; color: var(--text-secondary) !important;
+  }
+  html.sc-light .sc-sheldon b { color: var(--text-primary) !important; }
+  html.sc-light .sc-mode { background: #EFF1F8 !important; border-color: var(--border-subtle) !important; }
+  html.sc-light .sc-mode-btn { color: var(--text-secondary) !important; }
+  html.sc-light .sc-mode-btn.sc-on { background: #FFFFFF !important; color: var(--text-primary) !important; box-shadow: 0 1px 4px rgba(23, 27, 46, 0.10) !important; }
+
+  /* ── 9 · ERROR LOG VIEW — never had light styles ── */
+  html.sc-light .el-dropzone { background: #F8F9FD !important; border-color: #D6DBEA !important; }
+  html.sc-light .el-dropzone:hover, html.sc-light .el-dropzone.drag-over {
+    border-color: rgba(88, 94, 230, 0.55) !important; background: rgba(88, 94, 230, 0.05) !important;
+  }
+  html.sc-light .el-dz-title { color: var(--text-primary) !important; }
+  html.sc-light .el-mode-btn { background: #FFFFFF !important; border-color: var(--border) !important; color: var(--text-secondary) !important; }
+  html.sc-light .el-mode-btn.el-mode-on { background: rgba(88, 94, 230, 0.10) !important; border-color: rgba(88, 94, 230, 0.36) !important; color: #4A50D8 !important; }
+  html.sc-light .el-fmt-chip { background: #FFFFFF !important; border-color: var(--border) !important; color: var(--text-tertiary) !important; }
+  html.sc-light .el-file-pill { background: rgba(14, 159, 110, 0.06) !important; border-color: rgba(14, 159, 110, 0.24) !important; }
+  html.sc-light .el-analyse-btn { background: var(--accent) !important; color: #fff !important; }
+  html.sc-light .el-ins-card, html.sc-light .el-dna-pill,
+  html.sc-light .el-drill-row, html.sc-light .el-hist-row {
+    background: #F8F9FD !important; border-color: var(--border-subtle) !important;
+  }
+  html.sc-light .el-ins-val, html.sc-light .el-dna-name,
+  html.sc-light .el-drill-title, html.sc-light .el-hist-title { color: var(--text-primary) !important; }
+  html.sc-light .el-dna-bar-wrap { background: #ECEFF6 !important; }
+  html.sc-light .el-hist-ic, html.sc-light .el-drill-num {
+    background: rgba(88, 94, 230, 0.10) !important; color: #4A50D8 !important;
+  }
+  html.sc-light .el-drill-chip { background: rgba(88, 94, 230, 0.08) !important; color: #4A50D8 !important; border-color: rgba(88, 94, 230, 0.22) !important; }
+  html.sc-light .el-hist-badge { background: rgba(14, 159, 110, 0.08) !important; color: #0B8A5F !important; border-color: rgba(14, 159, 110, 0.24) !important; }
+  html.sc-light #el-sheldon-text { color: var(--text-secondary) !important; }
+  html.sc-light #el-sheldon-text strong { color: var(--text-primary) !important; }
+
+  /* ── 10 · OVERLAYS — dialogs, modals, tooltip, Sheldon, profile ── */
+  html.sc-light .scd-card {
+    background: #FFFFFF !important; border: 1px solid var(--border) !important;
+    box-shadow: 0 32px 80px -20px rgba(23, 27, 46, 0.28) !important;
+  }
+  html.sc-light .scd-title { color: var(--text-primary) !important; }
+  html.sc-light .scd-body { color: var(--text-secondary) !important; }
+  html.sc-light .scd-icon-wrap { background: #F4F6FB !important; border-color: var(--border) !important; }
+  html.sc-light .scd-cancel { background: #F4F6FB !important; border: 1px solid var(--border) !important; color: var(--text-secondary) !important; }
+  html.sc-light .scd-primary { background: var(--accent) !important; color: #fff !important; }
+  html.sc-light #add-mock-modal > div, html.sc-light #migrate-modal > div, html.sc-light #trash-modal > div,
+  html.sc-light .dt-card, html.sc-light .asm-card, html.sc-light .scn-card {
+    background: #FFFFFF !important; border-color: var(--border) !important;
+    box-shadow: 0 32px 80px -20px rgba(23, 27, 46, 0.26) !important;
+  }
+  html.sc-light .dt-stat { background: #F8F9FD !important; border-color: var(--border-subtle) !important; }
+  html.sc-light .dt-track { background: #F2F4FA !important; border-color: var(--border-subtle) !important; }
+  html.sc-light .dt-grid { background: rgba(23, 27, 46, 0.07) !important; }
+  html.sc-light #perfos-tip {
+    background: #171B2E !important; border-color: #171B2E !important; color: #F5F7FF !important;
+    box-shadow: 0 10px 28px -8px rgba(23, 27, 46, 0.45) !important;
+  }
+  html.sc-light #perfos-tip::after { background: #171B2E !important; border-color: #171B2E !important; }
+  html.sc-light #perfos-tip .tip-val { color: #FFFFFF !important; }
+  html.sc-light #perfos-tip .tip-date { color: rgba(255, 255, 255, 0.60) !important; }
+  html.sc-light #sheldonPanel { background: #FBFCFE !important; border-color: var(--border) !important; box-shadow: 0 24px 64px -16px rgba(23, 27, 46, 0.28) !important; }
+  html.sc-light .sheldon-header { background: linear-gradient(180deg, rgba(88, 94, 230, 0.05), transparent) !important; border-bottom-color: var(--border-subtle) !important; }
+  html.sc-light .sheldon-title h3 { color: var(--text-primary) !important; }
+  html.sc-light .sheldon-title span { color: var(--text-tertiary) !important; }
+  html.sc-light .sheldon-msg.bot { background: #F2F4FB !important; color: var(--text-primary) !important; border-color: var(--border-subtle) !important; }
+  html.sc-light .sheldon-msg.user { background: linear-gradient(135deg, #585EE6, #4A50D8) !important; color: #fff !important; }
+  html.sc-light .sheldon-input { background: #F2F4FB !important; border-top-color: var(--border-subtle) !important; }
+  html.sc-light .sheldon-input textarea { background: #FFFFFF !important; border-color: var(--border) !important; color: var(--text-primary) !important; }
+  html.sc-light .sheldon-chip { background: rgba(88, 94, 230, 0.07) !important; border-color: rgba(88, 94, 230, 0.22) !important; color: #4A50D8 !important; }
+  html.sc-light .sheldon-typing { background: #F2F4FB !important; border-color: var(--border-subtle) !important; }
+  html.sc-light #sheldonFab { background: linear-gradient(135deg, #585EE6, #0E9F6E) !important; color: #fff !important; box-shadow: 0 10px 28px -8px rgba(88, 94, 230, 0.55) !important; }
+  html.sc-light .pf-btn { background: #FFFFFF !important; border-color: var(--border) !important; color: #4A50D8; }
+  html.sc-light .pf-menu { background: #FFFFFF !important; border-color: var(--border) !important; box-shadow: 0 16px 44px -12px rgba(23, 27, 46, 0.20) !important; }
+  html.sc-light .pf-name { color: var(--text-primary) !important; }
+  html.sc-light .pf-email { color: var(--text-tertiary) !important; }
+  html.sc-light .pf-item { color: var(--text-secondary) !important; }
+  html.sc-light .pf-head { border-bottom-color: var(--border-subtle) !important; }
+  /* share modal shell light; the share CARD itself stays dark — it's a branded export image */
+  html.sc-light #share-modal > div { background: #FFFFFF !important; border-color: var(--border) !important; }
+
+  /* ── 11 · MISC — footer, scrollbar, toggle ── */
+  html.sc-light .footer { border-top-color: var(--border) !important; background: transparent !important; color: var(--text-muted) !important; }
+  html.sc-light .footer strong { color: var(--text-secondary) !important; }
+  html.sc-light ::-webkit-scrollbar-thumb { background: rgba(88, 94, 230, 0.22) !important; }
+  html.sc-light ::-webkit-scrollbar-thumb:hover { background: rgba(88, 94, 230, 0.38) !important; }
+  html.sc-light .sct-track { background: rgba(88, 94, 230, 0.10); border-color: rgba(88, 94, 230, 0.28); }
+  html.sc-light .sct-thumb { box-shadow: 0 2px 8px rgba(88, 94, 230, 0.30), 0 0 0 1px rgba(88, 94, 230, 0.14); }
+  html.sc-light .sc-theme-toggle:hover .sct-track { box-shadow: 0 0 0 3px rgba(88, 94, 230, 0.14); }
+</style>
   <script>
     !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]), t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.crossOrigin = "anonymous", p.async = !0, p.src = s.api_host.replace(".i.posthog.com", "io.posthog.com") + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + " (stub)" }, o = "init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
     posthog.init('phc_snjXrKu2HqQyp2LPm8qPastGF9JvpHPjVpxBJ62DkLaq', {
