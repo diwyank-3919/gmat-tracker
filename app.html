@@ -6644,9 +6644,13 @@
     .sheldon-send:active{transform:scale(.9);}
     .sheldon-send:disabled{opacity:.4;transform:none;cursor:default;}
 
+    @media(max-width:640px){
+      #sheldonCoreWrap{right:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:1000;}
+      #sheldonCore{width:60px;height:60px;}
+      .core-label{display:none;}
+    }
     @media(max-width:480px){
       #sheldonPanel{width:100vw;max-width:100vw;height:100vh;max-height:100vh;bottom:0;right:0;border-radius:0;}
-      #sheldonCoreWrap{bottom:18px;right:16px;}
     }
     /* ── EYEBROW MICRO-LABELS — subtle brand tint ── */
     .kpi-label,
@@ -10335,16 +10339,13 @@
       var GOAL_HRS = 200, remaining = Math.max(0, GOAL_HRS - totalStudied);
       var hrsPerDay = daysLeft > 0 ? (remaining / daysLeft).toFixed(1) : "0";
       document.getElementById("hrs-needed").textContent = hrsPerDay + "h";
-      var sd = new Set(sessions.map(function (s) { return s.date; })).size || 1;
       var sd = new Set(sessions.map(function (s) { return s.date; })).size;
       if (totalStudied > 0 && sd > 0) {
         var projected = totalStudied + (totalStudied / sd * daysLeft);
         document.getElementById("proj-total").textContent = Math.round(projected) + "h";
       } else {
-        // no sessions yet (or still loading) — don't show a misleading 0h
         document.getElementById("proj-total").textContent = "—";
       }
-      document.getElementById("proj-total").textContent = Math.round(projected) + "h";
       var totalPrepDays = Math.ceil((examDate - PREP_START_DATE) / (1000 * 60 * 60 * 24));
       var doneDays = Math.ceil((today - PREP_START_DATE) / (1000 * 60 * 60 * 24));
       var prepPct = Math.min(100, Math.round(doneDays / totalPrepDays * 100));
@@ -10975,7 +10976,7 @@
       wrap.appendChild(div);
       var words=text.split(' '), i=0;
       function next(){
-        if(i>=words.length){ div.innerHTML=sheldonFormat(text); return; }
+        if(i>=words.length){ div.innerHTML=sheldonFormat(text); if(typeof sheldonSpeak==='function') sheldonSpeak(text.replace(/\*\*/g,'')); return; }
         div.textContent=words.slice(0,++i).join(' ');
         wrap.scrollTop=wrap.scrollHeight;
         setTimeout(next,28);
@@ -12544,6 +12545,9 @@
       </div>
       <button class="sheldon-tone" id="sheldonTone" onclick="sheldonToggleTone()">
         <i class="ti ti-mood-smile"></i><span id="sheldonToneLabel">Playful</span>
+      </button>
+      <button id="sheldonVoiceBtn" onclick="sheldonVoiceToggle()" title="Voice replies" aria-label="Toggle voice replies">
+        <i class="ti ti-volume"></i>
       </button>
       <button class="sheldon-close" onclick="closeSheldon()" aria-label="Close">
         <i class="ti ti-x"></i>
