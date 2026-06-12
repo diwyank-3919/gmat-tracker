@@ -7612,8 +7612,7 @@
   SCORECONSOLE — MICRO-INTERACTIONS PATCH v1
   Two paste blocks. No existing code is modified — both blocks are
   additive, so your IIFEs and braces stay untouched.
- 
-  BLOCK A (style): paste immediately BEFORE the closing </head> tag,
+
   AFTER the last existing </style> (it must win the cascade — same rule
   as the Sheldon Coach block).
  
@@ -7622,7 +7621,7 @@
 ═════════════════════════════════════════════════════════════════════ -->
  
  
-<!-- ━━━━━━━━━━ BLOCK A — paste before </head> ━━━━━━━━━━ -->
+<!-- ━━━━━━━━━━ BLOCK A —  ━━━━━━━━━━ -->
 <style id="sc-micro-css">
   @property --sc-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
   @keyframes scSpinAngle { to { --sc-angle: 360deg; } }
@@ -11008,6 +11007,29 @@
         if(_thinkTimer){ clearInterval(_thinkTimer); _thinkTimer=null; }
       }
     }
+
+    function buildSheldonContext() {
+  var tot = sessions.reduce(function (a, s) { return a + s.mins; }, 0);
+  var ws = startOfWeek(today), wm = 0, wt = 0;
+  for (var i = 0; i < 7; i++) { var wd = addDays(ws, i); wm += minsOn(dateStr(wd)); wt += targetFor(wd); }
+  var topicTotals = {};
+  sessions.forEach(function (s) { topicTotals[s.topic] = (topicTotals[s.topic] || 0) + s.mins; });
+  var streak = 0, cur = minsOn(dateStr(today)) > 0 ? new Date(today) : addDays(today, -1);
+  while (minsOn(dateStr(cur)) > 0) { streak++; cur = addDays(cur, -1); }
+  var ed = localStorage.getItem("gmat_exam_date"), daysLeft = null;
+  if (ed) { var p = ed.split("-").map(Number); daysLeft = Math.max(0, Math.ceil((new Date(p[0], p[1] - 1, p[2]) - today) / 86400000)); }
+  return {
+    totalHours: +(tot / 60).toFixed(1),
+    streak: streak,
+    weekHours: +(wm / 60).toFixed(1),
+    weekTarget: +(wt / 60).toFixed(1),
+    tone: localStorage.getItem('sheldon_tone') || 'playful',
+    topicTotals: Object.fromEntries(Object.entries(topicTotals).map(function (e) { return [e[0], +(e[1] / 60).toFixed(1)]; })),
+    daysLeft: daysLeft,
+    latestMock: window.mockScores && window.mockScores.length ? window.mockScores[window.mockScores.length - 1].score : null,
+    targetScore: TARGET_SCORE
+  };
+}
 
     /* ── send ── */
     function sheldonGrow(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
