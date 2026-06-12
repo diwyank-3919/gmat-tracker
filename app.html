@@ -6300,374 +6300,354 @@
     })();
   </script>
   <style>
-    /* ============ Sheldon Coach ============ */
-    #sheldonFab {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-      z-index: 9998;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #878dff, #46c98f);
-      color: #0d1018;
-      font-size: 26px;
-      box-shadow: 0 8px 28px rgba(135, 141, 255, .35);
-      transition: transform .2s ease, box-shadow .2s ease;
+    /* ════ SHELDON 2.0 ════ */
+    @property --ang  { syntax:'<angle>'; initial-value:0deg; inherits:false; }
+    @property --ang2 { syntax:'<angle>'; initial-value:0deg; inherits:false; }
+
+    /* ── CORE FAB ── */
+    #sheldonCoreWrap {
+      position:fixed;bottom:28px;right:28px;z-index:9998;
+      display:flex;align-items:center;gap:0;cursor:pointer;user-select:none;
+      transition:opacity .3s, transform .3s;
+    }
+    #sheldonCoreWrap.hidden{opacity:0;pointer-events:none;transform:translateY(16px);}
+
+    .core-label{
+      display:flex;align-items:center;height:40px;padding:0 16px 0 20px;margin-right:-14px;
+      border-radius:100px 0 0 100px;font-size:12.5px;font-weight:700;letter-spacing:.01em;
+      color:rgba(245,247,250,1);
+      background:rgba(17,21,33,.88);border:1px solid rgba(135,141,255,.30);border-right:none;
+      backdrop-filter:blur(18px);white-space:nowrap;
+      opacity:0;transform:translateX(14px);pointer-events:none;
+      transition:opacity .25s ease, transform .35s cubic-bezier(.34,1.56,.64,1);
+    }
+    html.sc-light .core-label{
+      color:#0e1020;background:rgba(240,242,252,.92);border-color:rgba(90,78,200,.28);
+    }
+    #sheldonCoreWrap:hover .core-label{opacity:1;transform:translateX(0);}
+    .core-label small{color:#5fd9a8;margin-left:7px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+
+    #sheldonCore{position:relative;width:68px;height:68px;flex-shrink:0;
+      transition:transform .25s cubic-bezier(.34,1.56,.64,1);}
+    #sheldonCoreWrap:hover #sheldonCore{transform:scale(1.07);}
+    #sheldonCoreWrap:active #sheldonCore{transform:scale(.93);}
+
+    /* breathing ambient halo */
+    #sheldonCore::before{
+      content:'';position:absolute;inset:-16px;border-radius:50%;
+      background:radial-gradient(circle, rgba(135,141,255,.28), rgba(70,201,143,.10) 50%, transparent 72%);
+      animation:shBreath 3.6s ease-in-out infinite;filter:blur(6px);pointer-events:none;
+    }
+    @keyframes shBreath{0%,100%{opacity:.55;transform:scale(.92);}50%{opacity:1;transform:scale(1.06);}}
+
+    /* glass sphere */
+    .sh-orb{
+      position:absolute;inset:6px;border-radius:50%;overflow:hidden;background:#0c0f1a;
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.22),
+        inset 0 -8px 16px rgba(0,0,0,.55),
+        0 10px 30px rgba(0,0,0,.55), 0 0 24px rgba(135,141,255,.22);
+    }
+    .sh-orb::before{
+      content:'';position:absolute;inset:-40%;
+      background:conic-gradient(from var(--ang), #878dff, #46c98f, #60a5fa, #6f76ff, #878dff);
+      filter:blur(14px) saturate(1.3);opacity:.85;
+      animation:shSpin1 5.5s linear infinite;
+    }
+    .sh-orb::after{
+      content:'';position:absolute;inset:0;border-radius:50%;
+      background:
+        radial-gradient(circle at 32% 26%, rgba(255,255,255,.34), transparent 36%),
+        radial-gradient(circle at 50% 110%, rgba(5,8,16,.85), transparent 58%);
+    }
+    @keyframes shSpin1{to{--ang:360deg;}}
+
+    /* electron orbit */
+    .sh-orbit{position:absolute;inset:-4px;border-radius:50%;animation:shSpin2 7s linear infinite;pointer-events:none;}
+    @keyframes shSpin2{to{transform:rotate(360deg);}}
+    .sh-orbit i{
+      position:absolute;top:-2px;left:50%;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;
+      background:#5fd9a8;box-shadow:0 0 12px #5fd9a8, 0 0 4px #fff inset;
+    }
+    .sh-orbit::before{
+      content:'';position:absolute;inset:0;border-radius:50%;
+      border:1px solid rgba(135,141,255,.22);
     }
 
-    #sheldonFab:hover {
-      transform: translateY(-2px) scale(1.05);
-      box-shadow: 0 12px 34px rgba(70, 201, 143, .4);
+    /* ring of light */
+    .sh-ring{
+      position:absolute;inset:-1px;border-radius:50%;padding:1.5px;pointer-events:none;
+      background:conic-gradient(from var(--ang2), transparent 12%, rgba(255,255,255,.85) 22%, #9ca2ff 30%, transparent 45%);
+      -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite:xor;mask-composite:exclude;
+      animation:shSpin3 3.2s linear infinite;
+    }
+    @keyframes shSpin3{to{--ang2:360deg;}}
+
+    /* spark icon */
+    #sheldonCore .sh-spark{
+      position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;
+      font-size:23px;animation:shFloaty 4.2s ease-in-out infinite;
+    }
+    #sheldonCore .sh-spark .ti{
+      background:linear-gradient(135deg,#fff,#dfe3ff);-webkit-background-clip:text;background-clip:text;
+      -webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));
+    }
+    @keyframes shFloaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-2.5px);}}
+
+    /* core states */
+    #sheldonCoreWrap.thinking .sh-orb::before{animation-duration:1.4s;opacity:1;}
+    #sheldonCoreWrap.thinking #sheldonCore::before{animation-duration:1.2s;}
+    #sheldonCoreWrap.thinking .sh-orbit{animation-duration:2.2s;}
+    #sheldonCoreWrap.away .sh-orb::before{animation-play-state:paused;opacity:.35;}
+    #sheldonCoreWrap.away #sheldonCore::before{opacity:.2;animation:none;}
+    #sheldonCoreWrap.away .sh-ring,.sh-orbit i{opacity:.25;}
+
+    /* unread ping */
+    .sh-ping{
+      position:absolute;top:2px;right:2px;width:14px;height:14px;border-radius:50%;z-index:4;
+      background:#46c98f;border:2.5px solid #0d1018;
+      animation:shPingPop .5s cubic-bezier(.34,1.8,.64,1) both;
+    }
+    @keyframes shPingPop{from{transform:scale(0);}to{transform:scale(1);}}
+
+    /* ── PANEL ── */
+    #sheldonPanel{
+      position:fixed;bottom:28px;right:28px;z-index:9999;
+      width:396px;max-width:calc(100vw - 32px);
+      height:600px;max-height:calc(100vh - 56px);
+      display:flex;flex-direction:column;overflow:hidden;
+      border-radius:24px;
+      background:rgba(13,17,28,.92);backdrop-filter:blur(28px) saturate(160%);
+      border:1px solid rgba(135,141,255,.22);
+      box-shadow:0 32px 90px rgba(0,0,0,.65), 0 0 60px rgba(135,141,255,.10);
+      opacity:0;transform:translateY(26px) scale(.95);pointer-events:none;
+      transform-origin:bottom right;
+      transition:opacity .28s ease, transform .38s cubic-bezier(.34,1.4,.5,1);
+    }
+    html.sc-light #sheldonPanel{
+      background:rgba(244,242,255,.94);border-color:rgba(90,78,200,.22);
+      box-shadow:0 32px 90px rgba(15,17,40,.18), 0 0 40px rgba(90,78,200,.08);
+    }
+    #sheldonPanel.open{opacity:1;transform:none;pointer-events:auto;}
+
+    /* aurora edge */
+    #sheldonPanel::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:1.5px;z-index:5;
+      background:linear-gradient(90deg, transparent, #878dff, #46c98f, transparent);
+      background-size:220% 100%;animation:shEdge 5s linear infinite;
+    }
+    @keyframes shEdge{from{background-position:200% 0;}to{background-position:-200% 0;}}
+
+    /* nebula glow inside panel */
+    #sheldonPanel::after{
+      content:'';position:absolute;top:-120px;right:-100px;width:320px;height:320px;border-radius:50%;
+      background:radial-gradient(circle, rgba(135,141,255,.12), transparent 65%);
+      pointer-events:none;animation:shBreath 6s ease-in-out infinite;
     }
 
-    #sheldonFab.hidden {
-      display: none;
+    /* ── PANEL HEADER ── */
+    .sheldon-header{
+      display:flex;align-items:center;gap:12px;padding:16px 18px 14px;position:relative;z-index:2;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      background:linear-gradient(180deg, rgba(135,141,255,.07), transparent);
+    }
+    html.sc-light .sheldon-header{
+      border-bottom-color:rgba(15,17,40,.07);
+      background:linear-gradient(180deg, rgba(90,78,200,.07), transparent);
     }
 
-    #sheldonPanel {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 384px;
-      max-width: calc(100vw - 32px);
-      height: 560px;
-      max-height: calc(100vh - 48px);
-      background: #11151f;
-      border: 1px solid rgba(135, 141, 255, .18);
-      border-radius: 18px;
-      display: none;
-      flex-direction: column;
-      overflow: hidden;
-      z-index: 9999;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
-      font-family: 'Hanken Grotesk', system-ui, sans-serif;
+    /* mini orb in header */
+    .sh-mini{position:relative;width:42px;height:42px;flex-shrink:0;}
+    .sh-mini .sh-orb{inset:4px;}
+    .sh-mini .sh-orbit{inset:-2px;animation-duration:5s;}
+    .sh-mini .sh-orbit i{width:6px;height:6px;margin-left:-3px;top:-1.5px;}
+
+    .sheldon-title h3{
+      font-family:'Fraunces',serif;font-size:18px;font-weight:600;letter-spacing:-.01em;
+      background:linear-gradient(90deg,#fff 30%,#c9cdff);-webkit-background-clip:text;
+      background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    html.sc-light .sheldon-title h3{
+      background:linear-gradient(90deg,#0e1020 30%,#4a44a0);
+      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .sheldon-title{flex:1;min-width:0;line-height:1.2;}
+    .ph-status-wrap{display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(245,247,250,.45);margin-top:2px;}
+    html.sc-light .ph-status-wrap{color:rgba(14,16,32,.42);}
+    .ph-status-dot{width:6px;height:6px;border-radius:50%;background:#46c98f;
+      box-shadow:0 0 8px #46c98f;animation:shDotPulse 2s ease-in-out infinite;}
+    @keyframes shDotPulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+    .ph-typing-lbl{color:#9ca2ff;display:none;}
+    #sheldonPanel.thinking .ph-online-lbl{display:none;}
+    #sheldonPanel.thinking .ph-typing-lbl{display:inline;}
+
+    .sheldon-tone{
+      display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 12px;
+      border-radius:100px;cursor:pointer;font-family:inherit;
+      font-size:11px;font-weight:650;
+      background:rgba(135,141,255,.12);border:1px solid rgba(135,141,255,.28);color:#b6baff;
+      transition:all .15s;
+    }
+    html.sc-light .sheldon-tone{
+      background:rgba(90,78,200,.09);border-color:rgba(90,78,200,.24);color:var(--accent,#5a4ec8);
+    }
+    .sheldon-tone.focused{background:rgba(70,201,143,.12);border-color:rgba(70,201,143,.30);color:#6fe7b6;}
+    .sheldon-tone:active{transform:scale(.94);}
+
+    .sheldon-close{
+      width:32px;height:32px;border-radius:10px;border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.05);color:rgba(245,247,250,.45);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s;
+    }
+    html.sc-light .sheldon-close{border-color:rgba(15,17,40,.10);background:rgba(15,17,40,.04);color:rgba(14,16,32,.40);}
+    .sheldon-close:hover{color:rgba(245,247,250,1);border-color:rgba(135,141,255,.4);}
+    html.sc-light .sheldon-close:hover{color:var(--red,#c73b5a);background:rgba(199,59,90,.08);border-color:rgba(199,59,90,.25);}
+
+    /* ── MESSAGES ── */
+    .sheldon-messages{
+      flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:13px;position:relative;z-index:2;
+    }
+    .sheldon-messages::-webkit-scrollbar{width:5px;}
+    .sheldon-messages::-webkit-scrollbar-thumb{background:rgba(135,141,255,.25);border-radius:3px;}
+
+    .sheldon-msg{max-width:86%;font-size:13.5px;line-height:1.55;
+      animation:shMsgIn .4s cubic-bezier(.34,1.4,.5,1) both;}
+    @keyframes shMsgIn{from{opacity:0;transform:translateY(10px) scale(.97);}to{opacity:1;transform:none;}}
+
+    .sheldon-msg.bot{
+      align-self:flex-start;position:relative;color:#dfe2ea;padding:12px 15px;
+      background:linear-gradient(155deg,#1c2233,#171c2a);
+      border-radius:4px 18px 18px 18px;
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    html.sc-light .sheldon-msg.bot{
+      background:linear-gradient(155deg,#ffffff,#f7f6ff);
+      color:#0e1020;border-color:rgba(15,17,40,.08);
+      box-shadow:0 2px 8px rgba(15,17,40,.06), inset 0 1px 0 rgba(255,255,255,.90);
+    }
+    /* left accent bar */
+    .sheldon-msg.bot::before{
+      content:'';position:absolute;left:0;top:10px;bottom:10px;width:2px;border-radius:2px;
+      background:linear-gradient(180deg,#878dff,#46c98f);opacity:.8;
+    }
+    .sheldon-msg.bot strong{color:#fff;}
+    html.sc-light .sheldon-msg.bot strong{color:#0e1020;}
+    .sheldon-msg.bot p{margin:0 0 8px;}
+    .sheldon-msg.bot p:last-child{margin-bottom:0;}
+    .sheldon-msg.bot ul{margin:6px 0;padding-left:18px;}
+    .sheldon-msg.bot li{margin-bottom:4px;}
+
+    .sheldon-msg.user{
+      align-self:flex-end;color:#0d1018;font-weight:550;padding:11px 15px;
+      border-radius:18px 4px 18px 18px;
+      background:linear-gradient(135deg,#9ca2ff,#878dff);
+      box-shadow:0 6px 18px -6px rgba(135,141,255,.55);
+    }
+    .sheldon-msg.error{
+      align-self:flex-start;padding:11px 15px;border-radius:14px;
+      background:rgba(255,90,90,.10);border:1px solid rgba(255,90,90,.25);color:#ff9a9a;
     }
 
-    #sheldonPanel.open {
-      display: flex;
+    /* thinking bubble */
+    .sheldon-typing{
+      align-self:flex-start;display:flex;align-items:center;gap:11px;
+      padding:11px 16px 11px 12px;
+      background:linear-gradient(155deg,#1c2233,#171c2a);
+      border-radius:4px 18px 18px 18px;border:1px solid rgba(135,141,255,.18);
+      animation:shMsgIn .3s ease both;max-width:fit-content;
     }
-
-    .sheldon-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 16px 18px;
-      border-bottom: 1px solid rgba(255, 255, 255, .06);
-      background: linear-gradient(180deg, rgba(135, 141, 255, .08), transparent);
+    html.sc-light .sheldon-typing{
+      background:linear-gradient(155deg,#ffffff,#f7f6ff);border-color:rgba(90,78,200,.18);
     }
-
-    .sheldon-avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #878dff, #46c98f);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #0d1018;
-      font-size: 20px;
-      flex-shrink: 0;
+    .sh-think-micro{position:relative;width:26px;height:26px;flex-shrink:0;}
+    .sh-think-micro .sh-orb{inset:2px;}
+    .sh-think-micro .sh-orb::before{animation-duration:1.3s;}
+    .sheldon-thinking-text{
+      font-size:12px;font-style:italic;
+      background:linear-gradient(90deg,#878dff 20%,#cfd2ff 40%,#878dff 60%);
+      background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+      animation:shTxtShimmer 1.8s linear infinite;
+      white-space:nowrap;
     }
-
-    .sheldon-title {
-      flex: 1;
-      min-width: 0;        /* add this */
-      overflow: hidden;     /* optional, prevents text overflow issues */
-}
-
-    .sheldon-title h3 {
-      margin: 0;
-      font-family: 'Fraunces', serif;
-      font-size: 17px;
-      font-weight: 600;
-      color: #f5f6fa;
+    html.sc-light .sheldon-thinking-text{
+      background:linear-gradient(90deg,#5a4ec8 20%,#8b85d4 40%,#5a4ec8 60%);
+      background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
     }
+    @keyframes shTxtShimmer{from{background-position:200% 0;}to{background-position:-200% 0;}}
 
-    .sheldon-title span {
-      font-size: 12px;
-      color: #8a90a2;
+    /* ── CHIPS ── */
+    .sheldon-chips{
+      display:flex;flex-wrap:wrap;gap:8px;padding:0 18px 8px;position:relative;z-index:2;
     }
-
-    .sheldon-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #46c98f;
-      display: inline-block;
-      margin-right: 5px;
+    .sheldon-chip{
+      position:relative;font-family:inherit;font-size:12px;font-weight:600;
+      padding:8px 14px;border-radius:100px;cursor:pointer;overflow:hidden;
+      background:rgba(135,141,255,.08);border:1px solid rgba(135,141,255,.22);color:#b6baff;
+      transition:all .2s cubic-bezier(.34,1.56,.64,1);
     }
-
-    .sheldon-close {
-      background: none;
-      border: none;
-      color: #8a90a2;
-      cursor: pointer;
-      font-size: 24px;
-      padding: 2px 6px;
-      line-height: 1;
-      border-radius: 8px;
+    .sheldon-chip::after{
+      content:'';position:absolute;inset:0;
+      transform:translateX(-110%) skewX(-18deg);
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent);
+      transition:none;
     }
-
-    .sheldon-close:hover {
-      color: #f5f6fa;
-      background: rgba(255, 255, 255, .06);
+    .sheldon-chip:hover{
+      background:rgba(135,141,255,.16);transform:translateY(-2px);
+      border-color:rgba(135,141,255,.45);box-shadow:0 6px 18px -6px rgba(135,141,255,.5);
     }
-
-    .sheldon-tone {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-family: inherit;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 5px 9px;
-      border-radius: 100px;
-      cursor: pointer;
-      margin-right: 6px;
-      background: rgba(135, 141, 255, .12);
-      border: 1px solid rgba(135, 141, 255, .28);
-      color: #b6baff;
-      transition: background .15s, color .15s, border-color .15s;
+    .sheldon-chip:hover::after{animation:shChipSheen .6s ease forwards;}
+    .sheldon-chip:active{transform:scale(.95);}
+    @keyframes shChipSheen{to{transform:translateX(160%) skewX(-18deg);}}
+    html.sc-light .sheldon-chip{
+      background:rgba(90,78,200,.08);border-color:rgba(90,78,200,.22);color:var(--accent,#5a4ec8);
     }
+    html.sc-light .sheldon-chip:hover{background:rgba(90,78,200,.14);border-color:rgba(90,78,200,.40);}
 
-    .sheldon-tone:hover {
-      background: rgba(135, 141, 255, .2);
+    /* ── INPUT DOCK ── */
+    .sheldon-input{
+      display:flex;align-items:flex-end;gap:9px;padding:13px 15px;position:relative;z-index:2;
+      border-top:1px solid rgba(255,255,255,.06);background:rgba(10,13,22,.70);
     }
-
-    .sheldon-tone .ti {
-      font-size: 13px;
+    html.sc-light .sheldon-input{
+      background:rgba(235,237,252,.80);border-top-color:rgba(15,17,40,.07);
     }
-
-    .sheldon-tone.focused {
-      background: rgba(70, 201, 143, .12);
-      border-color: rgba(70, 201, 143, .30);
-      color: #6fe7b6;
+    .sh-dock-field{flex:1;position:relative;border-radius:14px;padding:1.5px;
+      background:rgba(255,255,255,.08);transition:background .25s;}
+    .sh-dock-field.lit{
+      background:conic-gradient(from var(--ang2), #878dff, #46c98f, #60a5fa, #878dff);
+      animation:shSpin3 3s linear infinite;
     }
-
-    .sheldon-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+    html.sc-light .sh-dock-field{background:rgba(15,17,40,.10);}
+    html.sc-light .sh-dock-field.lit{background:conic-gradient(from var(--ang2), #5a4ec8, #12875a, #2563c0, #5a4ec8);}
+    .sh-dock-field textarea{
+      display:block;width:100%;resize:none;border:none;outline:none;border-radius:12.5px;
+      background:#141927;color:#f5f7fa;font-family:'Hanken Grotesk',system-ui,sans-serif;
+      font-size:13.5px;line-height:1.45;padding:11px 13px;max-height:110px;
     }
-
-    .sheldon-messages::-webkit-scrollbar {
-      width: 6px;
+    html.sc-light .sh-dock-field textarea{
+      background:#ffffff;color:#0e1020;
+      box-shadow:0 1px 4px rgba(15,17,40,.06);
     }
+    html.sc-light .sh-dock-field textarea::placeholder{color:rgba(14,16,32,.32);}
+    .sh-dock-field textarea::placeholder{color:rgba(245,247,250,.30);}
 
-    .sheldon-messages::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, .12);
-      border-radius: 3px;
+    .sheldon-send{
+      width:44px;height:44px;flex-shrink:0;border:none;border-radius:13px;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;font-size:17px;color:#0d1018;
+      background:linear-gradient(135deg,#9ca2ff,#5fd9a8);
+      box-shadow:0 6px 18px -4px rgba(135,141,255,.5);
+      transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .2s, filter .15s;
     }
+    .sheldon-send:hover{filter:brightness(1.08);transform:translateY(-1px);}
+    .sheldon-send:active{transform:scale(.9);}
+    .sheldon-send:disabled{opacity:.4;transform:none;cursor:default;}
 
-    .sheldon-msg {
-      max-width: 86%;
-      font-size: 14px;
-      line-height: 1.55;
+    @media(max-width:480px){
+      #sheldonPanel{width:100vw;max-width:100vw;height:100vh;max-height:100vh;bottom:0;right:0;border-radius:0;}
+      #sheldonCoreWrap{bottom:18px;right:16px;}
     }
-
-    .sheldon-msg.user {
-      align-self: flex-end;
-      background: linear-gradient(135deg, #878dff, #6f76ff);
-      color: #0d1018;
-      font-weight: 500;
-      padding: 10px 14px;
-      border-radius: 16px 16px 4px 16px;
-    }
-
-    .sheldon-msg.bot {
-      align-self: flex-start;
-      background: #1b2130;
-      color: #dfe2ea;
-      padding: 11px 15px;
-      border-radius: 16px 16px 16px 4px;
-      border: 1px solid rgba(255, 255, 255, .05);
-    }
-
-    .sheldon-msg.bot p {
-      margin: 0 0 8px;
-    }
-
-    .sheldon-msg.bot p:last-child {
-      margin-bottom: 0;
-    }
-
-    .sheldon-msg.bot ul {
-      margin: 6px 0;
-      padding-left: 18px;
-    }
-
-    .sheldon-msg.bot li {
-      margin-bottom: 4px;
-    }
-
-    .sheldon-msg.bot strong {
-      color: #f5f6fa;
-    }
-
-    .sheldon-msg.error {
-      align-self: flex-start;
-      background: rgba(255, 90, 90, .1);
-      border: 1px solid rgba(255, 90, 90, .25);
-      color: #ff9a9a;
-      padding: 11px 15px;
-      border-radius: 14px;
-    }
-
-    .sheldon-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 0 18px 4px;
-    }
-
-    .sheldon-chip {
-      background: rgba(135, 141, 255, .1);
-      border: 1px solid rgba(135, 141, 255, .25);
-      color: #b6baff;
-      font-size: 12.5px;
-      padding: 7px 12px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background .15s;
-    }
-
-    .sheldon-chip:hover {
-      background: rgba(135, 141, 255, .2);
-    }
-
-    .sheldon-typing {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      align-self: flex-start;
-      padding: 11px 15px;
-      background: #1b2130;
-      border-radius: 16px 16px 16px 4px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      max-width: fit-content;
-      overflow: visible;
-    }
-
-    .sheldon-typing span:nth-child(1),
-    .sheldon-typing span:nth-child(2),
-    .sheldon-typing span:nth-child(3) {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #878dff;
-      animation: sheldonBlink 1.2s infinite both;
-      flex-shrink: 0;
-    }
-
-    .sheldon-typing span:nth-child(2) {
-      animation-delay: .2s;
-    }
-
-    .sheldon-typing span:nth-child(3) {
-      animation-delay: .4s;
-    }
-
-    .sheldon-thinking-text {
-      font-size: 12px;
-      color: rgba(135, 141, 255, 0.7);
-      margin-left: 4px;
-      transition: opacity 0.2s ease;
-      font-style: italic;
-      white-space: nowrap;
-    }
-
-    @keyframes sheldonBlink {
-
-      0%,
-      80%,
-      100% {
-        opacity: .25;
-      }
-
-      40% {
-        opacity: 1;
-      }
-    }
-
-    .sheldon-input {
-      display: flex;
-      align-items: flex-end;
-      gap: 8px;
-      padding: 12px 14px;
-      border-top: 1px solid rgba(255, 255, 255, .06);
-      background: #0f131c;
-    }
-
-    .sheldon-input textarea {
-      flex: 1;
-      resize: none;
-      background: #1b2130;
-      border: 1px solid rgba(255, 255, 255, .08);
-      border-radius: 12px;
-      color: #f5f6fa;
-      font-family: inherit;
-      font-size: 14px;
-      padding: 10px 12px;
-      max-height: 120px;
-      line-height: 1.4;
-      outline: none;
-    }
-
-    .sheldon-input textarea:focus {
-      border-color: rgba(135, 141, 255, .5);
-    }
-
-    .sheldon-input textarea::placeholder {
-      color: #6a7186;
-    }
-
-    .sheldon-send {
-      width: 40px;
-      height: 40px;
-      border-radius: 11px;
-      border: none;
-      cursor: pointer;
-      background: linear-gradient(135deg, #878dff, #46c98f);
-      color: #0d1018;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: opacity .15s;
-    }
-
-    .sheldon-send:disabled {
-      opacity: .4;
-      cursor: default;
-    }
-
-    @media (max-width: 480px) {
-      #sheldonPanel {
-        width: 100vw;
-        height: 100vh;
-        max-height: 100vh;
-        bottom: 0;
-        right: 0;
-        border-radius: 0;
-      }
-
-      #sheldonFab {
-        bottom: 18px;
-        right: 18px;
-      }
-    }
-
     /* ── EYEBROW MICRO-LABELS — subtle brand tint ── */
     .kpi-label,
     .kpi.hero .kpi-label,
@@ -10874,235 +10854,207 @@
         document.getElementById("auth-overlay").style.display = "flex";
       }
     });
-    /* ============ Sheldon Coach ============ */
+    /* ═══ SHELDON 2.0 JS ═══ */
     var sheldonHistory = [];
     var sheldonBusy = false;
     var sheldonGreeted = false;
 
-    function openSheldon() {
+    /* ── tiny sound engine ── */
+    var _sctx = null;
+    function _blip(f,d,t,g,s){
+      try{
+        _sctx = _sctx || new (window.AudioContext||window.webkitAudioContext)();
+        if(_sctx.state==='suspended') _sctx.resume();
+        var o=_sctx.createOscillator(), gn=_sctx.createGain(), now=_sctx.currentTime;
+        o.type=t||'triangle'; o.frequency.setValueAtTime(f,now);
+        if(s) o.frequency.exponentialRampToValueAtTime(s,now+d);
+        gn.gain.setValueAtTime(g||.06,now); gn.gain.exponentialRampToValueAtTime(.0001,now+d);
+        o.connect(gn); gn.connect(_sctx.destination); o.start(now); o.stop(now+d+.02);
+      } catch(e){}
+    }
+    var _snd={
+      open:  function(){ _blip(660,.12,'sine',.06,990); },
+      close: function(){ _blip(880,.10,'sine',.05,520); },
+      send:  function(){ _blip(2200,.06,'triangle',.06,1100); },
+      reply: function(){ _blip(880,.08,'sine',.05); setTimeout(function(){ _blip(1318,.13,'sine',.05); },85); }
+    };
+
+    /* ── core state helpers ── */
+    function _setCoreState(s){
+      var w = document.getElementById('sheldonCoreWrap'); if(!w) return;
+      w.classList.remove('thinking','away');
+      if(s) w.classList.add(s);
+      var lbl = document.getElementById('sh-core-status-lbl'); if(!lbl) return;
+      lbl.textContent = s==='away' ? 'resting' : s==='thinking' ? 'thinking…' : 'online';
+    }
+
+    /* ── panel open / close ── */
+    function openSheldon(){
       sheldonInitTone();
-      document.getElementById('sheldonPanel').classList.add('open');
-      document.getElementById('sheldonFab').classList.add('hidden');
-      if (!sheldonGreeted) {
+      var panel = document.getElementById('sheldonPanel');
+      var wrap  = document.getElementById('sheldonCoreWrap');
+      panel.classList.add('open');
+      if(wrap) wrap.classList.add('hidden');
+      _snd.open();
+      var ping = document.querySelector('#sheldonCore .sh-ping'); if(ping) ping.remove();
+      if(!sheldonGreeted){
         sheldonRender('bot', "Hey — I'm Sheldon, your GMAT coach. I can see your dashboard data, so ask me about your progress, weak spots, or what to study next.");
         sheldonGreeted = true;
       }
-      setTimeout(function () { document.getElementById('sheldonInput').focus(); }, 100);
+      setTimeout(function(){ var inp=document.getElementById('sheldonInput'); if(inp) inp.focus(); }, 250);
     }
-    function closeSheldon() {
-      document.getElementById('sheldonPanel').classList.remove('open');
-      document.getElementById('sheldonFab').classList.remove('hidden');
+    function closeSheldon(){
+      var panel = document.getElementById('sheldonPanel');
+      var wrap  = document.getElementById('sheldonCoreWrap');
+      panel.classList.remove('open');
+      if(wrap) wrap.classList.remove('hidden');
+      _snd.close();
     }
-    function sheldonGrow(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
-    function sheldonKeydown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sheldonSend(); } }
-    function sheldonAsk(text) { document.getElementById('sheldonInput').value = text; sheldonSend(); }
 
-    function sheldonApplyToneUI() {
-      var tone = localStorage.getItem('sheldon_tone') || 'playful';
-      var btn = document.getElementById('sheldonTone');
-      var label = document.getElementById('sheldonToneLabel');
-      if (!btn || !label) return;
-      if (tone === 'focused') {
+    /* ── input dock glow ── */
+    (function(){
+      function ready(fn){ if(document.body) fn(); else document.addEventListener('DOMContentLoaded',fn); }
+      ready(function(){
+        var ta = document.getElementById('sheldonInput');
+        var df = document.getElementById('shDockField');
+        if(!ta||!df) return;
+        ta.addEventListener('focus', function(){ df.classList.add('lit'); });
+        ta.addEventListener('blur',  function(){ df.classList.remove('lit'); });
+      });
+    })();
+
+    /* ── tone ── */
+    function sheldonApplyToneUI(){
+      var tone = localStorage.getItem('sheldon_tone')||'playful';
+      var btn  = document.getElementById('sheldonTone');
+      var lbl  = document.getElementById('sheldonToneLabel');
+      if(!btn||!lbl) return;
+      if(tone==='focused'){
         btn.classList.add('focused');
-        btn.querySelector('.ti').className = 'ti ti-target';
-        label.textContent = 'Focused';
-        btn.title = 'Focused — straight answers, no jokes. Tap for Playful.';
+        btn.querySelector('.ti').className='ti ti-target';
+        lbl.textContent='Focused';
       } else {
         btn.classList.remove('focused');
-        btn.querySelector('.ti').className = 'ti ti-mood-smile';
-        label.textContent = 'Playful';
-        btn.title = 'Playful — a little wit. Tap for Focused.';
+        btn.querySelector('.ti').className='ti ti-mood-smile';
+        lbl.textContent='Playful';
       }
     }
-    function sheldonInitTone() { sheldonApplyToneUI(); }
-    function sheldonToggleTone() {
-      var tone = localStorage.getItem('sheldon_tone') || 'playful';
-      localStorage.setItem('sheldon_tone', tone === 'focused' ? 'playful' : 'focused');
+    function sheldonInitTone(){ sheldonApplyToneUI(); }
+    function sheldonToggleTone(){
+      var t = localStorage.getItem('sheldon_tone')||'playful';
+      localStorage.setItem('sheldon_tone', t==='focused'?'playful':'focused');
       sheldonApplyToneUI();
+      _blip(1200,.05,'triangle',.05);
     }
 
-    function sheldonEscape(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-    function sheldonFormat(raw) {
-      var text = sheldonEscape(raw).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-      var lines = text.split(/\n/), html = '', inList = false;
-      for (var i = 0; i < lines.length; i++) {
-        var line = lines[i].trim();
-        if (/^[-•*]\s+/.test(line)) {
-          if (!inList) { html += '<ul>'; inList = true; }
-          html += '<li>' + line.replace(/^[-•*]\s+/, '') + '</li>';
-        } else {
-          if (inList) { html += '</ul>'; inList = false; }
-          if (line) html += '<p>' + line + '</p>';
-        }
+    /* ── message rendering ── */
+    function sheldonEscape(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function sheldonFormat(raw){
+      var text = sheldonEscape(raw).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+      var lines=text.split(/\n/), html='', inList=false;
+      for(var i=0;i<lines.length;i++){
+        var line=lines[i].trim();
+        if(/^[-•*]\s+/.test(line)){ if(!inList){html+='<ul>';inList=true;} html+='<li>'+line.replace(/^[-•*]\s+/,'')+'</li>'; }
+        else { if(inList){html+='</ul>';inList=false;} if(line) html+='<p>'+line+'</p>'; }
       }
-      if (inList) html += '</ul>';
-      return html || '<p></p>';
+      if(inList) html+='</ul>';
+      return html||'<p></p>';
     }
-    function sheldonRender(role, text) {
+    function sheldonRender(role, text){
       var wrap = document.getElementById('sheldonMessages');
-      var div = document.createElement('div');
-      div.className = 'sheldon-msg ' + role;
-      if (role === 'bot') div.innerHTML = sheldonFormat(text);
+      var div  = document.createElement('div');
+      div.className = 'sheldon-msg '+role;
+      if(role==='bot') div.innerHTML = sheldonFormat(text);
       else div.textContent = text;
       wrap.appendChild(div);
       wrap.scrollTop = wrap.scrollHeight;
     }
-    function sheldonRenderStream(text) {
+    function sheldonRenderStream(text){
       var wrap = document.getElementById('sheldonMessages');
-      var div = document.createElement('div');
+      var div  = document.createElement('div');
       div.className = 'sheldon-msg bot';
       wrap.appendChild(div);
-      var words = text.split(' '); var i = 0;
-      function next() {
-        if (i >= words.length) { div.innerHTML = sheldonFormat(text); return; }
-        div.textContent = words.slice(0, ++i).join(' ');
-        wrap.scrollTop = wrap.scrollHeight;
-        setTimeout(next, 28);
+      var words=text.split(' '), i=0;
+      function next(){
+        if(i>=words.length){ div.innerHTML=sheldonFormat(text); return; }
+        div.textContent=words.slice(0,++i).join(' ');
+        wrap.scrollTop=wrap.scrollHeight;
+        setTimeout(next,28);
       }
       next();
     }
-    // Replace sheldonTyping(true) call — smarter indicator
-    var THINKING = [
-      "Analyzing your study data…",
-      "Checking your patterns…",
-      "Crunching the numbers…",
-      "Reviewing your progress…"
-    ];
-    var _thinkIdx = 0, _thinkTimer = null;
 
-    function sheldonTyping(on) {
+    /* ── thinking indicator — mini orb version ── */
+    var _thinkTimer=null;
+    var _THINKING=['Analyzing your study data…','Checking your patterns…','Crunching the numbers…','Reading your progress…'];
+    var _thinkIdx=0;
+    function sheldonTyping(on){
       var wrap = document.getElementById('sheldonMessages');
       var existing = document.getElementById('sheldonTyping');
-      if (on && !existing) {
-        var t = document.createElement('div');
-        t.className = 'sheldon-typing'; t.id = 'sheldonTyping';
-        t.innerHTML = '<span></span><span></span><span></span><div class="sheldon-thinking-text">Sheldon is analyzing…</div>';
-        wrap.appendChild(t); wrap.scrollTop = wrap.scrollHeight;
-        _thinkIdx = 0;
-        _thinkTimer = setInterval(function () {
-          _thinkIdx = (_thinkIdx + 1) % THINKING.length;
-          var el = document.querySelector('.sheldon-thinking-text');
-          if (el) {
-            el.style.opacity = 0; setTimeout(function () {
-              if (el) { el.textContent = "Sheldon is " + THINKING[_thinkIdx]; el.style.opacity = 1; }
-            }, 200);
-          }
-        }, 1800);
-      } else if (!on && existing) {
+      if(on && !existing){
+        var t=document.createElement('div');
+        t.className='sheldon-typing'; t.id='sheldonTyping';
+        t.innerHTML='<div class="sh-think-micro"><div class="sh-orb"></div></div>'
+                   +'<span class="sheldon-thinking-text">Sheldon is analyzing…</span>';
+        wrap.appendChild(t); wrap.scrollTop=wrap.scrollHeight;
+        _thinkIdx=0;
+        _thinkTimer=setInterval(function(){
+          _thinkIdx=(_thinkIdx+1)%_THINKING.length;
+          var el=document.querySelector('.sheldon-thinking-text');
+          if(el){ el.style.opacity=0; setTimeout(function(){ if(el){el.textContent='Sheldon is '+_THINKING[_thinkIdx];el.style.opacity=1;} },200); }
+        },1800);
+      } else if(!on && existing){
         existing.remove();
-        if (_thinkTimer) { clearInterval(_thinkTimer); _thinkTimer = null; }
+        if(_thinkTimer){ clearInterval(_thinkTimer); _thinkTimer=null; }
       }
     }
 
-    function buildSheldonContext() {
-      // ---- all-time total ----
-      var totalMins = sessions.reduce(function (a, s) { return a + s.mins; }, 0);
+    /* ── send ── */
+    function sheldonGrow(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
+    function sheldonKeydown(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sheldonSend(); } }
+    function sheldonAsk(text){ var inp=document.getElementById('sheldonInput'); inp.value=text; sheldonSend(); }
 
-      // ---- this week (mirrors render(): Mon–Sun, weekday 3h / weekend 6h) ----
-      var ws = startOfWeek(today), weekMins = 0, weekTargetMins = 0;
-      for (var i = 0; i < 7; i++) {
-        var wd = addDays(ws, i);
-        weekMins += minsOn(dateStr(wd));
-        weekTargetMins += targetFor(wd);
-      }
-
-      // ---- streak (mirrors render(): consecutive days back from today with any minutes) ----
-      var streak = 0;
-      var cur = minsOn(dateStr(today)) > 0 ? new Date(today) : addDays(today, -1);
-      while (minsOn(dateStr(cur)) > 0) { streak++; cur = addDays(cur, -1); }
-
-      // ---- consistency (mirrors render(): % of prep days at ≥80% of target since 25 Apr 2026) ----
-      var prepStart = new Date(2026, 3, 25); prepStart.setHours(0, 0, 0, 0);
-      var consistentDays = 0, totalDays = 0, c = new Date(prepStart);
-      while (c <= today) {
-        totalDays++;
-        var m = minsOn(dateStr(c));
-        if (m > 0 && m >= targetFor(c) * 0.8) consistentDays++;
-        c = addDays(c, 1);
-      }
-      var consistency = totalDays > 0 ? Math.min(100, Math.round(consistentDays / totalDays * 100)) : 0;
-
-      // ---- exam date + days left (same source as updateExamCountdown) ----
-      var examDate = localStorage.getItem("gmat_exam_date") || null;
-      var daysLeft = null;
-      if (examDate) {
-        var ep = examDate.split("-").map(Number);
-        daysLeft = Math.max(0, Math.ceil((new Date(ep[0], ep[1] - 1, ep[2]) - today) / 86400000));
-      }
-
-      // ---- topic totals, in hours (1 decimal) ----
-      var topicMins = {};
-      sessions.forEach(function (s) { topicMins[s.topic] = (topicMins[s.topic] || 0) + s.mins; });
-      var topicTotals = {};
-      Object.keys(topicMins).forEach(function (t) { topicTotals[t] = +(topicMins[t] / 60).toFixed(1); });
-
-      // ---- latest mock (mockScores is kept sorted ascending by date) ----
-      var latestMock = (window.mockScores && window.mockScores.length)
-        ? window.mockScores[window.mockScores.length - 1].score
-        : null;
-
-      // ---- recent notes (newest first; sessions arrive date-desc from loadSessions) ----
-      var recentNotes = sessions
-        .filter(function (s) { return s.notes; })
-        .slice(0, 5)
-        .map(function (s) { return s.notes; });
-
-      return {
-        targetScore: TARGET_SCORE,
-        examDate: examDate,
-        daysLeft: daysLeft,
-        totalHours: +(totalMins / 60).toFixed(1),
-        streak: streak,
-        weekHours: +(weekMins / 60).toFixed(1),
-        weekTarget: +(weekTargetMins / 60).toFixed(1),
-        consistency: consistency,
-        latestMock: latestMock,
-        topicTotals: topicTotals,
-        recentNotes: recentNotes,
-        tone: localStorage.getItem("sheldon_tone") || "playful"
-      };
-    }
-
-    function sheldonSend() {
-      if (sheldonBusy) return;
+    function sheldonSend(){
+      if(sheldonBusy) return;
       var input = document.getElementById('sheldonInput');
-      var msg = input.value.trim();
-      if (!msg) return;
-
+      var msg   = input.value.trim();
+      if(!msg) return;
+      _snd.send();
       var chips = document.getElementById('sheldonChips');
-      if (chips) chips.style.display = 'none';
-
+      if(chips) chips.style.display='none';
       sheldonRender('user', msg);
-      sheldonHistory.push({ role: 'user', content: msg });
-      input.value = ''; sheldonGrow(input);
-
-      sheldonBusy = true;
-      document.getElementById('sheldonSend').disabled = true;
+      sheldonHistory.push({role:'user', content:msg});
+      input.value=''; sheldonGrow(input);
+      sheldonBusy=true;
+      document.getElementById('sheldonSend').disabled=true;
+      /* panel + core go thinking */
+      document.getElementById('sheldonPanel').classList.add('thinking');
+      _setCoreState('thinking');
       sheldonTyping(true);
-
-      supa.functions.invoke('sheldon', {
-        body: {
-          message: msg,
-          context: buildSheldonContext(),
-          history: sheldonHistory.slice(0, -1).slice(-6)
-        }
-      }).then(function (res) {
+      supa.functions.invoke('sheldon',{
+        body:{message:msg, context:buildSheldonContext(), history:sheldonHistory.slice(0,-1).slice(-6)}
+      }).then(function(res){
         sheldonTyping(false);
-        var reply = res && res.data && res.data.reply;
-        var err = (res && res.data && res.data.error) || (res && res.error && res.error.message);
-        if (reply) {
+        document.getElementById('sheldonPanel').classList.remove('thinking');
+        _setCoreState('');
+        var reply = res&&res.data&&res.data.reply;
+        var err   = (res&&res.data&&res.data.error)||(res&&res.error&&res.error.message);
+        if(reply){
           sheldonRenderStream(reply);
-          sheldonHistory.push({ role: 'assistant', content: reply });
+          sheldonHistory.push({role:'assistant', content:reply});
+          _snd.reply();
         } else {
-          sheldonRender('error', 'Sheldon hit a snag: ' + (err || 'no response') + '. Try again in a moment.');
+          sheldonRender('error','Sheldon hit a snag: '+(err||'no response')+'. Try again in a moment.');
         }
-      }).catch(function (e) {
+      }).catch(function(e){
         sheldonTyping(false);
-        sheldonRender('error', 'Network error: ' + e.message);
-      }).then(function () {
-        sheldonBusy = false;
-        document.getElementById('sheldonSend').disabled = false;
-        document.getElementById('sheldonInput').focus();
+        document.getElementById('sheldonPanel').classList.remove('thinking');
+        _setCoreState('');
+        sheldonRender('error','Network error: '+e.message);
+      }).then(function(){
+        sheldonBusy=false;
+        document.getElementById('sheldonSend').disabled=false;
+        var inp=document.getElementById('sheldonInput'); if(inp) inp.focus();
       });
     }
   </script>
@@ -12543,36 +12495,37 @@
     })();
   </script>
 
-  <!-- Sheldon Coach -->
-  <button id="sheldonFab" onclick="openSheldon()" title="Ask Sheldon" aria-label="Ask Sheldon">
-    <i class="ti ti-sparkles"></i>
-  </button>
+ <!-- Sheldon 2.0 Core -->
+  <div id="sheldonCoreWrap" onclick="openSheldon()" title="Ask Sheldon" role="button" aria-label="Ask Sheldon">
+    <div class="core-label">Ask Sheldon <small id="sh-core-status-lbl">online</small></div>
+    <div id="sheldonCore">
+      <div class="sh-orbit"><i></i></div>
+      <div class="sh-orb"></div>
+      <div class="sh-ring"></div>
+      <div class="sh-spark"><i class="ti ti-sparkles"></i></div>
+    </div>
+  </div>
 
   <div id="sheldonPanel" role="dialog" aria-label="Sheldon GMAT Coach">
     <div class="sheldon-header">
-      <div class="sheldon-avatar"><svg viewBox="0 0 40 40" width="24" height="24" xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true">
-          <defs>
-            <linearGradient id="shAtom" x1="6" y1="34" x2="34" y2="6" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#878dff" />
-              <stop offset="1" stop-color="#46c98f" />
-            </linearGradient>
-          </defs>
-          <g fill="none" stroke="#0d1018" stroke-width="2.4">
-            <ellipse cx="20" cy="20" rx="13" ry="5.5" />
-            <ellipse cx="20" cy="20" rx="13" ry="5.5" transform="rotate(60 20 20)" />
-            <ellipse cx="20" cy="20" rx="13" ry="5.5" transform="rotate(120 20 20)" />
-          </g>
-          <circle cx="20" cy="20" r="3.2" fill="#0d1018" />
-        </svg></div>
+      <div class="sh-mini">
+        <div class="sh-orbit"><i></i></div>
+        <div class="sh-orb"></div>
+      </div>
       <div class="sheldon-title">
         <h3>Sheldon</h3>
-        <span><span class="sheldon-dot"></span>GMAT Coach</span>
+        <div class="ph-status-wrap">
+          <span class="ph-status-dot"></span>
+          <span class="ph-online-lbl">GMAT Coach · reading your dashboard</span>
+          <span class="ph-typing-lbl">analyzing your data…</span>
+        </div>
       </div>
-      <button class="sheldon-tone" id="sheldonTone" onclick="sheldonToggleTone()" title="Toggle tone"><i
-          class="ti ti-mood-smile"></i><span id="sheldonToneLabel">Playful</span></button>
-      <button id="sheldonVoiceBtn" onclick="sheldonVoiceToggle()" title="Sheldon voice" aria-label="Toggle Sheldon voice"><i class="ti ti-volume"></i></button>
-      <button class="sheldon-close" onclick="closeSheldon()" aria-label="Close">&times;</button>
+      <button class="sheldon-tone" id="sheldonTone" onclick="sheldonToggleTone()">
+        <i class="ti ti-mood-smile"></i><span id="sheldonToneLabel">Playful</span>
+      </button>
+      <button class="sheldon-close" onclick="closeSheldon()" aria-label="Close">
+        <i class="ti ti-x"></i>
+      </button>
     </div>
     <div class="sheldon-messages" id="sheldonMessages"></div>
     <div class="sheldon-chips" id="sheldonChips">
@@ -12581,10 +12534,13 @@
       <button class="sheldon-chip" onclick="sheldonAsk(this.textContent)">Plan my week</button>
     </div>
     <div class="sheldon-input">
-      <textarea id="sheldonInput" rows="1" placeholder="Ask Sheldon anything…" onkeydown="sheldonKeydown(event)"
-        oninput="sheldonGrow(this)"></textarea>
-      <button class="sheldon-send" id="sheldonSend" onclick="sheldonSend()" aria-label="Send"><i
-          class="ti ti-send"></i></button>
+      <div class="sh-dock-field" id="shDockField">
+        <textarea id="sheldonInput" rows="1" placeholder="Ask Sheldon anything…"
+          onkeydown="sheldonKeydown(event)" oninput="sheldonGrow(this)"></textarea>
+      </div>
+      <button class="sheldon-send" id="sheldonSend" onclick="sheldonSend()" aria-label="Send">
+        <i class="ti ti-send"></i>
+      </button>
     </div>
   </div>
 
