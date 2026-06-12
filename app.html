@@ -7628,6 +7628,140 @@
     font-variant-numeric: tabular-nums;
   }
 </style>
+  <!-- ════════════════════════════════════════════════════════════════════
+  SCORECONSOLE — MICRO-INTERACTIONS PATCH v1
+  Two paste blocks. No existing code is modified — both blocks are
+  additive, so your IIFEs and braces stay untouched.
+ 
+  BLOCK A (style): paste immediately BEFORE the closing </head> tag,
+  AFTER the last existing </style> (it must win the cascade — same rule
+  as the Sheldon Coach block).
+ 
+  BLOCK B (script): paste immediately BEFORE the closing </body> tag,
+  after all existing scripts.
+═════════════════════════════════════════════════════════════════════ -->
+ 
+ 
+<!-- ━━━━━━━━━━ BLOCK A — paste before </head> ━━━━━━━━━━ -->
+<style id="sc-micro-css">
+  @property --sc-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+  @keyframes scSpinAngle { to { --sc-angle: 360deg; } }
+ 
+  /* ── 1 · UNIFIED PRESS FEEDBACK — every primary control squishes ── */
+  .log-btn:active, .timer-btn:active, .scd-btn:active, .el-analyse-btn:active,
+  .sc-btn:active, .sheldon-send:active, .fpill:active, .sess-tab:active,
+  .sc-mode-btn:active, .sc-dur-chip:active, .tb-chip:active, .mob-burger:active {
+    transform: scale(0.94) !important;
+    transition: transform 0.08s ease !important;
+  }
+  .log-btn:hover, .timer-btn.primary:hover, .timer-btn.stop:hover {
+    transform: translateY(-1px);
+  }
+ 
+  /* ── 1b · TEXT-SLIDE LABELS — applied automatically by Block B, survives
+        innerHTML restores in addSession etc. because the JS re-wraps. ── */
+  .sc-slide { display: inline-block; height: 1.3em; overflow: hidden; vertical-align: middle; }
+  .sc-sl { display: flex; flex-direction: column; }
+  .sc-sl span { display: block; height: 1.3em; line-height: 1.3em; white-space: nowrap;
+    transition: transform .28s cubic-bezier(.65, 0, .35, 1); }
+  button:hover .sc-sl span { transform: translateY(-1.3em); }
+  button:disabled .sc-sl span { transform: none !important; }
+ 
+  /* ── 5 · SHIMMER STROKE on the Sheldon FAB (premium "alive" ring) ── */
+  #sheldonFab { overflow: visible; }
+  #sheldonFab::before {
+    content: ''; position: absolute; inset: -3px; border-radius: 50%; padding: 2px; z-index: -1;
+    background: conic-gradient(from var(--sc-angle), transparent 8%, #878dff 26%, #46c98f 44%, transparent 62%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    animation: scSpinAngle 3.4s linear infinite;
+    opacity: 0.85; pointer-events: none;
+  }
+  html.sc-parch #sheldonFab::before {
+    background: conic-gradient(from var(--sc-angle), transparent 8%, #5c7a5a 28%, #c47f2a 44%, transparent 62%);
+  }
+ 
+  /* ── 6 · DELAYED TOOLTIPS — pure CSS, no engine change.
+        Show waits 480ms; hide is instant (delay only on .show). ── */
+  #perfos-tip { transition-delay: 0s, 0s; }
+  #perfos-tip.show {
+    transition: opacity .18s ease .48s, transform .22s cubic-bezier(.34,1.56,.64,1) .48s;
+  }
+ 
+  /* ── 3 · TOAST UPGRADE — drain bar on milestone toast while visible ── */
+  #milestone-toast { overflow: hidden; }
+  #milestone-toast::after {
+    content: ''; position: absolute; left: 0; bottom: 0; height: 2px; width: 100%;
+    background: linear-gradient(90deg, #878dff, #46c98f);
+    transform-origin: left; transform: scaleX(0);
+  }
+  #milestone-toast.show::after { animation: scDrain 4.2s linear forwards; }
+  @keyframes scDrain { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+ 
+  /* ── 8 · PROGRESS SHEEN — exam bar + today footer get a travelling light ── */
+  #exam-progress-bar, #sc-today-foot .stf-fill { position: relative; overflow: hidden; }
+  #exam-progress-bar::after, #sc-today-foot .stf-fill::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.30), transparent);
+    transform: translateX(-100%); animation: scSheen 3s ease-in-out infinite;
+  }
+  @keyframes scSheen { 55%, 100% { transform: translateX(100%); } }
+ 
+  /* ── 4 · AVATAR NAME TAG — pf-btn hooks into your premium tooltip engine
+        via data-tip (set in Block B), plus a springy hover lift ── */
+  .pf-btn { transition: transform .2s cubic-bezier(.34,1.7,.64,1), box-shadow .15s, border-color .15s; }
+  .pf-btn:hover { transform: translateY(-2px) scale(1.06); }
+ 
+  /* ── 2 · KEYBOARD SHORTCUTS OVERLAY (press "?") ── */
+  #sc-kbd-overlay {
+    display: none; position: fixed; inset: 0; z-index: 99998;
+    background: rgba(5,8,16,0.72); backdrop-filter: blur(14px);
+    align-items: center; justify-content: center; padding: 24px;
+  }
+  #sc-kbd-overlay.open { display: flex; }
+  .sck-card {
+    background: linear-gradient(155deg,#151a26,#1a2030); border: 1px solid rgba(135,141,255,0.28);
+    border-radius: 22px; padding: 28px 30px 24px; max-width: 420px; width: 100%; text-align: center;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.65); animation: scdPop .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .sck-title { font-family: 'Fraunces', serif; font-size: 19px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+  .sck-sub { font-size: 12px; color: var(--text-tertiary); margin-bottom: 22px; }
+  .sck-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 9px 2px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .sck-row:last-of-type { border-bottom: none; }
+  .sck-what { font-size: 12.5px; color: var(--text-secondary); font-weight: 550; }
+  .sck-keys { display: flex; gap: 6px; }
+  .sck-cap {
+    min-width: 34px; height: 34px; padding: 0 10px; border-radius: 9px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'Satoshi', sans-serif; font-size: 13px; font-weight: 600; color: var(--text-primary);
+    background: linear-gradient(180deg,#1c2232,#151a26); border: 1px solid rgba(255,255,255,0.13);
+    box-shadow: 0 3px 0 #0a0d14, inset 0 1px 0 rgba(255,255,255,0.08);
+    transition: transform .09s ease, box-shadow .09s ease;
+  }
+  .sck-cap.pressed { transform: translateY(2.5px); box-shadow: 0 0.5px 0 #0a0d14, inset 0 1px 0 rgba(255,255,255,0.05); }
+  .sck-close { margin-top: 20px; height: 38px; width: 100%; border: none; border-radius: 10px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+    color: var(--text-secondary); font-family: 'Hanken Grotesk', sans-serif; font-size: 13px; font-weight: 650; cursor: pointer; }
+  .sck-close:hover { color: var(--text-primary); }
+ 
+  /* shortcut keycap flash — fired on any registered shortcut, anywhere */
+  #sc-kbd-flash {
+    position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%) translateY(14px);
+    z-index: 99997; display: flex; gap: 7px; opacity: 0; pointer-events: none;
+    transition: opacity .2s ease, transform .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  #sc-kbd-flash.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #sc-kbd-flash .sck-cap { box-shadow: 0 3px 0 #0a0d14, 0 8px 26px rgba(135,141,255,0.35), inset 0 1px 0 rgba(255,255,255,0.08); }
+ 
+  /* sound toggle chip in topbar */
+  #sc-snd-chip.snd-on { color: var(--accent-bright) !important; border-color: rgba(135,141,255,0.35) !important; background: rgba(135,141,255,0.10) !important; }
+ 
+  @media (prefers-reduced-motion: reduce) {
+    #sheldonFab::before, #exam-progress-bar::after, #sc-today-foot .stf-fill::after,
+    #milestone-toast::after { animation: none !important; }
+  }
+</style>
+<!-- ━━━━━━━━━━ END BLOCK A ━━━━━━━━━━ -->
 </head>
 
 <body>
@@ -15166,6 +15300,197 @@
   setTimeout(function () { scTourStart(); }, 1200);
 })();
 </script>
+  <!-- ━━━━━━━━━━ BLOCK B — paste before </body> ━━━━━━━━━━ -->
+<script id="sc-micro-js">
+(function () {
+  function ready(fn) { if (document.body) fn(); else document.addEventListener('DOMContentLoaded', fn); }
+ 
+  /* ══ SOUND ENGINE — WebAudio synth, no assets, off by default ══ */
+  var SND_KEY = 'sc_sound';
+  /* default ON — only silent if the user explicitly turned it off */
+  var sndOn = localStorage.getItem(SND_KEY) !== 'off';
+  var actx = null;
+  function ac() {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    return actx;
+  }
+  function blip(freq, dur, type, gain, slide) {
+    if (!sndOn) return;
+    try {
+      var a = ac(), o = a.createOscillator(), g = a.createGain(), t = a.currentTime;
+      o.type = type || 'triangle'; o.frequency.setValueAtTime(freq, t);
+      if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+      g.gain.setValueAtTime(gain || 0.07, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + dur + 0.02);
+    } catch (e) { }
+  }
+  window.scSnd = {
+    click:   function () { blip(2400, 0.05, 'triangle', 0.06, 1200); },
+    tick:    function () { blip(1600, 0.035, 'sine', 0.045); },
+    key:     function () { blip(900, 0.06, 'square', 0.03, 600); },
+    success: function () { blip(880, 0.09, 'sine', 0.06); setTimeout(function () { blip(1318, 0.14, 'sine', 0.06); }, 90); },
+    error:   function () { blip(420, 0.14, 'sawtooth', 0.045, 300); }
+  };
+ 
+  /* sound toggle chip — injected into the topbar */
+  function injectSndChip() {
+    var bar = document.querySelector('.topbar-right');
+    if (!bar || document.getElementById('sc-snd-chip')) return;
+    var b = document.createElement('button');
+    b.id = 'sc-snd-chip'; b.title = 'Click sounds';
+    b.style.cssText = 'display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;color:var(--text-secondary);padding:5px 11px;border-radius:100px;border:1px solid var(--border);background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);cursor:pointer;font-family:inherit';
+    function paint() {
+      b.innerHTML = '<i class="ti ' + (sndOn ? 'ti-volume' : 'ti-volume-off') + '" style="font-size:12px"></i>' + (sndOn ? ' Sound' : '');
+      b.classList.toggle('snd-on', sndOn);
+    }
+    b.onclick = function () {
+      sndOn = !sndOn; localStorage.setItem(SND_KEY, sndOn ? 'on' : 'off');
+      paint(); if (sndOn) scSnd.success();
+    };
+    paint();
+    var sync = document.getElementById('sync-status');
+    if (sync) bar.insertBefore(b, sync); else bar.appendChild(b);
+  }
+ 
+  /* ══ CLICK SOUND DELEGATION — one listener, all controls ══ */
+  var CLICKY = '.log-btn,.timer-btn,.el-analyse-btn,.scd-btn,.sheldon-send,.sheldon-chip,.sc-dur-chip,.sc-mode-btn,.sess-tab,.fpill,.sb-item,.tb-chip,.cs-trigger,.cs-opt,.mob-burger,.sct-track,.kcap';
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest) return;
+    var el = e.target.closest(CLICKY);
+    if (!el) return;
+    if (el.classList.contains('log-btn') || el.classList.contains('el-analyse-btn') || (el.classList.contains('timer-btn') && el.classList.contains('stop'))) scSnd.click();
+    else if (el.classList.contains('sb-item') || el.classList.contains('sess-tab') || el.classList.contains('sc-mode-btn') || el.classList.contains('fpill')) scSnd.tick();
+    else scSnd.click();
+  }, true);
+ 
+  /* ══ TOAST + DIALOG SOUND HOOKS — safe wrappers, originals untouched ══ */
+  ready(function () {
+    if (typeof window.showToast === 'function') {
+      var _toast = window.showToast;
+      window.showToast = function () { scSnd.success(); return _toast.apply(this, arguments); };
+    }
+    if (typeof window.scNotify === 'function') {
+      var _notify = window.scNotify;
+      window.scNotify = function (msg, type) {
+        if (type === 'error' || type === 'warning') scSnd.error(); else scSnd.tick();
+        return _notify.apply(this, arguments);
+      };
+    }
+  });
+ 
+  /* ══ TEXT-SLIDE LABELS — fully additive, no markup edits needed.
+     Wraps each button's label in slide spans; a light interval re-wraps
+     after addSession / elAnalyse restore the plain innerHTML.        ══ */
+  var SLIDE_TARGETS = [
+    ['.log-btn',          'Lock it in \u2192'],
+    ['#timer-pause-btn',  'Take a breath'],
+    ['#timer-stop-btn',   'Bank it \u2713'],
+    ['.el-analyse-btn',   'Find the patterns']
+  ];
+  function slideify(el, alt) {
+    if (!el || el.disabled || el.querySelector('.sc-sl')) return;
+    var txt = (el.textContent || '').trim();
+    if (!txt || /Saving|Analysing|…/.test(txt)) return;        /* skip busy states */
+    var ic = el.querySelector('i.ti');
+    var icHTML = ic ? ic.outerHTML + ' ' : '';
+    el.innerHTML = icHTML
+      + '<span class="sc-slide"><span class="sc-sl"><span>' + txt + '</span><span>' + alt + '</span></span></span>';
+  }
+  function slidePass() {
+    SLIDE_TARGETS.forEach(function (t) {
+      var el = document.querySelector(t[0]);
+      if (el) slideify(el, t[1]);
+    });
+  }
+  ready(function () { setTimeout(slidePass, 800); setInterval(slidePass, 900); });
+ 
+  /* ══ AVATAR NAME TAG — feeds the existing premium tooltip engine ══ */
+  function tagAvatar() {
+    var btn = document.getElementById('pf-btn');
+    var name = document.getElementById('pf-name');
+    if (btn && name && name.textContent && name.textContent !== 'Loading…') {
+      btn.setAttribute('data-tip', name.textContent);
+    }
+  }
+  ready(function () { setTimeout(tagAvatar, 1200); setTimeout(tagAvatar, 3000); });
+ 
+  /* ══ KEYBOARD SHORTCUTS — T timer · S Sheldon · 1-6 views · ? help ══ */
+  var SHORTCUTS = [
+    { keys: ['T'], what: 'Start / pause the timer' },
+    { keys: ['S'], what: 'Ask Sheldon' },
+    { keys: ['1', '–', '6'], what: 'Switch views (Dashboard → Error log)' },
+    { keys: ['?'], what: 'Show this panel' },
+    { keys: ['Esc'], what: 'Close any panel' }
+  ];
+  var VIEWS = ['dashboard', 'analytics', 'calendar', 'sessions', 'mock', 'errors'];
+ 
+  function injectKbd() {
+    if (document.getElementById('sc-kbd-overlay')) return;
+    var ov = document.createElement('div'); ov.id = 'sc-kbd-overlay';
+    var rows = SHORTCUTS.map(function (s) {
+      var caps = s.keys.map(function (k) {
+        return k === '–' ? '<span style="color:var(--text-muted);align-self:center">–</span>' : '<span class="sck-cap">' + k + '</span>';
+      }).join('');
+      return '<div class="sck-row"><span class="sck-what">' + s.what + '</span><span class="sck-keys">' + caps + '</span></div>';
+    }).join('');
+    ov.innerHTML = '<div class="sck-card"><div class="sck-title">Keyboard shortcuts</div>'
+      + '<div class="sck-sub">Work the console without touching the mouse</div>'
+      + rows + '<button class="sck-close" onclick="document.getElementById(\'sc-kbd-overlay\').classList.remove(\'open\')">Close</button></div>';
+    ov.addEventListener('click', function (e) { if (e.target === ov) ov.classList.remove('open'); });
+    document.body.appendChild(ov);
+ 
+    var fl = document.createElement('div'); fl.id = 'sc-kbd-flash';
+    document.body.appendChild(fl);
+  }
+ 
+  var flashTimer = null;
+  function flashKeys(keys) {
+    var fl = document.getElementById('sc-kbd-flash'); if (!fl) return;
+    fl.innerHTML = keys.map(function (k) { return '<span class="sck-cap pressed">' + k + '</span>'; }).join('');
+    fl.classList.add('show'); scSnd.key();
+    setTimeout(function () {
+      fl.querySelectorAll('.sck-cap').forEach(function (c) { c.classList.remove('pressed'); });
+    }, 130);
+    if (flashTimer) clearTimeout(flashTimer);
+    flashTimer = setTimeout(function () { fl.classList.remove('show'); }, 900);
+  }
+ 
+  function typing() {
+    var a = document.activeElement;
+    return a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT' || a.isContentEditable);
+  }
+ 
+  document.addEventListener('keydown', function (e) {
+    if (typing() || e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key;
+    if (k === '?') { e.preventDefault(); injectKbd(); document.getElementById('sc-kbd-overlay').classList.add('open'); scSnd.click(); return; }
+    if (k === 'Escape') { var ov = document.getElementById('sc-kbd-overlay'); if (ov) ov.classList.remove('open'); return; }
+    if (k === 't' || k === 'T') {
+      e.preventDefault(); flashKeys(['T']);
+      var st = document.getElementById('timer-status');
+      if (st && st.textContent === 'Recording') { if (typeof timerPause === 'function') timerPause(); }
+      else { if (typeof timerStart === 'function') timerStart(); }
+      return;
+    }
+    if (k === 's' || k === 'S') {
+      e.preventDefault(); flashKeys(['S']);
+      if (typeof openSheldon === 'function') openSheldon();
+      return;
+    }
+    var n = parseInt(k, 10);
+    if (n >= 1 && n <= 6) {
+      e.preventDefault(); flashKeys([String(n)]);
+      if (typeof switchView === 'function') switchView(VIEWS[n - 1]);
+      return;
+    }
+  });
+ 
+  ready(function () { injectSndChip(); injectKbd(); });
+})();
+</script>
+<!-- ━━━━━━━━━━ END BLOCK B ━━━━━━━━━━ -->
 </body>
 
 </html>
