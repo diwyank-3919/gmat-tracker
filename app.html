@@ -11159,6 +11159,128 @@ html.sc-light .sh-minimize-btn:hover {
 }
 
 </style>
+    <style id="sheldon-bubble-fix">
+
+/* ══ UNIVERSAL: always a proper flex column ══ */
+#sheldonPanel .sheldon-messages {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  overflow-y: auto !important;
+  flex: 1 !important;
+  box-sizing: border-box !important;
+}
+
+/* ══ NORMAL SIZE ══ */
+#sheldonPanel:not(.sh-maximized):not(.sh-minimized) .sheldon-messages {
+  padding: 20px 18px 12px !important;
+  align-items: flex-start !important;
+}
+
+#sheldonPanel:not(.sh-maximized):not(.sh-minimized) .sheldon-msg.bot {
+  max-width: 84% !important;
+  width: fit-content !important;
+  align-self: flex-start !important;
+  margin-right: auto !important;
+}
+
+#sheldonPanel:not(.sh-maximized):not(.sh-minimized) .sheldon-msg.user {
+  max-width: 72% !important;
+  width: fit-content !important;
+  align-self: flex-end !important;
+  margin-left: auto !important;
+}
+
+/* ══ MAXIMIZED: bubbles scale with the panel ══ */
+#sheldonPanel.sh-maximized .sheldon-messages {
+  /* comfortable side padding — scales with panel width */
+  padding-top:    32px !important;
+  padding-bottom: 16px !important;
+  padding-left:   6vw !important;
+  padding-right:  6vw !important;
+  align-items:    flex-start !important;
+  gap: 20px !important;
+}
+
+/* bot bubble: up to 75% of the available column — wide but readable */
+#sheldonPanel.sh-maximized .sheldon-msg.bot {
+  max-width: 75% !important;
+  width: fit-content !important;
+  align-self: flex-start !important;
+  margin-right: auto !important;
+  font-size: 15px !important;
+  line-height: 1.80 !important;
+  padding: 18px 22px !important;
+}
+
+/* user bubble: up to 58% — a comfortable pill even on large screens */
+#sheldonPanel.sh-maximized .sheldon-msg.user {
+  max-width: 58% !important;
+  width: fit-content !important;
+  align-self: flex-end !important;
+  margin-left: auto !important;
+  font-size: 15px !important;
+  line-height: 1.65 !important;
+  padding: 13px 20px !important;
+}
+
+/* chips same padding as messages */
+#sheldonPanel.sh-maximized .sheldon-chips {
+  padding-left:  6vw !important;
+  padding-right: 6vw !important;
+  padding-bottom: 14px !important;
+  gap: 8px !important;
+}
+
+#sheldonPanel.sh-maximized .sheldon-chip {
+  font-size: 12.5px !important;
+  padding: 8px 16px !important;
+}
+
+/* input dock wider on maximize */
+#sheldonPanel.sh-maximized .sheldon-input {
+  padding: 14px 6vw 18px !important;
+}
+
+#sheldonPanel.sh-maximized .sh-dock-field textarea {
+  font-size: 15px !important;
+  padding: 13px 16px !important;
+}
+
+#sheldonPanel.sh-maximized .sheldon-send {
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 15px !important;
+  font-size: 19px !important;
+}
+
+/* ══ ALWAYS: bot left, user right — never stretch ══ */
+#sheldonPanel .sheldon-msg.bot {
+  align-self: flex-start !important;
+  margin-right: auto !important;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+#sheldonPanel .sheldon-msg.user {
+  align-self: flex-end !important;
+  margin-left: auto !important;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* smooth bubble resize when toggling max/normal */
+#sheldonPanel .sheldon-msg.bot,
+#sheldonPanel .sheldon-msg.user {
+  transition:
+    max-width  0.30s cubic-bezier(.34,1.2,.64,1),
+    font-size  0.22s ease,
+    padding    0.22s ease !important;
+}
+
+</style>
 </head>
 
 <body>
