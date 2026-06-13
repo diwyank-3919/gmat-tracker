@@ -21959,6 +21959,255 @@ html.sc-light #sh-session-label { color: rgba(23,27,46,0.35); }
 
 })();
 </script>
+    <style id="sheldon-history-fix">
+
+/* ══ RESET: panel must stay fixed bottom-right, not flex-row ══ */
+#sheldonPanel {
+  display: flex !important;
+  flex-direction: column !important;
+  position: fixed !important;
+  bottom: 28px !important;
+  right: 28px !important;
+}
+
+/* when sidebar is open, switch to row layout */
+#sheldonPanel.sh-sidebar-open {
+  flex-direction: row !important;
+}
+
+/* ── SIDEBAR: sits as a sibling INSIDE the panel ── */
+#sh-sidebar {
+  width: 0 !important;
+  min-width: 0 !important;
+  flex-shrink: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: rgba(8,10,20,0.90) !important;
+  border-right: 1px solid rgba(255,255,255,0.07) !important;
+  transition: width 0.28s cubic-bezier(.4,0,.2,1),
+              min-width 0.28s cubic-bezier(.4,0,.2,1) !important;
+  order: -1 !important;
+}
+
+#sh-sidebar.open {
+  width: 220px !important;
+  min-width: 220px !important;
+}
+
+/* ── CHAT AREA: the original panel content wrapper ── */
+#sh-chat-area {
+  flex: 1 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+/* ── SESSION LABEL: inside chat area, below header ── */
+#sh-session-label {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+  font-size: 10.5px !important;
+  font-weight: 500 !important;
+  color: rgba(190,196,235,0.32) !important;
+  padding: 5px 18px 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  flex-shrink: 0 !important;
+  min-height: 0 !important;
+  line-height: 1 !important;
+}
+
+/* hide label when empty */
+#sh-session-label:empty {
+  padding: 0 !important;
+  height: 0 !important;
+}
+
+/* ── sheldon-header stays inside chat area ── */
+#sh-chat-area .sheldon-header {
+  flex-shrink: 0 !important;
+}
+
+/* ── messages + chips + input stay inside chat area ── */
+#sh-chat-area .sheldon-messages,
+#sh-chat-area .sheldon-chips,
+#sh-chat-area .sheldon-input {
+  flex-shrink: 0 !important;
+}
+
+#sh-chat-area .sheldon-messages {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  flex-shrink: 1 !important;
+  overflow-y: auto !important;
+}
+
+/* maximized sidebar */
+#sheldonPanel.sh-maximized #sh-sidebar.open {
+  width: 280px !important;
+  min-width: 280px !important;
+}
+
+/* minimized — hide sidebar */
+#sheldonPanel.sh-minimized #sh-sidebar {
+  display: none !important;
+  width: 0 !important;
+}
+
+/* light theme */
+html.sc-light #sh-sidebar {
+  background: rgba(240,242,252,0.97) !important;
+  border-right-color: rgba(15,17,40,0.09) !important;
+}
+
+</style>
+
+<script id="sheldon-history-fix-js">
+(function () {
+
+  /* ══ COMPLETELY REPLACE buildSidebar with a safe version ══
+     The old version moved ALL children into a wrapper div which
+     broke the panel's fixed positioning and internal layout.
+     This version only APPENDS the sidebar as a new child — 
+     it never touches existing children. */
+
+  function buildSidebarSafe() {
+    var panel = document.getElementById('sheldonPanel');
+    if (!panel) return;
+
+    /* ── 1. Create #sh-chat-area wrapper if not already done ── */
+    if (!document.getElementById('sh-chat-area')) {
+      var chatArea = document.createElement('div');
+      chatArea.id = 'sh-chat-area';
+
+      /* Move ONLY the real Sheldon children into chat-area:
+         header, messages, chips, input, aurora div */
+      var toMove = [
+        panel.querySelector('.sheldon-header'),
+        panel.querySelector('.sheldon-messages'),
+        panel.querySelector('.sheldon-chips'),
+        panel.querySelector('.sheldon-input'),
+        panel.querySelector('#sheldonPanel > *:not(#sh-sidebar):not(#sh-chat-area)')
+      ].filter(Boolean);
+
+      /* safer: move everything except sidebar */
+      Array.from(panel.children).forEach(function (child) {
+        if (child.id !== 'sh-sidebar' && child.id !== 'sh-chat-area') {
+          chatArea.appendChild(child);
+        }
+      });
+
+      panel.appendChild(chatArea);
+
+      /* inject session label inside chat-area, after header */
+      if (!document.getElementById('sh-session-label')) {
+        var lbl = document.createElement('div');
+        lbl.id = 'sh-session-label';
+        var header = chatArea.querySelector('.sheldon-header');
+        if (header && header.nextSibling) {
+          chatArea.insertBefore(lbl, header.nextSibling);
+        } else {
+          chatArea.insertBefore(lbl, chatArea.firstChild);
+        }
+      }
+    }
+
+    /* ── 2. Create sidebar if not exists ── */
+    if (!document.getElementById('sh-sidebar')) {
+      var sb = document.createElement('div');
+      sb.id = 'sh-sidebar';
+      sb.innerHTML =
+        '<div class="sh-sb-head">' +
+          '<div class="sh-sb-title">History</div>' +
+          '<button class="sh-new-btn" id="sh-new-btn">' +
+            '<i class="ti ti-plus" style="font-size:12px"></i> New chat' +
+          '</button>' +
+        '</div>' +
+        '<div class="sh-sb-list" id="sh-sb-list">' +
+          '<div class="sh-sb-empty">No conversations yet</div>' +
+        '</div>';
+
+      /* insert sidebar BEFORE chat-area so it appears on the left */
+      var chatArea2 = document.getElementById('sh-chat-area');
+      panel.insertBefore(sb, chatArea2);
+
+      var newBtn = document.getElementById('sh-new-btn');
+      if (newBtn) {
+        newBtn.addEventListener('click', function () {
+          if (typeof startNewChat === 'function') startNewChat();
+        });
+      }
+    }
+  }
+
+  /* ══ FIX toggleSidebar to use correct class ══ */
+  var _origToggle = window.toggleSidebar;
+  window.toggleSidebar = function () {
+    var panel = document.getElementById('sheldonPanel');
+    var sb    = document.getElementById('sh-sidebar');
+    var btn   = document.getElementById('sh-history-btn');
+
+    if (!sb) return;
+    var isOpen = sb.classList.contains('open');
+
+    sb.classList.toggle('open', !isOpen);
+    if (panel) panel.classList.toggle('sh-sidebar-open', !isOpen);
+    if (btn)   btn.classList.toggle('active', !isOpen);
+
+    if (!isOpen && typeof loadSessions === 'function') {
+      loadSessions().then(function () {
+        if (typeof renderSidebar === 'function') renderSidebar();
+      });
+    }
+  };
+
+  /* re-wire the history button to use our fixed toggle */
+  function rewireHistoryBtn() {
+    var btn = document.getElementById('sh-history-btn');
+    if (!btn || btn.dataset.rewired) return;
+    btn.dataset.rewired = '1';
+    btn.onclick = null;
+    btn.removeEventListener('click', window.toggleSidebar);
+    btn.addEventListener('click', window.toggleSidebar);
+  }
+
+  /* ══ BOOT ══ */
+  function boot() {
+    buildSidebarSafe();
+    rewireHistoryBtn();
+    /* inject history btn if it got lost */
+    var header = document.querySelector('#sh-chat-area .sheldon-header');
+    if (header && !document.getElementById('sh-history-btn')) {
+      var btn2 = document.createElement('button');
+      btn2.id = 'sh-history-btn';
+      btn2.title = 'Chat history';
+      btn2.setAttribute('aria-label', 'Toggle chat history');
+      btn2.innerHTML = '<i class="ti ti-layout-sidebar" style="font-size:13px"></i>';
+      btn2.addEventListener('click', window.toggleSidebar);
+      var toneBtn = header.querySelector('.sheldon-tone');
+      if (toneBtn) header.insertBefore(btn2, toneBtn);
+      else header.appendChild(btn2);
+    }
+  }
+
+  /* run now and on every open */
+  if (document.body) boot();
+  else document.addEventListener('DOMContentLoaded', boot);
+
+  var _origOpen = window.openSheldon;
+  window.openSheldon = function () {
+    if (typeof _origOpen === 'function') _origOpen.apply(this, arguments);
+    setTimeout(boot, 150);
+  };
+
+  /* also run after 1s to catch late renders */
+  setTimeout(boot, 1000);
+
+})();
+</script>
 </body>
 
 </html>
