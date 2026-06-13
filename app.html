@@ -15300,24 +15300,112 @@
     if (actx.state === 'suspended') actx.resume();
     return actx;
   }
-  function blip(freq, dur, type, gain, slide) {
-    if (!sndOn) return;
-    try {
-      var a = ac(), o = a.createOscillator(), g = a.createGain(), t = a.currentTime;
-      o.type = type || 'triangle'; o.frequency.setValueAtTime(freq, t);
-      if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
-      g.gain.setValueAtTime(gain || 0.07, t);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + dur + 0.02);
-    } catch (e) { }
+  function thock(ctx, t, lowG, midG, noiseG) {
+    var o, g, o2, g2, s, f, b, d, i;
+    o = ctx.createOscillator(); g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(100, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.09);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(lowG, t + 0.003);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.10);
+    o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.11);
+    o2 = ctx.createOscillator(); g2 = ctx.createGain();
+    o2.type = 'sine';
+    o2.frequency.setValueAtTime(420, t); o2.frequency.exponentialRampToValueAtTime(200, t + 0.06);
+    g2.gain.setValueAtTime(0.0001, t); g2.gain.linearRampToValueAtTime(midG, t + 0.003);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+    o2.connect(g2); g2.connect(ctx.destination); o2.start(t); o2.stop(t + 0.08);
+    if (noiseG > 0) {
+      b = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.018), ctx.sampleRate);
+      d = b.getChannelData(0);
+      for (i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+      s = ctx.createBufferSource(); s.buffer = b;
+      f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 2200; f.Q.value = 1.2;
+      g = ctx.createGain(); g.gain.setValueAtTime(noiseG, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.018);
+      s.connect(f); f.connect(g); g.connect(ctx.destination); s.start(t);
+    }
   }
   window.scSnd = {
-    click:   function () { blip(2400, 0.05, 'triangle', 0.06, 1200); },
-    tick:    function () { blip(1600, 0.035, 'sine', 0.045); },
-    key:     function () { blip(900, 0.06, 'square', 0.03, 600); },
-    success: function () { blip(880, 0.09, 'sine', 0.06); setTimeout(function () { blip(1318, 0.14, 'sine', 0.06); }, 90); },
-    error:   function () { blip(420, 0.14, 'sawtooth', 0.045, 300); }
+    click: function () {
+      if (!sndOn) return;
+      try { var c = ac(); thock(c, c.currentTime, 0.55, 0.18, 0.35); } catch(e) {}
+    },
+    tick: function () {
+      if (!sndOn) return;
+      try { var c = ac(); thock(c, c.currentTime, 0.28, 0.09, 0); } catch(e) {}
+    },
+    key: function () {
+      if (!sndOn) return;
+      try { var c = ac(); thock(c, c.currentTime, 0.38, 0.13, 0.18); } catch(e) {}
+    },
+    success: function () {
+      if (!sndOn) return;
+      try {
+        var c = ac(), t = c.currentTime;
+        thock(c, t, 0.55, 0.18, 0.35);
+        [660, 880].forEach(function(freq, i) {
+          var delay = 0.09 + i * 0.07, o = c.createOscillator(), g = c.createGain();
+          o.type = 'sine'; o.frequency.value = freq;
+          g.gain.setValueAtTime(0.0001, t + delay);
+          g.gain.linearRampToValueAtTime(0.09, t + delay + 0.005);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + delay + 0.12);
+          o.connect(g); g.connect(c.destination); o.start(t + delay); o.stop(t + delay + 0.13);
+        });
+      } catch(e) {}
+    },
+    error: function () {
+      if (!sndOn) return;
+      try {
+        var c = ac(), t = c.currentTime, o, g, o2, g2;
+        o = c.createOscillator(); g = c.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(80, t); o.frequency.exponentialRampToValueAtTime(28, t + 0.12);
+        g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.45, t + 0.004);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+        o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 0.15);
+        o2 = c.createOscillator(); g2 = c.createGain();
+        o2.type = 'sine'; o2.frequency.setValueAtTime(200, t); o2.frequency.exponentialRampToValueAtTime(70, t + 0.09);
+        g2.gain.setValueAtTime(0.0001, t); g2.gain.linearRampToValueAtTime(0.14, t + 0.003);
+        g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.10);
+        o2.connect(g2); g2.connect(c.destination); o2.start(t); o2.stop(t + 0.11);
+      } catch(e) {}
+    }
   };
+  /* ══ TYPING SOUNDS ══ */
+  var SKIP = {Tab:1,Shift:1,Control:1,Alt:1,Meta:1,CapsLock:1,Escape:1,
+    ArrowLeft:1,ArrowRight:1,ArrowUp:1,ArrowDown:1,PageUp:1,PageDown:1,Home:1,End:1};
+
+  function scTypeSound(key) {
+    if (!sndOn) return;
+    try {
+      var ctx = ac(), t = ctx.currentTime, o, g, b, d, i, s, f;
+      function ns(f1, f2, dur, gv) {
+        o = ctx.createOscillator(); g = ctx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(f1, t);
+        if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+        g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(gv, t + 0.003);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + dur + 0.005);
+      }
+      function nr(freq, q, dur, gv) {
+        b = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
+        d = b.getChannelData(0);
+        for (i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+        s = ctx.createBufferSource(); s.buffer = b;
+        f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = freq; f.Q.value = q;
+        g = ctx.createGain(); g.gain.setValueAtTime(gv, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        s.connect(f); f.connect(g); g.connect(ctx.destination); s.start(t);
+      }
+      if (key === 'Enter')                        { thock(ctx, t, 0.55, 0.18, 0.35); }
+      else if (key === ' ')                        { ns(80, 35, 0.08, 0.42); ns(320, 150, 0.06, 0.12); }
+      else if (key === 'Backspace' || key === 'Delete') { ns(110, 55, 0.055, 0.28); nr(1800, 1.5, 0.012, 0.18); }
+      else                                         { thock(ctx, t, 0.28, 0.09, 0.18); }
+    } catch(e) {}
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (SKIP[e.key] || e.metaKey || e.ctrlKey || e.altKey) return;
+    var tag = e.target && e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') scTypeSound(e.key);
+  }, true);
  
   /* sound toggle chip — injected into the topbar */
   function injectSndChip() {
