@@ -8240,12 +8240,29 @@
         <i class="ti ti-arrow-left"></i> Set your exam date to start
       </div>
       <div id="countdown-block" style="display:none;width:100%;text-align:center">
-        <div class="ecn-glass">
-          <div class="ecn-num" id="days-left">--</div>
-          <div class="ecn-unit">days to exam</div>
-        </div>
-        <div class="ecn-weeks" id="ecn-weeks"></div>
+  <div class="ecn-glass">
+    <div class="ecn-arc-wrap">
+      <svg class="ecn-parc" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="ecn-pg" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#878dff"/>
+            <stop offset="100%" stop-color="#46c98f"/>
+          </linearGradient>
+        </defs>
+        <circle cx="70" cy="70" r="60" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="5"/>
+        <circle cx="70" cy="70" r="60" fill="none" stroke="url(#ecn-pg)" stroke-width="5"
+          stroke-linecap="round" stroke-dasharray="0 377"
+          transform="rotate(-90 70 70)" id="ecn-arc"/>
+      </svg>
+      <div class="ecn-arc-center">
+        <div class="ecn-num" id="days-left">--</div>
+        <div class="ecn-unit">DAYS</div>
       </div>
+    </div>
+    <div class="ecn-plate-sub">to exam</div>
+  </div>
+  <div class="ecn-weeks" id="ecn-weeks"></div>
+</div>
     </div>
 
     <!-- RIGHT: Track + Stats -->
@@ -15904,6 +15921,12 @@
       node.style.opacity = '0';
       setTimeout(function(){ node.style.opacity='1'; }, 350);
     }
+    // prep arc inside plate
+    var arc = document.getElementById('ecn-arc');
+    if(arc){
+      arc.style.transition = 'stroke-dasharray 1.5s cubic-bezier(.4,0,.2,1)';
+      arc.setAttribute('stroke-dasharray', (pct/100*377).toFixed(1) + ' 377');
+    }
     // session dots
     var track = document.getElementById('ecn-track');
     if(track && totalDays > 0){
@@ -16013,6 +16036,31 @@
   .ecn-stats{flex-wrap:wrap}
   .ecn-s{flex:0 0 calc(50% - 4px)}
 }
+    /* 1. Milestone labels above track */
+.ecn-tick-lbl{top:-21px !important;bottom:auto !important}
+
+/* 2. Exam dot filled + pulse */
+.ecn-exam-dot{background:#46c98f !important;animation:examdot 3s ease-in-out infinite}
+@keyframes examdot{0%,100%{box-shadow:0 0 12px rgba(70,201,143,.55)}50%{box-shadow:0 0 24px rgba(70,201,143,.90),0 0 44px rgba(70,201,143,.30)}}
+
+/* 3. Plate arc ring layout */
+.ecn-glass{overflow:visible !important;padding:16px 16px 14px !important}
+.ecn-arc-wrap{position:relative;width:148px;height:148px;margin:0 auto}
+.ecn-parc{width:100%;height:100%;display:block}
+.ecn-arc-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ecn-num{font-size:56px !important;letter-spacing:-4px !important}
+.ecn-unit{font-size:9px !important;letter-spacing:.16em !important;margin-top:3px}
+.ecn-plate-sub{font-size:10.5px;color:rgba(245,247,250,.42);margin-top:8px;font-weight:500}
+
+/* 4. Score gap red→amber→green */
+.ecn-gap-fill{background:linear-gradient(90deg,#fb7185 0%,#f0bd6a 50%,#46c98f 100%) !important}
+
+/* 5. Track height 10→8px */
+.ecn-track{height:8px !important}
+.ecn-tfill{height:8px !important}
+
+/* 6. Stat top accent stripes 2→3px */
+.ecn-s::after{height:3px !important}
 </style>
 </body>
 
