@@ -7752,6 +7752,155 @@
 #view-mock       > .sec-header,
 #view-errorlog   > .sec-header {
   display: none !important;
+  /* ══ EXAM COMMAND — Elevated Design ══ */
+#exam-command{
+  padding:0 !important;
+  background:linear-gradient(145deg,#121a2d 0%,#0c1320 100%) !important;
+  border:1px solid rgba(70,201,143,.22) !important;
+  box-shadow:0 8px 32px rgba(0,0,0,.40) !important;
+  overflow:hidden !important;
+  position:relative;
+}
+#exam-command::before{
+  content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.016) 1px,transparent 1px);
+  background-size:28px 28px;pointer-events:none;z-index:0;border-radius:inherit;
+}
+#exam-command::after{
+  content:'';position:absolute;bottom:-70px;right:-70px;
+  width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(70,201,143,.10),transparent 62%);
+  pointer-events:none;z-index:0;
+}
+.ecn-head{display:flex;align-items:center;gap:10px;padding:14px 22px;
+  border-bottom:1px solid rgba(255,255,255,.055);position:relative;z-index:1}
+.ecn-eye{font-size:9.5px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;
+  color:rgba(70,201,143,.65);display:flex;align-items:center;gap:5px}
+.ecn-sep{width:1px;height:14px;background:rgba(255,255,255,.10);flex-shrink:0}
+.ecn-datechip{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;
+  padding:6px 14px;border-radius:9px;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.10);color:rgba(245,247,250,.92);
+  cursor:pointer;user-select:none;transition:border-color .15s}
+.ecn-datechip:hover{border-color:rgba(135,141,255,.45)}
+.ecn-datechip .ti{color:#878dff;font-size:14px}
+.ecn-pct-badge{margin-left:auto;display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;padding:5px 13px;border-radius:100px;
+  background:rgba(135,141,255,.11);color:#878dff;border:1px solid rgba(135,141,255,.30)}
+.ecn-blink{width:5px;height:5px;border-radius:50%;background:#878dff;
+  box-shadow:0 0 6px #878dff;animation:bl 2s ease-in-out infinite}
+.ecn-body{display:grid;grid-template-columns:196px 1fr;position:relative;z-index:1}
+.ecn-plate{padding:26px 18px;border-right:1px solid rgba(255,255,255,.055);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;overflow:hidden}
+.ecn-plate::after{content:'';position:absolute;top:-40%;left:0;right:0;height:35%;
+  background:linear-gradient(180deg,transparent,rgba(255,255,255,.035),transparent);
+  animation:pscan 5s ease-in-out infinite;pointer-events:none}
+@keyframes pscan{0%{top:-40%}60%,100%{top:140%}}
+.ecn-empty{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;
+  color:rgba(167,139,250,.75);text-align:center;line-height:1.4}
+.ecn-glass{background:linear-gradient(170deg,rgba(255,255,255,.07) 0%,rgba(255,255,255,.02) 100%);
+  border:1px solid rgba(255,255,255,.11);border-radius:18px;
+  padding:20px 22px 16px;text-align:center;width:100%;
+  box-shadow:0 1px 0 rgba(255,255,255,.09) inset,0 -1px 0 rgba(0,0,0,.3) inset,0 12px 36px rgba(0,0,0,.4);
+  position:relative;overflow:hidden}
+.ecn-glass::before{content:'';position:absolute;top:0;left:0;right:0;height:44%;
+  background:linear-gradient(180deg,rgba(255,255,255,.07),transparent);pointer-events:none}
+.ecn-num{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:76px;
+  line-height:.95;letter-spacing:-5px;color:#fff;
+  animation:ecnumglow 3.5s ease-in-out infinite}
+@keyframes ecnumglow{
+  0%,100%{text-shadow:0 0 30px rgba(70,201,143,.18),0 3px 0 rgba(0,0,0,.6)}
+  50%{text-shadow:0 0 60px rgba(70,201,143,.40),0 0 20px rgba(70,201,143,.15),0 3px 0 rgba(0,0,0,.6)}}
+.ecn-unit{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(70,201,143,.75);margin-top:7px}
+.ecn-weeks{display:flex;justify-content:center;gap:7px;margin-top:13px;flex-wrap:wrap}
+.ecn-w-chip{font-size:10.5px;font-weight:600;padding:3px 10px;border-radius:7px;
+  background:rgba(135,141,255,.10);border:1px solid rgba(135,141,255,.20);color:#878dff}
+.ecn-right{padding:20px 24px;display:flex;flex-direction:column;gap:18px}
+.ecn-tlabels{display:flex;justify-content:space-between;align-items:flex-end;
+  font-size:9.5px;font-weight:600;color:rgba(245,247,250,.30);margin-bottom:11px}
+.ecn-tl-today{color:#46c98f;font-weight:800}
+.ecn-track{position:relative;height:10px;background:rgba(255,255,255,.055);
+  border-radius:100px;overflow:visible}
+.ecn-tfill{position:absolute;left:0;top:0;height:10px;border-radius:100px;
+  background:linear-gradient(90deg,rgba(135,141,255,.75) 0%,#46c98f 100%);
+  box-shadow:0 0 10px rgba(70,201,143,.40),0 0 22px rgba(70,201,143,.18);
+  width:0;transition:width 1.6s cubic-bezier(.4,0,.2,1);overflow:hidden}
+.ecn-sheen{position:absolute;inset:0;border-radius:100px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);
+  background-size:200% 100%;animation:ecnsh 2.8s linear infinite}
+@keyframes ecnsh{from{background-position:200% 0}to{background-position:-200% 0}}
+.ecn-tick{position:absolute;top:-9px;bottom:-9px;width:1px;
+  background:rgba(255,255,255,.10);transform:translateX(-50%)}
+.ecn-tick-lbl{position:absolute;bottom:-21px;left:50%;transform:translateX(-50%);
+  font-size:8px;color:rgba(245,247,250,.25);white-space:nowrap;font-weight:600}
+.ecn-sesdot{position:absolute;width:3px;border-radius:100px;
+  top:50%;transform:translateY(-50%);background:rgba(255,255,255,.38);pointer-events:none}
+.ecn-node{position:absolute;top:50%;transform:translate(-50%,-50%);
+  transition:left .5s cubic-bezier(.34,1.56,.64,1),opacity .3s ease;z-index:4;opacity:0}
+.ecn-node-core{width:18px;height:18px;border-radius:50%;background:#46c98f;
+  border:3px solid #0c1320;box-shadow:0 0 16px rgba(70,201,143,.70);position:relative;z-index:3}
+.ecn-ring{position:absolute;border-radius:50%;border:1.5px solid rgba(70,201,143,.40);
+  top:50%;left:50%;transform:translate(-50%,-50%);animation:ecnpr 2.4s ease-out infinite}
+.ecn-ring:nth-child(1){animation-delay:0s}
+.ecn-ring:nth-child(2){animation-delay:.6s}
+.ecn-ring:nth-child(3){animation-delay:1.2s}
+@keyframes ecnpr{0%{width:18px;height:18px;opacity:.9}100%{width:52px;height:52px;opacity:0}}
+.ecn-node-tag{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  font-size:9px;font-weight:800;color:#46c98f;white-space:nowrap;letter-spacing:.06em;
+  text-transform:uppercase;background:rgba(70,201,143,.12);
+  border:1px solid rgba(70,201,143,.28);padding:2px 7px;border-radius:6px}
+.ecn-exam-m{position:absolute;right:0;top:50%;transform:translateY(-50%)}
+.ecn-exam-vl{position:absolute;right:5px;top:-28px;bottom:-28px;width:1px;
+  background:linear-gradient(180deg,transparent,rgba(70,201,143,.5),transparent)}
+.ecn-exam-dot{position:absolute;right:0;top:50%;transform:translateY(-50%);
+  width:12px;height:12px;border-radius:50%;background:#0c1320;
+  border:2.5px solid #46c98f;box-shadow:0 0 12px rgba(70,201,143,.55)}
+.ecn-exam-flag{position:absolute;right:13px;top:-40px;font-size:10px;
+  font-weight:700;color:#46c98f;white-space:nowrap;text-align:right}
+.ecn-stats{display:flex;gap:8px}
+.ecn-s{flex:1;min-width:0;background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.065);border-radius:13px;
+  padding:12px 13px;position:relative;overflow:hidden}
+.ecn-s::after{content:'';position:absolute;top:0;left:0;right:0;
+  height:2px;border-radius:2px 2px 0 0}
+.ecn-s1::after{background:rgba(245,247,250,.14)}
+.ecn-s2::after{background:linear-gradient(90deg,#46c98f,transparent 80%)}
+.ecn-s3::after{background:linear-gradient(90deg,#878dff,transparent 80%)}
+.ecn-s4::after{background:linear-gradient(90deg,#f0bd6a,transparent 80%)}
+.ecn-s5::after{background:linear-gradient(90deg,rgba(135,141,255,.5),transparent 80%)}
+.ecn-sv{font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:600;
+  letter-spacing:-.5px;line-height:1}
+.ecn-sv input[type="number"]{font-family:'Fraunces',Georgia,serif;font-size:20px;
+  font-weight:600;letter-spacing:-.5px;width:100%;
+  background:transparent !important;border:none !important;
+  color:rgba(245,247,250,.92) !important;outline:none;padding:0 !important;
+  box-shadow:none !important;-webkit-text-fill-color:rgba(245,247,250,.92) !important}
+.ecn-sv input[type="number"]:focus{color:#878dff !important;-webkit-text-fill-color:#878dff !important}
+.ecn-sk{font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(245,247,250,.28);margin-top:5px}
+.ecn-footer{padding:13px 22px;border-top:1px solid rgba(255,255,255,.055);
+  display:flex;align-items:center;gap:16px;position:relative;z-index:1}
+.ecn-gap-lbl{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(245,247,250,.30);white-space:nowrap}
+.ecn-gap-track{height:4px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden}
+.ecn-gap-fill{height:100%;border-radius:100px;
+  background:linear-gradient(90deg,rgba(135,141,255,.6),#878dff);
+  width:0;transition:width 1.4s cubic-bezier(.4,0,.2,1) .6s}
+.ecn-gap-scores{display:flex;justify-content:space-between;font-size:9px;
+  color:rgba(245,247,250,.28);margin-top:5px;font-weight:600}
+/* rolling digits color fix inside the glass plate */
+#exam-command #days-left.rolling .dl-cell{
+  color:#fff !important;-webkit-text-fill-color:#fff !important}
+/* mobile */
+@media(max-width:700px){
+  .ecn-body{grid-template-columns:1fr !important}
+  .ecn-plate{border-right:none !important;border-bottom:1px solid rgba(255,255,255,.055)}
+  .ecn-num{font-size:62px !important}
+  .ecn-stats{flex-wrap:wrap}
+  .ecn-s{flex:0 0 calc(50% - 4px)}
+}
 </style>
 <!-- ━━━━━━━━━━ END BLOCK A ━━━━━━━━━━ -->
 </head>
@@ -8066,69 +8215,109 @@
         <div id="view-dashboard" class="view-enter">
           <!-- EXAM COMMAND CENTER -->
           <div class="card" id="exam-command" style="margin-bottom:14px">
-            <div class="ec-grid">
-              <!-- IDENTITY: date + days left -->
-              <div class="ec-identity">
-                <div class="ec-date-col">
-                  <div class="ec-eyebrow">Exam date</div>
-                  <input type="hidden" id="exam-date-inp">
-                  <div id="exam-date-display"
-                    onclick="openPicker({inputId:'exam-date-inp',textId:'exam-date-text',displayId:'exam-date-display',onSelect:saveExamSettings})"
-                    class="ec-date-chip">
-                    <i class="ti ti-calendar"></i><span id="exam-date-text">Select date</span>
-                  </div>
-                </div>
-                <div id="exam-empty-prompt" class="ec-empty">
-                  <i class="ti ti-arrow-left" style="font-size:15px"></i> Set your exam date to start the countdown
-                </div>
-                <div id="countdown-block" class="ec-hero" style="display:none">
-                  <div class="ec-hero-num" id="days-left">--</div>
-                  <div class="ec-eyebrow">days left</div>
-                </div>
-              </div>
 
-              <!-- STATS STRIP -->
-              <div class="ec-stats">
-                <div id="hrs-needed-block" class="ec-cell" style="display:none">
-                  <div class="ec-cell-val" id="hrs-needed">--</div>
-                  <div class="ec-eyebrow">hrs/day needed</div>
-                </div>
-                <div id="total-hrs-block" class="ec-cell" style="display:none">
-                  <div class="ec-cell-val ec-green" id="proj-total">--</div>
-                  <div class="ec-eyebrow">projected total</div>
-                </div>
-                <div id="score-progress-block" class="ec-cell" style="display:none">
-                  <div class="ec-cell-val" id="latest-mock-display">--</div>
-                  <div class="ec-eyebrow">latest mock</div>
-                </div>
-                <div id="gap-block" class="ec-cell" style="display:none">
-                  <div class="ec-cell-val ec-amber" id="score-gap">--</div>
-                  <div class="ec-eyebrow">gap to target</div>
-                </div>
-                <div class="ec-cell ec-target-cell">
-                  <div class="ec-cell-val"><input type="number" id="target-score-inp" onchange="saveExamSettings()"
-                      min="200" max="805" placeholder="735"></div>
-                  <div class="ec-eyebrow">target score</div>
-                </div>
-              </div>
-            </div>
+  <!-- HEADER -->
+  <div class="ecn-head">
+    <span class="ecn-eye"><i class="ti ti-flame" style="font-size:10px;color:#46c98f"></i> GMAT Focus Edition</span>
+    <div class="ecn-sep"></div>
+    <input type="hidden" id="exam-date-inp">
+    <div id="exam-date-display"
+         onclick="openPicker({inputId:'exam-date-inp',textId:'exam-date-text',displayId:'exam-date-display',onSelect:saveExamSettings})"
+         class="ecn-datechip">
+      <i class="ti ti-calendar"></i><span id="exam-date-text">Select exam date</span>
+    </div>
+    <div class="ecn-pct-badge" id="ecn-pct-badge" style="display:none">
+      <span class="ecn-blink"></span><span id="exam-progress-pct">0%</span>
+    </div>
+  </div>
 
-            <!-- progress -->
-            <div id="exam-progress-wrap" style="display:none;margin-top:20px">
-              <div
-                style="display:flex;justify-content:space-between;font-size:11px;font-weight:500;color:var(--text-tertiary);margin-bottom:6px">
-                <span>25 Apr 2026 (start)</span>
-                <span id="exam-progress-pct" style="color:rgba(167,139,250,0.85);font-weight:650">0% of prep done</span>
-                <span id="exam-date-label">Exam day</span>
-              </div>
-              <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:100px;overflow:hidden">
-                <div id="exam-progress-bar"
-                  style="height:100%;border-radius:100px;background:linear-gradient(90deg,#8b7cf8,#5fd9a8);transition:width 0.6s ease;width:0%">
-                </div>
-              </div>
+  <!-- BODY -->
+  <div class="ecn-body">
+
+    <!-- LEFT: Countdown plate -->
+    <div class="ecn-plate">
+      <div id="exam-empty-prompt" class="ecn-empty">
+        <i class="ti ti-arrow-left"></i> Set your exam date to start
+      </div>
+      <div id="countdown-block" style="display:none;width:100%;text-align:center">
+        <div class="ecn-glass">
+          <div class="ecn-num" id="days-left">--</div>
+          <div class="ecn-unit">days to exam</div>
+        </div>
+        <div class="ecn-weeks" id="ecn-weeks"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Track + Stats -->
+    <div class="ecn-right" id="ecn-right" style="display:none">
+      <div class="ecn-track-section">
+        <div class="ecn-tlabels">
+          <span>25 Apr 2026</span>
+          <span class="ecn-tl-today">▲ Today</span>
+          <span id="exam-date-label">Exam day</span>
+        </div>
+        <div class="ecn-track" id="ecn-track">
+          <div class="ecn-tfill" id="exam-progress-bar"><div class="ecn-sheen"></div></div>
+          <div class="ecn-tick" style="left:25%"><span class="ecn-tick-lbl">25%</span></div>
+          <div class="ecn-tick" style="left:50%"><span class="ecn-tick-lbl">50%</span></div>
+          <div class="ecn-tick" style="left:75%"><span class="ecn-tick-lbl">75%</span></div>
+          <div class="ecn-node" id="ecn-node">
+            <div class="ecn-node-core">
+              <div class="ecn-ring"></div><div class="ecn-ring"></div><div class="ecn-ring"></div>
             </div>
+            <div class="ecn-node-tag">Today</div>
           </div>
+          <div class="ecn-exam-m">
+            <div class="ecn-exam-vl"></div>
+            <div class="ecn-exam-dot"></div>
+            <div class="ecn-exam-flag">🏁 Exam</div>
+          </div>
+        </div>
+      </div>
+      <div class="ecn-stats">
+        <div class="ecn-s ecn-s1" id="hrs-needed-block">
+          <div class="ecn-sv" id="hrs-needed">--</div>
+          <div class="ecn-sk">Hrs/day needed</div>
+        </div>
+        <div class="ecn-s ecn-s2" id="total-hrs-block">
+          <div class="ecn-sv" style="color:#46c98f" id="proj-total">--</div>
+          <div class="ecn-sk">Projected total</div>
+        </div>
+        <div class="ecn-s ecn-s3" id="score-progress-block">
+          <div class="ecn-sv" id="latest-mock-display">--</div>
+          <div class="ecn-sk">Latest mock</div>
+        </div>
+        <div class="ecn-s ecn-s4" id="gap-block">
+          <div class="ecn-sv" style="color:#f0bd6a" id="score-gap">--</div>
+          <div class="ecn-sk">Gap to target</div>
+        </div>
+        <div class="ecn-s ecn-s5">
+          <div class="ecn-sv">
+            <input type="number" id="target-score-inp" onchange="saveExamSettings()" min="200" max="805" placeholder="735">
+          </div>
+          <div class="ecn-sk">Target score</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- SCORE GAP FOOTER -->
+  <div class="ecn-footer" id="ecn-footer" style="display:none">
+    <span class="ecn-gap-lbl">Score gap</span>
+    <div style="flex:1">
+      <div class="ecn-gap-track"><div class="ecn-gap-fill" id="ecn-gap-fill"></div></div>
+      <div class="ecn-gap-scores">
+        <span>200</span>
+        <span>Latest <strong id="ecn-gap-latest" style="color:#f0bd6a">--</strong></span>
+        <span>Target <strong id="ecn-gap-target" style="color:#f0bd6a">--</strong></span>
+        <span>805</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- compat shim — keep, do not remove -->
+  <div id="exam-progress-wrap" style="display:none!important"></div>
+</div>
           <!-- KPI ROW (enhanced with sparklines + deltas) -->
           <div class="kpi-row">
             <!-- Today -->
@@ -15679,6 +15868,78 @@
   }
   function go(){ if(!build()) setTimeout(go,300); }
   if(document.readyState!=='loading') go(); else document.addEventListener('DOMContentLoaded',go);
+})();
+</script>
+  <script>
+/* ── EXAM COMMAND: new visual layer — wraps existing functions, no changes needed elsewhere ── */
+(function(){
+  var _uec = updateExamCountdown;
+  updateExamCountdown = function(){
+    _uec.apply(this, arguments);
+    var examDateVal = document.getElementById('exam-date-inp').value;
+    var show = !!examDateVal;
+    var er = document.getElementById('ecn-right');
+    if(er) er.style.display = show ? 'flex' : 'none';
+    var pb = document.getElementById('ecn-pct-badge');
+    if(pb) pb.style.display = show ? 'inline-flex' : 'none';
+    if(!show) return;
+    var ep = examDateVal.split('-').map(Number);
+    var examDate = new Date(ep[0], ep[1]-1, ep[2]);
+    var daysLeft = Math.max(0, Math.ceil((examDate - today) / 86400000));
+    var PS = new Date(2026,3,25); PS.setHours(0,0,0,0);
+    var totalDays = Math.ceil((examDate - PS) / 86400000);
+    var doneDays = Math.ceil((today - PS) / 86400000);
+    var pct = Math.min(100, Math.max(0, Math.round(doneDays / totalDays * 100)));
+    // weeks chips
+    var wEl = document.getElementById('ecn-weeks');
+    if(wEl){
+      var wks=Math.floor(daysLeft/7), dys=daysLeft%7, wh='';
+      if(wks>0) wh+='<span class="ecn-w-chip">'+wks+' week'+(wks!==1?'s':'')+'</span>';
+      if(dys>0) wh+='<span class="ecn-w-chip">'+dys+' day'+(dys!==1?'s':'')+'</span>';
+      wEl.innerHTML=wh;
+    }
+    // today node
+    var node = document.getElementById('ecn-node');
+    if(node){
+      node.style.left = pct + '%';
+      node.style.opacity = '0';
+      setTimeout(function(){ node.style.opacity='1'; }, 350);
+    }
+    // session dots
+    var track = document.getElementById('ecn-track');
+    if(track && totalDays > 0){
+      track.querySelectorAll('.ecn-sesdot').forEach(function(d){ d.remove(); });
+      var seen={};
+      (typeof sessions!=='undefined'?sessions:[]).forEach(function(s){
+        if(seen[s.date]) return; seen[s.date]=1;
+        var d=parseLocal(s.date);
+        var dp=Math.round(Math.ceil((d-PS)/86400000)/totalDays*100);
+        if(dp<1||dp>pct) return;
+        var dot=document.createElement('div');
+        dot.className='ecn-sesdot';
+        dot.style.left=dp+'%';
+        dot.style.opacity=(0.28+Math.random()*0.42).toFixed(2);
+        dot.style.height=(4+Math.random()*4).toFixed(0)+'px';
+        track.appendChild(dot);
+      });
+    }
+  };
+
+  var _ucc = updateCommandCenter;
+  updateCommandCenter = function(){
+    _ucc.apply(this, arguments);
+    var footer = document.getElementById('ecn-footer'); if(!footer) return;
+    if(window.mockScores && window.mockScores.length){
+      footer.style.display='flex';
+      var latest = window.mockScores[window.mockScores.length-1].score;
+      var gf=document.getElementById('ecn-gap-fill');
+      if(gf) gf.style.width=Math.min(100,Math.round((latest-200)/(805-200)*100))+'%';
+      var gl=document.getElementById('ecn-gap-latest'); if(gl) gl.textContent=latest;
+      var gt=document.getElementById('ecn-gap-target'); if(gt) gt.textContent=TARGET_SCORE;
+    } else {
+      footer.style.display='none';
+    }
+  };
 })();
 </script>
 </body>
