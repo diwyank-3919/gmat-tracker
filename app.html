@@ -10606,6 +10606,201 @@ html.sc-light .sheldon-close {
 }
 
 </style>
+    <style id="sheldon-resize">
+
+/* ── MAXIMIZED state ── */
+#sheldonPanel.sh-maximized {
+  width: calc(100vw - 48px) !important;
+  height: calc(100vh - 48px) !important;
+  max-width: calc(100vw - 48px) !important;
+  max-height: calc(100vh - 48px) !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  border-radius: 28px !important;
+  transition: all 0.32s cubic-bezier(.34,1.2,.64,1) !important;
+}
+
+/* ── MINIMIZED state ── */
+#sheldonPanel.sh-minimized {
+  width: 280px !important;
+  height: 62px !important;
+  min-height: 0 !important;
+  max-height: 62px !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  transition: all 0.28s cubic-bezier(.4,0,.2,1) !important;
+}
+
+/* hide everything except the header when minimized */
+#sheldonPanel.sh-minimized .sheldon-messages,
+#sheldonPanel.sh-minimized .sheldon-chips,
+#sheldonPanel.sh-minimized .sheldon-input,
+#sheldonPanel.sh-minimized #sheldonPanel::after {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* minimized header — tighter */
+#sheldonPanel.sh-minimized .sheldon-header {
+  padding: 12px 14px !important;
+  border-bottom: none !important;
+}
+
+/* hide status line when minimized — just show name */
+#sheldonPanel.sh-minimized .ph-status-wrap {
+  display: none !important;
+}
+
+/* hide voice button when minimized */
+#sheldonPanel.sh-minimized #sheldonVoiceBtn {
+  display: none !important;
+}
+
+/* minimized name smaller */
+#sheldonPanel.sh-minimized .sheldon-title h3 {
+  font-size: 14px !important;
+}
+
+/* unread badge on minimized pill */
+#sheldonPanel.sh-minimized .sh-unread-dot {
+  display: flex !important;
+}
+
+.sh-unread-dot {
+  display: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #46c98f;
+  box-shadow: 0 0 8px rgba(70,201,143,0.8);
+  flex-shrink: 0;
+  animation: shUnreadPulse 2s ease-in-out infinite;
+}
+
+@keyframes shUnreadPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.7); }
+}
+
+/* smooth transition on normal open/close */
+#sheldonPanel {
+  transition: opacity 0.28s ease, transform 0.38s cubic-bezier(.34,1.4,.5,1) !important;
+}
+
+/* the resize button itself */
+.sh-resize-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.sh-resize-btn:hover {
+  background: rgba(135,141,255,0.12) !important;
+  border-color: rgba(135,141,255,0.28) !important;
+  color: #9aa0ff !important;
+}
+
+.sh-minimize-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.sh-minimize-btn:hover {
+  background: rgba(251,191,36,0.10) !important;
+  border-color: rgba(251,191,36,0.26) !important;
+  color: #f0bd6a !important;
+}
+
+/* light theme */
+html.sc-light .sh-resize-btn,
+html.sc-light .sh-minimize-btn {
+  background: rgba(15,17,40,0.04) !important;
+  border-color: rgba(15,17,40,0.09) !important;
+  color: rgba(23,27,46,0.32) !important;
+}
+
+html.sc-light .sh-resize-btn:hover {
+  background: rgba(88,94,230,0.08) !important;
+  border-color: rgba(88,94,230,0.24) !important;
+  color: #4a50d8 !important;
+}
+
+html.sc-light .sh-minimize-btn:hover {
+  background: rgba(180,83,9,0.08) !important;
+  border-color: rgba(180,83,9,0.22) !important;
+  color: #b45309 !important;
+}
+
+/* maximized — wider message bubbles */
+#sheldonPanel.sh-maximized .sheldon-msg.bot,
+#sheldonPanel.sh-maximized .sheldon-msg.user {
+  max-width: 72% !important;
+  font-size: 14px !important;
+  line-height: 1.75 !important;
+}
+
+#sheldonPanel.sh-maximized .sheldon-messages {
+  padding: 28px 28px 16px !important;
+  max-width: 860px !important;
+  margin: 0 auto !important;
+  width: 100% !important;
+}
+
+#sheldonPanel.sh-maximized .sheldon-chips {
+  padding: 0 28px 14px !important;
+  max-width: 860px !important;
+  margin: 0 auto !important;
+  width: 100% !important;
+}
+
+#sheldonPanel.sh-maximized .sheldon-input {
+  padding: 14px 28px 18px !important;
+}
+
+#sheldonPanel.sh-maximized .sh-dock-field textarea {
+  font-size: 14px !important;
+}
+
+/* mobile — no maximize, only minimize */
+@media (max-width: 640px) {
+  #sheldonPanel.sh-maximized {
+    width: 100vw !important;
+    height: 100vh !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    border-radius: 0 !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+  }
+  #sheldonPanel.sh-minimized {
+    width: calc(100vw - 32px) !important;
+    right: 16px !important;
+  }
+}
+
+</style>
 </head>
 
 <body>
@@ -19680,6 +19875,225 @@ html.sc-light .sheldon-close {
             justify-content: center;
         }
     </style>
+    <script id="sheldon-resize-js">
+(function () {
+
+  /* ── state ── */
+  var SH_STATE_KEY = 'sc_sheldon_size';
+  var state = 'normal'; /* 'normal' | 'maximized' | 'minimized' */
+
+  /* ── inject the two new buttons into Sheldon's header ── */
+  function injectButtons() {
+    var header = document.querySelector('#sheldonPanel .sheldon-header');
+    if (!header || document.getElementById('sh-minimize-btn')) return;
+
+    /* minimize button — goes between voice and close */
+    var minBtn = document.createElement('button');
+    minBtn.id = 'sh-minimize-btn';
+    minBtn.className = 'sh-minimize-btn';
+    minBtn.title = 'Minimise';
+    minBtn.setAttribute('aria-label', 'Minimise Sheldon');
+    minBtn.innerHTML = '<i class="ti ti-minus" style="font-size:13px"></i>';
+    minBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      toggleMinimize();
+    });
+
+    /* maximize button */
+    var maxBtn = document.createElement('button');
+    maxBtn.id = 'sh-maximize-btn';
+    maxBtn.className = 'sh-resize-btn';
+    maxBtn.title = 'Maximise';
+    maxBtn.setAttribute('aria-label', 'Maximise Sheldon');
+    maxBtn.innerHTML = '<i class="ti ti-arrows-maximize" style="font-size:13px"></i>';
+    maxBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      toggleMaximize();
+    });
+
+    /* unread dot (shown only when minimized + new message) */
+    var dot = document.createElement('span');
+    dot.className = 'sh-unread-dot';
+    dot.id = 'sh-unread-dot';
+
+    /* insert: …name… [dot] [minBtn] [maxBtn] [voice] [close] */
+    var closeBtn = header.querySelector('.sheldon-close');
+    var voiceBtn = document.getElementById('sheldonVoiceBtn');
+    var toneBtn  = header.querySelector('.sheldon-tone');
+
+    /* insert dot after title */
+    var titleEl = header.querySelector('.sheldon-title');
+    if (titleEl && titleEl.nextSibling) {
+      header.insertBefore(dot, titleEl.nextSibling);
+    }
+
+    /* insert maximize then minimize before voice/close cluster */
+    var anchor = voiceBtn || closeBtn;
+    if (anchor) {
+      header.insertBefore(minBtn, anchor);
+      header.insertBefore(maxBtn, minBtn);
+    } else {
+      header.appendChild(maxBtn);
+      header.appendChild(minBtn);
+    }
+  }
+
+  /* ── toggle maximize ── */
+  function toggleMaximize() {
+    var panel = document.getElementById('sheldonPanel');
+    var maxBtn = document.getElementById('sh-maximize-btn');
+    if (!panel) return;
+
+    if (state === 'minimized') {
+      /* restore first, then maximize */
+      setState('normal');
+      setTimeout(function () { setState('maximized'); }, 50);
+      return;
+    }
+
+    setState(state === 'maximized' ? 'normal' : 'maximized');
+  }
+
+  /* ── toggle minimize ── */
+  function toggleMinimize() {
+    var panel = document.getElementById('sheldonPanel');
+    if (!panel) return;
+
+    if (state === 'maximized') {
+      setState('normal');
+      return;
+    }
+
+    setState(state === 'minimized' ? 'normal' : 'minimized');
+  }
+
+  /* ── apply state ── */
+  function setState(newState) {
+    var panel  = document.getElementById('sheldonPanel');
+    var maxBtn = document.getElementById('sh-maximize-btn');
+    var minBtn = document.getElementById('sh-minimize-btn');
+    if (!panel) return;
+
+    state = newState;
+
+    /* remove all state classes */
+    panel.classList.remove('sh-maximized', 'sh-minimized');
+
+    if (newState === 'maximized') {
+      panel.classList.add('sh-maximized');
+      if (maxBtn) {
+        maxBtn.title = 'Restore';
+        maxBtn.setAttribute('aria-label', 'Restore Sheldon');
+        maxBtn.innerHTML = '<i class="ti ti-arrows-minimize" style="font-size:13px"></i>';
+      }
+      if (minBtn) {
+        minBtn.title = 'Minimise';
+        minBtn.innerHTML = '<i class="ti ti-minus" style="font-size:13px"></i>';
+      }
+    } else if (newState === 'minimized') {
+      panel.classList.add('sh-minimized');
+      if (minBtn) {
+        minBtn.title = 'Restore';
+        minBtn.setAttribute('aria-label', 'Restore Sheldon');
+        minBtn.innerHTML = '<i class="ti ti-chevron-up" style="font-size:13px"></i>';
+      }
+      if (maxBtn) {
+        maxBtn.innerHTML = '<i class="ti ti-arrows-maximize" style="font-size:13px"></i>';
+      }
+    } else {
+      /* normal */
+      if (maxBtn) {
+        maxBtn.title = 'Maximise';
+        maxBtn.setAttribute('aria-label', 'Maximise Sheldon');
+        maxBtn.innerHTML = '<i class="ti ti-arrows-maximize" style="font-size:13px"></i>';
+      }
+      if (minBtn) {
+        minBtn.title = 'Minimise';
+        minBtn.setAttribute('aria-label', 'Minimise Sheldon');
+        minBtn.innerHTML = '<i class="ti ti-minus" style="font-size:13px"></i>';
+      }
+    }
+
+    /* persist so state survives tab reload */
+    try { localStorage.setItem(SH_STATE_KEY, newState); } catch (e) {}
+  }
+
+  /* ── clicking the minimized strip re-opens it ── */
+  function onHeaderClick(e) {
+    if (state !== 'minimized') return;
+    /* only if click wasn't on a button */
+    if (e.target.closest('button')) return;
+    setState('normal');
+  }
+
+  /* ── unread dot: light up when Sheldon replies while minimized ── */
+  function watchMessages() {
+    var msgs = document.getElementById('sheldonMessages');
+    if (!msgs) return;
+    var observer = new MutationObserver(function () {
+      if (state === 'minimized') {
+        var dot = document.getElementById('sh-unread-dot');
+        if (dot) dot.style.display = 'flex';
+      }
+    });
+    observer.observe(msgs, { childList: true, subtree: true });
+  }
+
+  /* clear unread dot when restored */
+  var _origOpen = window.openSheldon;
+  window.openSheldon = function () {
+    var dot = document.getElementById('sh-unread-dot');
+    if (dot) dot.style.display = 'none';
+    if (typeof _origOpen === 'function') _origOpen.apply(this, arguments);
+    /* if user opens while minimized, restore */
+    if (state === 'minimized') setState('normal');
+  };
+
+  /* ── keyboard shortcut: M to minimize while panel is open ── */
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'm' && e.key !== 'M') return;
+    var active = document.activeElement;
+    if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
+    var panel = document.getElementById('sheldonPanel');
+    if (!panel || !panel.classList.contains('open')) return;
+    e.preventDefault();
+    toggleMinimize();
+  });
+
+  /* ── Escape restores from minimized (already closes from open) ── */
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (state === 'minimized') setState('normal');
+  });
+
+  /* ── boot ── */
+  function boot() {
+    injectButtons();
+
+    var header = document.querySelector('#sheldonPanel .sheldon-header');
+    if (header) header.addEventListener('click', onHeaderClick);
+
+    watchMessages();
+
+    /* restore persisted state (skip minimized on cold load — that's confusing) */
+    try {
+      var saved = localStorage.getItem(SH_STATE_KEY);
+      if (saved === 'maximized') setState('maximized');
+    } catch (e) {}
+  }
+
+  /* wait for Sheldon's HTML to exist, then re-run injectButtons on each open */
+  var _origOpen2 = window.openSheldon;
+  window.openSheldon = function () {
+    if (typeof _origOpen2 === 'function') _origOpen2.apply(this, arguments);
+    setTimeout(injectButtons, 80);
+  };
+
+  if (document.body) boot();
+  else document.addEventListener('DOMContentLoaded', boot);
+
+})();
+</script>
 </body>
 
 </html>
