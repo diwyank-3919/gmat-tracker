@@ -11003,6 +11003,162 @@ html.sc-light .sh-minimize-btn:hover {
 }
 
 </style>
+    <style id="sheldon-maximized-layout">
+
+/* ══ MAXIMIZED: centred readable column ══ */
+
+#sheldonPanel.sh-maximized .sheldon-messages {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  /* centred column */
+  max-width: 700px !important;
+  width: 700px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 32px 0 16px !important;
+  box-sizing: border-box !important;
+}
+
+/* bot bubbles — readable line length */
+#sheldonPanel.sh-maximized .sheldon-msg.bot {
+  max-width: 82% !important;
+  font-size: 14.5px !important;
+  line-height: 1.78 !important;
+  padding: 16px 20px !important;
+}
+
+/* user bubbles — right aligned within the column */
+#sheldonPanel.sh-maximized .sheldon-msg.user {
+  align-self: flex-end !important;
+  margin-left: auto !important;
+  max-width: 72% !important;
+  font-size: 14.5px !important;
+  line-height: 1.65 !important;
+  padding: 12px 18px !important;
+}
+
+/* chips — same centred column */
+#sheldonPanel.sh-maximized .sheldon-chips {
+  max-width: 700px !important;
+  width: 700px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 0 0 14px !important;
+  box-sizing: border-box !important;
+}
+
+/* input bar — stretch full but pad generously */
+#sheldonPanel.sh-maximized .sheldon-input {
+  padding: 14px 24px 18px !important;
+}
+
+/* make the textarea feel spacious */
+#sheldonPanel.sh-maximized .sh-dock-field {
+  border-radius: 16px !important;
+}
+
+#sheldonPanel.sh-maximized .sh-dock-field textarea {
+  font-size: 14.5px !important;
+  padding: 13px 16px !important;
+  min-height: 48px !important;
+}
+
+/* bigger send button in maximized */
+#sheldonPanel.sh-maximized .sheldon-send {
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 15px !important;
+  font-size: 19px !important;
+}
+
+/* messages scroll area needs to allow the column to centre */
+#sheldonPanel.sh-maximized .sheldon-messages {
+  overflow-y: auto !important;
+  flex: 1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* inner wrapper trick — wrap messages in a centred div */
+/* since we can't add a wrapper div, use flex on the panel body instead */
+#sheldonPanel.sh-maximized {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* the scroll container itself centres its content */
+#sheldonPanel.sh-maximized .sheldon-messages {
+  align-self: stretch !important;
+}
+
+/* ── true centred column via padding math ──
+   Panel is ~100vw-48px wide. Column = 700px.
+   So padding = (panelWidth - 700) / 2
+   We can't do this in CSS without a wrapper, so we use
+   max-width on the messages + auto margin on a pseudo-flex child.
+   The cleanest solution: set left/right padding to push content in */
+#sheldonPanel.sh-maximized .sheldon-messages {
+  padding-left:  max(32px, calc((100% - 700px) / 2)) !important;
+  padding-right: max(32px, calc((100% - 700px) / 2)) !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#sheldonPanel.sh-maximized .sheldon-chips {
+  padding-left:  max(32px, calc((100% - 700px) / 2)) !important;
+  padding-right: max(32px, calc((100% - 700px) / 2)) !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* ══ NORMAL SIZE: also improve bubble widths ══ */
+
+/* normal panel — bot bubble should never be full width */
+#sheldonPanel:not(.sh-maximized):not(.sh-minimized) .sheldon-msg.bot {
+  max-width: 86% !important;
+  width: fit-content !important;
+}
+
+#sheldonPanel:not(.sh-maximized):not(.sh-minimized) .sheldon-msg.user {
+  max-width: 76% !important;
+  width: fit-content !important;
+  align-self: flex-end !important;
+  margin-left: auto !important;
+}
+
+/* make sure messages flex column is always set */
+#sheldonPanel .sheldon-messages {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+}
+
+/* gap between messages */
+#sheldonPanel .sheldon-messages {
+  gap: 16px !important;
+}
+
+/* ══ MAXIMIZED: wider gap between messages ══ */
+#sheldonPanel.sh-maximized .sheldon-messages {
+  gap: 20px !important;
+}
+
+/* ══ TRANSITION: smooth resize feel ══ */
+#sheldonPanel .sheldon-messages,
+#sheldonPanel .sheldon-msg.bot,
+#sheldonPanel .sheldon-msg.user {
+  transition:
+    max-width 0.32s cubic-bezier(.34,1.2,.64,1),
+    font-size  0.22s ease,
+    padding    0.22s ease !important;
+}
+
+</style>
 </head>
 
 <body>
