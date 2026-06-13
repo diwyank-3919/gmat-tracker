@@ -15592,6 +15592,54 @@
   });
 })();
 </script>
+
+  <style id="sc-arc-final">
+#sheldonCore .sh-spark{display:none !important;}
+#sheldonCore .sh-orb{
+  background:
+    radial-gradient(120% 85% at 32% 16%, rgba(255,255,255,.38), rgba(255,255,255,0) 42%),
+    radial-gradient(95% 95% at 70% 92%, rgba(135,141,255,.85), rgba(135,141,255,0) 58%),
+    radial-gradient(150% 150% at 50% -10%, #15565c 0%, #0c2f40 45%, #312a78 100%) !important;
+}
+.sh-orb::before{opacity:.30 !important;filter:blur(18px) saturate(1.1) !important;}
+.sh-sparks{position:absolute;inset:0;z-index:2;pointer-events:none;display:flex;align-items:center;justify-content:center;}
+.sh-sparks svg{width:72%;height:72%;overflow:visible;}
+.ar-core{fill:none;stroke:#fff;stroke-width:3;transform-box:fill-box;transform-origin:center;
+  filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 12px rgba(135,141,255,.9));animation:arPulse 2.4s ease-in-out infinite;}
+.ar-nuc{fill:rgba(156,162,255,.30);transform-box:fill-box;transform-origin:center;animation:arNuc 2.4s ease-in-out infinite;}
+.ar-seg{fill:none;stroke-linecap:round;transform-box:fill-box;transform-origin:center;}
+.ar-out{stroke:rgba(156,162,255,.9);stroke-width:3;animation:arSpin 7s linear infinite;}
+.ar-in{stroke:rgba(95,217,168,.85);stroke-width:3.5;animation:arSpin 4.5s linear infinite reverse;}
+@keyframes arSpin{to{transform:rotate(360deg)}}
+@keyframes arPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.12);opacity:.85}}
+@keyframes arNuc{0%,100%{transform:scale(1);opacity:.30}50%{transform:scale(1.4);opacity:.55}}
+#sheldonCoreWrap.thinking .ar-seg{animation-duration:1.4s !important;}
+#sheldonCoreWrap.thinking .ar-core,#sheldonCoreWrap.thinking .ar-nuc{animation-duration:1s !important;}
+#sheldonCoreWrap.away .sh-sparks{opacity:.3;}
+</style>
+<script id="sc-arc-final-js">
+(function(){
+  function build(){
+    var orb=document.querySelector('#sheldonCore .sh-orb'); if(!orb) return false;
+    var ex=orb.querySelectorAll('.sh-sparks');
+    for(var i=0;i<ex.length;i++) ex[i].parentNode.removeChild(ex[i]);
+    var s=document.createElement('span'); s.className='sh-sparks';
+    s.innerHTML='<svg viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">'
+      +'<path class="ar-seg ar-out" d="M22 6 A16 16 0 0 1 37.8 22.6"/>'
+      +'<path class="ar-seg ar-out" d="M36.8 27.6 A16 16 0 0 1 12.7 35.5"/>'
+      +'<path class="ar-seg ar-out" d="M8.2 30.5 A16 16 0 0 1 16.6 7.4"/>'
+      +'<path class="ar-seg ar-in" d="M11.6 16 A11 11 0 0 1 32.4 16"/>'
+      +'<path class="ar-seg ar-in" d="M11.6 28 A11 11 0 0 0 32.4 28"/>'
+      +'<circle class="ar-nuc" cx="22" cy="22" r="5.5"/>'
+      +'<circle class="ar-core" cx="22" cy="22" r="3.8"/>'
+      +'</svg>';
+    orb.appendChild(s);
+    return true;
+  }
+  function go(){ if(!build()) setTimeout(go,300); }
+  if(document.readyState!=='loading') go(); else document.addEventListener('DOMContentLoaded',go);
+})();
+</script>
 </body>
 
 </html>
