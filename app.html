@@ -11499,6 +11499,287 @@ html.sc-light .sh-copy-btn:hover {
 }
 
 </style>
+    <style id="sheldon-history-css">
+
+/* ══ PANEL LAYOUT: sidebar + chat side by side ══ */
+#sheldonPanel {
+  display: flex !important;
+  flex-direction: row !important;
+  overflow: hidden !important;
+}
+
+/* ── HISTORY SIDEBAR ── */
+#sh-sidebar {
+  width: 0;
+  min-width: 0;
+  flex-shrink: 0;
+  background: rgba(8,10,20,0.85);
+  border-right: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.30s cubic-bezier(.4,0,.2,1);
+  position: relative;
+  z-index: 3;
+}
+
+#sh-sidebar.open {
+  width: 220px;
+  min-width: 220px;
+}
+
+/* sidebar header */
+.sh-sb-head {
+  padding: 16px 14px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+
+.sh-sb-title {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: rgba(190,196,235,0.45);
+  margin-bottom: 10px;
+}
+
+/* new chat button */
+.sh-new-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border-radius: 9px;
+  background: rgba(135,141,255,0.10);
+  border: 1px solid rgba(135,141,255,0.24);
+  color: #9aa0ff;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.sh-new-btn:hover {
+  background: rgba(135,141,255,0.18);
+  border-color: rgba(135,141,255,0.40);
+}
+.sh-new-btn:active { transform: scale(0.96); }
+
+/* session list */
+.sh-sb-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sh-sb-list::-webkit-scrollbar { width: 3px; }
+.sh-sb-list::-webkit-scrollbar-thumb {
+  background: rgba(135,141,255,0.20);
+  border-radius: 2px;
+}
+
+/* date group label */
+.sh-date-group {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(190,196,235,0.30);
+  padding: 8px 6px 4px;
+}
+
+/* session row */
+.sh-sess-row {
+  padding: 8px 10px;
+  border-radius: 9px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-left: 2.5px solid transparent;
+  transition: all 0.15s;
+  position: relative;
+  min-width: 0;
+}
+.sh-sess-row:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.07);
+  border-left-color: rgba(135,141,255,0.35);
+}
+.sh-sess-row.active {
+  background: rgba(135,141,255,0.10);
+  border-color: rgba(135,141,255,0.20);
+  border-left-color: #9aa0ff;
+}
+.sh-sess-title {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(218,222,248,0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+  padding-right: 20px;
+}
+.sh-sess-row.active .sh-sess-title { color: #fff; font-weight: 600; }
+.sh-sess-meta {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 10.5px;
+  color: rgba(190,196,235,0.35);
+}
+.sh-sess-del {
+  position: absolute;
+  top: 50%; right: 6px;
+  transform: translateY(-50%);
+  width: 20px; height: 20px;
+  border-radius: 5px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.18);
+  font-size: 11px;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+}
+.sh-sess-row:hover .sh-sess-del { display: flex; }
+.sh-sess-del:hover {
+  background: rgba(251,113,133,0.14);
+  color: #fb7185;
+}
+
+/* empty state */
+.sh-sb-empty {
+  text-align: center;
+  padding: 28px 14px;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 12px;
+  color: rgba(190,196,235,0.28);
+  line-height: 1.5;
+}
+
+/* ── CHAT AREA: takes remaining width ── */
+#sh-chat-area {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── HISTORY TOGGLE BUTTON in header ── */
+#sh-history-btn {
+  width: 30px; height: 30px;
+  border-radius: 9px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+#sh-history-btn:hover {
+  background: rgba(135,141,255,0.12);
+  border-color: rgba(135,141,255,0.28);
+  color: #9aa0ff;
+}
+#sh-history-btn.active {
+  background: rgba(135,141,255,0.16);
+  border-color: rgba(135,141,255,0.40);
+  color: #9aa0ff;
+}
+
+/* ── LOADING STATE ── */
+.sh-loading-msgs {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+}
+.sh-loading-spin {
+  width: 20px; height: 20px;
+  border: 2px solid rgba(135,141,255,0.20);
+  border-top-color: #9aa0ff;
+  border-radius: 50%;
+  animation: shSpin 0.8s linear infinite;
+}
+@keyframes shSpin { to { transform: rotate(360deg); } }
+.sh-loading-lbl {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 12px;
+  color: rgba(190,196,235,0.35);
+}
+
+/* ── CURRENT SESSION LABEL ── */
+#sh-session-label {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(190,196,235,0.38);
+  padding: 6px 18px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+/* light theme */
+html.sc-light #sh-sidebar {
+  background: rgba(240,242,252,0.95);
+  border-right-color: rgba(15,17,40,0.09);
+}
+html.sc-light .sh-sb-title { color: rgba(23,27,46,0.38); }
+html.sc-light .sh-new-btn {
+  background: rgba(88,94,230,0.08);
+  border-color: rgba(88,94,230,0.22);
+  color: #4a50d8;
+}
+html.sc-light .sh-sess-row:hover {
+  background: rgba(15,17,40,0.04);
+  border-left-color: rgba(88,94,230,0.35);
+}
+html.sc-light .sh-sess-row.active {
+  background: rgba(88,94,230,0.08);
+  border-left-color: #4a50d8;
+}
+html.sc-light .sh-sess-title { color: rgba(23,27,46,0.82); }
+html.sc-light .sh-sess-row.active .sh-sess-title { color: #0e1020; }
+html.sc-light .sh-sess-meta { color: rgba(23,27,46,0.35); }
+html.sc-light .sh-date-group { color: rgba(23,27,46,0.30); }
+html.sc-light .sh-sb-empty { color: rgba(23,27,46,0.28); }
+html.sc-light #sh-history-btn {
+  background: rgba(15,17,40,0.04);
+  border-color: rgba(15,17,40,0.09);
+  color: rgba(23,27,46,0.32);
+}
+html.sc-light #sh-history-btn.active,
+html.sc-light #sh-history-btn:hover {
+  background: rgba(88,94,230,0.08);
+  border-color: rgba(88,94,230,0.24);
+  color: #4a50d8;
+}
+html.sc-light #sh-session-label { color: rgba(23,27,46,0.35); }
+
+/* maximized sidebar wider */
+#sheldonPanel.sh-maximized #sh-sidebar.open { width: 280px; min-width: 280px; }
+
+/* minimized — hide sidebar */
+#sheldonPanel.sh-minimized #sh-sidebar { display: none !important; }
+
+</style>
 </head>
 
 <body>
@@ -21238,6 +21519,443 @@ html.sc-light .sh-copy-btn:hover {
   /* run again after a short delay to catch messages already in DOM */
   setTimeout(fixAll, 600);
   setTimeout(fixAll, 1500);
+
+})();
+</script>
+    <script id="sheldon-history-js">
+(function () {
+
+  /* ══ STATE ══ */
+  var currentSessionId = null;
+  var currentUserId    = null;
+  var sessions         = [];
+  var sidebarOpen      = false;
+  var loadedSessionTitle = '';
+
+  /* ══ SUPABASE HELPERS ══ */
+  async function getUid() {
+    if (currentUserId) return currentUserId;
+    var r = await supa.auth.getUser();
+    currentUserId = r && r.data && r.data.user && r.data.user.id;
+    return currentUserId;
+  }
+
+  async function createSession(firstMsg) {
+    var uid = await getUid(); if (!uid) return null;
+    var title = firstMsg.slice(0, 60) + (firstMsg.length > 60 ? '…' : '');
+    var r = await supa.from('sheldon_sessions').insert({
+      user_id: uid, title: title, message_count: 0
+    }).select().single();
+    if (r.error) { console.warn('sheldon session create:', r.error); return null; }
+    currentSessionId = r.data.id;
+    loadedSessionTitle = title;
+    return r.data.id;
+  }
+
+  async function saveMessage(role, content) {
+    var uid = await getUid(); if (!uid) return;
+    if (!currentSessionId) return;
+    await supa.from('sheldon_messages').insert({
+      session_id: currentSessionId,
+      user_id: uid,
+      role: role,
+      content: content
+    });
+    /* bump updated_at + message_count */
+    await supa.from('sheldon_sessions')
+      .update({ updated_at: new Date().toISOString() })
+      .eq('id', currentSessionId);
+    /* refresh sidebar */
+    await loadSessions();
+    renderSidebar();
+  }
+
+  async function loadSessions() {
+    var uid = await getUid(); if (!uid) return;
+    var r = await supa.from('sheldon_sessions')
+      .select('id, title, created_at, updated_at, message_count')
+      .eq('user_id', uid)
+      .order('updated_at', { ascending: false })
+      .limit(50);
+    if (!r.error) sessions = r.data || [];
+  }
+
+  async function loadSessionMessages(sessionId) {
+    var uid = await getUid(); if (!uid) return [];
+    var r = await supa.from('sheldon_messages')
+      .select('role, content, created_at')
+      .eq('session_id', sessionId)
+      .eq('user_id', uid)
+      .order('created_at', { ascending: true });
+    return r.error ? [] : (r.data || []);
+  }
+
+  async function deleteSession(sessionId) {
+    var uid = await getUid(); if (!uid) return;
+    await supa.from('sheldon_sessions').delete()
+      .eq('id', sessionId).eq('user_id', uid);
+    if (currentSessionId === sessionId) {
+      currentSessionId = null;
+      startNewChat();
+    }
+    await loadSessions();
+    renderSidebar();
+  }
+
+  /* ══ SIDEBAR DOM ══ */
+  function buildSidebar() {
+    var panel = document.getElementById('sheldonPanel');
+    if (!panel || document.getElementById('sh-sidebar')) return;
+
+    /* wrap existing panel children in #sh-chat-area */
+    var chatArea = document.createElement('div');
+    chatArea.id = 'sh-chat-area';
+    while (panel.firstChild) chatArea.appendChild(panel.firstChild);
+    panel.appendChild(chatArea);
+
+    /* create sidebar */
+    var sb = document.createElement('div');
+    sb.id = 'sh-sidebar';
+    sb.innerHTML =
+      '<div class="sh-sb-head">' +
+        '<div class="sh-sb-title">History</div>' +
+        '<button class="sh-new-btn" id="sh-new-btn">' +
+          '<i class="ti ti-plus" style="font-size:12px"></i> New chat' +
+        '</button>' +
+      '</div>' +
+      '<div class="sh-sb-list" id="sh-sb-list">' +
+        '<div class="sh-sb-empty">No conversations yet</div>' +
+      '</div>';
+
+    /* insert sidebar before chat area */
+    panel.insertBefore(sb, chatArea);
+
+    document.getElementById('sh-new-btn').addEventListener('click', function () {
+      startNewChat();
+    });
+  }
+
+  function injectHistoryBtn() {
+    var header = document.querySelector('#sheldonPanel .sheldon-header');
+    if (!header || document.getElementById('sh-history-btn')) return;
+
+    var btn = document.createElement('button');
+    btn.id = 'sh-history-btn';
+    btn.title = 'Chat history';
+    btn.setAttribute('aria-label', 'Toggle chat history');
+    btn.innerHTML = '<i class="ti ti-layout-sidebar" style="font-size:13px"></i>';
+    btn.addEventListener('click', toggleSidebar);
+
+    /* insert as first button after the title block */
+    var toneBtn = header.querySelector('.sheldon-tone');
+    if (toneBtn) header.insertBefore(btn, toneBtn);
+    else header.appendChild(btn);
+
+    /* also inject session label below header */
+    var chatArea = document.getElementById('sh-chat-area');
+    if (chatArea && !document.getElementById('sh-session-label')) {
+      var lbl = document.createElement('div');
+      lbl.id = 'sh-session-label';
+      chatArea.insertBefore(lbl, chatArea.firstChild);
+    }
+  }
+
+  function toggleSidebar() {
+    sidebarOpen = !sidebarOpen;
+    var sb  = document.getElementById('sh-sidebar');
+    var btn = document.getElementById('sh-history-btn');
+    if (sb)  sb.classList.toggle('open', sidebarOpen);
+    if (btn) btn.classList.toggle('active', sidebarOpen);
+    if (sidebarOpen) {
+      loadSessions().then(renderSidebar);
+    }
+  }
+
+  function renderSidebar() {
+    var list = document.getElementById('sh-sb-list');
+    if (!list) return;
+
+    if (!sessions.length) {
+      list.innerHTML = '<div class="sh-sb-empty">No conversations yet.<br>Start chatting to build history.</div>';
+      return;
+    }
+
+    /* group by date */
+    function dateGroup(iso) {
+      var d = new Date(iso), now = new Date();
+      var diff = Math.floor((now - d) / 86400000);
+      if (diff === 0) return 'Today';
+      if (diff === 1) return 'Yesterday';
+      if (diff < 7)  return 'This week';
+      if (diff < 30) return 'This month';
+      return d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+    }
+
+    function fmtTime(iso) {
+      var d = new Date(iso);
+      var h = d.getHours(), m = d.getMinutes();
+      var ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      return h + ':' + String(m).padStart(2,'0') + ' ' + ampm;
+    }
+
+    var groups = {};
+    var groupOrder = [];
+    sessions.forEach(function (s) {
+      var g = dateGroup(s.updated_at);
+      if (!groups[g]) { groups[g] = []; groupOrder.push(g); }
+      groups[g].push(s);
+    });
+
+    list.innerHTML = '';
+    groupOrder.forEach(function (g) {
+      var lbl = document.createElement('div');
+      lbl.className = 'sh-date-group';
+      lbl.textContent = g;
+      list.appendChild(lbl);
+
+      groups[g].forEach(function (s) {
+        var row = document.createElement('div');
+        row.className = 'sh-sess-row' + (s.id === currentSessionId ? ' active' : '');
+        row.dataset.id = s.id;
+
+        var metaText = (s.message_count ? s.message_count + ' msg' + (s.message_count !== 1 ? 's' : '') + ' · ' : '') + fmtTime(s.updated_at);
+
+        row.innerHTML =
+          '<div class="sh-sess-title">' + escHtml(s.title) + '</div>' +
+          '<div class="sh-sess-meta">' + metaText + '</div>' +
+          '<button class="sh-sess-del" data-id="' + s.id + '" title="Delete" aria-label="Delete conversation">' +
+            '<i class="ti ti-trash" style="font-size:11px"></i>' +
+          '</button>';
+
+        row.addEventListener('click', function (e) {
+          if (e.target.closest('.sh-sess-del')) return;
+          resumeSession(s.id, s.title);
+        });
+
+        row.querySelector('.sh-sess-del').addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (typeof scConfirm === 'function') {
+            scConfirm({
+              title: 'Delete conversation?',
+              message: '"' + s.title.slice(0,40) + (s.title.length>40?'…':'') + '" will be permanently removed.',
+              icon: '<i class="ti ti-trash-x" style="font-size:22px;color:var(--red)"></i>',
+              confirmLabel: 'Delete', cancelLabel: 'Cancel', danger: true,
+              onConfirm: function () { deleteSession(s.id); }
+            });
+          } else {
+            deleteSession(s.id);
+          }
+        });
+
+        list.appendChild(row);
+      });
+    });
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ══ RESUME SESSION ══ */
+  async function resumeSession(sessionId, title) {
+    if (currentSessionId === sessionId) return;
+
+    /* show loading */
+    var msgs = document.getElementById('sheldonMessages');
+    var chips = document.querySelector('#sheldonPanel .sheldon-chips');
+    if (msgs) {
+      msgs.innerHTML =
+        '<div class="sh-loading-msgs">' +
+          '<div class="sh-loading-spin"></div>' +
+          '<div class="sh-loading-lbl">Loading conversation…</div>' +
+        '</div>';
+    }
+
+    var history = await loadSessionMessages(sessionId);
+    currentSessionId = sessionId;
+    loadedSessionTitle = title;
+
+    /* update session label */
+    var lbl = document.getElementById('sh-session-label');
+    if (lbl) lbl.textContent = title;
+
+    /* restore sheldonHistory so Sheldon has context */
+    if (typeof sheldonHistory !== 'undefined') {
+      sheldonHistory = history.map(function (m) {
+        return { role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content };
+      });
+    }
+
+    /* rebuild messages UI */
+    if (msgs) {
+      msgs.innerHTML = '';
+      if (!history.length) {
+        var emptyEl = document.createElement('div');
+        emptyEl.className = 'empty-state';
+        emptyEl.style.cssText = 'text-align:center;padding:32px 0;font-size:12px;color:rgba(190,196,235,0.30)';
+        emptyEl.textContent = 'Start of conversation';
+        msgs.appendChild(emptyEl);
+      } else {
+        history.forEach(function (m) {
+          var div = document.createElement('div');
+          div.className = 'sheldon-msg ' + (m.role === 'assistant' ? 'bot' : 'user');
+          /* format bot messages as HTML, user as text */
+          if (m.role === 'assistant' && typeof sheldonFormat === 'function') {
+            div.innerHTML = sheldonFormat(m.content);
+          } else {
+            div.textContent = m.content;
+          }
+          msgs.appendChild(div);
+        });
+        msgs.scrollTop = msgs.scrollHeight;
+      }
+    }
+
+    /* hide chips on resumed sessions */
+    if (chips) chips.style.display = history.length ? 'none' : '';
+
+    /* re-run decoration (timestamps + copy buttons) */
+    if (typeof fixAll === 'function') setTimeout(fixAll, 100);
+
+    /* mark active in sidebar */
+    renderSidebar();
+  }
+
+  /* ══ NEW CHAT ══ */
+  function startNewChat() {
+    currentSessionId = null;
+    loadedSessionTitle = '';
+
+    var msgs = document.getElementById('sheldonMessages');
+    if (msgs) msgs.innerHTML = '';
+
+    var chips = document.querySelector('#sheldonPanel .sheldon-chips');
+    if (chips) chips.style.display = '';
+
+    if (typeof sheldonHistory !== 'undefined') sheldonHistory = [];
+    if (typeof sheldonGreeted !== 'undefined') window.sheldonGreeted = false;
+
+    var lbl = document.getElementById('sh-session-label');
+    if (lbl) lbl.textContent = '';
+
+    /* re-render the greeting */
+    if (typeof sheldonRender === 'function') {
+      sheldonRender('bot', "Hey — I'm Sheldon, your GMAT coach. I can see your dashboard data, so ask me about your progress, weak spots, or what to study next.");
+      window.sheldonGreeted = true;
+    }
+
+    renderSidebar();
+
+    /* focus input */
+    var ta = document.getElementById('sheldonInput');
+    if (ta) setTimeout(function () { ta.focus(); }, 100);
+  }
+
+  /* ══ HOOK INTO sheldonSend ══
+     We intercept the send flow to:
+     1. Create a session on first message
+     2. Save user message
+     3. Save assistant reply
+  */
+  function hookSend() {
+    var _origSend = window.sheldonSend;
+    if (!_origSend || window._shHistoryHooked) return;
+    window._shHistoryHooked = true;
+
+    window.sheldonSend = async function () {
+      var input = document.getElementById('sheldonInput');
+      var msg = input ? input.value.trim() : '';
+      if (!msg) return;
+
+      /* create session if needed */
+      if (!currentSessionId) {
+        await createSession(msg);
+        /* update label */
+        var lbl = document.getElementById('sh-session-label');
+        if (lbl) lbl.textContent = loadedSessionTitle;
+      }
+
+      /* save user message */
+      saveMessage('user', msg);
+
+      /* call original send */
+      _origSend.apply(this, arguments);
+
+      /* hook reply: watch for bot message completion */
+      watchForReply();
+    };
+  }
+
+  /* Watch the messages container for a complete bot reply */
+  var _replyWatcher = null;
+  function watchForReply() {
+    if (_replyWatcher) { _replyWatcher.disconnect(); _replyWatcher = null; }
+
+    var msgs = document.getElementById('sheldonMessages');
+    if (!msgs) return;
+
+    var lastBot = null;
+    var stableTimer = null;
+
+    _replyWatcher = new MutationObserver(function () {
+      /* find the latest bot message */
+      var allBot = msgs.querySelectorAll('.sheldon-msg.bot:not(.sheldon-typing)');
+      if (!allBot.length) return;
+      lastBot = allBot[allBot.length - 1];
+
+      /* wait for content to stabilise (streaming ends) */
+      clearTimeout(stableTimer);
+      stableTimer = setTimeout(function () {
+        if (!lastBot || lastBot.dataset.shSaved) return;
+        var content = (lastBot.innerText || lastBot.textContent || '').replace(/Copy$/,'').trim();
+        if (!content || content.length < 5) return;
+        lastBot.dataset.shSaved = '1';
+        saveMessage('assistant', content);
+
+        /* update message count in sessions list */
+        var s = sessions.find(function(x){ return x.id === currentSessionId; });
+        if (s) {
+          var count = msgs.querySelectorAll('.sheldon-msg.bot:not(.sheldon-typing), .sheldon-msg.user').length;
+          s.message_count = count;
+          supa.from('sheldon_sessions')
+            .update({ message_count: count })
+            .eq('id', currentSessionId)
+            .then(function(){});
+        }
+
+        if (_replyWatcher) { _replyWatcher.disconnect(); _replyWatcher = null; }
+        renderSidebar();
+      }, 900); /* 900ms stable = streaming done */
+    });
+
+    _replyWatcher.observe(msgs, { childList: true, subtree: true, characterData: true });
+  }
+
+  /* ══ BOOT ══ */
+  function boot() {
+    buildSidebar();
+    injectHistoryBtn();
+    hookSend();
+    /* load sessions in background */
+    loadSessions().then(function () {
+      if (sidebarOpen) renderSidebar();
+    });
+  }
+
+  var _origOpen = window.openSheldon;
+  window.openSheldon = function () {
+    if (typeof _origOpen === 'function') _origOpen.apply(this, arguments);
+    setTimeout(function () {
+      buildSidebar();
+      injectHistoryBtn();
+      hookSend();
+      loadSessions().then(renderSidebar);
+    }, 120);
+  };
+
+  if (document.body) boot();
+  else document.addEventListener('DOMContentLoaded', boot);
 
 })();
 </script>
