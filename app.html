@@ -10474,16 +10474,19 @@
 
                         <!-- HEADER -->
                         <div class="ecn-head">
-  <span class="ecn-eye"><i class="ti ti-flame" style="font-size:10px;color:#46c98f"></i> GMAT Focus Edition</span>
-  <input type="hidden" id="exam-date-inp">
-  <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
-    <div id="exam-date-display" onclick="openPicker({inputId:'exam-date-inp',textId:'exam-date-text',displayId:'exam-date-display',onSelect:saveExamSettings})" class="ecn-datechip">
-      <i class="ti ti-calendar"></i><span id="exam-date-text">Select exam date</span>
-    </div>
-    <div class="ecn-pct-badge" id="ecn-pct-badge" style="display:none">
-      <span class="ecn-blink"></span><span id="exam-progress-pct">0%</span>
-    </div>
-  </div>
+                            <span class="ecn-eye"><i class="ti ti-flame" style="font-size:10px;color:#46c98f"></i> GMAT
+                                Focus Edition</span>
+                            <div class="ecn-sep"></div>
+                            <input type="hidden" id="exam-date-inp">
+                            <div id="exam-date-display"
+                                onclick="openPicker({inputId:'exam-date-inp',textId:'exam-date-text',displayId:'exam-date-display',onSelect:saveExamSettings})"
+                                class="ecn-datechip">
+                                <i class="ti ti-calendar"></i><span id="exam-date-text">Select exam date</span>
+                            </div>
+                            <div class="ecn-pct-badge" id="ecn-pct-badge" style="display:none">
+                                <span class="ecn-blink"></span><span id="exam-progress-pct">0%</span>
+                            </div>
+                        </div>
 
                         <!-- BODY -->
                         <div class="ecn-body">
@@ -19213,10 +19216,6 @@
             align-items: center;
             justify-content: center;
         }
-        /* add to <style id="ecn-styles"> */
-.ecn-datechip { margin-left: auto; }
-        .ecn-sep { display:none !important; }
-.ecn-eye { flex:1 !important; }
     </style>
 </body>
 
