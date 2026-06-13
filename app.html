@@ -11281,6 +11281,157 @@ html.sc-light .sh-minimize-btn:hover {
 }
 
 </style>
+    <style id="sheldon-polish">
+
+/* ══ TIMESTAMPS ══ */
+.sh-msg-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 84%;
+  align-self: flex-start;
+}
+.sh-msg-wrap.sh-user-wrap {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+.sh-timestamp {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: rgba(190,196,235,0.35);
+  letter-spacing: 0.03em;
+  padding: 0 4px;
+  opacity: 0;
+  transform: translateY(-3px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.sh-msg-wrap:hover .sh-timestamp {
+  opacity: 1;
+  transform: translateY(0);
+}
+html.sc-light .sh-timestamp { color: rgba(23,27,46,0.35); }
+html.sc-parch .sh-timestamp { color: rgba(45,37,24,0.35); }
+
+/* ══ COPY BUTTON ══ */
+.sh-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.09);
+  color: rgba(190,196,235,0.40);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.15s ease, transform 0.18s cubic-bezier(.34,1.56,.64,1),
+              background 0.12s, color 0.12s;
+  z-index: 3;
+  flex-shrink: 0;
+}
+.sheldon-msg.bot {
+  position: relative;
+}
+.sheldon-msg.bot:hover .sh-copy-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+.sh-copy-btn:hover {
+  background: rgba(135,141,255,0.14) !important;
+  border-color: rgba(135,141,255,0.28) !important;
+  color: #9aa0ff !important;
+}
+.sh-copy-btn.sh-copied {
+  background: rgba(70,201,143,0.14) !important;
+  border-color: rgba(70,201,143,0.28) !important;
+  color: #46c98f !important;
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+html.sc-light .sh-copy-btn {
+  background: rgba(15,17,40,0.05);
+  border-color: rgba(15,17,40,0.10);
+  color: rgba(23,27,46,0.35);
+}
+html.sc-light .sh-copy-btn:hover {
+  background: rgba(88,94,230,0.08) !important;
+  border-color: rgba(88,94,230,0.24) !important;
+  color: #4a50d8 !important;
+}
+
+/* pad bot message text so copy btn doesn't overlap long lines */
+.sheldon-msg.bot {
+  padding-right: 42px !important;
+}
+
+/* ══ TYPING SOUNDS — visual feedback pulse on send ══ */
+@keyframes shSendPulse {
+  0%   { box-shadow: 0 6px 22px rgba(109,115,232,0.42), inset 0 1px 0 rgba(255,255,255,0.24); }
+  40%  { box-shadow: 0 0 0 8px rgba(109,115,232,0.18), 0 6px 22px rgba(109,115,232,0.55), inset 0 1px 0 rgba(255,255,255,0.24); }
+  100% { box-shadow: 0 6px 22px rgba(109,115,232,0.42), inset 0 1px 0 rgba(255,255,255,0.24); }
+}
+.sheldon-send.sh-sending {
+  animation: shSendPulse 0.45s ease forwards;
+}
+
+/* ══ TYPING SOUND — keyboard click ripple on textarea ══ */
+@keyframes shKeyRipple {
+  0%   { opacity: 0.5; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.2); }
+}
+.sh-key-ripple {
+  position: absolute;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(135,141,255,0.45);
+  pointer-events: none;
+  animation: shKeyRipple 0.32s ease forwards;
+  z-index: 10;
+}
+
+/* ══ MAXIMIZED: wrap sizing ══ */
+#sheldonPanel.sh-maximized .sh-msg-wrap {
+  max-width: 75%;
+}
+#sheldonPanel.sh-maximized .sh-msg-wrap.sh-user-wrap {
+  max-width: 58%;
+}
+
+/* ══ SOUND WAVE ANIMATION in status when speaking ══ */
+.sh-wave {
+  display: none;
+  align-items: center;
+  gap: 2px;
+  height: 12px;
+}
+.sh-wave.active { display: flex; }
+.sh-wave span {
+  display: block;
+  width: 2px;
+  border-radius: 2px;
+  background: #46c98f;
+  animation: shWaveBar 1s ease-in-out infinite;
+}
+.sh-wave span:nth-child(1) { height: 4px;  animation-delay: 0s; }
+.sh-wave span:nth-child(2) { height: 8px;  animation-delay: 0.1s; }
+.sh-wave span:nth-child(3) { height: 12px; animation-delay: 0.2s; }
+.sh-wave span:nth-child(4) { height: 8px;  animation-delay: 0.3s; }
+.sh-wave span:nth-child(5) { height: 4px;  animation-delay: 0.4s; }
+@keyframes shWaveBar {
+  0%, 100% { transform: scaleY(0.4); opacity: 0.5; }
+  50%       { transform: scaleY(1);   opacity: 1; }
+}
+
+</style>
 </head>
 
 <body>
@@ -20567,6 +20718,314 @@ html.sc-light .sh-minimize-btn:hover {
   window.openSheldon = function () {
     if (typeof _origOpen2 === 'function') _origOpen2.apply(this, arguments);
     setTimeout(injectButtons, 80);
+  };
+
+  if (document.body) boot();
+  else document.addEventListener('DOMContentLoaded', boot);
+
+})();
+</script>
+    <script id="sheldon-polish-js">
+(function () {
+
+  /* ══ HELPERS ══ */
+  function fmt(d) {
+    var h = d.getHours(), m = d.getMinutes();
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return h + ':' + String(m).padStart(2, '0') + ' ' + ampm;
+  }
+
+  function isToday(d) {
+    var n = new Date();
+    return d.getDate() === n.getDate() &&
+           d.getMonth() === n.getMonth() &&
+           d.getFullYear() === n.getFullYear();
+  }
+
+  function tsLabel(d) {
+    if (isToday(d)) return 'Today ' + fmt(d);
+    var yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+    if (d.getDate() === yesterday.getDate()) return 'Yesterday ' + fmt(d);
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) + ' ' + fmt(d);
+  }
+
+  /* ══ 1. TIMESTAMPS + COPY BUTTON ══
+     Wraps every new message in .sh-msg-wrap and appends a
+     timestamp + copy button. Runs via MutationObserver so it
+     catches every message Sheldon streams in. */
+  function decorateMsg(el) {
+    if (!el || el.dataset.shDecorated) return;
+    el.dataset.shDecorated = '1';
+
+    var isBot  = el.classList.contains('bot');
+    var isUser = el.classList.contains('user');
+    if (!isBot && !isUser) return;
+
+    /* ── COPY BUTTON (bot only) ── */
+    if (isBot) {
+      var btn = document.createElement('button');
+      btn.className = 'sh-copy-btn';
+      btn.setAttribute('aria-label', 'Copy message');
+      btn.title = 'Copy';
+      btn.innerHTML = '<i class="ti ti-copy" style="font-size:12px"></i>';
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var text = el.innerText || el.textContent || '';
+        navigator.clipboard.writeText(text.trim()).then(function () {
+          btn.classList.add('sh-copied');
+          btn.innerHTML = '<i class="ti ti-check" style="font-size:12px"></i>';
+          btn.title = 'Copied!';
+          setTimeout(function () {
+            btn.classList.remove('sh-copied');
+            btn.innerHTML = '<i class="ti ti-copy" style="font-size:12px"></i>';
+            btn.title = 'Copy';
+          }, 2000);
+        }).catch(function () {
+          /* fallback for older browsers */
+          var ta = document.createElement('textarea');
+          ta.value = el.innerText || '';
+          ta.style.cssText = 'position:fixed;opacity:0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+          btn.classList.add('sh-copied');
+          btn.innerHTML = '<i class="ti ti-check" style="font-size:12px"></i>';
+          setTimeout(function () {
+            btn.classList.remove('sh-copied');
+            btn.innerHTML = '<i class="ti ti-copy" style="font-size:12px"></i>';
+          }, 2000);
+        });
+      });
+      el.appendChild(btn);
+    }
+
+    /* ── TIMESTAMP WRAP ── */
+    var parent = el.parentNode;
+    if (!parent || parent.classList.contains('sh-msg-wrap')) return;
+
+    var wrap = document.createElement('div');
+    wrap.className = 'sh-msg-wrap' + (isUser ? ' sh-user-wrap' : '');
+
+    var ts = document.createElement('div');
+    ts.className = 'sh-timestamp';
+    ts.textContent = tsLabel(new Date());
+
+    parent.insertBefore(wrap, el);
+    wrap.appendChild(el);
+    if (isBot) wrap.appendChild(ts);   /* timestamp below bot */
+    else wrap.insertBefore(ts, el);    /* timestamp above user */
+  }
+
+  function decorateAll() {
+    var msgs = document.querySelectorAll('#sheldonMessages .sheldon-msg');
+    for (var i = 0; i < msgs.length; i++) decorateMsg(msgs[i]);
+  }
+
+  function watchMessages() {
+    var container = document.getElementById('sheldonMessages');
+    if (!container) return;
+    var obs = new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        m.addedNodes.forEach(function (node) {
+          if (node.nodeType !== 1) return;
+          if (node.classList && node.classList.contains('sheldon-msg')) {
+            decorateMsg(node);
+          }
+          /* catch nodes added inside a wrapper */
+          var inner = node.querySelectorAll && node.querySelectorAll('.sheldon-msg');
+          if (inner) inner.forEach(decorateMsg);
+        });
+      });
+    });
+    obs.observe(container, { childList: true, subtree: true });
+  }
+
+  /* ══ 2. TYPING SOUNDS ══ */
+  var SND_KEY = 'sc_sound';
+  var _actx = null;
+
+  function getAC() {
+    if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (_actx.state === 'suspended') _actx.resume();
+    return _actx;
+  }
+
+  function playKey() {
+    if (localStorage.getItem(SND_KEY) === 'off') return;
+    try {
+      var c = getAC(), t = c.currentTime;
+      /* low thud */
+      var o1 = c.createOscillator(), g1 = c.createGain();
+      o1.type = 'sine'; o1.frequency.setValueAtTime(95, t);
+      o1.frequency.exponentialRampToValueAtTime(42, t + 0.07);
+      g1.gain.setValueAtTime(0.0001, t);
+      g1.gain.linearRampToValueAtTime(0.32, t + 0.003);
+      g1.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
+      o1.connect(g1); g1.connect(c.destination);
+      o1.start(t); o1.stop(t + 0.09);
+      /* click transient */
+      var buf = c.createBuffer(1, Math.floor(c.sampleRate * 0.012), c.sampleRate);
+      var d = buf.getChannelData(0);
+      for (var i = 0; i < d.length; i++) d[i] = (Math.random()*2-1) * (1 - i/d.length);
+      var s = c.createBufferSource(); s.buffer = buf;
+      var f = c.createBiquadFilter(); f.type = 'bandpass';
+      f.frequency.value = 2800; f.Q.value = 1.4;
+      var g2 = c.createGain(); g2.gain.setValueAtTime(0.14, t);
+      g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.012);
+      s.connect(f); f.connect(g2); g2.connect(c.destination); s.start(t);
+    } catch(e) {}
+  }
+
+  function playBackspace() {
+    if (localStorage.getItem(SND_KEY) === 'off') return;
+    try {
+      var c = getAC(), t = c.currentTime;
+      var o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(120, t);
+      o.frequency.exponentialRampToValueAtTime(55, t + 0.055);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.22, t + 0.003);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+      o.connect(g); g.connect(c.destination);
+      o.start(t); o.stop(t + 0.065);
+    } catch(e) {}
+  }
+
+  function playSpace() {
+    if (localStorage.getItem(SND_KEY) === 'off') return;
+    try {
+      var c = getAC(), t = c.currentTime;
+      var o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(75, t);
+      o.frequency.exponentialRampToValueAtTime(32, t + 0.09);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.40, t + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.10);
+      o.connect(g); g.connect(c.destination);
+      o.start(t); o.stop(t + 0.11);
+    } catch(e) {}
+  }
+
+  function playEnter() {
+    if (localStorage.getItem(SND_KEY) === 'off') return;
+    try {
+      var c = getAC(), t = c.currentTime;
+      /* deep thud */
+      var o1 = c.createOscillator(), g1 = c.createGain();
+      o1.type = 'sine'; o1.frequency.setValueAtTime(110, t);
+      o1.frequency.exponentialRampToValueAtTime(38, t + 0.12);
+      g1.gain.setValueAtTime(0.0001, t);
+      g1.gain.linearRampToValueAtTime(0.55, t + 0.004);
+      g1.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+      o1.connect(g1); g1.connect(c.destination);
+      o1.start(t); o1.stop(t + 0.15);
+      /* rising confirm tone */
+      [500, 700].forEach(function(freq, i) {
+        var o2 = c.createOscillator(), g2 = c.createGain();
+        var delay = 0.10 + i * 0.07;
+        o2.type = 'sine'; o2.frequency.value = freq;
+        g2.gain.setValueAtTime(0.0001, t + delay);
+        g2.gain.linearRampToValueAtTime(0.07, t + delay + 0.005);
+        g2.gain.exponentialRampToValueAtTime(0.0001, t + delay + 0.10);
+        o2.connect(g2); g2.connect(c.destination);
+        o2.start(t + delay); o2.stop(t + delay + 0.11);
+      });
+    } catch(e) {}
+  }
+
+  /* key ripple visual */
+  function spawnRipple(textarea, key) {
+    if (localStorage.getItem(SND_KEY) === 'off') return;
+    var wrap = textarea.closest('.sh-dock-field');
+    if (!wrap) return;
+    var r = document.createElement('div');
+    r.className = 'sh-key-ripple';
+    /* position roughly where the caret is — approximate */
+    r.style.left = (Math.random() * 60 + 20) + '%';
+    r.style.top  = '50%';
+    wrap.style.position = 'relative';
+    wrap.appendChild(r);
+    setTimeout(function() { r.remove(); }, 350);
+  }
+
+  /* attach keyboard listener to the sheldon textarea */
+  var SKIP = { Tab:1, Shift:1, Control:1, Alt:1, Meta:1, CapsLock:1,
+               ArrowLeft:1, ArrowRight:1, ArrowUp:1, ArrowDown:1,
+               Escape:1, PageUp:1, PageDown:1, Home:1, End:1 };
+
+  function attachTyping() {
+    var ta = document.getElementById('sheldonInput');
+    if (!ta || ta.dataset.shTyping) return;
+    ta.dataset.shTyping = '1';
+
+    ta.addEventListener('keydown', function(e) {
+      if (SKIP[e.key] || e.metaKey || e.ctrlKey) return;
+      if (e.key === 'Enter' && !e.shiftKey) {
+        playEnter();
+        /* send button pulse */
+        var btn = document.querySelector('#sheldonPanel .sheldon-send');
+        if (btn) {
+          btn.classList.add('sh-sending');
+          setTimeout(function() { btn.classList.remove('sh-sending'); }, 500);
+        }
+      } else if (e.key === 'Backspace' || e.key === 'Delete') {
+        playBackspace();
+      } else if (e.key === ' ') {
+        playSpace();
+        spawnRipple(ta, e.key);
+      } else if (e.key.length === 1) {
+        playKey();
+        spawnRipple(ta, e.key);
+      }
+    });
+  }
+
+  /* ══ 3. SOUND WAVE in header when voice is speaking ══ */
+  function injectWave() {
+    var statusWrap = document.querySelector('#sheldonPanel .ph-status-wrap');
+    if (!statusWrap || document.getElementById('sh-wave')) return;
+    var wave = document.createElement('div');
+    wave.id = 'sh-wave';
+    wave.className = 'sh-wave';
+    wave.setAttribute('aria-hidden', 'true');
+    wave.innerHTML = '<span></span><span></span><span></span><span></span><span></span>';
+    statusWrap.appendChild(wave);
+  }
+
+  /* hook into sheldonSpeak to show/hide wave */
+  var _origSpeak = window.sheldonSpeak;
+  window.sheldonSpeak = function(text) {
+    var wave = document.getElementById('sh-wave');
+    if (wave) wave.classList.add('active');
+    if (typeof _origSpeak === 'function') _origSpeak.apply(this, arguments);
+    /* estimate speech duration and hide wave after */
+    var words = (text || '').split(/\s+/).length;
+    var ms = Math.max(1800, words * 360);
+    setTimeout(function() {
+      var w = document.getElementById('sh-wave');
+      if (w) w.classList.remove('active');
+    }, ms);
+  };
+
+  /* ══ BOOT ══ */
+  function boot() {
+    decorateAll();
+    watchMessages();
+    attachTyping();
+    injectWave();
+  }
+
+  /* re-run on every openSheldon so textarea + messages are always hooked */
+  var _origOpen = window.openSheldon;
+  window.openSheldon = function() {
+    if (typeof _origOpen === 'function') _origOpen.apply(this, arguments);
+    setTimeout(function() {
+      decorateAll();
+      attachTyping();
+      injectWave();
+    }, 120);
   };
 
   if (document.body) boot();
