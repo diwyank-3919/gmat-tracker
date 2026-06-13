@@ -22349,6 +22349,118 @@ html.sc-light #sh-sidebar {
 }
 
 </style>
+    <style id="sheldon-final-anchor">
+
+/* ══ 1. PANEL: locked to bottom-right, no exceptions ══ */
+#sheldonPanel {
+  position: fixed !important;
+  top: auto !important;
+  left: auto !important;
+  bottom: 28px !important;
+  right: 28px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: 420px !important;
+  height: 630px !important;
+  max-width: calc(100vw - 32px) !important;
+  max-height: calc(100vh - 56px) !important;
+  overflow: hidden !important;
+}
+
+/* ══ 2. THE REAL FIX: chat area must fill the panel completely ══ */
+#sh-chat-area {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 100% !important;
+  width: 100% !important;
+  height: 100% !important;       /* <-- this is what was missing */
+  min-height: 0 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  align-self: stretch !important;
+}
+
+/* ══ 3. Children of chat area fill their slots ══ */
+#sh-chat-area > .sheldon-header {
+  flex-shrink: 0 !important;
+  width: 100% !important;
+}
+
+#sh-chat-area > .sheldon-messages {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  width: 100% !important;
+}
+
+#sh-chat-area > .sheldon-chips {
+  flex-shrink: 0 !important;
+  width: 100% !important;
+}
+
+#sh-chat-area > .sheldon-input {
+  flex-shrink: 0 !important;
+  width: 100% !important;
+  margin-top: auto !important;
+}
+
+/* ══ 4. Sidebar open: panel widens, row layout ══ */
+#sheldonPanel.sh-sidebar-open {
+  flex-direction: row !important;
+  width: 640px !important;
+  max-width: calc(100vw - 32px) !important;
+}
+
+/* ══ 5. Maximized ══ */
+#sheldonPanel.sh-maximized {
+  width:      calc(100vw - 48px) !important;
+  height:     calc(100vh - 48px) !important;
+  max-width:  calc(100vw - 48px) !important;
+  max-height: calc(100vh - 48px) !important;
+  bottom: 24px !important;
+  right:  24px !important;
+  flex-direction: column !important;
+}
+
+#sheldonPanel.sh-maximized.sh-sidebar-open {
+  flex-direction: row !important;
+}
+
+/* ══ 6. Minimized ══ */
+#sheldonPanel.sh-minimized {
+  height:     58px !important;
+  min-height: 0 !important;
+  max-height: 58px !important;
+  width:      300px !important;
+  flex-direction: column !important;
+}
+
+/* ══ 7. Aurora pseudo-element: never affects height ══ */
+#sheldonPanel::after {
+  pointer-events: none !important;
+  z-index: 0 !important;
+  flex-shrink: 0 !important;
+  position: absolute !important;
+}
+
+/* ══ 8. Everything inside chat-area sits above aurora ══ */
+#sh-chat-area,
+#sh-chat-area > * {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* mobile */
+@media (max-width: 640px) {
+  #sheldonPanel,
+  #sheldonPanel.sh-sidebar-open {
+    width: calc(100vw - 32px) !important;
+    bottom: 16px !important;
+    right: 16px !important;
+  }
+}
+
+</style>
 </body>
 
 </html>
