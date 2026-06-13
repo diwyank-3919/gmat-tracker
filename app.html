@@ -11432,6 +11432,73 @@ html.sc-light .sh-copy-btn:hover {
 }
 
 </style>
+    <style id="sheldon-polish-patch">
+
+/* ══ FIX 1: USER BUBBLE — proper width, never a square ══ */
+#sheldonPanel .sh-msg-wrap.sh-user-wrap {
+  align-self: flex-end !important;
+  align-items: flex-end !important;
+  max-width: 72% !important;
+  width: auto !important;
+}
+
+#sheldonPanel .sh-msg-wrap.sh-user-wrap .sheldon-msg.user {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+  display: block !important;
+  box-sizing: border-box !important;
+}
+
+/* ══ FIX 2: BOT WRAP — also constrain correctly ══ */
+#sheldonPanel .sh-msg-wrap:not(.sh-user-wrap) {
+  align-self: flex-start !important;
+  align-items: flex-start !important;
+  max-width: 84% !important;
+  width: auto !important;
+}
+
+#sheldonPanel .sh-msg-wrap:not(.sh-user-wrap) .sheldon-msg.bot {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  word-break: break-word !important;
+  display: block !important;
+  box-sizing: border-box !important;
+}
+
+/* ══ MAXIMIZED: larger wraps ══ */
+#sheldonPanel.sh-maximized .sh-msg-wrap:not(.sh-user-wrap) {
+  max-width: 75% !important;
+}
+#sheldonPanel.sh-maximized .sh-msg-wrap.sh-user-wrap {
+  max-width: 58% !important;
+}
+
+/* ══ FIX 3: ensure copy button is always positioned relative to bot bubble ══ */
+#sheldonPanel .sheldon-msg.bot {
+  position: relative !important;
+}
+
+/* copy button always in DOM, only visible on hover */
+#sheldonPanel .sheldon-msg.bot .sh-copy-btn {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  opacity: 0 !important;
+  transform: scale(0.82) !important;
+  pointer-events: none !important;
+}
+
+#sheldonPanel .sheldon-msg.bot:hover .sh-copy-btn {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+  pointer-events: auto !important;
+}
+
+</style>
 </head>
 
 <body>
@@ -21030,6 +21097,147 @@ html.sc-light .sh-copy-btn:hover {
 
   if (document.body) boot();
   else document.addEventListener('DOMContentLoaded', boot);
+
+})();
+</script>
+    <script id="sheldon-polish-patch-js">
+(function () {
+
+  /* ══ FIX: re-run decoration on ALL bot messages including those
+     already wrapped — the original observer missed messages that
+     were added as children of an existing .sh-msg-wrap ══ */
+
+  function fmt(d) {
+    var h = d.getHours(), m = d.getMinutes();
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return h + ':' + String(m).padStart(2,'0') + ' ' + ampm;
+  }
+
+  function addCopyBtn(el) {
+    /* skip if already has one */
+    if (el.querySelector('.sh-copy-btn')) return;
+    if (!el.classList.contains('bot')) return;
+
+    el.style.position = 'relative';
+
+    var btn = document.createElement('button');
+    btn.className = 'sh-copy-btn';
+    btn.setAttribute('aria-label', 'Copy message');
+    btn.title = 'Copy';
+    btn.innerHTML = '<i class="ti ti-copy" style="font-size:12px"></i>';
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var text = (el.innerText || el.textContent || '').replace(/Copy$/,'').trim();
+
+      function markCopied() {
+        btn.classList.add('sh-copied');
+        btn.innerHTML = '<i class="ti ti-check" style="font-size:12px"></i>';
+        btn.title = 'Copied!';
+        setTimeout(function () {
+          btn.classList.remove('sh-copied');
+          btn.innerHTML = '<i class="ti ti-copy" style="font-size:12px"></i>';
+          btn.title = 'Copy';
+        }, 2000);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(markCopied).catch(function() {
+          fallbackCopy(text); markCopied();
+        });
+      } else {
+        fallbackCopy(text); markCopied();
+      }
+    });
+
+    el.appendChild(btn);
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    ta.remove();
+  }
+
+  function fixWrap(el) {
+    if (!el || el.dataset.shFixed) return;
+    el.dataset.shFixed = '1';
+
+    var isBot  = el.classList.contains('bot');
+    var isUser = el.classList.contains('user');
+    if (!isBot && !isUser) return;
+
+    /* add copy button to bot messages */
+    if (isBot) addCopyBtn(el);
+
+    /* wrap in sh-msg-wrap if not already wrapped */
+    var parent = el.parentNode;
+    if (parent && parent.classList.contains('sh-msg-wrap')) return;
+    if (!parent) return;
+
+    var wrap = document.createElement('div');
+    wrap.className = 'sh-msg-wrap' + (isUser ? ' sh-user-wrap' : '');
+
+    var ts = document.createElement('div');
+    ts.className = 'sh-timestamp';
+    var now = new Date();
+    var h = now.getHours(), m = now.getMinutes();
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    ts.textContent = 'Today ' + h + ':' + String(m).padStart(2,'0') + ' ' + ampm;
+
+    parent.insertBefore(wrap, el);
+    wrap.appendChild(el);
+    if (isBot)  wrap.appendChild(ts);
+    else        wrap.insertBefore(ts, el);
+  }
+
+  function fixAll() {
+    /* catch both wrapped and unwrapped messages */
+    var msgs = document.querySelectorAll(
+      '#sheldonMessages .sheldon-msg, #sheldonMessages .sh-msg-wrap .sheldon-msg'
+    );
+    msgs.forEach(fixWrap);
+  }
+
+  /* watch for new messages including inside wrappers */
+  function watchDeep() {
+    var container = document.getElementById('sheldonMessages');
+    if (!container) return;
+
+    var obs = new MutationObserver(function () {
+      /* debounce — Sheldon streams tokens so mutations fire rapidly */
+      clearTimeout(obs._t);
+      obs._t = setTimeout(fixAll, 80);
+    });
+
+    obs.observe(container, { childList: true, subtree: true });
+  }
+
+  /* boot */
+  function boot() {
+    fixAll();
+    watchDeep();
+  }
+
+  /* also re-run when panel opens */
+  var _orig = window.openSheldon;
+  window.openSheldon = function () {
+    if (typeof _orig === 'function') _orig.apply(this, arguments);
+    setTimeout(boot, 150);
+  };
+
+  if (document.body) boot();
+  else document.addEventListener('DOMContentLoaded', boot);
+
+  /* run again after a short delay to catch messages already in DOM */
+  setTimeout(fixAll, 600);
+  setTimeout(fixAll, 1500);
 
 })();
 </script>
