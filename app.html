@@ -15428,7 +15428,13 @@
   }
  
   /* ══ CLICK SOUND DELEGATION — one listener, all controls ══ */
-  var CLICKY = '.log-btn,.timer-btn,.el-analyse-btn,.scd-btn,.sheldon-send,.sheldon-chip,.sc-dur-chip,.sc-mode-btn,.sess-tab,.fpill,.sb-item,.tb-chip,.cs-trigger,.cs-opt,.mob-burger,.sct-track,.kcap';
+  var CLICKY = '.log-btn,.timer-btn,.el-analyse-btn,.scd-primary,.sheldon-send,.sheldon-chip,.sc-dur-chip,.sc-mode-btn,.sess-tab,.fpill,.sb-item,.tb-chip,.cs-trigger,.cs-opt,.mob-burger,.sct-track,.kcap';
+  /* ── destructive actions — heavy low thock ── */
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest) return;
+    var el = e.target.closest('.sess-del, .log-del-btn, .mock-del-btn, .trash-perm, .scd-danger');
+    if (el) scSnd.error();
+  }, true);
   document.addEventListener('click', function (e) {
     if (!e.target.closest) return;
     var el = e.target.closest(CLICKY);
