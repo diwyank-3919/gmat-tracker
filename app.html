@@ -12422,9 +12422,9 @@
                 .then(function (res) {
                     if (res.error) {
                         return supa.from("sessions").select("*").order("date", { ascending: false }).order("created_at", { ascending: false }).limit(5000)
-                            .then(function (res2) { if (res2.error) { setStatus("error"); return; } sessions = (res2.data || []).filter(function (s) { return s.deleted !== true; }); setStatus("synced"); render(); });
+                            .then(function (res2) { if (res2.error) { setStatus("error"); return; } sessions = (res2.data || []).filter(function (s) { return s.deleted !== true; }); setStatus("synced"); window._sessionsReady = true; render(); });
                     }
-                    sessions = res.data || []; setStatus("synced"); render();
+                    sessions = res.data || []; setStatus("synced"); window._sessionsReady = true; render();
                 });
         }
 
@@ -12437,6 +12437,7 @@
         }
 
         function render() {
+            if (!window._sessionsReady) return;
             var ts, tm, tt, tpct, tmet, ws, wm, wt, wpct, ms, me, mm, msc, dd, tot, sd, streak, cur, ds2, qi, topicTotals, wd;
             ["week", "month", "all"].forEach(function (v) { document.getElementById("f-" + v).className = "fpill" + (viewMode === v ? " active" : ""); });
             document.getElementById("f-range-label").textContent = getRangeLabel();
