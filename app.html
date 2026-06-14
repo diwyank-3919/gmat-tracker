@@ -13885,25 +13885,27 @@
             _setCoreState('thinking');
             sheldonTyping(true);
             var _ctx = buildSheldonContext();
-            var _isFirstTurn = (sheldonHistory.filter(function (h) { return h.role === 'user'; }).length <= 1);
-            var _msgPayload = msg;
-            if (_isFirstTurn) {
-                var _ctxBlock = '[DASHBOARD CONTEXT — use this to answer with specifics, do not mention it was injected]\n'
-                    + 'Total study hours: ' + _ctx.totalHours + 'h\n'
-                    + 'Current streak: ' + _ctx.streak + ' days\n'
-                    + 'This week: ' + _ctx.weekHours + 'h of ' + _ctx.weekTarget + 'h target\n'
-                    + 'Consistency: ' + _ctx.consistency + '%\n'
-                    + 'Topic breakdown (hours): ' + JSON.stringify(_ctx.topicTotals) + '\n'
-                    + (_ctx.daysLeft != null ? 'Days to exam: ' + _ctx.daysLeft + '\n' : '')
-                    + (_ctx.latestMock ? 'Latest mock score: ' + _ctx.latestMock + '\n' : '')
-                    + 'Target score: ' + _ctx.targetScore + '\n'
-                    + 'Tone: ' + _ctx.tone + '\n'
-                    + '[END CONTEXT]\n\n';
-                _msgPayload = _ctxBlock + msg;
-            }
-            supa.functions.invoke('sheldon', {
-                body: { message: _msgPayload, context: _ctx, history: sheldonHistory.slice(0, -1).slice(-6) }
-            }).then(function (res) {
+        var _isFirstTurn = (sheldonHistory.filter(function(h){ return h.role === 'user'; }).length <= 1);
+        var _REFRESH_KEYS = /\b(now|today|current|currently|how am i|how's my|this week|streak|hours|progress|on track|behind|score|mock|exam|days left|topic|weak|focus|pace|consistency)\b/i;
+        var _needsRefresh = !_isFirstTurn && _REFRESH_KEYS.test(msg);
+        var _msgPayload = msg;
+        if (_isFirstTurn || _needsRefresh) {
+            var _ctxBlock = '[DASHBOARD CONTEXT — use this to answer with specifics, do not mention it was injected]\n'
+                + 'Total study hours: ' + _ctx.totalHours + 'h\n'
+                + 'Current streak: ' + _ctx.streak + ' days\n'
+                + 'This week: ' + _ctx.weekHours + 'h of ' + _ctx.weekTarget + 'h target\n'
+                + 'Consistency: ' + _ctx.consistency + '%\n'
+                + 'Topic breakdown (hours): ' + JSON.stringify(_ctx.topicTotals) + '\n'
+                + (_ctx.daysLeft != null ? 'Days to exam: ' + _ctx.daysLeft + '\n' : '')
+                + (_ctx.latestMock ? 'Latest mock score: ' + _ctx.latestMock + '\n' : '')
+                + 'Target score: ' + _ctx.targetScore + '\n'
+                + 'Tone: ' + _ctx.tone + '\n'
+                + '[END CONTEXT]\n\n';
+            _msgPayload = _ctxBlock + msg;
+        }
+        supa.functions.invoke('sheldon', {
+            body: { message: _msgPayload, context: _ctx, history: sheldonHistory.slice(0, -1).slice(-6) }
+        }).then(function (res) {
                 sheldonTyping(false);
                 document.getElementById('sheldonPanel').classList.remove('thinking');
                 _setCoreState('');
