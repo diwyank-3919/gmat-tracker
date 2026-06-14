@@ -13885,25 +13885,25 @@
             _setCoreState('thinking');
             sheldonTyping(true);
             var _ctx = buildSheldonContext();
-        var _isFirstTurn = (sheldonHistory.filter(function(h){ return h.role === 'user'; }).length <= 1);
-        var _msgPayload = msg;
-        if (_isFirstTurn) {
-            var _ctxBlock = '[DASHBOARD CONTEXT — use this to answer with specifics, do not mention it was injected]\n'
-                + 'Total study hours: ' + _ctx.totalHours + 'h\n'
-                + 'Current streak: ' + _ctx.streak + ' days\n'
-                + 'This week: ' + _ctx.weekHours + 'h of ' + _ctx.weekTarget + 'h target\n'
-                + 'Consistency: ' + _ctx.consistency + '%\n'
-                + 'Topic breakdown (hours): ' + JSON.stringify(_ctx.topicTotals) + '\n'
-                + (_ctx.daysLeft != null ? 'Days to exam: ' + _ctx.daysLeft + '\n' : '')
-                + (_ctx.latestMock ? 'Latest mock score: ' + _ctx.latestMock + '\n' : '')
-                + 'Target score: ' + _ctx.targetScore + '\n'
-                + 'Tone: ' + _ctx.tone + '\n'
-                + '[END CONTEXT]\n\n';
-            _msgPayload = _ctxBlock + msg;
-        }
-        supa.functions.invoke('sheldon', {
-            body: { message: _msgPayload, context: _ctx, history: sheldonHistory.slice(0, -1).slice(-6) }
-        }).then(function (res) {
+            var _isFirstTurn = (sheldonHistory.filter(function (h) { return h.role === 'user'; }).length <= 1);
+            var _msgPayload = msg;
+            if (_isFirstTurn) {
+                var _ctxBlock = '[DASHBOARD CONTEXT — use this to answer with specifics, do not mention it was injected]\n'
+                    + 'Total study hours: ' + _ctx.totalHours + 'h\n'
+                    + 'Current streak: ' + _ctx.streak + ' days\n'
+                    + 'This week: ' + _ctx.weekHours + 'h of ' + _ctx.weekTarget + 'h target\n'
+                    + 'Consistency: ' + _ctx.consistency + '%\n'
+                    + 'Topic breakdown (hours): ' + JSON.stringify(_ctx.topicTotals) + '\n'
+                    + (_ctx.daysLeft != null ? 'Days to exam: ' + _ctx.daysLeft + '\n' : '')
+                    + (_ctx.latestMock ? 'Latest mock score: ' + _ctx.latestMock + '\n' : '')
+                    + 'Target score: ' + _ctx.targetScore + '\n'
+                    + 'Tone: ' + _ctx.tone + '\n'
+                    + '[END CONTEXT]\n\n';
+                _msgPayload = _ctxBlock + msg;
+            }
+            supa.functions.invoke('sheldon', {
+                body: { message: _msgPayload, context: _ctx, history: sheldonHistory.slice(0, -1).slice(-6) }
+            }).then(function (res) {
                 sheldonTyping(false);
                 document.getElementById('sheldonPanel').classList.remove('thinking');
                 _setCoreState('');
@@ -20884,8 +20884,8 @@
 
         /* when sidebar open — row layout + wider panel */
         #sheldonPanel.sh-sidebar-open {
-  width: 630px !important;
-}
+            width: 630px !important;
+        }
 
         #sh-chat-area {
             flex: 1 1 auto;
@@ -21215,13 +21215,21 @@
 
         /* maximized — wider bubbles, centred column */
         #sheldonPanel.sh-maximized .sheldon-messages {
-  padding-left:  48px !important;
-  padding-right: 48px !important;
-  gap: 20px !important;
-}
+            padding-left: 48px !important;
+            padding-right: 48px !important;
+            gap: 20px !important;
+        }
 
-        #sheldonPanel.sh-maximized .sheldon-msg.bot { max-width: 68% !important; font-size: 14.5px !important; line-height: 1.78 !important; }
-#sheldonPanel.sh-maximized .sheldon-msg.user { max-width: 55% !important; font-size: 14.5px !important; }
+        #sheldonPanel.sh-maximized .sheldon-msg.bot {
+            max-width: 68% !important;
+            font-size: 14.5px !important;
+            line-height: 1.78 !important;
+        }
+
+        #sheldonPanel.sh-maximized .sheldon-msg.user {
+            max-width: 55% !important;
+            font-size: 14.5px !important;
+        }
 
         /* ── 7. CHIPS ── */
         .sheldon-chips {
@@ -21872,77 +21880,77 @@
     </style>
 
     <script id="sheldon-v2-fix">
-(function () {
+        (function () {
 
-  function fix() {
-    var panel = document.getElementById('sheldonPanel');
-    if (!panel || !panel.classList.contains('open')) return;
+            function fix() {
+                var panel = document.getElementById('sheldonPanel');
+                if (!panel || !panel.classList.contains('open')) return;
 
-    /* lock panel position */
-    panel.style.setProperty('position','fixed','important');
-    panel.style.setProperty('bottom','28px','important');
-    panel.style.setProperty('right','28px','important');
-    panel.style.setProperty('top','auto','important');
-    panel.style.setProperty('left','auto','important');
+                /* lock panel position */
+                panel.style.setProperty('position', 'fixed', 'important');
+                panel.style.setProperty('bottom', '28px', 'important');
+                panel.style.setProperty('right', '28px', 'important');
+                panel.style.setProperty('top', 'auto', 'important');
+                panel.style.setProperty('left', 'auto', 'important');
 
-    /* ensure chat-area exists */
-    var ca = document.getElementById('sh-chat-area');
-    if (!ca) {
-      ca = document.createElement('div');
-      ca.id = 'sh-chat-area';
-      var sb = document.getElementById('sh-sidebar');
-      Array.from(panel.children).forEach(function(c){
-        if (c !== sb && c.id !== 'sh-chat-area') ca.appendChild(c);
-      });
-      panel.appendChild(ca);
-    }
+                /* ensure chat-area exists */
+                var ca = document.getElementById('sh-chat-area');
+                if (!ca) {
+                    ca = document.createElement('div');
+                    ca.id = 'sh-chat-area';
+                    var sb = document.getElementById('sh-sidebar');
+                    Array.from(panel.children).forEach(function (c) {
+                        if (c !== sb && c.id !== 'sh-chat-area') ca.appendChild(c);
+                    });
+                    panel.appendChild(ca);
+                }
 
-    /* find the key parts WHEREVER they currently are */
-    var header = panel.querySelector('.sheldon-header');
-    var label  = document.getElementById('sh-session-label');
-    var msgs   = panel.querySelector('.sheldon-messages');
-    var chips  = panel.querySelector('.sheldon-chips');
-    var input  = panel.querySelector('.sheldon-input');
+                /* find the key parts WHEREVER they currently are */
+                var header = panel.querySelector('.sheldon-header');
+                var label = document.getElementById('sh-session-label');
+                var msgs = panel.querySelector('.sheldon-messages');
+                var chips = panel.querySelector('.sheldon-chips');
+                var input = panel.querySelector('.sheldon-input');
 
-    /* ── THE REAL FIX: re-append in correct visual order ──
-       appendChild MOVES an element (keeps all event listeners),
-       so this forces order regardless of how they got scrambled */
-    if (header) ca.appendChild(header);
-    if (label)  ca.appendChild(label);
-    if (msgs)   ca.appendChild(msgs);
-    if (chips)  ca.appendChild(chips);
-    if (input)  ca.appendChild(input);
+                /* ── THE REAL FIX: re-append in correct visual order ──
+                   appendChild MOVES an element (keeps all event listeners),
+                   so this forces order regardless of how they got scrambled */
+                if (header) ca.appendChild(header);
+                if (label) ca.appendChild(label);
+                if (msgs) ca.appendChild(msgs);
+                if (chips) ca.appendChild(chips);
+                if (input) ca.appendChild(input);
 
-    /* sizing: only messages grows, everything else fixed */
-    ca.style.cssText = 'display:flex!important;flex-direction:column!important;flex:1 1 auto!important;height:100%!important;min-height:0!important;overflow:hidden!important;position:relative!important;z-index:2!important;';
-    if (header) header.style.cssText = 'flex:0 0 auto!important;width:100%!important;';
-    if (msgs)   msgs.style.cssText   = 'flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;width:100%!important;';
-    if (chips)  chips.style.cssText  = 'flex:0 0 auto!important;';
-    if (input)  input.style.cssText  = 'flex:0 0 auto!important;margin-top:auto!important;';
-  }
+                /* sizing: only messages grows, everything else fixed */
+                ca.style.cssText = 'display:flex!important;flex-direction:column!important;flex:1 1 auto!important;height:100%!important;min-height:0!important;overflow:hidden!important;position:relative!important;z-index:2!important;';
+                if (header) header.style.cssText = 'flex:0 0 auto!important;width:100%!important;';
+                if (msgs) msgs.style.cssText = 'flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;width:100%!important;';
+                if (chips) chips.style.cssText = 'flex:0 0 auto!important;';
+                if (input) input.style.cssText = 'flex:0 0 auto!important;margin-top:auto!important;';
+            }
 
-  var _orig = window.openSheldon;
-  window.openSheldon = function(){
-    if (typeof _orig === 'function') _orig.apply(this, arguments);
-    [50,150,350,700].forEach(function(ms){ setTimeout(fix, ms); });
-  };
+            var _orig = window.openSheldon;
+            window.openSheldon = function () {
+                if (typeof _orig === 'function') _orig.apply(this, arguments);
+                [50, 150, 350, 700].forEach(function (ms) { setTimeout(fix, ms); });
+            };
 
-  var obs = new MutationObserver(function(muts){
-    muts.forEach(function(m){
-      if (m.attributeName === 'class' && m.target.classList.contains('open')) {
-        [50,200,500].forEach(function(ms){ setTimeout(fix, ms); });
-      }
-    });
-  });
-  setTimeout(function(){
-    var p = document.getElementById('sheldonPanel');
-    if (p) obs.observe(p, { attributes:true, attributeFilter:['class'] });
-  }, 500);
+            var obs = new MutationObserver(function (muts) {
+                muts.forEach(function (m) {
+                    if (m.attributeName === 'class' && m.target.classList.contains('open')) {
+                        [50, 200, 500].forEach(function (ms) { setTimeout(fix, ms); });
+                    }
+                });
+            });
+            setTimeout(function () {
+                var p = document.getElementById('sheldonPanel');
+                if (p) obs.observe(p, { attributes: true, attributeFilter: ['class'] });
+            }, 500);
 
-  window.addEventListener('resize', fix);
-  window.shFixPanel = fix;
-})();
-
+            window.addEventListener('resize', fix);
+            window.shFixPanel = fix;
+        })();
+    </script>
 
 </body>
 
