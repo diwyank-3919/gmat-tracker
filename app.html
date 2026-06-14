@@ -23236,7 +23236,7 @@ function _doRender() {
     position: fixed;
     bottom: 28px;
     right: 108px;
-    z-index: 9996;
+    z-index: 99999;
     width: 340px;
     max-height: 520px;
     display: none;
@@ -23693,11 +23693,11 @@ function _doRender() {
 
   window.toggleMemPanel = function () {
     var panel = document.getElementById('sh-mem-panel');
-    if (!panel) { buildMemPanel(); }
-    panel = document.getElementById('sh-mem-panel');
+    if (!panel) { buildMemPanel(); panel = document.getElementById('sh-mem-panel'); }
+    if (!panel) return;
     var isOpen = panel.classList.contains('open');
     panel.classList.toggle('open', !isOpen);
-    if (!isOpen) loadMemories();
+    if (!isOpen) { renderMemPanel(); loadMemories(); }
   };
 
   function buildMemPanel() {
@@ -23723,6 +23723,7 @@ function _doRender() {
         p.classList.remove('open');
       }
     });
+      renderMemPanel();
   }
 
   function renderMemPanel() {
