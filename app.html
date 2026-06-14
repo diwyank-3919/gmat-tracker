@@ -22921,6 +22921,314 @@ function _doRender() {
 })();
 </script>
 
+    <!-- ══ SHELDON VOICE INPUT ══ -->
+<style id="sheldon-voice-input-css">
+  #sh-voice-btn {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(190,196,235,0.40);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.18s cubic-bezier(.34,1.56,.64,1);
+  }
+  #sh-voice-btn:hover {
+    background: rgba(135,141,255,0.10);
+    border-color: rgba(135,141,255,0.28);
+    color: #9aa0ff;
+    transform: translateY(-1px);
+  }
+  #sh-voice-btn.sh-listening {
+    background: rgba(251,113,133,0.14);
+    border-color: rgba(251,113,133,0.40);
+    color: #fb7185;
+    animation: shVoicePulse 1.2s ease-in-out infinite;
+  }
+  #sh-voice-btn.sh-processing {
+    background: rgba(240,189,106,0.12);
+    border-color: rgba(240,189,106,0.30);
+    color: #f0bd6a;
+    cursor: default;
+  }
+  @keyframes shVoicePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(251,113,133,0); }
+    50% { box-shadow: 0 0 0 6px rgba(251,113,133,0.18); }
+  }
+
+  /* live transcript preview */
+  #sh-voice-preview {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: rgba(13,15,28,0.95);
+    border: 1px solid rgba(251,113,133,0.28);
+    border-radius: 12px;
+    padding: 9px 13px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: rgba(218,222,248,0.75);
+    display: none;
+    pointer-events: none;
+    font-style: italic;
+  }
+  #sh-voice-preview.show { display: block; }
+  #sh-voice-preview .sh-vp-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #fb7185;
+    margin-right: 7px;
+    animation: shVoiceDot 1s ease-in-out infinite;
+    vertical-align: middle;
+  }
+  @keyframes shVoiceDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  /* no-support message */
+  #sh-voice-nosupport {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    background: rgba(13,15,28,0.97);
+    border: 1px solid rgba(251,113,133,0.25);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 11.5px;
+    color: #fb7185;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* light theme */
+  html.sc-light #sh-voice-btn {
+    background: rgba(15,17,40,0.04);
+    border-color: rgba(15,17,40,0.09);
+    color: rgba(23,27,46,0.35);
+  }
+  html.sc-light #sh-voice-btn.sh-listening {
+    background: rgba(229,72,77,0.08);
+    border-color: rgba(229,72,77,0.30);
+    color: #e5484d;
+  }
+  html.sc-light #sh-voice-preview {
+    background: rgba(248,249,255,0.98);
+    border-color: rgba(229,72,77,0.22);
+    color: rgba(23,27,46,0.65);
+  }
+</style>
+
+<script id="sheldon-voice-input-js">
+(function () {
+
+  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var recognition = null;
+  var listening = false;
+  var silenceTimer = null;
+  var SILENCE_MS = 1800; /* send after 1.8s of silence */
+
+  /* ── inject mic button into Sheldon input dock ── */
+  function injectVoiceBtn() {
+    var dock = document.querySelector('#sheldonPanel .sheldon-input');
+    if (!dock || document.getElementById('sh-voice-btn')) return;
+
+    var wrap = dock.querySelector('.sh-dock-field');
+    if (!wrap) return;
+
+    /* position wrapper for the preview bubble */
+    dock.style.position = 'relative';
+
+    /* preview bubble */
+    var preview = document.createElement('div');
+    preview.id = 'sh-voice-preview';
+    preview.innerHTML = '<span class="sh-vp-dot"></span><span id="sh-vp-text">Listening…</span>';
+    dock.insertBefore(preview, dock.firstChild);
+
+    /* no-support tooltip */
+    var noSupport = document.createElement('div');
+    noSupport.id = 'sh-voice-nosupport';
+    noSupport.textContent = 'Voice input not supported in this browser';
+    dock.appendChild(noSupport);
+
+    /* mic button */
+    var btn = document.createElement('button');
+    btn.id = 'sh-voice-btn';
+    btn.setAttribute('aria-label', 'Voice input');
+    btn.title = 'Click to speak';
+    btn.innerHTML = '<i class="ti ti-microphone" style="font-size:17px" aria-hidden="true"></i>';
+    btn.addEventListener('click', toggleVoice);
+
+    /* insert between dock-field and send button */
+    var send = dock.querySelector('.sheldon-send');
+    if (send) dock.insertBefore(btn, send);
+    else dock.appendChild(btn);
+  }
+
+  /* ── toggle ── */
+  function toggleVoice() {
+    if (!SpeechRecognition) {
+      showNoSupport();
+      return;
+    }
+    if (listening) {
+      stopListening(false);
+    } else {
+      startListening();
+    }
+  }
+
+  /* ── start ── */
+  function startListening() {
+    if (listening) return;
+
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    var finalTranscript = '';
+
+    recognition.onstart = function () {
+      listening = true;
+      setBtn('listening');
+      showPreview('Listening…');
+      /* clear textarea */
+      var ta = document.getElementById('sheldonInput');
+      if (ta) ta.value = '';
+    };
+
+    recognition.onresult = function (e) {
+      var interim = '';
+      finalTranscript = '';
+      for (var i = 0; i < e.results.length; i++) {
+        if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
+        else interim += e.results[i][0].transcript;
+      }
+      var display = (finalTranscript + interim).trim();
+      showPreview(display || 'Listening…');
+
+      /* put interim text in textarea so user can see */
+      var ta = document.getElementById('sheldonInput');
+      if (ta) { ta.value = display; if (typeof sheldonGrow === 'function') sheldonGrow(ta); }
+
+      /* reset silence timer on every result */
+      clearTimeout(silenceTimer);
+      if (finalTranscript.trim()) {
+        silenceTimer = setTimeout(function () {
+          stopListening(true);
+        }, SILENCE_MS);
+      }
+    };
+
+    recognition.onerror = function (e) {
+      if (e.error === 'not-allowed') {
+        if (typeof scNotify === 'function') scNotify('Microphone permission denied. Please allow mic access in your browser settings.', 'error');
+      }
+      stopListening(false);
+    };
+
+    recognition.onend = function () {
+      /* onend fires when recognition stops — if we still have a final transcript, send it */
+      if (listening) {
+        var ta = document.getElementById('sheldonInput');
+        var text = ta ? ta.value.trim() : '';
+        listening = false;
+        setBtn('idle');
+        hidePreview();
+        if (text && typeof sheldonSend === 'function') {
+          setTimeout(sheldonSend, 100);
+        }
+      }
+    };
+
+    try {
+      recognition.start();
+    } catch (e) {
+      stopListening(false);
+    }
+  }
+
+  /* ── stop ── */
+  function stopListening(andSend) {
+    clearTimeout(silenceTimer);
+    listening = false;
+    setBtn(andSend ? 'processing' : 'idle');
+    hidePreview();
+    if (recognition) {
+      try { recognition.stop(); } catch(e) {}
+    }
+    if (andSend) {
+      /* small delay to let onend fire and textarea settle */
+      setTimeout(function () {
+        var ta = document.getElementById('sheldonInput');
+        var text = ta ? ta.value.trim() : '';
+        setBtn('idle');
+        if (text && typeof sheldonSend === 'function') sheldonSend();
+      }, 300);
+    }
+  }
+
+  /* ── UI helpers ── */
+  function setBtn(state) {
+    var btn = document.getElementById('sh-voice-btn'); if (!btn) return;
+    btn.classList.remove('sh-listening', 'sh-processing');
+    var icon = btn.querySelector('i');
+    if (state === 'listening') {
+      btn.classList.add('sh-listening');
+      btn.title = 'Click to cancel';
+      if (icon) icon.className = 'ti ti-microphone';
+    } else if (state === 'processing') {
+      btn.classList.add('sh-processing');
+      btn.title = 'Processing…';
+      if (icon) icon.className = 'ti ti-loader-2';
+      icon && (icon.style.animation = 'spin 1s linear infinite');
+    } else {
+      btn.title = 'Click to speak';
+      if (icon) { icon.className = 'ti ti-microphone'; icon.style.animation = ''; }
+    }
+  }
+
+  function showPreview(text) {
+    var p = document.getElementById('sh-voice-preview'); if (!p) return;
+    var t = document.getElementById('sh-vp-text'); if (t) t.textContent = text;
+    p.classList.add('show');
+  }
+
+  function hidePreview() {
+    var p = document.getElementById('sh-voice-preview'); if (!p) return;
+    p.classList.remove('show');
+  }
+
+  function showNoSupport() {
+    var el = document.getElementById('sh-voice-nosupport'); if (!el) return;
+    el.style.display = 'block';
+    setTimeout(function () { el.style.display = 'none'; }, 3000);
+  }
+
+  /* ── boot ── */
+  function boot() { injectVoiceBtn(); }
+
+  var _origOpen = window.openSheldon;
+  window.openSheldon = function () {
+    if (typeof _origOpen === 'function') _origOpen.apply(this, arguments);
+    setTimeout(boot, 200);
+  };
+
+  if (document.body) setTimeout(boot, 1000);
+  else document.addEventListener('DOMContentLoaded', boot);
+
+})();
+</script>
+
 </body>
 
 </html>
