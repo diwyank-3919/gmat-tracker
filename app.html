@@ -21954,6 +21954,452 @@
         })();
     </script>
 
+    <!-- ══ SHELDON PROACTIVE NUDGE ══ -->
+<style id="sheldon-nudge-css">
+  #sh-nudge-banner {
+    display: none;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    background: linear-gradient(155deg, #131826, #0f1420);
+    border: 1px solid rgba(135,141,255,0.22);
+    border-left: 3px solid #878dff;
+    border-radius: 16px;
+    position: relative;
+    animation: fadeUp 0.4s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  #sh-nudge-banner.sh-nudge-warn {
+    border-left-color: #f0bd6a;
+    border-color: rgba(240,189,106,0.22);
+    background: linear-gradient(155deg, #181410, #120f09);
+  }
+  #sh-nudge-banner.sh-nudge-ok {
+    border-left-color: #46c98f;
+    border-color: rgba(70,201,143,0.22);
+    background: linear-gradient(155deg, #0d1812, #0a130e);
+  }
+  .sh-nudge-ic {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(135,141,255,0.12);
+    border: 1px solid rgba(135,141,255,0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  #sh-nudge-banner.sh-nudge-warn .sh-nudge-ic {
+    background: rgba(240,189,106,0.12);
+    border-color: rgba(240,189,106,0.22);
+  }
+  #sh-nudge-banner.sh-nudge-ok .sh-nudge-ic {
+    background: rgba(70,201,143,0.12);
+    border-color: rgba(70,201,143,0.22);
+  }
+  .sh-nudge-body { flex: 1; min-width: 0; }
+  .sh-nudge-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #878dff;
+    margin-bottom: 5px;
+  }
+  #sh-nudge-banner.sh-nudge-warn .sh-nudge-label { color: #f0bd6a; }
+  #sh-nudge-banner.sh-nudge-ok .sh-nudge-label { color: #46c98f; }
+  .sh-nudge-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(218,222,248,0.82);
+  }
+  .sh-nudge-text strong { color: #fff; font-weight: 650; }
+  .sh-nudge-ask {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 6px 13px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 650;
+    font-family: 'Hanken Grotesk', sans-serif;
+    cursor: pointer;
+    background: rgba(135,141,255,0.10);
+    border: 1px solid rgba(135,141,255,0.28);
+    color: #9aa0ff;
+    transition: all 0.15s;
+  }
+  .sh-nudge-ask:hover {
+    background: rgba(135,141,255,0.18);
+    border-color: rgba(135,141,255,0.45);
+    transform: translateY(-1px);
+  }
+  #sh-nudge-banner.sh-nudge-warn .sh-nudge-ask {
+    background: rgba(240,189,106,0.10);
+    border-color: rgba(240,189,106,0.28);
+    color: #f0bd6a;
+  }
+  #sh-nudge-banner.sh-nudge-ok .sh-nudge-ask {
+    background: rgba(70,201,143,0.10);
+    border-color: rgba(70,201,143,0.28);
+    color: #46c98f;
+  }
+  .sh-nudge-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(190,196,235,0.30);
+    font-size: 14px;
+    padding: 4px;
+    border-radius: 6px;
+    transition: color 0.12s;
+    line-height: 1;
+  }
+  .sh-nudge-close:hover { color: rgba(190,196,235,0.70); }
+
+  /* FAB badge */
+  #sh-fab-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 14px;
+    height: 14px;
+    background: #46c98f;
+    border-radius: 50%;
+    border: 2.5px solid #0d1018;
+    display: none;
+    animation: shPingPop 0.5s cubic-bezier(.34,1.8,.64,1) both;
+  }
+  #sh-fab-badge.show { display: block; }
+
+  /* Bubble preview above FAB */
+  #sh-fab-bubble {
+    position: fixed;
+    bottom: 108px;
+    right: 28px;
+    z-index: 9997;
+    max-width: 260px;
+    background: rgba(13,15,28,0.97);
+    border: 1px solid rgba(135,141,255,0.28);
+    border-radius: 14px 14px 4px 14px;
+    padding: 11px 14px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(218,222,248,0.80);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+    display: none;
+    animation: fadeUp 0.35s cubic-bezier(.34,1.56,.64,1) both;
+    cursor: pointer;
+  }
+  #sh-fab-bubble strong { color: #fff; font-weight: 650; }
+  #sh-fab-bubble.show { display: block; }
+
+  /* light theme */
+  html.sc-light #sh-nudge-banner {
+    background: linear-gradient(155deg, #f4f5ff, #eef0ff);
+    border-color: rgba(88,94,230,0.18);
+    border-left-color: #585ee6;
+  }
+  html.sc-light #sh-nudge-banner.sh-nudge-warn {
+    background: linear-gradient(155deg, #fdf8ee, #fdf4e4);
+    border-color: rgba(196,127,42,0.18);
+    border-left-color: #c47f2a;
+  }
+  html.sc-light #sh-nudge-banner.sh-nudge-ok {
+    background: linear-gradient(155deg, #f0faf5, #e8f7ef);
+    border-color: rgba(14,159,110,0.18);
+    border-left-color: #0e9f6e;
+  }
+  html.sc-light .sh-nudge-label { color: #585ee6; }
+  html.sc-light #sh-nudge-banner.sh-nudge-warn .sh-nudge-label { color: #c47f2a; }
+  html.sc-light #sh-nudge-banner.sh-nudge-ok .sh-nudge-label { color: #0e9f6e; }
+  html.sc-light .sh-nudge-text { color: rgba(23,27,46,0.80); }
+  html.sc-light .sh-nudge-text strong { color: #0e1020; }
+  html.sc-light #sh-fab-bubble {
+    background: rgba(248,249,255,0.98);
+    border-color: rgba(88,94,230,0.22);
+    color: rgba(23,27,46,0.75);
+  }
+  html.sc-light #sh-fab-bubble strong { color: #0e1020; }
+  html.sc-light #sh-fab-badge { border-color: #eef0f8; }
+
+  /* parchment */
+  html.sc-parch #sh-nudge-banner {
+    background: linear-gradient(155deg, #faf7f0, #f5efe0);
+    border-color: rgba(92,122,90,0.22);
+    border-left-color: #5c7a5a;
+  }
+  html.sc-parch .sh-nudge-label { color: #5c7a5a; }
+  html.sc-parch .sh-nudge-text { color: rgba(45,37,24,0.78); }
+  html.sc-parch .sh-nudge-text strong { color: #2d2518; }
+</style>
+
+<script id="sheldon-nudge-js">
+(function () {
+  var NUDGE_KEY = 'sc_nudge_date';
+
+  /* ── Build the nudge message from live dashboard data ── */
+  function buildNudge() {
+    if (typeof sessions === 'undefined') return null;
+
+    var ts = dateStr(today);
+    var todayMins = sessions.filter(function(s){ return s.date === ts; })
+                            .reduce(function(a,s){ return a + s.mins; }, 0);
+    var todayTarget = targetFor(today);
+    var examDate = localStorage.getItem('gmat_exam_date');
+    var daysLeft = null;
+    if (examDate) {
+      var ep = examDate.split('-').map(Number);
+      daysLeft = Math.max(0, Math.ceil((new Date(ep[0],ep[1]-1,ep[2]) - today) / 86400000));
+    }
+
+    var totalMins = sessions.reduce(function(a,s){ return a + s.mins; }, 0);
+    var studiedDays = new Set(sessions.map(function(s){ return s.date; })).size || 1;
+    var avgPerDay = totalMins / studiedDays;
+    var projectedHours = daysLeft != null ? Math.round((totalMins + avgPerDay * daysLeft) / 60) : null;
+
+    /* topic last-seen */
+    var topicLast = {};
+    sessions.forEach(function(s){ if (!topicLast[s.topic] || s.date > topicLast[s.topic]) topicLast[s.topic] = s.date; });
+    var ALL_TOPICS = ['Quant','RC','CR','DI'];
+    var overdueTopics = ALL_TOPICS.filter(function(t){
+      if (!topicLast[t]) return true;
+      var diff = Math.floor((today - parseLocal(topicLast[t])) / 86400000);
+      return diff >= 3;
+    });
+
+    var latestMock = window.mockScores && window.mockScores.length
+      ? window.mockScores[window.mockScores.length - 1].score : null;
+    var targetScore = typeof TARGET_SCORE !== 'undefined' ? TARGET_SCORE : 735;
+
+    /* ── Week pace ── */
+    var ws = startOfWeek(today), weekMins = 0, weekTarget = 0;
+    for (var i = 0; i < 7; i++) {
+      var wd = addDays(ws, i);
+      weekMins  += minsOn(dateStr(wd));
+      weekTarget += targetFor(wd);
+    }
+    var weekPct = weekTarget > 0 ? Math.round(weekMins / weekTarget * 100) : 0;
+
+    /* ── Decide tone ── */
+    var type, label, icon, msg, askText;
+
+    if (todayMins === 0) {
+      /* no study yet today */
+      type = 'nudge';
+      label = 'Sheldon check-in';
+      icon = 'ti-brain';
+      var parts = [];
+      if (daysLeft != null) parts.push('<strong>' + daysLeft + ' days</strong> to exam');
+      if (overdueTopics.length) parts.push('<strong>' + overdueTopics[0] + '</strong> hasn\'t been touched in 3+ days');
+      if (projectedHours && projectedHours < 180) parts.push('you\'re projecting <strong>' + projectedHours + 'h</strong> total — under the 200h benchmark');
+      msg = 'No study logged yet today. ' + (parts.length ? parts.join(', ') + '.' : 'Even 45 minutes moves the needle.');
+      if (overdueTopics.length) msg += ' A focused session on <strong>' + overdueTopics[0] + '</strong> would close the biggest gap right now.';
+      askText = 'Plan my session with Sheldon';
+
+    } else if (todayMins < todayTarget * 0.8) {
+      /* behind today's target */
+      type = 'warn';
+      label = 'Behind today\'s target';
+      icon = 'ti-clock';
+      var remaining = fmtH(todayTarget - todayMins);
+      msg = 'You\'ve logged <strong>' + fmtH(todayMins) + '</strong> today — <strong>' + remaining + '</strong> still to hit your target.';
+      if (overdueTopics.length) msg += ' ' + overdueTopics[0] + ' is overdue for a session.';
+      if (projectedHours && projectedHours < 180) msg += ' At current pace you\'re tracking <strong>' + projectedHours + 'h</strong> by exam day.';
+      askText = 'Help me finish strong today';
+
+    } else if (weekPct >= 90 && todayMins >= todayTarget) {
+      /* on track / ahead */
+      type = 'ok';
+      label = 'On track';
+      icon = 'ti-trending-up';
+      msg = 'Strong week — <strong>' + fmtH(weekMins) + '</strong> logged, pace is at <strong>' + weekPct + '%</strong> of target.';
+      if (latestMock) {
+        var gap = targetScore - latestMock;
+        msg += ' Latest mock: <strong>' + latestMock + '</strong>' + (gap > 0 ? ', <strong>' + gap + ' points</strong> to close.' : ' — target reached!');
+      }
+      if (overdueTopics.length) msg += ' One thing: <strong>' + overdueTopics[0] + '</strong> hasn\'t been in rotation recently.';
+      askText = 'What should I focus on next?';
+
+    } else {
+      /* generic momentum nudge */
+      type = 'nudge';
+      label = 'Sheldon check-in';
+      icon = 'ti-sparkles';
+      msg = 'Week is at <strong>' + weekPct + '%</strong> of target';
+      if (daysLeft != null) msg += ' with <strong>' + daysLeft + ' days</strong> to exam';
+      msg += '.';
+      if (overdueTopics.length) msg += ' <strong>' + overdueTopics[0] + '</strong> is overdue — add it to today\'s plan.';
+      askText = 'What should I focus on this week?';
+    }
+
+    return { type: type, label: label, icon: icon, msg: msg, askText: askText };
+  }
+
+  /* ── Inject banner at top of dashboard ── */
+  function injectBanner() {
+    if (document.getElementById('sh-nudge-banner')) return;
+    var dash = document.getElementById('view-dashboard');
+    if (!dash) return;
+    var banner = document.createElement('div');
+    banner.id = 'sh-nudge-banner';
+    banner.innerHTML =
+      '<div class="sh-nudge-ic"><i class="ti ti-sparkles" style="font-size:16px;color:#878dff" aria-hidden="true"></i></div>' +
+      '<div class="sh-nudge-body">' +
+        '<div class="sh-nudge-label" id="sh-nudge-label">Sheldon check-in</div>' +
+        '<div class="sh-nudge-text" id="sh-nudge-text"></div>' +
+        '<button class="sh-nudge-ask" id="sh-nudge-ask"><i class="ti ti-message-chatbot" style="font-size:13px" aria-hidden="true"></i> <span id="sh-nudge-ask-lbl">Ask Sheldon</span></button>' +
+      '</div>' +
+      '<button class="sh-nudge-close" id="sh-nudge-close" aria-label="Dismiss"><i class="ti ti-x"></i></button>';
+    dash.insertBefore(banner, dash.firstChild);
+
+    document.getElementById('sh-nudge-close').addEventListener('click', dismissNudge);
+    document.getElementById('sh-nudge-ask').addEventListener('click', function(){
+      var lbl = document.getElementById('sh-nudge-ask-lbl');
+      var question = lbl ? lbl.dataset.question || lbl.textContent : '';
+      dismissNudge();
+      if (typeof openSheldon === 'function') {
+        openSheldon();
+        setTimeout(function(){
+          if (typeof sheldonAsk === 'function') sheldonAsk(question);
+        }, 350);
+      }
+    });
+  }
+
+  /* ── Inject FAB badge ── */
+  function injectFabBadge() {
+    var core = document.getElementById('sheldonCore');
+    if (!core || document.getElementById('sh-fab-badge')) return;
+    var badge = document.createElement('div');
+    badge.id = 'sh-fab-badge';
+    core.style.position = 'relative';
+    core.appendChild(badge);
+  }
+
+  /* ── Inject FAB bubble ── */
+  function injectFabBubble() {
+    if (document.getElementById('sh-fab-bubble')) return;
+    var bubble = document.createElement('div');
+    bubble.id = 'sh-fab-bubble';
+    bubble.setAttribute('role', 'status');
+    bubble.setAttribute('aria-live', 'polite');
+    document.body.appendChild(bubble);
+    bubble.addEventListener('click', function(){
+      bubble.classList.remove('show');
+      if (typeof openSheldon === 'function') openSheldon();
+    });
+  }
+
+  /* ── Show nudge ── */
+  function showNudge(data) {
+    /* banner */
+    var banner = document.getElementById('sh-nudge-banner');
+    if (banner) {
+      banner.className = 'sh-nudge-' + (data.type === 'warn' ? 'warn' : data.type === 'ok' ? 'ok' : '');
+      banner.id = 'sh-nudge-banner'; /* keep id */
+      banner.style.display = 'flex';
+
+      var ic = banner.querySelector('.sh-nudge-ic i');
+      if (ic) { ic.className = 'ti ' + data.icon; ic.style.color = data.type === 'warn' ? '#f0bd6a' : data.type === 'ok' ? '#46c98f' : '#878dff'; }
+      var lbl = document.getElementById('sh-nudge-label');
+      if (lbl) lbl.textContent = data.label;
+      var txt = document.getElementById('sh-nudge-text');
+      if (txt) txt.innerHTML = data.msg;
+      var askLbl = document.getElementById('sh-nudge-ask-lbl');
+      if (askLbl) { askLbl.textContent = data.askText; askLbl.dataset.question = data.askText; }
+    }
+
+    /* FAB badge */
+    var badge = document.getElementById('sh-fab-badge');
+    if (badge) badge.classList.add('show');
+
+    /* FAB bubble — show for 6 seconds then fade */
+    var bubble = document.getElementById('sh-fab-bubble');
+    if (bubble) {
+      var shortMsg = data.msg.replace(/<[^>]+>/g, '').slice(0, 90) + (data.msg.length > 90 ? '…' : '');
+      bubble.innerHTML = shortMsg;
+      bubble.classList.add('show');
+      setTimeout(function(){ bubble.classList.remove('show'); }, 6000);
+    }
+  }
+
+  function dismissNudge() {
+    var banner = document.getElementById('sh-nudge-banner');
+    if (banner) banner.style.display = 'none';
+    var badge = document.getElementById('sh-fab-badge');
+    if (badge) badge.classList.remove('show');
+    var bubble = document.getElementById('sh-fab-bubble');
+    if (bubble) bubble.classList.remove('show');
+    /* mark dismissed for today */
+    try { localStorage.setItem(NUDGE_KEY, dateStr(today)); } catch(e){}
+  }
+
+  /* ── Main trigger ── */
+  function tryNudge() {
+    /* only once per day */
+    try {
+      var last = localStorage.getItem(NUDGE_KEY);
+      if (last === dateStr(today)) return;
+    } catch(e){}
+
+    /* need sessions to be loaded */
+    if (typeof sessions === 'undefined' || !sessions) return;
+
+    var data = buildNudge();
+    if (!data) return;
+
+    injectBanner();
+    injectFabBadge();
+    injectFabBubble();
+    showNudge(data);
+  }
+
+  /* ── Hook into loadSessions so nudge fires after data is ready ── */
+  var _origLoad = window.loadSessions;
+  if (typeof _origLoad === 'function') {
+    window.loadSessions = function() {
+      var result = _origLoad.apply(this, arguments);
+      /* wait for sessions array to populate then nudge */
+      setTimeout(tryNudge, 800);
+      return result;
+    };
+  }
+
+  /* also re-evaluate when switching back to dashboard view */
+  var _origSwitch = window.switchView;
+  if (typeof _origSwitch === 'function') {
+    window.switchView = function(view) {
+      _origSwitch.apply(this, arguments);
+      if (view === 'dashboard') {
+        setTimeout(function(){
+          var banner = document.getElementById('sh-nudge-banner');
+          /* only re-show if not dismissed today */
+          try {
+            var last = localStorage.getItem(NUDGE_KEY);
+            if (last === dateStr(today)) return;
+          } catch(e){}
+          if (banner && banner.style.display === 'none') {
+            var data = buildNudge();
+            if (data) showNudge(data);
+          }
+        }, 300);
+      }
+    };
+  }
+
+  /* run once on boot too (after a delay for sessions to load) */
+  setTimeout(tryNudge, 2000);
+
+})();
+</script>
+
 </body>
 
 </html>
