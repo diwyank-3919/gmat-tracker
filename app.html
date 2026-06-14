@@ -22461,6 +22461,100 @@ html.sc-light #sh-sidebar {
 }
 
 </style>
+    <script id="sheldon-position-js">
+(function () {
+
+  function fixPanel() {
+    var panel = document.getElementById('sheldonPanel');
+    if (!panel) return;
+
+    /* ── Force position via inline style — beats every stylesheet ── */
+    panel.style.setProperty('position', 'fixed', 'important');
+    panel.style.setProperty('top',    'auto',   'important');
+    panel.style.setProperty('left',   'auto',   'important');
+    panel.style.setProperty('bottom', '28px',   'important');
+    panel.style.setProperty('right',  '28px',   'important');
+
+    /* ── Force chat area to fill panel ── */
+    var chatArea = document.getElementById('sh-chat-area');
+    if (chatArea) {
+      chatArea.style.setProperty('display',        'flex',    'important');
+      chatArea.style.setProperty('flex-direction', 'column',  'important');
+      chatArea.style.setProperty('flex',           '1',       'important');
+      chatArea.style.setProperty('min-height',     '0',       'important');
+      chatArea.style.setProperty('overflow',       'hidden',  'important');
+      chatArea.style.setProperty('width',          '100%',    'important');
+    }
+
+    /* ── Messages fills remaining space ── */
+    var msgs = document.querySelector('#sh-chat-area .sheldon-messages');
+    if (msgs) {
+      msgs.style.setProperty('flex',       '1 1 auto', 'important');
+      msgs.style.setProperty('min-height', '0',        'important');
+      msgs.style.setProperty('overflow-y', 'auto',     'important');
+    }
+
+    /* ── Panel flex direction ── */
+    var hasSidebar = panel.classList.contains('sh-sidebar-open');
+    panel.style.setProperty('flex-direction', hasSidebar ? 'row' : 'column', 'important');
+
+    /* ── Size constraints ── */
+    var isMax = panel.classList.contains('sh-maximized');
+    var isMin = panel.classList.contains('sh-minimized');
+
+    if (isMax) {
+      panel.style.setProperty('width',      'calc(100vw - 48px)', 'important');
+      panel.style.setProperty('height',     'calc(100vh - 48px)', 'important');
+      panel.style.setProperty('max-width',  'calc(100vw - 48px)', 'important');
+      panel.style.setProperty('max-height', 'calc(100vh - 48px)', 'important');
+      panel.style.setProperty('bottom',     '24px', 'important');
+      panel.style.setProperty('right',      '24px', 'important');
+    } else if (isMin) {
+      panel.style.setProperty('width',      '300px', 'important');
+      panel.style.setProperty('height',     '58px',  'important');
+      panel.style.setProperty('max-height', '58px',  'important');
+      panel.style.setProperty('min-height', '0',     'important');
+    } else {
+      var w = hasSidebar ? '640px' : '420px';
+      panel.style.setProperty('width',      w,                        'important');
+      panel.style.setProperty('height',     '630px',                  'important');
+      panel.style.setProperty('max-width',  'calc(100vw - 32px)',     'important');
+      panel.style.setProperty('max-height', 'calc(100vh - 56px)',     'important');
+    }
+  }
+
+  /* Run immediately and on every animation frame for the first 3s */
+  fixPanel();
+  var count = 0;
+  var raf = function () {
+    fixPanel();
+    if (count++ < 180) requestAnimationFrame(raf); /* ~3s at 60fps */
+  };
+  requestAnimationFrame(raf);
+
+  /* Also run on any class change on the panel */
+  var panel = document.getElementById('sheldonPanel');
+  if (panel) {
+    new MutationObserver(fixPanel).observe(panel, { attributes: true, attributeFilter: ['class', 'style'] });
+  }
+
+  /* Run when Sheldon opens */
+  var _orig = window.openSheldon;
+  window.openSheldon = function () {
+    if (typeof _orig === 'function') _orig.apply(this, arguments);
+    setTimeout(fixPanel, 50);
+    setTimeout(fixPanel, 200);
+    setTimeout(fixPanel, 500);
+  };
+
+  /* Run on resize */
+  window.addEventListener('resize', fixPanel);
+
+  /* Expose for manual call */
+  window.shFixPanel = fixPanel;
+
+})();
+</script>
 </body>
 
 </html>
