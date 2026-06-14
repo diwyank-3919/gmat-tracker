@@ -21864,34 +21864,76 @@
     </style>
 
     <script id="sheldon-v2-fix">
-        (function () {
-            /* Single targeted fix — runs 4 times then stops */
-            function fix() {
-                var p = document.getElementById('sheldonPanel');
-                if (!p) return;
-                p.style.setProperty('position', 'fixed', 'important');
-                p.style.setProperty('bottom', '28px', 'important');
-                p.style.setProperty('right', '28px', 'important');
-                p.style.setProperty('top', 'auto', 'important');
-                p.style.setProperty('left', 'auto', 'important');
-                var ca = document.getElementById('sh-chat-area');
-                if (ca) {
-                    ca.style.setProperty('flex', '1 1 auto', 'important');
-                    ca.style.setProperty('min-height', '0', 'important');
-                    ca.style.setProperty('overflow', 'hidden', 'important');
-                    ca.style.setProperty('display', 'flex', 'important');
-                    ca.style.setProperty('flex-direction', 'column', 'important');
-                }
-            }
-            [0, 150, 400, 900].forEach(function (ms) { setTimeout(fix, ms); });
-            var _o = window.openSheldon;
-            window.openSheldon = function () {
-                if (typeof _o === 'function') _o.apply(this, arguments);
-                setTimeout(fix, 100);
-            };
-            window.addEventListener('resize', fix);
-        })();
-    </script>
+(function () {
+
+  function fix() {
+    var panel = document.getElementById('sheldonPanel');
+    if (!panel || !panel.classList.contains('open')) return;
+
+    /* lock panel position */
+    panel.style.setProperty('position','fixed','important');
+    panel.style.setProperty('bottom','28px','important');
+    panel.style.setProperty('right','28px','important');
+    panel.style.setProperty('top','auto','important');
+    panel.style.setProperty('left','auto','important');
+
+    /* ensure chat-area exists */
+    var ca = document.getElementById('sh-chat-area');
+    if (!ca) {
+      ca = document.createElement('div');
+      ca.id = 'sh-chat-area';
+      var sb = document.getElementById('sh-sidebar');
+      Array.from(panel.children).forEach(function(c){
+        if (c !== sb && c.id !== 'sh-chat-area') ca.appendChild(c);
+      });
+      panel.appendChild(ca);
+    }
+
+    /* find the key parts WHEREVER they currently are */
+    var header = panel.querySelector('.sheldon-header');
+    var label  = document.getElementById('sh-session-label');
+    var msgs   = panel.querySelector('.sheldon-messages');
+    var chips  = panel.querySelector('.sheldon-chips');
+    var input  = panel.querySelector('.sheldon-input');
+
+    /* ── THE REAL FIX: re-append in correct visual order ──
+       appendChild MOVES an element (keeps all event listeners),
+       so this forces order regardless of how they got scrambled */
+    if (header) ca.appendChild(header);
+    if (label)  ca.appendChild(label);
+    if (msgs)   ca.appendChild(msgs);
+    if (chips)  ca.appendChild(chips);
+    if (input)  ca.appendChild(input);
+
+    /* sizing: only messages grows, everything else fixed */
+    ca.style.cssText = 'display:flex!important;flex-direction:column!important;flex:1 1 auto!important;height:100%!important;min-height:0!important;overflow:hidden!important;position:relative!important;z-index:2!important;';
+    if (header) header.style.cssText = 'flex:0 0 auto!important;width:100%!important;';
+    if (msgs)   msgs.style.cssText   = 'flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;width:100%!important;';
+    if (chips)  chips.style.cssText  = 'flex:0 0 auto!important;';
+    if (input)  input.style.cssText  = 'flex:0 0 auto!important;margin-top:auto!important;';
+  }
+
+  var _orig = window.openSheldon;
+  window.openSheldon = function(){
+    if (typeof _orig === 'function') _orig.apply(this, arguments);
+    [50,150,350,700].forEach(function(ms){ setTimeout(fix, ms); });
+  };
+
+  var obs = new MutationObserver(function(muts){
+    muts.forEach(function(m){
+      if (m.attributeName === 'class' && m.target.classList.contains('open')) {
+        [50,200,500].forEach(function(ms){ setTimeout(fix, ms); });
+      }
+    });
+  });
+  setTimeout(function(){
+    var p = document.getElementById('sheldonPanel');
+    if (p) obs.observe(p, { attributes:true, attributeFilter:['class'] });
+  }, 500);
+
+  window.addEventListener('resize', fix);
+  window.shFixPanel = fix;
+})();
 
 
 </body>
