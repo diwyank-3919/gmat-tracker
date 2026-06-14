@@ -12418,10 +12418,10 @@
 
         function loadSessions() {
             supa.from("sessions").select("*").eq("deleted", false)
-                .order("date", { ascending: false }).order("created_at", { ascending: false })
+                .order("date", { ascending: false }).order("created_at", { ascending: false }).limit(5000)
                 .then(function (res) {
                     if (res.error) {
-                        return supa.from("sessions").select("*").order("date", { ascending: false }).order("created_at", { ascending: false })
+                        return supa.from("sessions").select("*").order("date", { ascending: false }).order("created_at", { ascending: false }).limit(5000)
                             .then(function (res2) { if (res2.error) { setStatus("error"); return; } sessions = (res2.data || []).filter(function (s) { return s.deleted !== true; }); setStatus("synced"); render(); });
                     }
                     sessions = res.data || []; setStatus("synced"); render();
