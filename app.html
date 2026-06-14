@@ -23519,6 +23519,7 @@ function _doRender() {
   /* ── Extract memories from conversation turn ── */
   async function extractMemories(userMsg, botReply) {
     if (_extracting) return;
+    if (!window._sessionsReady) return;
     _extracting = true;
     showExtracting(true);
 
