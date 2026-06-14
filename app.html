@@ -23229,6 +23229,577 @@ function _doRender() {
 })();
 </script>
 
+    <!-- ══ SHELDON MEMORY ══ -->
+<style id="sheldon-memory-css">
+  /* Memory panel */
+  #sh-mem-panel {
+    position: fixed;
+    bottom: 28px;
+    right: 108px;
+    z-index: 9996;
+    width: 340px;
+    max-height: 520px;
+    display: none;
+    flex-direction: column;
+    background: rgba(13,15,28,0.97);
+    border: 1px solid rgba(135,141,255,0.28);
+    border-radius: 20px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+    overflow: hidden;
+    animation: fadeUp 0.3s cubic-bezier(.34,1.56,.64,1) both;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+  #sh-mem-panel.open { display: flex; }
+  .sh-mem-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    flex-shrink: 0;
+  }
+  .sh-mem-title {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #9aa0ff;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .sh-mem-close {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(190,196,235,0.40);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    transition: all 0.12s;
+  }
+  .sh-mem-close:hover { color: #fb7185; background: rgba(251,113,133,0.10); border-color: rgba(251,113,133,0.25); }
+  .sh-mem-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .sh-mem-list::-webkit-scrollbar { width: 3px; }
+  .sh-mem-list::-webkit-scrollbar-thumb { background: rgba(135,141,255,0.22); border-radius: 2px; }
+  .sh-mem-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 9px 11px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.065);
+    transition: border-color 0.15s;
+  }
+  .sh-mem-item:hover { border-color: rgba(135,141,255,0.22); }
+  .sh-mem-ic {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    line-height: 1;
+  }
+  .sh-mem-body { flex: 1; min-width: 0; }
+  .sh-mem-key {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: rgba(190,196,235,0.35);
+    margin-bottom: 3px;
+  }
+  .sh-mem-val {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: rgba(218,222,248,0.80);
+  }
+  .sh-mem-del {
+    background: none; border: none;
+    cursor: pointer;
+    color: rgba(190,196,235,0.18);
+    font-size: 12px;
+    padding: 2px;
+    border-radius: 5px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: color 0.12s;
+    display: none;
+  }
+  .sh-mem-item:hover .sh-mem-del { display: block; }
+  .sh-mem-del:hover { color: #fb7185; }
+  .sh-mem-empty {
+    text-align: center;
+    padding: 32px 16px;
+    font-size: 12px;
+    color: rgba(190,196,235,0.28);
+    line-height: 1.6;
+  }
+  .sh-mem-footer {
+    padding: 10px 14px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sh-mem-count {
+    font-size: 10.5px;
+    color: rgba(190,196,235,0.30);
+  }
+  .sh-mem-clear {
+    font-size: 11px;
+    font-weight: 650;
+    font-family: 'Hanken Grotesk', sans-serif;
+    padding: 5px 11px;
+    border-radius: 8px;
+    cursor: pointer;
+    background: rgba(251,113,133,0.08);
+    border: 1px solid rgba(251,113,133,0.20);
+    color: #fb7185;
+    transition: all 0.15s;
+  }
+  .sh-mem-clear:hover { background: rgba(251,113,133,0.14); border-color: rgba(251,113,133,0.35); }
+
+  /* memory button in Sheldon header */
+  #sh-mem-btn {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(190,196,235,0.35);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    position: relative;
+  }
+  #sh-mem-btn:hover {
+    background: rgba(135,141,255,0.12);
+    border-color: rgba(135,141,255,0.28);
+    color: #9aa0ff;
+  }
+  #sh-mem-btn.has-mem {
+    border-color: rgba(135,141,255,0.25);
+    color: #9aa0ff;
+  }
+  #sh-mem-badge {
+    position: absolute;
+    top: -4px; right: -4px;
+    width: 13px; height: 13px;
+    background: #878dff;
+    border-radius: 50%;
+    border: 2px solid #0d1018;
+    font-size: 8px;
+    font-weight: 700;
+    color: #fff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  #sh-mem-badge.show { display: flex; }
+
+  /* extracting indicator */
+  #sh-mem-extracting {
+    position: absolute;
+    bottom: 6px;
+    left: 18px;
+    font-size: 10.5px;
+    color: rgba(135,141,255,0.50);
+    display: none;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-style: italic;
+  }
+  #sh-mem-extracting.show { display: flex; }
+
+  /* light theme */
+  html.sc-light #sh-mem-panel {
+    background: rgba(248,249,255,0.98);
+    border-color: rgba(88,94,230,0.22);
+  }
+  html.sc-light .sh-mem-item {
+    background: #fff;
+    border-color: rgba(15,17,40,0.08);
+    color: rgba(23,27,46,0.78);
+  }
+  html.sc-light .sh-mem-val { color: rgba(23,27,46,0.78); }
+  html.sc-light .sh-mem-key { color: rgba(23,27,46,0.35); }
+  html.sc-light #sh-mem-btn { background: rgba(15,17,40,0.04); border-color: rgba(15,17,40,0.09); color: rgba(23,27,46,0.35); }
+</style>
+
+<script id="sheldon-memory-js">
+(function () {
+
+  var _memories = []; /* [{key, value, updated_at}] */
+  var _extracting = false;
+
+  /* ── category icons ── */
+  var ICONS = {
+    'weak_area': '🎯',
+    'study_pattern': '📊',
+    'goal': '🏆',
+    'preference': '⚙️',
+    'insight': '💡',
+    'session': '📝',
+    'default': '🧠'
+  };
+
+  function iconFor(key) {
+    if (/weak|struggle|error|miss/i.test(key)) return ICONS.weak_area;
+    if (/pattern|habit|routine|time|session/i.test(key)) return ICONS.study_pattern;
+    if (/goal|target|score|exam|aim/i.test(key)) return ICONS.goal;
+    if (/prefer|like|style|mode/i.test(key)) return ICONS.preference;
+    if (/insight|note|observation/i.test(key)) return ICONS.insight;
+    if (/session|study|log/i.test(key)) return ICONS.session;
+    return ICONS.default;
+  }
+
+  /* ── Supabase helpers ── */
+  async function getUid() {
+    var r = await supa.auth.getUser();
+    return r && r.data && r.data.user && r.data.user.id;
+  }
+
+  async function loadMemories() {
+    var uid = await getUid(); if (!uid) return;
+    var r = await supa.from('sheldon_memory')
+      .select('key, value, updated_at')
+      .eq('user_id', uid)
+      .order('updated_at', { ascending: false })
+      .limit(30);
+    if (!r.error) {
+      _memories = r.data || [];
+      updateMemBtn();
+      renderMemPanel();
+    }
+  }
+
+  async function upsertMemory(key, value) {
+    var uid = await getUid(); if (!uid) return;
+    await supa.from('sheldon_memory').upsert(
+      { user_id: uid, key: key, value: value, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id,key' }
+    );
+  }
+
+  async function deleteMemory(key) {
+    var uid = await getUid(); if (!uid) return;
+    await supa.from('sheldon_memory').delete().eq('user_id', uid).eq('key', key);
+    _memories = _memories.filter(function(m){ return m.key !== key; });
+    updateMemBtn();
+    renderMemPanel();
+  }
+
+  async function clearAllMemories() {
+    var uid = await getUid(); if (!uid) return;
+    await supa.from('sheldon_memory').delete().eq('user_id', uid);
+    _memories = [];
+    updateMemBtn();
+    renderMemPanel();
+  }
+
+  /* ── Build memory context string for injection ── */
+  window.buildSheldonMemoryContext = function () {
+    if (!_memories.length) return '';
+    var lines = _memories.slice(0, 20).map(function(m){ return '- ' + m.key + ': ' + m.value; });
+    return '[SHELDON MEMORY — facts you know about this student, use naturally in replies]\n'
+      + lines.join('\n')
+      + '\n[END MEMORY]\n\n';
+  };
+
+  /* ── Extract memories from conversation turn ── */
+  async function extractMemories(userMsg, botReply) {
+    if (_extracting) return;
+    _extracting = true;
+    showExtracting(true);
+
+    var ctx = typeof buildSheldonContext === 'function' ? buildSheldonContext() : {};
+    var existingKeys = _memories.map(function(m){ return m.key; }).join(', ');
+
+    var prompt = 'You are a memory extraction system for a GMAT coaching AI called Sheldon.\n'
+      + 'Given a conversation turn, extract any facts worth remembering about this student.\n'
+      + 'Return ONLY valid JSON array (no markdown, no backticks) like:\n'
+      + '[{"key": "snake_case_key", "value": "concise fact about the student"}]\n'
+      + 'Return [] if nothing worth remembering.\n\n'
+      + 'Rules:\n'
+      + '- Keys must be snake_case, descriptive, max 40 chars\n'
+      + '- Values must be concise (max 120 chars), factual, third-person ("struggles with..." not "I struggle with...")\n'
+      + '- Max 5 memories per extraction\n'
+      + '- Focus on: weak areas, study patterns, goals, preferences, specific insights\n'
+      + '- If a key already exists in memory, only include it if the value has meaningfully changed\n'
+      + '- Do NOT extract generic facts already in the dashboard context\n\n'
+      + 'Existing memory keys: ' + (existingKeys || 'none') + '\n'
+      + 'Dashboard context: total_hours=' + (ctx.totalHours||0) + ', streak=' + (ctx.streak||0) + ', target=' + (ctx.targetScore||735) + '\n\n'
+      + 'User said: "' + userMsg.slice(0, 500) + '"\n'
+      + 'Sheldon replied: "' + botReply.replace(/<[^>]+>/g,'').slice(0, 800) + '"';
+
+    try {
+      var res = await supa.functions.invoke('sheldon', {
+        body: { message: prompt, context: {}, history: [], jsonMode: true }
+      });
+      var raw = (res.data && res.data.reply) || '[]';
+      var clean = raw.replace(/```json|```/g,'').trim();
+      var extracted = JSON.parse(clean);
+      if (Array.isArray(extracted) && extracted.length) {
+        for (var i = 0; i < extracted.length; i++) {
+          var m = extracted[i];
+          if (m.key && m.value) {
+            await upsertMemory(m.key, m.value);
+            /* update local cache */
+            var existing = _memories.find(function(x){ return x.key === m.key; });
+            if (existing) existing.value = m.value;
+            else _memories.unshift({ key: m.key, value: m.value, updated_at: new Date().toISOString() });
+          }
+        }
+        updateMemBtn();
+        renderMemPanel();
+      }
+    } catch(e) {
+      console.warn('Memory extraction failed:', e);
+    } finally {
+      _extracting = false;
+      showExtracting(false);
+    }
+  }
+
+  /* ── Hook into sheldonSend to capture turns ── */
+  function hookSheldonSend() {
+    if (window._shMemHooked) return;
+    window._shMemHooked = true;
+
+    var _orig = window.sheldonSend;
+    if (typeof _orig !== 'function') return;
+
+    window.sheldonSend = function () {
+      var input = document.getElementById('sheldonInput');
+      var userMsg = input ? input.value.trim() : '';
+      _orig.apply(this, arguments);
+
+      if (!userMsg) return;
+
+      /* watch for bot reply to complete then extract */
+      var msgs = document.getElementById('sheldonMessages'); if (!msgs) return;
+      var attempts = 0;
+      var watcher = setInterval(function () {
+        attempts++;
+        if (attempts > 30) { clearInterval(watcher); return; } /* 15s timeout */
+        var allBot = msgs.querySelectorAll('.sheldon-msg.bot:not(.sheldon-typing)');
+        if (!allBot.length) return;
+        var lastBot = allBot[allBot.length - 1];
+        /* wait until it's stable (not still streaming) */
+        var text = (lastBot.innerText || lastBot.textContent || '').trim();
+        if (text.length < 20) return;
+        /* check if it's been stable for 1s */
+        if (!lastBot._memLen) { lastBot._memLen = text.length; return; }
+        if (Math.abs(lastBot._memLen - text.length) > 5) { lastBot._memLen = text.length; return; }
+        /* stable — extract */
+        clearInterval(watcher);
+        if (!lastBot._memExtracted) {
+          lastBot._memExtracted = true;
+          extractMemories(userMsg, text);
+        }
+      }, 500);
+    };
+  }
+
+  /* ── Inject memory into Sheldon messages ── */
+  function injectMemoryIntoSend() {
+    if (window._shMemInjected) return;
+    window._shMemInjected = true;
+
+    var _origSend = window.sheldonSend;
+    if (typeof _origSend !== 'function') return;
+
+    /* We patch buildSheldonContext to append memory */
+    var _origCtx = window.buildSheldonContext;
+    window.buildSheldonContext = function () {
+      var ctx = typeof _origCtx === 'function' ? _origCtx() : {};
+      ctx._memoryBlock = window.buildSheldonMemoryContext();
+      return ctx;
+    };
+
+    /* Patch the supa.functions.invoke call indirectly via message prepend */
+    var _origShSend = window.sheldonSend;
+    window.sheldonSend = function () {
+      /* prepend memory to the message payload — done by patching the input value */
+      var ta = document.getElementById('sheldonInput');
+      if (ta && _memories.length && ta.value.trim()) {
+        var memBlock = window.buildSheldonMemoryContext();
+        if (memBlock && !ta.value.startsWith('[SHELDON MEMORY')) {
+          ta._originalValue = ta.value;
+          ta.value = memBlock + ta.value;
+        }
+      }
+      _origShSend.apply(this, arguments);
+      /* restore original value immediately after send */
+      if (ta && ta._originalValue !== undefined) {
+        setTimeout(function(){ ta.value = ''; ta._originalValue = undefined; }, 50);
+      }
+    };
+  }
+
+  /* ── UI ── */
+  function injectMemBtn() {
+    var header = document.querySelector('#sh-chat-area .sheldon-header');
+    if (!header || document.getElementById('sh-mem-btn')) return;
+
+    var btn = document.createElement('button');
+    btn.id = 'sh-mem-btn';
+    btn.title = 'Sheldon\'s memory';
+    btn.setAttribute('aria-label', 'View Sheldon memory');
+    btn.innerHTML = '<i class="ti ti-brain" style="font-size:13px" aria-hidden="true"></i>'
+      + '<span id="sh-mem-badge"></span>';
+    btn.addEventListener('click', toggleMemPanel);
+
+    /* insert before history button */
+    var histBtn = document.getElementById('sh-history-btn');
+    if (histBtn) header.insertBefore(btn, histBtn);
+    else header.appendChild(btn);
+
+    /* extracting indicator in input dock */
+    var dock = document.querySelector('#sh-chat-area .sheldon-input');
+    if (dock && !document.getElementById('sh-mem-extracting')) {
+      var ind = document.createElement('div');
+      ind.id = 'sh-mem-extracting';
+      ind.innerHTML = '<i class="ti ti-loader-2" style="font-size:11px;animation:spin 1s linear infinite" aria-hidden="true"></i> Updating memory…';
+      dock.insertBefore(ind, dock.firstChild);
+    }
+  }
+
+  function updateMemBtn() {
+    var btn = document.getElementById('sh-mem-btn');
+    var badge = document.getElementById('sh-mem-badge');
+    if (!btn) return;
+    if (_memories.length > 0) {
+      btn.classList.add('has-mem');
+      if (badge) {
+        badge.classList.add('show');
+        badge.textContent = _memories.length > 9 ? '9+' : _memories.length;
+      }
+    } else {
+      btn.classList.remove('has-mem');
+      if (badge) badge.classList.remove('show');
+    }
+  }
+
+  window.toggleMemPanel = function () {
+    var panel = document.getElementById('sh-mem-panel');
+    if (!panel) { buildMemPanel(); }
+    panel = document.getElementById('sh-mem-panel');
+    var isOpen = panel.classList.contains('open');
+    panel.classList.toggle('open', !isOpen);
+    if (!isOpen) loadMemories();
+  };
+
+  function buildMemPanel() {
+    if (document.getElementById('sh-mem-panel')) return;
+    var panel = document.createElement('div');
+    panel.id = 'sh-mem-panel';
+    panel.innerHTML =
+      '<div class="sh-mem-head">'
+        + '<div class="sh-mem-title"><i class="ti ti-brain" style="font-size:14px" aria-hidden="true"></i> Sheldon\'s memory</div>'
+        + '<button class="sh-mem-close" onclick="toggleMemPanel()" aria-label="Close"><i class="ti ti-x"></i></button>'
+      + '</div>'
+      + '<div class="sh-mem-list" id="sh-mem-list"><div class="sh-mem-empty">No memories yet.<br>Chat with Sheldon to build up context.</div></div>'
+      + '<div class="sh-mem-footer">'
+        + '<span class="sh-mem-count" id="sh-mem-count"></span>'
+        + '<button class="sh-mem-clear" onclick="shMemClearAll()">Clear all</button>'
+      + '</div>';
+    document.body.appendChild(panel);
+
+    document.addEventListener('click', function(e) {
+      var p = document.getElementById('sh-mem-panel');
+      var b = document.getElementById('sh-mem-btn');
+      if (p && p.classList.contains('open') && !p.contains(e.target) && b && !b.contains(e.target)) {
+        p.classList.remove('open');
+      }
+    });
+  }
+
+  function renderMemPanel() {
+    var list = document.getElementById('sh-mem-list'); if (!list) return;
+    var count = document.getElementById('sh-mem-count');
+    if (count) count.textContent = _memories.length + ' memor' + (_memories.length === 1 ? 'y' : 'ies');
+    if (!_memories.length) {
+      list.innerHTML = '<div class="sh-mem-empty">No memories yet.<br>Chat with Sheldon to build up context.</div>';
+      return;
+    }
+    list.innerHTML = _memories.map(function(m) {
+      var icon = iconFor(m.key);
+      var keyLabel = m.key.replace(/_/g,' ');
+      return '<div class="sh-mem-item">'
+        + '<span class="sh-mem-ic">' + icon + '</span>'
+        + '<div class="sh-mem-body">'
+          + '<div class="sh-mem-key">' + keyLabel + '</div>'
+          + '<div class="sh-mem-val">' + m.value + '</div>'
+        + '</div>'
+        + '<button class="sh-mem-del" data-key="' + m.key + '" title="Forget this" aria-label="Forget"><i class="ti ti-x"></i></button>'
+      + '</div>';
+    }).join('');
+
+    list.querySelectorAll('.sh-mem-del').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var key = this.getAttribute('data-key');
+        if (typeof scConfirm === 'function') {
+          scConfirm({
+            title: 'Forget this?',
+            message: '"' + key.replace(/_/g,' ') + '" will be removed from Sheldon\'s memory.',
+            icon: '<i class="ti ti-brain" style="font-size:22px;color:var(--accent-bright)"></i>',
+            confirmLabel: 'Forget', cancelLabel: 'Keep', danger: false,
+            onConfirm: function() { deleteMemory(key); }
+          });
+        } else { deleteMemory(key); }
+      });
+    });
+  }
+
+  window.shMemClearAll = function() {
+    if (typeof scConfirm === 'function') {
+      scConfirm({
+        title: 'Clear all memories?',
+        message: 'Sheldon will forget everything about you. This cannot be undone.',
+        icon: '<i class="ti ti-brain" style="font-size:22px;color:var(--red)"></i>',
+        confirmLabel: 'Clear all', cancelLabel: 'Cancel', danger: true,
+        onConfirm: clearAllMemories
+      });
+    } else { clearAllMemories(); }
+  };
+
+  function showExtracting(on) {
+    var el = document.getElementById('sh-mem-extracting');
+    if (el) el.classList.toggle('show', on);
+  }
+
+  /* ── Boot ── */
+  function boot() {
+    buildMemPanel();
+    injectMemBtn();
+    hookSheldonSend();
+    injectMemoryIntoSend();
+    loadMemories();
+  }
+
+  var _origOpen = window.openSheldon;
+  window.openSheldon = function() {
+    if (typeof _origOpen === 'function') _origOpen.apply(this, arguments);
+    setTimeout(boot, 250);
+  };
+
+  if (document.body) setTimeout(boot, 1200);
+  else document.addEventListener('DOMContentLoaded', boot);
+
+})();
+</script>
+
 </body>
 
 </html>
