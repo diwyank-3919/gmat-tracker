@@ -22440,6 +22440,487 @@ function _doRender() {
         })();
     </script>
 
+    <!-- ══ SHELDON REACTION BUTTONS ══ -->
+<style id="sheldon-reactions-css">
+  .sh-react-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    opacity: 0;
+    transform: translateY(3px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    pointer-events: none;
+  }
+  .sh-msg-wrap:hover .sh-react-row,
+  .sh-react-row.sh-reacted {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .sh-react-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 9px;
+    border-radius: 8px;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    color: rgba(190,196,235,0.45);
+    transition: all 0.15s cubic-bezier(.34,1.56,.64,1);
+    white-space: nowrap;
+  }
+  .sh-react-btn:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.14);
+    color: rgba(190,196,235,0.80);
+    transform: translateY(-1px);
+  }
+  .sh-react-btn:active { transform: scale(0.93); }
+  .sh-react-btn.sh-active-up {
+    background: rgba(70,201,143,0.12);
+    border-color: rgba(70,201,143,0.30);
+    color: #46c98f;
+  }
+  .sh-react-btn.sh-active-down {
+    background: rgba(251,113,133,0.12);
+    border-color: rgba(251,113,133,0.28);
+    color: #fb7185;
+  }
+  .sh-react-btn.sh-active-pin {
+    background: rgba(240,189,106,0.12);
+    border-color: rgba(240,189,106,0.28);
+    color: #f0bd6a;
+  }
+  .sh-react-btn.sh-active-report {
+    background: rgba(251,113,133,0.08);
+    border-color: rgba(251,113,133,0.20);
+    color: #fb7185;
+  }
+  .sh-react-sep {
+    width: 1px;
+    height: 14px;
+    background: rgba(255,255,255,0.08);
+    margin: 0 2px;
+  }
+  /* Pins panel */
+  #sh-pins-panel {
+    position: fixed;
+    bottom: 28px;
+    right: 108px;
+    z-index: 9996;
+    width: 320px;
+    max-height: 480px;
+    display: none;
+    flex-direction: column;
+    background: rgba(13,15,28,0.97);
+    border: 1px solid rgba(240,189,106,0.28);
+    border-radius: 20px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+    overflow: hidden;
+    animation: fadeUp 0.3s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  #sh-pins-panel.open { display: flex; }
+  .sh-pins-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    flex-shrink: 0;
+  }
+  .sh-pins-title {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #f0bd6a;
+  }
+  .sh-pins-close {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(190,196,235,0.40);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    transition: all 0.12s;
+  }
+  .sh-pins-close:hover { color: #fb7185; background: rgba(251,113,133,0.10); border-color: rgba(251,113,133,0.25); }
+  .sh-pins-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sh-pins-list::-webkit-scrollbar { width: 3px; }
+  .sh-pins-list::-webkit-scrollbar-thumb { background: rgba(240,189,106,0.25); border-radius: 2px; }
+  .sh-pin-item {
+    padding: 10px 12px;
+    border-radius: 11px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(240,189,106,0.14);
+    font-size: 12px;
+    line-height: 1.55;
+    color: rgba(218,222,248,0.78);
+    position: relative;
+  }
+  .sh-pin-item strong { color: #fff; font-weight: 650; }
+  .sh-pin-date {
+    font-size: 10px;
+    color: rgba(190,196,235,0.30);
+    margin-top: 6px;
+  }
+  .sh-pin-del {
+    position: absolute;
+    top: 7px; right: 7px;
+    background: none; border: none;
+    cursor: pointer;
+    color: rgba(190,196,235,0.20);
+    font-size: 12px;
+    padding: 2px;
+    border-radius: 5px;
+    display: none;
+    transition: color 0.12s;
+  }
+  .sh-pin-item:hover .sh-pin-del { display: block; }
+  .sh-pin-del:hover { color: #fb7185; }
+  .sh-pins-empty {
+    text-align: center;
+    padding: 28px 12px;
+    font-size: 12px;
+    color: rgba(190,196,235,0.28);
+    line-height: 1.5;
+  }
+  /* Pins FAB button */
+  #sh-pins-fab {
+    position: fixed;
+    bottom: 108px;
+    right: 28px;
+    z-index: 9996;
+    width: 42px; height: 42px;
+    border-radius: 14px;
+    background: rgba(13,15,28,0.92);
+    border: 1px solid rgba(240,189,106,0.30);
+    color: #f0bd6a;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    transition: all 0.18s cubic-bezier(.34,1.56,.64,1);
+  }
+  #sh-pins-fab.show { display: flex; }
+  #sh-pins-fab:hover { transform: translateY(-2px) scale(1.06); border-color: rgba(240,189,106,0.55); }
+  #sh-pins-fab-count {
+    position: absolute;
+    top: -5px; right: -5px;
+    width: 16px; height: 16px;
+    background: #f0bd6a;
+    border-radius: 50%;
+    border: 2px solid #0d1018;
+    font-size: 9px;
+    font-weight: 700;
+    color: #0d1018;
+    display: flex; align-items: center; justify-content: center;
+  }
+  /* light theme */
+  html.sc-light .sh-react-btn {
+    background: rgba(15,17,40,0.04);
+    border-color: rgba(15,17,40,0.09);
+    color: rgba(23,27,46,0.38);
+  }
+  html.sc-light .sh-react-btn:hover {
+    background: rgba(15,17,40,0.07);
+    color: rgba(23,27,46,0.70);
+  }
+  html.sc-light #sh-pins-panel {
+    background: rgba(248,249,255,0.98);
+    border-color: rgba(196,127,42,0.30);
+  }
+  html.sc-light .sh-pin-item {
+    background: #fff;
+    border-color: rgba(196,127,42,0.16);
+    color: rgba(23,27,46,0.75);
+  }
+  html.sc-light .sh-pin-item strong { color: #0e1020; }
+  html.sc-light #sh-pins-fab {
+    background: rgba(255,255,255,0.96);
+    border-color: rgba(196,127,42,0.35);
+  }
+</style>
+
+<script id="sheldon-reactions-js">
+(function () {
+
+  var _reactCache = {}; /* msgHash -> {up,down,pin,report} */
+  var _pins = [];
+  var _currentSessionId_rx = null;
+
+  /* simple hash for message content */
+  function msgHash(content) {
+    var h = 0, i, c;
+    for (i = 0; i < content.length; i++) {
+      c = content.charCodeAt(i);
+      h = ((h << 5) - h) + c; h |= 0;
+    }
+    return 'rx_' + Math.abs(h);
+  }
+
+  /* ── Supabase helpers ── */
+  async function getUid() {
+    var r = await supa.auth.getUser();
+    return r && r.data && r.data.user && r.data.user.id;
+  }
+
+  async function saveReaction(content, reaction, sessionId) {
+    var uid = await getUid(); if (!uid) return;
+    await supa.from('sheldon_reactions').insert({
+      user_id: uid,
+      session_id: sessionId || null,
+      message_content: content.slice(0, 2000),
+      reaction: reaction
+    });
+  }
+
+  async function deleteReaction(content, reaction) {
+    var uid = await getUid(); if (!uid) return;
+    await supa.from('sheldon_reactions')
+      .delete()
+      .eq('user_id', uid)
+      .eq('reaction', reaction)
+      .eq('message_content', content.slice(0, 2000));
+  }
+
+  async function loadPins() {
+    var uid = await getUid(); if (!uid) return;
+    var r = await supa.from('sheldon_reactions')
+      .select('message_content, created_at')
+      .eq('user_id', uid)
+      .eq('reaction', 'pin')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (!r.error) {
+      _pins = r.data || [];
+      updatePinsFab();
+      renderPinsPanel();
+    }
+  }
+
+  /* ── Pins FAB ── */
+  function injectPinsFab() {
+    if (document.getElementById('sh-pins-fab')) return;
+    var fab = document.createElement('div');
+    fab.id = 'sh-pins-fab';
+    fab.setAttribute('role', 'button');
+    fab.setAttribute('aria-label', 'Pinned insights');
+    fab.title = 'Pinned insights';
+    fab.innerHTML = '<i class="ti ti-bookmark" style="font-size:17px" aria-hidden="true"></i><span id="sh-pins-fab-count" style="display:none"></span>';
+    fab.addEventListener('click', togglePinsPanel);
+    document.body.appendChild(fab);
+
+    var panel = document.createElement('div');
+    panel.id = 'sh-pins-panel';
+    panel.innerHTML =
+      '<div class="sh-pins-head">' +
+        '<div class="sh-pins-title"><i class="ti ti-bookmark" style="font-size:14px;margin-right:6px" aria-hidden="true"></i>Pinned insights</div>' +
+        '<button class="sh-pins-close" onclick="togglePinsPanel()" aria-label="Close"><i class="ti ti-x"></i></button>' +
+      '</div>' +
+      '<div class="sh-pins-list" id="sh-pins-list"><div class="sh-pins-empty">No pins yet.<br>Save Sheldon\'s best advice here.</div></div>';
+    document.body.appendChild(panel);
+  }
+
+  function updatePinsFab() {
+    var fab = document.getElementById('sh-pins-fab');
+    var cnt = document.getElementById('sh-pins-fab-count');
+    if (!fab) return;
+    if (_pins.length > 0) {
+      fab.classList.add('show');
+      if (cnt) { cnt.style.display = 'flex'; cnt.textContent = _pins.length > 9 ? '9+' : _pins.length; }
+    } else {
+      fab.classList.remove('show');
+      if (cnt) cnt.style.display = 'none';
+    }
+  }
+
+  window.togglePinsPanel = function () {
+    var panel = document.getElementById('sh-pins-panel');
+    if (!panel) return;
+    var isOpen = panel.classList.contains('open');
+    panel.classList.toggle('open', !isOpen);
+    if (!isOpen) { loadPins(); }
+  };
+
+  function renderPinsPanel() {
+    var list = document.getElementById('sh-pins-list'); if (!list) return;
+    if (!_pins.length) {
+      list.innerHTML = '<div class="sh-pins-empty">No pins yet.<br>Save Sheldon\'s best advice here.</div>';
+      return;
+    }
+    list.innerHTML = _pins.map(function (p, i) {
+      var d = new Date(p.created_at);
+      var dateStr2 = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      var preview = (p.message_content || '').replace(/<[^>]+>/g, '').slice(0, 180);
+      return '<div class="sh-pin-item">' +
+        preview + (p.message_content.length > 180 ? '…' : '') +
+        '<div class="sh-pin-date">' + dateStr2 + '</div>' +
+        '<button class="sh-pin-del" data-idx="' + i + '" title="Unpin" aria-label="Unpin"><i class="ti ti-x"></i></button>' +
+        '</div>';
+    }).join('');
+
+    list.querySelectorAll('.sh-pin-del').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var idx = parseInt(this.getAttribute('data-idx'));
+        var pin = _pins[idx];
+        if (!pin) return;
+        deleteReaction(pin.message_content, 'pin').then(function () {
+          _pins.splice(idx, 1);
+          updatePinsFab();
+          renderPinsPanel();
+          /* un-highlight any visible pin button for this message */
+          document.querySelectorAll('.sh-react-btn[data-action="pin"]').forEach(function (b) {
+            if (b.dataset.content === pin.message_content.slice(0, 2000)) {
+              b.classList.remove('sh-active-pin');
+            }
+          });
+        });
+      });
+    });
+  }
+
+  /* ── React buttons ── */
+  function getContent(msgEl) {
+    return (msgEl.innerText || msgEl.textContent || '').replace(/Copy$/, '').trim();
+  }
+
+  function addReactRow(msgWrap) {
+    if (msgWrap.querySelector('.sh-react-row')) return;
+    var botMsg = msgWrap.querySelector('.sheldon-msg.bot');
+    if (!botMsg) return;
+
+    var content = getContent(botMsg);
+    var hash = msgHash(content);
+    var cached = _reactCache[hash] || {};
+
+    var row = document.createElement('div');
+    row.className = 'sh-react-row' + (Object.keys(cached).length ? ' sh-reacted' : '');
+
+    function btn(action, icon, label, activeClass) {
+      var b = document.createElement('button');
+      b.className = 'sh-react-btn' + (cached[action] ? ' ' + activeClass : '');
+      b.setAttribute('data-action', action);
+      b.setAttribute('data-content', content.slice(0, 2000));
+      b.setAttribute('aria-label', label);
+      b.title = label;
+      b.innerHTML = '<i class="ti ' + icon + '" style="font-size:12px" aria-hidden="true"></i> ' + label;
+      b.addEventListener('click', function () { handleReact(b, action, content, hash, row); });
+      return b;
+    }
+
+    row.appendChild(btn('up', 'ti-thumb-up', 'Helpful', 'sh-active-up'));
+    row.appendChild(btn('down', 'ti-thumb-down', 'Not helpful', 'sh-active-down'));
+    var sep = document.createElement('div'); sep.className = 'sh-react-sep';
+    row.appendChild(sep);
+    row.appendChild(btn('pin', 'ti-bookmark', 'Save', 'sh-active-pin'));
+    row.appendChild(btn('report', 'ti-flag', 'Report', 'sh-active-report'));
+
+    msgWrap.appendChild(row);
+  }
+
+  async function handleReact(btn, action, content, hash, row) {
+    var activeClass = 'sh-active-' + action;
+    var isActive = btn.classList.contains(activeClass);
+
+    /* up/down are mutually exclusive */
+    if (action === 'up' || action === 'down') {
+      var other = action === 'up' ? 'down' : 'up';
+      var otherBtn = row.querySelector('[data-action="' + other + '"]');
+      if (otherBtn) { otherBtn.classList.remove('sh-active-' + other); delete (_reactCache[hash] || {})[other]; }
+    }
+
+    if (isActive) {
+      btn.classList.remove(activeClass);
+      delete (_reactCache[hash] || {})[action];
+      await deleteReaction(content, action);
+      if (action === 'pin') { _pins = _pins.filter(function (p) { return p.message_content.slice(0,2000) !== content.slice(0,2000); }); updatePinsFab(); renderPinsPanel(); }
+    } else {
+      btn.classList.add(activeClass);
+      if (!_reactCache[hash]) _reactCache[hash] = {};
+      _reactCache[hash][action] = true;
+      row.classList.add('sh-reacted');
+
+      /* get current session id from the history module if available */
+      var sid = null;
+      try { sid = window.currentSessionId || null; } catch(e) {}
+
+      await saveReaction(content, action, sid);
+
+      if (action === 'pin') {
+        _pins.unshift({ message_content: content, created_at: new Date().toISOString() });
+        updatePinsFab();
+        renderPinsPanel();
+        /* brief visual confirmation */
+        var orig = btn.innerHTML;
+        btn.innerHTML = '<i class="ti ti-check" style="font-size:12px" aria-hidden="true"></i> Saved!';
+        setTimeout(function () { btn.innerHTML = orig; }, 1800);
+      }
+
+      if (action === 'report') {
+        if (typeof scNotify === 'function') scNotify('Thanks — this response has been flagged for review.', 'info');
+      }
+    }
+  }
+
+  /* ── Observer — attach to every bot message ── */
+  function decorateAll() {
+    document.querySelectorAll('#sheldonMessages .sh-msg-wrap:not(.sh-user-wrap)').forEach(addReactRow);
+  }
+
+  function watchMessages() {
+    var container = document.getElementById('sheldonMessages'); if (!container) return;
+    var obs = new MutationObserver(function () {
+      clearTimeout(obs._t);
+      obs._t = setTimeout(decorateAll, 200);
+    });
+    obs.observe(container, { childList: true, subtree: true });
+  }
+
+  /* ── Boot ── */
+  function boot() {
+    injectPinsFab();
+    decorateAll();
+    watchMessages();
+    loadPins();
+  }
+
+  var _origOpen = window.openSheldon;
+  window.openSheldon = function () {
+    if (typeof _origOpen === 'function') _origOpen.apply(this, arguments);
+    setTimeout(boot, 300);
+  };
+
+  if (document.body) setTimeout(boot, 1000);
+  else document.addEventListener('DOMContentLoaded', boot);
+
+  /* close pins panel on outside click */
+  document.addEventListener('click', function (e) {
+    var panel = document.getElementById('sh-pins-panel');
+    var fab = document.getElementById('sh-pins-fab');
+    if (panel && panel.classList.contains('open') && !panel.contains(e.target) && fab && !fab.contains(e.target)) {
+      panel.classList.remove('open');
+    }
+  });
+
+})();
+</script>
+
 </body>
 
 </html>
