@@ -23523,24 +23523,24 @@ function _doRender() {
     _extracting = true;
     showExtracting(true);
 
-    var ctx = typeof buildSheldonContext === 'function' ? buildSheldonContext() : {};
     var existingKeys = _memories.map(function(m){ return m.key; }).join(', ');
 
     var prompt = 'You are a memory extraction system for a GMAT coaching AI called Sheldon.\n'
-      + 'Given a conversation turn, extract any facts worth remembering about this student.\n'
+      + 'Given a conversation turn, extract ONLY facts explicitly stated or clearly implied by what the USER said or what SHELDON observed about them.\n'
       + 'Return ONLY valid JSON array (no markdown, no backticks) like:\n'
       + '[{"key": "snake_case_key", "value": "concise fact about the student"}]\n'
       + 'Return [] if nothing worth remembering.\n\n'
       + 'Rules:\n'
       + '- Keys must be snake_case, descriptive, max 40 chars\n'
-      + '- Values must be concise (max 120 chars), factual, third-person ("struggles with..." not "I struggle with...")\n'
-      + '- Max 5 memories per extraction\n'
-      + '- Focus on: weak areas, study patterns, goals, preferences, specific insights\n'
-      + '- If a key already exists in memory, only include it if the value has meaningfully changed\n'
-      + '- Do NOT extract generic facts already in the dashboard context\n\n'
-      + 'Existing memory keys: ' + (existingKeys || 'none') + '\n'
-      + 'Dashboard context: total_hours=' + (ctx.totalHours||0) + ', streak=' + (ctx.streak||0) + ', target=' + (ctx.targetScore||735) + '\n\n'
-      + 'User said: "' + userMsg.slice(0, 500) + '"\n'
+      + '- Values must be concise (max 120 chars), factual, third-person\n'
+      + '- Max 3 memories per extraction\n'
+      + '- ONLY extract from what was actually said in this conversation turn\n'
+      + '- DO NOT invent or assume facts not mentioned in the conversation\n'
+      + '- DO NOT extract numeric dashboard stats (hours, streak, scores) — those come from live data\n'
+      + '- Focus on: weak question types, study habits, preferences, specific struggles, goals mentioned by user\n'
+      + '- If a key already exists, only include if value has meaningfully changed\n\n'
+      + 'Existing memory keys: ' + (existingKeys || 'none') + '\n\n'
+      + 'User said: "' + userMsg.replace(/\[DASHBOARD CONTEXT[\s\S]*?\[END CONTEXT\]\n\n/g, '').slice(0, 500) + '"\n'
       + 'Sheldon replied: "' + botReply.replace(/<[^>]+>/g,'').slice(0, 800) + '"';
 
     try {
