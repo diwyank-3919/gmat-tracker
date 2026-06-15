@@ -23768,6 +23768,48 @@ function _doRender() {
 })();
 </script>
 
+    <script id="weekly-review-trigger">
+(function(){
+  function addReviewBtn() {
+    var bar = document.querySelector('.topbar-right');
+    if (!bar || document.getElementById('weekly-review-btn')) return;
+    var btn = document.createElement('button');
+    btn.id = 'weekly-review-btn';
+    btn.style.cssText = 'display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;color:var(--text-secondary);padding:5px 11px;border-radius:100px;border:1px solid var(--border);background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);cursor:pointer;font-family:inherit';
+    btn.innerHTML = '<i class="ti ti-mail" style="font-size:12px"></i> Weekly email';
+    btn.onclick = async function() {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="ti ti-loader-2" style="font-size:12px;animation:spin 1s linear infinite"></i> Sending…';
+      try {
+        var session = await supa.auth.getSession();
+        var token = session.data.session.access_token;
+        var res = await fetch('https://zglxfaarezgyibewtmbh.supabase.co/functions/v1/weekly-review', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: '{}'
+        });
+        var data = await res.json();
+        if (data.ok) {
+          if (typeof showToast === 'function') showToast('📧', 'Review sent!', 'Check your inbox — Sheldon\'s weekly summary is on its way.');
+        } else {
+          throw new Error('Send failed');
+        }
+      } catch(e) {
+        if (typeof scNotify === 'function') scNotify('Could not send email — check Resend API key in Supabase secrets.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ti ti-mail" style="font-size:12px"></i> Weekly email';
+      }
+    };
+    var sync = document.getElementById('sync-status');
+    if (sync) bar.insertBefore(btn, sync);
+    else bar.appendChild(btn);
+  }
+  if (document.body) setTimeout(addReviewBtn, 800);
+  else document.addEventListener('DOMContentLoaded', addReviewBtn);
+})();
+</script>
+
 </body>
 
 </html>
