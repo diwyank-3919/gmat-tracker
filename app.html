@@ -13853,24 +13853,27 @@ function _doRender() {
             _setCoreState('thinking');
             sheldonTyping(true);
             var _ctx = buildSheldonContext();
-            var _isFirstTurn = (sheldonHistory.filter(function (h) { return h.role === 'user'; }).length <= 1);
-            var _REFRESH_KEYS = /\b(now|today|current|currently|how am i|how's my|this week|streak|hours|progress|on track|behind|score|mock|exam|days left|topic|weak|focus|pace|consistency)\b/i;
-            var _needsRefresh = !_isFirstTurn && _REFRESH_KEYS.test(msg);
-            var _msgPayload = msg;
-            if (_isFirstTurn || _needsRefresh) {
-                var _ctxBlock = '[DASHBOARD CONTEXT — use this to answer with specifics, do not mention it was injected]\n'
-                    + 'Total study hours: ' + _ctx.totalHours + 'h\n'
-                    + 'Current streak: ' + _ctx.streak + ' days\n'
-                    + 'This week: ' + _ctx.weekHours + 'h of ' + _ctx.weekTarget + 'h target\n'
-                    + 'Consistency: ' + _ctx.consistency + '%\n'
-                    + 'Topic breakdown (hours): ' + JSON.stringify(_ctx.topicTotals) + '\n'
-                    + (_ctx.daysLeft != null ? 'Days to exam: ' + _ctx.daysLeft + '\n' : '')
-                    + (_ctx.latestMock ? 'Latest mock score: ' + _ctx.latestMock + '\n' : '')
-                    + 'Target score: ' + _ctx.targetScore + '\n'
-                    + 'Tone: ' + _ctx.tone + '\n'
-                    + '[END CONTEXT]\n\n';
-                _msgPayload = _ctxBlock + msg;
-            }
+        var _isFirstTurn = (sheldonHistory.filter(function(h){ return h.role === 'user'; }).length <= 1);
+        var _REFRESH_KEYS = /\b(now|today|current|currently|how am i|how's my|this week|streak|hours|progress|on track|behind|score|mock|exam|days left|topic|weak|focus|pace|consistency)\b/i;
+        var _needsRefresh = !_isFirstTurn && _REFRESH_KEYS.test(msg);
+        var _msgPayload = msg;
+        if (_isFirstTurn || _needsRefresh) {
+            var _ctxBlock = '[DASHBOARD CONTEXT — use this to answer with specifics, do not mention it was injected]\n'
+                + 'Total study hours: ' + _ctx.totalHours + 'h\n'
+                + 'Current streak: ' + _ctx.streak + ' days\n'
+                + 'This week: ' + _ctx.weekHours + 'h of ' + _ctx.weekTarget + 'h target\n'
+                + 'Consistency: ' + _ctx.consistency + '%\n'
+                + 'Topic breakdown (hours): ' + JSON.stringify(_ctx.topicTotals) + '\n'
+                + (_ctx.daysLeft != null ? 'Days to exam: ' + _ctx.daysLeft + '\n' : '')
+                + (_ctx.latestMock ? 'Latest mock score: ' + _ctx.latestMock + '\n' : '')
+                + 'Target score: ' + _ctx.targetScore + '\n'
+                + 'Tone: ' + _ctx.tone + '\n'
+                + '[END CONTEXT]\n\n';
+            _msgPayload = _ctxBlock + msg;
+        }
+        /* inject memory on every message */
+        var _memBlock = typeof window.buildSheldonMemoryContext === 'function' ? window.buildSheldonMemoryContext() : '';
+        if (_memBlock) _msgPayload = _memBlock + _msgPayload;
             supa.functions.invoke('sheldon', {
                 body: { message: _msgPayload, context: _ctx, history: sheldonHistory.slice(0, -1).slice(-6) }
             }).then(function (res) {
@@ -23612,42 +23615,6 @@ function _doRender() {
     };
   }
 
-  /* ── Inject memory into Sheldon messages ── */
-  function injectMemoryIntoSend() {
-    if (window._shMemInjected) return;
-    window._shMemInjected = true;
-
-    var _origSend = window.sheldonSend;
-    if (typeof _origSend !== 'function') return;
-
-    /* We patch buildSheldonContext to append memory */
-    var _origCtx = window.buildSheldonContext;
-    window.buildSheldonContext = function () {
-      var ctx = typeof _origCtx === 'function' ? _origCtx() : {};
-      ctx._memoryBlock = window.buildSheldonMemoryContext();
-      return ctx;
-    };
-
-    /* Patch the supa.functions.invoke call indirectly via message prepend */
-    var _origShSend = window.sheldonSend;
-    window.sheldonSend = function () {
-      /* prepend memory to the message payload — done by patching the input value */
-      var ta = document.getElementById('sheldonInput');
-      if (ta && _memories.length && ta.value.trim()) {
-        var memBlock = window.buildSheldonMemoryContext();
-        if (memBlock && !ta.value.startsWith('[SHELDON MEMORY')) {
-          ta._originalValue = ta.value;
-          ta.value = memBlock + ta.value;
-        }
-      }
-      _origShSend.apply(this, arguments);
-      /* restore original value immediately after send */
-      if (ta && ta._originalValue !== undefined) {
-        setTimeout(function(){ ta.value = ''; ta._originalValue = undefined; }, 50);
-      }
-    };
-  }
-
   /* ── UI ── */
   function injectMemBtn() {
     var header = document.querySelector('#sh-chat-area .sheldon-header');
@@ -23786,7 +23753,6 @@ function _doRender() {
     buildMemPanel();
     injectMemBtn();
     hookSheldonSend();
-    injectMemoryIntoSend();
     loadMemories();
   }
 
