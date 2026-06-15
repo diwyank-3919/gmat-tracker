@@ -13,6 +13,18 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@500,700&display=swap" rel="stylesheet">
+
+<!-- ═══════════════════════════════════════════════
+     SUPABASE CONFIG — fill these two values in
+     ═══════════════════════════════════════════════ -->
+<script>
+  // Replace with your own project URL and anon key from
+  // Supabase → Project Settings → API
+  window.SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+  window.SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px;height:100%}
@@ -83,13 +95,8 @@ body::after{
   100%{opacity:1;transform:scale(1.04) rotate(0.3deg)}
 }
 
-/* ── SHELL ── */
-.shell{
-  display:grid;grid-template-columns:218px 1fr;
-  height:100vh;position:relative;z-index:1;overflow:hidden;
-}
+.shell{display:grid;grid-template-columns:218px 1fr;height:100vh;position:relative;z-index:1;overflow:hidden}
 
-/* ── SIDEBAR ── */
 .sidebar{
   background:rgba(10,7,22,0.88);
   backdrop-filter:blur(40px) saturate(180%);
@@ -99,193 +106,66 @@ body::after{
   height:100vh;overflow-y:auto;
   box-shadow:1px 0 0 rgba(255,255,255,0.04),inset -1px 0 30px rgba(0,0,0,0.30);
 }
-.sb-logo{
-  display:flex;align-items:center;gap:10px;
-  padding:20px 16px 16px;
-  border-bottom:1px solid rgba(255,255,255,0.06);
-}
-.sb-logo-icon{
-  width:36px;height:36px;border-radius:10px;
-  background:#13161f;
-  border:1px solid rgba(139,124,248,0.28);
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-  box-shadow:0 4px 18px rgba(139,124,248,0.15);
-}
-.sb-logo-name{
-  font-family:'Clash Display',sans-serif;font-size:14px;font-weight:700;
-  color:var(--text-primary);letter-spacing:-0.3px;
-}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.06)}
+.sb-logo-icon{width:36px;height:36px;border-radius:10px;background:#13161f;border:1px solid rgba(139,124,248,0.28);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 18px rgba(139,124,248,0.15)}
+.sb-logo-name{font-family:'Clash Display',sans-serif;font-size:14px;font-weight:700;color:var(--text-primary);letter-spacing:-0.3px}
 .sb-logo-sub{font-size:9.5px;color:var(--text-tertiary);font-weight:400;margin-top:1px;letter-spacing:0.04em}
-
 .sb-section{padding:14px 10px 5px}
-.sb-section-label{
-  font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
-  color:var(--text-muted);padding:0 8px;margin-bottom:4px;
-}
-.sb-nav-item{
-  display:flex;align-items:center;gap:9px;
-  padding:8px 10px;border-radius:8px;
-  font-size:13px;font-weight:500;color:var(--text-secondary);
-  cursor:pointer;transition:all .15s;text-decoration:none;
-  border:1px solid transparent;
-}
+.sb-section-label{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);padding:0 8px;margin-bottom:4px}
+.sb-nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:all .15s;text-decoration:none;border:1px solid transparent}
 .sb-nav-item:hover{background:var(--bg-card);color:var(--text-primary)}
-.sb-nav-item.active{
-  background:var(--accent-soft);color:var(--accent-bright);
-  border-color:var(--border-accent);
-}
+.sb-nav-item.active{background:var(--accent-soft);color:var(--accent-bright);border-color:var(--border-accent)}
 .sb-nav-item i{font-size:15px;flex-shrink:0}
-
-.sb-topic-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:6px 10px;border-radius:7px;cursor:pointer;
-  font-size:12px;color:var(--text-tertiary);font-weight:500;
-  transition:all .12s;
-}
+.sb-topic-row{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:7px;cursor:pointer;font-size:12px;color:var(--text-tertiary);font-weight:500;transition:all .12s}
 .sb-topic-row:hover{background:var(--bg-card);color:var(--text-secondary)}
-.sb-topic-badge{
-  font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;
-  background:var(--bg-card);border:1px solid var(--border-subtle);
-  color:var(--text-tertiary);
-}
+.sb-topic-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;background:var(--bg-card);border:1px solid var(--border-subtle);color:var(--text-tertiary)}
 .sb-topic-badge.lit{background:var(--accent-soft);border-color:var(--border-accent);color:var(--accent-bright)}
 .sb-topic-badge.green{background:var(--green-soft);border-color:rgba(52,211,153,0.25);color:var(--green)}
 .sb-topic-badge.red{background:var(--red-soft);border-color:rgba(251,113,133,0.25);color:var(--red)}
 .sb-topic-badge.amber{background:var(--amber-soft);border-color:rgba(251,191,36,0.25);color:var(--amber)}
-
 .sb-divider{height:1px;background:var(--border-subtle);margin:10px 14px}
 
-/* ── MAIN AREA ── */
 .main{display:flex;flex-direction:column;height:100vh;overflow:hidden}
-
-/* ── TOP BAR ── */
-.topbar{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 28px;
-  border-bottom:1px solid var(--border-subtle);
-  background:rgba(10,7,22,0.60);
-  backdrop-filter:blur(20px);
-  flex-shrink:0;gap:16px;
-}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--border-subtle);background:rgba(10,7,22,0.60);backdrop-filter:blur(20px);flex-shrink:0;gap:16px}
 .topbar-left{display:flex;flex-direction:column;gap:1px}
 .topbar-title{font-family:'Clash Display',sans-serif;font-size:17px;font-weight:700;letter-spacing:-0.3px}
 .topbar-sub{font-size:11px;color:var(--text-tertiary);font-weight:400}
 .topbar-chips{display:flex;align-items:center;gap:6px;flex:1;justify-content:center;flex-wrap:wrap}
-.t-chip{
-  display:flex;align-items:center;gap:6px;
-  font-size:11.5px;font-weight:500;
-  padding:5px 11px;border-radius:20px;
-  border:1px solid var(--border-subtle);
-  background:var(--bg-card);
-  color:var(--text-secondary);
-  white-space:nowrap;
-}
+.t-chip{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500;padding:5px 11px;border-radius:20px;border:1px solid var(--border-subtle);background:var(--bg-card);color:var(--text-secondary);white-space:nowrap}
 .t-chip i{font-size:12px}
 .t-chip.green{color:var(--green);border-color:rgba(52,211,153,0.2);background:var(--green-soft)}
 .t-chip.indigo{color:var(--accent-bright);border-color:var(--border-accent);background:var(--accent-soft)}
 .t-chip.amber{color:var(--amber);border-color:rgba(251,191,36,0.2);background:var(--amber-soft)}
 .t-chip.red{color:var(--red);border-color:rgba(251,113,133,0.2);background:var(--red-soft)}
-.btn-primary{
-  font-family:'Satoshi',sans-serif;font-size:12px;font-weight:700;
-  padding:7px 16px;border-radius:8px;border:none;cursor:pointer;
-  background:linear-gradient(135deg,var(--accent),#6366f1);
-  color:#fff;letter-spacing:0.01em;
-  box-shadow:0 4px 14px rgba(139,124,248,0.30);
-  transition:all .15s;white-space:nowrap;
-}
+.btn-primary{font-family:'Satoshi',sans-serif;font-size:12px;font-weight:700;padding:7px 16px;border-radius:8px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--accent),#6366f1);color:#fff;letter-spacing:0.01em;box-shadow:0 4px 14px rgba(139,124,248,0.30);transition:all .15s;white-space:nowrap}
 .btn-primary:hover{opacity:.88;transform:translateY(-1px)}
 
-/* ── TABS ── */
-.tabs-row{
-  display:flex;align-items:center;gap:0;
-  border-bottom:1px solid var(--border-subtle);
-  padding:0 28px;flex-shrink:0;
-  background:rgba(10,7,22,0.40);
-}
-.tab-btn{
-  font-family:'Satoshi',sans-serif;font-size:11.5px;font-weight:600;
-  letter-spacing:0.06em;text-transform:uppercase;
-  padding:13px 14px;border:none;background:none;
-  color:var(--text-muted);cursor:pointer;
-  border-bottom:2px solid transparent;margin-bottom:-1px;
-  transition:all .15s;
-}
+.tabs-row{display:flex;align-items:center;gap:0;border-bottom:1px solid var(--border-subtle);padding:0 28px;flex-shrink:0;background:rgba(10,7,22,0.40)}
+.tab-btn{font-family:'Satoshi',sans-serif;font-size:11.5px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:13px 14px;border:none;background:none;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
 .tab-btn:hover{color:var(--text-secondary)}
 .tab-btn.active{color:var(--accent-bright);border-bottom-color:var(--accent)}
 
-/* ── CONTENT ── */
 .content-area{flex:1;overflow-y:auto;padding:24px 28px 48px}
-
-/* ── EYEBROW ── */
-.eyebrow{
-  font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;
-  color:var(--text-muted);margin-bottom:14px;
-}
-
-/* ── GRID ── */
+.eyebrow{font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px}
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
 .grid-full{margin-bottom:18px}
-
-/* ── CARD ── */
-.card{
-  background:var(--bg-card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  box-shadow:var(--shadow-card);
-  padding:20px;
-  position:relative;overflow:hidden;
-  transition:box-shadow .2s,background .2s;
-}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-card);padding:20px;position:relative;overflow:hidden;transition:box-shadow .2s,background .2s}
 .card:hover{background:var(--bg-card-hover);box-shadow:var(--shadow-card-hover)}
-.card-eyebrow{
-  font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
-  color:var(--text-muted);margin-bottom:10px;
-  display:flex;align-items:center;justify-content:space-between;
-}
+.card-eyebrow{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
 .card-eyebrow i{font-size:14px;color:var(--text-muted)}
-.big-num{
-  font-family:'Fraunces',serif;font-size:38px;font-weight:600;
-  line-height:1;letter-spacing:-0.02em;margin-bottom:5px;
-}
-.big-num.green{color:var(--green)}
-.big-num.indigo{color:var(--accent-bright)}
-.big-num.amber{color:var(--amber)}
-.big-num.red{color:var(--red)}
-.big-num.white{color:var(--text-primary)}
+.big-num{font-family:'Fraunces',serif;font-size:38px;font-weight:600;line-height:1;letter-spacing:-0.02em;margin-bottom:5px}
+.big-num.green{color:var(--green)}.big-num.indigo{color:var(--accent-bright)}.big-num.amber{color:var(--amber)}.big-num.red{color:var(--red)}.big-num.white{color:var(--text-primary)}
 .card-sub{font-size:11px;color:var(--text-tertiary);font-weight:400}
 
-/* ── INSIGHT BANNER ── */
-.insight-banner{
-  background:var(--bg-card);
-  border:1px solid var(--border);
-  border-left:3px solid var(--accent);
-  border-radius:14px;
-  box-shadow:var(--shadow-card);
-  padding:16px 20px;
-  display:flex;align-items:flex-start;gap:14px;
-  margin-bottom:18px;
-}
-.insight-orb{
-  width:36px;height:36px;border-radius:50%;flex-shrink:0;
-  background:var(--accent-soft);border:1px solid var(--border-accent);
-  display:flex;align-items:center;justify-content:center;
-  font-size:15px;
-}
-.insight-label{
-  font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
-  color:var(--accent-bright);margin-bottom:4px;
-}
+.insight-banner{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:14px;box-shadow:var(--shadow-card);padding:16px 20px;display:flex;align-items:flex-start;gap:14px;margin-bottom:18px}
+.insight-orb{width:36px;height:36px;border-radius:50%;flex-shrink:0;background:var(--accent-soft);border:1px solid var(--border-accent);display:flex;align-items:center;justify-content:center;font-size:15px}
+.insight-label{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent-bright);margin-bottom:4px}
 .insight-text{font-size:12.5px;color:var(--text-secondary);line-height:1.55}
 .insight-text strong{color:var(--text-primary)}
 
-/* ── ACC BARS ── */
 .acc-list{display:flex;flex-direction:column}
-.acc-row{
-  display:flex;align-items:center;gap:10px;
-  padding:9px 0;border-bottom:1px solid var(--border-subtle);
-}
+.acc-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-subtle)}
 .acc-row:last-child{border-bottom:none}
 .acc-label{font-size:12px;font-weight:500;color:var(--text-secondary);width:96px;flex-shrink:0}
 .acc-track{flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
@@ -293,13 +173,8 @@ body::after{
 .acc-pct{font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0}
 .acc-n{font-size:10px;color:var(--text-muted);width:26px;text-align:right;flex-shrink:0}
 
-/* ── MATRIX ── */
 .matrix-list{display:flex;flex-direction:column}
-.matrix-row{
-  display:grid;grid-template-columns:96px 1fr 48px 56px;
-  align-items:center;gap:10px;
-  padding:9px 0;border-bottom:1px solid var(--border-subtle);
-}
+.matrix-row{display:grid;grid-template-columns:96px 1fr 48px 56px;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-subtle)}
 .matrix-row:last-child{border-bottom:none}
 .matrix-label{font-size:12px;font-weight:500;color:var(--text-secondary)}
 .matrix-track{height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
@@ -307,77 +182,48 @@ body::after{
 .matrix-pct{font-size:11px;font-weight:700;text-align:right}
 .matrix-n{font-size:10px;color:var(--text-muted);text-align:right}
 
-/* ── STACKED PRETHINK ── */
 .stack-row{margin-bottom:9px}
 .stack-header{display:flex;justify-content:space-between;margin-bottom:4px}
 .stack-label{font-size:11px;font-weight:500;color:var(--text-secondary)}
 .stack-count{font-size:10px;color:var(--text-muted)}
 .stack-bar{height:4px;border-radius:2px;overflow:hidden;display:flex}
 
-/* ── TRAPS ── */
 .trap-list{display:flex;flex-direction:column}
-.trap-row{
-  display:flex;align-items:center;gap:10px;
-  padding:8px 0;border-bottom:1px solid var(--border-subtle);
-}
+.trap-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-subtle)}
 .trap-row:last-child{border-bottom:none}
 .trap-rank{font-family:'Fraunces',serif;font-size:13px;font-weight:600;color:var(--text-muted);width:18px;flex-shrink:0}
 .trap-name{flex:1;font-size:12px;color:var(--text-secondary)}
 .trap-bar{height:3px;border-radius:2px;background:var(--accent)}
 .trap-n{font-size:11px;font-weight:700;color:var(--accent-bright);width:18px;text-align:right;flex-shrink:0}
 
-/* ── DIFF BREAKDOWN ── */
 .diff-block{padding-bottom:16px}
 .diff-block+.diff-block{padding-top:16px;border-top:1px solid var(--border-subtle);padding-bottom:0}
 
-/* ── TAGS ── */
-.tag{
-  display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:0.04em;
-  text-transform:uppercase;padding:2px 7px;border-radius:4px;
-}
+.tag{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;padding:2px 7px;border-radius:4px}
 .tag-correct{background:var(--green-soft);color:var(--green)}
 .tag-wrong{background:var(--red-soft);color:var(--red)}
 .tag-type{background:var(--accent-soft);color:var(--accent-bright)}
 .tag-solid{background:var(--green-soft);color:var(--green)}
 .tag-partial{background:var(--amber-soft);color:var(--amber)}
 .tag-off{background:var(--red-soft);color:var(--red)}
-.diff-badge{
-  display:inline-block;font-size:9.5px;font-weight:700;
-  letter-spacing:0.04em;text-transform:uppercase;
-  padding:2px 7px;border-radius:4px;
-}
+.diff-badge{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;padding:2px 7px;border-radius:4px}
 .diff-badge.Hard{background:var(--red-soft);color:var(--red)}
 .diff-badge.Medium{background:var(--amber-soft);color:var(--amber)}
 .diff-badge.Easy{background:var(--green-soft);color:var(--green)}
 
-/* ── LOG TABLE ── */
 .table-outer{overflow-x:auto}
 .table-inner{max-height:480px;overflow-y:auto}
 .log-table{width:100%;border-collapse:collapse;font-size:12px}
-.log-table th{
-  text-align:left;padding:9px 12px;
-  font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
-  color:var(--text-muted);border-bottom:1px solid var(--border-subtle);
-  white-space:nowrap;position:sticky;top:0;background:rgba(10,7,22,0.95);
-}
+.log-table th{text-align:left;padding:9px 12px;font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border-subtle);white-space:nowrap;position:sticky;top:0;background:rgba(10,7,22,0.95)}
 .log-table td{padding:9px 12px;border-bottom:1px solid var(--border-subtle);vertical-align:middle}
 .log-table tbody tr:hover td{background:var(--bg-card)}
 
-/* ── FORM ── */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .form-group{margin-bottom:16px}
 .form-group:last-of-type{margin-bottom:0}
-.form-label{
-  display:block;font-size:9px;font-weight:700;letter-spacing:0.12em;
-  text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;
-}
+.form-label{display:block;font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
 .chip-row{display:flex;flex-wrap:wrap;gap:6px}
-.fchip{
-  font-family:'Satoshi',sans-serif;font-size:11px;font-weight:500;
-  padding:5px 12px;border-radius:20px;
-  border:1px solid var(--border-subtle);background:var(--bg-card);
-  color:var(--text-tertiary);cursor:pointer;transition:all .12s;
-}
+.fchip{font-family:'Satoshi',sans-serif;font-size:11px;font-weight:500;padding:5px 12px;border-radius:20px;border:1px solid var(--border-subtle);background:var(--bg-card);color:var(--text-tertiary);cursor:pointer;transition:all .12s}
 .fchip:hover{border-color:var(--border);color:var(--text-secondary)}
 .fchip.active{background:var(--accent-soft);border-color:var(--border-accent);color:var(--accent-bright)}
 .fchip.c-active{background:var(--green-soft);border-color:rgba(52,211,153,0.3);color:var(--green)}
@@ -386,54 +232,34 @@ body::after{
 .fchip.pqp-active{background:var(--amber-soft);border-color:rgba(251,191,36,0.3);color:var(--amber)}
 .fchip.pqo-active{background:var(--red-soft);border-color:rgba(251,113,133,0.3);color:var(--red)}
 
-.finput{
-  font-family:'Satoshi',sans-serif;font-size:13px;
-  background:var(--bg-input);
-  border:1px solid var(--border-subtle);
-  color:var(--text-primary);padding:9px 12px;border-radius:9px;
-  outline:none;transition:all .15s;width:100%;
-}
+.finput{font-family:'Satoshi',sans-serif;font-size:13px;background:var(--bg-input);border:1px solid var(--border-subtle);color:var(--text-primary);padding:9px 12px;border-radius:9px;outline:none;transition:all .15s;width:100%}
 .finput:focus{border-color:var(--border-accent);background:var(--bg-input-focus)}
 .finput::placeholder{color:var(--text-muted)}
 textarea.finput{resize:none;font-size:12px;line-height:1.5}
 
-.timer-num{
-  font-family:'Fraunces',serif;font-size:54px;font-weight:600;
-  color:var(--accent-bright);text-align:center;letter-spacing:-2px;
-  line-height:1;margin:10px 0 12px;
-}
+.timer-num{font-family:'Fraunces',serif;font-size:54px;font-weight:600;color:var(--accent-bright);text-align:center;letter-spacing:-2px;line-height:1;margin:10px 0 12px}
 .timer-btns{display:flex;gap:6px;justify-content:center}
-.tbtn{
-  font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;
-  padding:6px 14px;border-radius:7px;
-  border:1px solid var(--border-subtle);background:var(--bg-card);
-  color:var(--text-tertiary);cursor:pointer;transition:all .12s;
-}
+.tbtn{font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;padding:6px 14px;border-radius:7px;border:1px solid var(--border-subtle);background:var(--bg-card);color:var(--text-tertiary);cursor:pointer;transition:all .12s}
 .tbtn:hover{color:var(--text-secondary);border-color:var(--border);background:var(--bg-card-hover)}
 
-.btn-submit{
-  font-family:'Satoshi',sans-serif;font-size:13px;font-weight:700;
-  padding:11px;border-radius:9px;border:none;cursor:pointer;
-  background:linear-gradient(135deg,var(--accent),#6366f1);
-  color:#fff;width:100%;margin-top:16px;
-  box-shadow:0 4px 14px rgba(139,124,248,0.30);
-  transition:all .15s;
-}
+.btn-submit{font-family:'Satoshi',sans-serif;font-size:13px;font-weight:700;padding:11px;border-radius:9px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--accent),#6366f1);color:#fff;width:100%;margin-top:16px;box-shadow:0 4px 14px rgba(139,124,248,0.30);transition:all .15s}
 .btn-submit:hover{opacity:.88;transform:translateY(-1px)}
 .btn-submit:disabled{opacity:.35;cursor:not-allowed;transform:none}
 
-/* ── TOAST ── */
-.toast{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-  background:var(--bg-panel);backdrop-filter:blur(20px);
-  border:1px solid rgba(52,211,153,0.3);color:var(--green);
-  font-size:12px;font-weight:600;padding:9px 18px;border-radius:9px;
-  opacity:0;pointer-events:none;transition:opacity .2s;z-index:999;
-  box-shadow:0 8px 32px rgba(0,0,0,0.40);
-}
+/* loading overlay */
+.loading-overlay{position:fixed;inset:0;z-index:200;background:rgba(15,12,26,0.82);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .3s}
+.loading-overlay.hidden{opacity:0;pointer-events:none}
+.loading-spinner{width:32px;height:32px;border:3px solid rgba(139,124,248,0.2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-label{font-size:12px;color:var(--text-tertiary);font-weight:500}
+
+/* error banner */
+.error-bar{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:rgba(251,113,133,0.12);border:1px solid rgba(251,113,133,0.3);color:var(--red);font-size:12px;font-weight:600;padding:9px 18px;border-radius:9px;z-index:300;opacity:0;pointer-events:none;transition:opacity .2s;max-width:480px;text-align:center}
+.error-bar.show{opacity:1}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg-panel);backdrop-filter:blur(20px);border:1px solid rgba(52,211,153,0.3);color:var(--green);font-size:12px;font-weight:600;padding:9px 18px;border-radius:9px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,0.40)}
 .toast.show{opacity:1}
 
-/* ── SCROLLBARS ── */
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px}
@@ -441,6 +267,16 @@ textarea.finput{resize:none;font-size:12px;line-height:1.5}
 </style>
 </head>
 <body>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-label">Loading attempts…</div>
+</div>
+
+<!-- Error bar -->
+<div class="error-bar" id="error-bar"></div>
+
 <div class="shell">
 
   <!-- SIDEBAR -->
@@ -448,12 +284,7 @@ textarea.finput{resize:none;font-size:12px;line-height:1.5}
     <div class="sb-logo">
       <div class="sb-logo-icon">
         <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="brandGrad" x1="6" y1="26" x2="26" y2="6" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#8b7cf8"/>
-              <stop offset="1" stop-color="#5fd9a8"/>
-            </linearGradient>
-          </defs>
+          <defs><linearGradient id="brandGrad" x1="6" y1="26" x2="26" y2="6" gradientUnits="userSpaceOnUse"><stop stop-color="#8b7cf8"/><stop offset="1" stop-color="#5fd9a8"/></linearGradient></defs>
           <circle cx="16" cy="16" r="9" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="3"/>
           <path d="M21.2 8.4 A 9 9 0 1 1 10.8 8.4" fill="none" stroke="url(#brandGrad)" stroke-width="3" stroke-linecap="round"/>
           <circle cx="21.2" cy="8.4" r="2" fill="#5fd9a8"/>
@@ -467,7 +298,7 @@ textarea.finput{resize:none;font-size:12px;line-height:1.5}
 
     <div class="sb-section">
       <div class="sb-section-label">Navigation</div>
-      <a href="https://scoreconsole.com/app.html" class="sb-nav-item">
+      <a href="app.html" class="sb-nav-item">
         <i class="ti ti-layout-dashboard"></i>Dashboard
       </a>
       <div class="sb-nav-item active">
@@ -476,14 +307,12 @@ textarea.finput{resize:none;font-size:12px;line-height:1.5}
     </div>
 
     <div class="sb-divider"></div>
-
     <div class="sb-section">
       <div class="sb-section-label">Question Types</div>
       <div id="sb-types"></div>
     </div>
 
     <div class="sb-divider"></div>
-
     <div class="sb-section">
       <div class="sb-section-label">Difficulty</div>
       <div id="sb-diff"></div>
@@ -491,14 +320,12 @@ textarea.finput{resize:none;font-size:12px;line-height:1.5}
 
     <div style="flex:1"></div>
     <div style="padding:16px;border-top:1px solid var(--border-subtle)">
-      <div style="font-size:10px;color:var(--text-muted);text-align:center">83 attempts from error log</div>
+      <div style="font-size:10px;color:var(--text-muted);text-align:center" id="sb-footer-count">Loading…</div>
     </div>
   </aside>
 
   <!-- MAIN -->
   <div class="main">
-
-    <!-- TOPBAR -->
     <div class="topbar">
       <div class="topbar-left">
         <div class="topbar-title">CR Drill Tracker</div>
@@ -510,7 +337,6 @@ textarea.finput{resize:none;font-size:12px;line-height:1.5}
       </button>
     </div>
 
-    <!-- TABS -->
     <div class="tabs-row">
       <button class="tab-btn active" onclick="showTab('analytics')">Analytics</button>
       <button class="tab-btn" onclick="showTab('log')">Attempt Log</button>
@@ -520,10 +346,8 @@ textarea.finput{resize:none;font-size:12px;line-height:1.5}
     <!-- ANALYTICS -->
     <div id="tab-analytics" class="content-area">
       <div id="insight-banner" class="insight-banner"></div>
-
       <div class="eyebrow">Overview</div>
       <div class="grid-4" id="hero-cards"></div>
-
       <div class="grid-2">
         <div class="card">
           <div class="card-eyebrow">Accuracy by Question Type <i class="ti ti-chart-bar"></i></div>
@@ -538,7 +362,6 @@ textarea.finput{resize:none;font-size:12px;line-height:1.5}
           </div>
         </div>
       </div>
-
       <div class="grid-2">
         <div class="card">
           <div class="card-eyebrow">Top Error Traps <i class="ti ti-alert-triangle"></i></div>
@@ -575,7 +398,6 @@ textarea.finput{resize:none;font-size:12px;line-height:1.5}
     <div id="tab-entry" class="content-area" style="display:none">
       <div class="eyebrow">Log a CR Attempt</div>
       <div class="form-grid">
-
         <div class="card">
           <div class="form-group">
             <label class="form-label">Question Type</label>
@@ -635,12 +457,10 @@ textarea.finput{resize:none;font-size:12px;line-height:1.5}
             <button class="tbtn" onclick="timerPause()"><i class="ti ti-player-pause"></i> Pause</button>
             <button class="tbtn" onclick="timerReset()"><i class="ti ti-refresh"></i> Reset</button>
           </div>
-
           <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border-subtle)">
             <div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px">Your Stats at a Glance</div>
             <div id="quick-stats"></div>
           </div>
-
           <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border-subtle)">
             <div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">GMAT CR Benchmark</div>
             <div style="font-size:11px;color:var(--text-tertiary);line-height:1.6">
@@ -650,35 +470,149 @@ textarea.finput{resize:none;font-size:12px;line-height:1.5}
             </div>
           </div>
         </div>
-
       </div>
     </div>
 
-  </div>
-</div>
+  </div><!-- /main -->
+</div><!-- /shell -->
 
 <div class="toast" id="toast"><i class="ti ti-check"></i> Attempt saved</div>
 
 <script>
+// ═══════════════════════════════════════════════════════════
+//  SUPABASE CLIENT
+// ═══════════════════════════════════════════════════════════
+const { createClient } = supabase;
+const sb = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+
+// ═══════════════════════════════════════════════════════════
+//  SEED DATA  (inserted once when table is empty)
+// ═══════════════════════════════════════════════════════════
 const SEED=[{"question_type":"Strengthen","question_name":"Marlandia Reptiles","difficulty":"Medium","correct":true,"time_secs":1800,"prethink_quality":"partial","trap":"Not found does not exist"},{"question_type":"Weaken","question_name":"Earthlike Worlds","difficulty":"Medium","correct":false,"time_secs":900,"prethink_quality":"solid","trap":"Not attempted Different Results"},{"question_type":"Inference","question_name":"Ground Water Scarcity","difficulty":"Medium","correct":false,"time_secs":480,"prethink_quality":"off-track","trap":"Existing System Fails"},{"question_type":"Assumption","question_name":"Tranquilizer Spray Vs Injection","difficulty":"Medium","correct":true,"time_secs":660,"prethink_quality":"partial","trap":"Correlation Vs Cause and Effect"},{"question_type":"Bold Face","question_name":"Traditional Lecture Teaching Methods","difficulty":"Medium","correct":false,"time_secs":420,"prethink_quality":null,"trap":"Reference Change"},{"question_type":"Other","question_name":"CyberSecurity Breaches","difficulty":"Medium","correct":true,"time_secs":600,"prethink_quality":"solid","trap":"Direct vs Indirect Explanation"},{"question_type":"Evaluate","question_name":"VRK and VRX","difficulty":"Medium","correct":false,"time_secs":780,"prethink_quality":"solid","trap":"Existing System Fails"},{"question_type":"Other","question_name":"BellaVista ranking fell","difficulty":"Medium","correct":false,"time_secs":360,"prethink_quality":"solid","trap":"Entities Missing"},{"question_type":"Weaken","question_name":"MixIt Smoothie Makers","difficulty":"Medium","correct":true,"time_secs":390,"prethink_quality":"solid","trap":"Prethinking"},{"question_type":"Inference","question_name":"Fizz 1l and half variant","difficulty":"Medium","correct":true,"time_secs":640,"prethink_quality":"off-track","trap":"Table Data for inference"},{"question_type":"Strengthen","question_name":"Rent Stabilization","difficulty":"Medium","correct":true,"time_secs":650,"prethink_quality":"off-track","trap":"Strengthen with Similarity"},{"question_type":"Evaluate","question_name":"Govt School Teachers 7th pay commission","difficulty":"Medium","correct":false,"time_secs":710,"prethink_quality":"off-track","trap":"Disagreement Identification"},{"question_type":"Weaken","question_name":"Targania Exports","difficulty":"Medium","correct":false,"time_secs":250,"prethink_quality":"off-track","trap":"Unrelated to Conclusion"},{"question_type":"Inference","question_name":"STEM curriculum Riverside school","difficulty":"Medium","correct":false,"time_secs":630,"prethink_quality":null,"trap":"Out of scope"},{"question_type":"Strengthen","question_name":"Digital Infrastructure local companies","difficulty":"Medium","correct":false,"time_secs":620,"prethink_quality":"partial","trap":"Generalization"},{"question_type":"Strengthen","question_name":"Watching Sports Temporary Escape","difficulty":"Medium","correct":false,"time_secs":185,"prethink_quality":"off-track","trap":"Irrelevant Comparison"},{"question_type":"Evaluate","question_name":"Stars into Supernova","difficulty":"Medium","correct":false,"time_secs":442,"prethink_quality":"off-track","trap":"Correlation Vs Cause and Effect"},{"question_type":"Inference","question_name":"Riverside School new teaching method","difficulty":"Medium","correct":false,"time_secs":437,"prethink_quality":null,"trap":"Scope of Data Total Avg"},{"question_type":"Other","question_name":"MeloStream daily active users","difficulty":"Medium","correct":false,"time_secs":522,"prethink_quality":"partial","trap":"Question Stem Trap"},{"question_type":"Inference","question_name":"Health Conditions exercise daily","difficulty":"Medium","correct":false,"time_secs":430,"prethink_quality":null,"trap":"Correlation Vs Cause and Effect"},{"question_type":"Other","question_name":"Speed Limits in Bravia","difficulty":"Medium","correct":false,"time_secs":1007,"prethink_quality":"solid","trap":"Unclear Paradox Resolution"},{"question_type":"Evaluate","question_name":"Virulent Microbes WHO","difficulty":"Medium","correct":false,"time_secs":517,"prethink_quality":"partial","trap":"Not Related to conclusion"},{"question_type":"Strengthen","question_name":"Pressure Flaking Early Men","difficulty":"Medium","correct":false,"time_secs":690,"prethink_quality":"partial","trap":"Chronological discrepancy"},{"question_type":"Inference","question_name":"Discounted Fare Program","difficulty":"Medium","correct":false,"time_secs":720,"prethink_quality":"partial","trap":"Safe Choice Conundrum"},{"question_type":"Weaken","question_name":"BurgerMan Egg Vs Veg Sandwich","difficulty":"Medium","correct":false,"time_secs":382,"prethink_quality":"off-track","trap":"Assumed Worldly Logic"},{"question_type":"Bold Face","question_name":"Dramatic Elevation academic standards","difficulty":"Medium","correct":false,"time_secs":267,"prethink_quality":null,"trap":"Intermediate vs main conclusion"},{"question_type":"Other","question_name":"Investment Firm Vs Financial Regulator","difficulty":"Medium","correct":false,"time_secs":430,"prethink_quality":"partial","trap":"Contradiction Identification"},{"question_type":"Assumption","question_name":"Britains Car Industry Jaguar","difficulty":"Medium","correct":false,"time_secs":337,"prethink_quality":"off-track","trap":"Question Stem Trap"},{"question_type":"Inference","question_name":"Sniper vibrations of heartbeat","difficulty":"Medium","correct":false,"time_secs":220,"prethink_quality":null,"trap":"Improved version trap"},{"question_type":"Inference","question_name":"Business Major vs Psycho CS","difficulty":"Medium","correct":false,"time_secs":477,"prethink_quality":null,"trap":"Numbers Avg Trap"},{"question_type":"Other","question_name":"WestView Academy Software","difficulty":"Medium","correct":false,"time_secs":367,"prethink_quality":"off-track","trap":"Question Stem Trap"},{"question_type":"Weaken","question_name":"Searton RDV Players and Disks","difficulty":"Medium","correct":false,"time_secs":375,"prethink_quality":"partial","trap":"Existing System"},{"question_type":"Weaken","question_name":"GM vs Toyota Volt vs Prius","difficulty":"Medium","correct":false,"time_secs":407,"prethink_quality":"off-track","trap":"C causes B"},{"question_type":"Inference","question_name":"Decline in Manufacturing new products","difficulty":"Medium","correct":false,"time_secs":340,"prethink_quality":"solid","trap":"Short Term Vs Long Term"},{"question_type":"Evaluate","question_name":"Sarah assignment to TechFlow","difficulty":"Medium","correct":false,"time_secs":587,"prethink_quality":"partial","trap":"Cost-Benefit Analysis"},{"question_type":"Evaluate","question_name":"Two year vs Four year degree","difficulty":"Medium","correct":false,"time_secs":215,"prethink_quality":"solid","trap":"Negligence Too quick"},{"question_type":"Other","question_name":"Schools conforming to dress code","difficulty":"Medium","correct":false,"time_secs":257,"prethink_quality":null,"trap":"Attention To Details"},{"question_type":"Strengthen","question_name":"Country X Fish and Fish Oil","difficulty":"Medium","correct":false,"time_secs":555,"prethink_quality":"partial","trap":"Existing System"},{"question_type":"Bold Face","question_name":"Local Healthcare System","difficulty":"Medium","correct":false,"time_secs":337,"prethink_quality":null,"trap":"Missed Contradictory Word"},{"question_type":"Other","question_name":"Colonial Quilting Wealthy Women","difficulty":"Medium","correct":false,"time_secs":480,"prethink_quality":"off-track","trap":"Stick to Conclusion"},{"question_type":"Other","question_name":"Riverside School AI tutoring system","difficulty":"Medium","correct":false,"time_secs":680,"prethink_quality":null,"trap":"Good vs Bad Completion"},{"question_type":"Strengthen","question_name":"Cleanville recyclable waste","difficulty":"Medium","correct":false,"time_secs":347,"prethink_quality":"partial","trap":"Stick to Conclusion"},{"question_type":"Other","question_name":"Wississipi Solar Power","difficulty":"Medium","correct":false,"time_secs":370,"prethink_quality":"partial","trap":"Negligence Too quick"},{"question_type":"Other","question_name":"FlightStats United Airlines","difficulty":"Medium","correct":false,"time_secs":2850,"prethink_quality":"partial","trap":"Quant-Based CR Averages"},{"question_type":"Strengthen","question_name":"DuoChemicals for roads","difficulty":"Medium","correct":false,"time_secs":750,"prethink_quality":"off-track","trap":"Quant-Based"},{"question_type":"Inference","question_name":"Shipping Clerk Truax Construction","difficulty":"Hard","correct":false,"time_secs":627,"prethink_quality":"off-track","trap":"Word Missed"},{"question_type":"Inference","question_name":"Medieval Manuscripts Euripides","difficulty":"Hard","correct":false,"time_secs":680,"prethink_quality":"partial","trap":"Out of scope"},{"question_type":"Inference","question_name":"Travel Expenses Airplanes vs Other modes","difficulty":"Hard","correct":false,"time_secs":795,"prethink_quality":"off-track","trap":"Not Mentioned in the passage"},{"question_type":"Other","question_name":"Sealice Broughton Archipelago","difficulty":"Hard","correct":false,"time_secs":310,"prethink_quality":"partial","trap":"Misunderstood word meaning"},{"question_type":"Other","question_name":"Banks revitalize impoverished communities","difficulty":"Hard","correct":false,"time_secs":317,"prethink_quality":"off-track","trap":"Prethinking Missed"},{"question_type":"Other","question_name":"Films Barbizon Film Festival","difficulty":"Hard","correct":true,"time_secs":567,"prethink_quality":"solid","trap":"Simpsons Paradox"},{"question_type":"Other","question_name":"MorganVille Downtown vs SaveMart","difficulty":"Hard","correct":false,"time_secs":552,"prethink_quality":"partial","trap":"Conclusion not Addressed"},{"question_type":"Inference","question_name":"Forests Thailand Evergreen Vs Deciduous","difficulty":"Hard","correct":false,"time_secs":507,"prethink_quality":"off-track","trap":"Not Mentioned in the passage"},{"question_type":"Inference","question_name":"Advik Stores owned by Women","difficulty":"Hard","correct":false,"time_secs":740,"prethink_quality":null,"trap":"Table Data for inference"},{"question_type":"Inference","question_name":"Careful Pricing Voter approval","difficulty":"Hard","correct":false,"time_secs":550,"prethink_quality":null,"trap":"Not Mentioned in the passage"},{"question_type":"Inference","question_name":"Lyme Disease Deer Ticks","difficulty":"Hard","correct":false,"time_secs":565,"prethink_quality":null,"trap":"Not Mentioned in the passage"},{"question_type":"Weaken","question_name":"Suriland Farmers selling wheat","difficulty":"Hard","correct":false,"time_secs":1710,"prethink_quality":"partial","trap":"Hypothetical VS Current Situation"},{"question_type":"Other","question_name":"Digit Electronics BillBoards Strategy","difficulty":"Hard","correct":false,"time_secs":1825,"prethink_quality":"partial","trap":"Structure Identification"},{"question_type":"Weaken","question_name":"Transportation Analyst Parking Facilities","difficulty":"Hard","correct":true,"time_secs":640,"prethink_quality":"partial","trap":"Quant-Based CR Averages"},{"question_type":"Bold Face","question_name":"US and NewZealand DTC advertisements","difficulty":"Hard","correct":false,"time_secs":650,"prethink_quality":null,"trap":"Missed Keyword in Boldface"},{"question_type":"Strengthen","question_name":"Two Month Workplace Study group","difficulty":"Hard","correct":false,"time_secs":742,"prethink_quality":"partial","trap":"Supporting Evidence Study"},{"question_type":"Weaken","question_name":"Pharmaceutical Company No FDA","difficulty":"Hard","correct":false,"time_secs":442,"prethink_quality":"partial","trap":"Conclusion not Addressed"},{"question_type":"Inference","question_name":"Performance Metrics Objectivity Subjectivity","difficulty":"Hard","correct":false,"time_secs":455,"prethink_quality":"partial","trap":"Not Mentioned in the passage"},{"question_type":"Weaken","question_name":"Climatologist Alps human activity","difficulty":"Hard","correct":false,"time_secs":460,"prethink_quality":"partial","trap":"Misunderstood word meaning"},{"question_type":"Strengthen","question_name":"CS Students programming fundamentals","difficulty":"Hard","correct":false,"time_secs":352,"prethink_quality":"off-track","trap":"Extreme Choice"},{"question_type":"Strengthen","question_name":"Social Learning Academic Misconduct","difficulty":"Hard","correct":false,"time_secs":325,"prethink_quality":"partial","trap":null},{"question_type":"Inference","question_name":"COVID Customers Hospitality Real State","difficulty":"Hard","correct":false,"time_secs":342,"prethink_quality":"off-track","trap":"Table Data for inference"},{"question_type":"Weaken","question_name":"Conservation Easement of a land","difficulty":"Hard","correct":false,"time_secs":452,"prethink_quality":"partial","trap":"Topic Understanding"},{"question_type":"Strengthen","question_name":"Native American Camp New Dumaw Creek","difficulty":"Hard","correct":false,"time_secs":370,"prethink_quality":"partial","trap":"Relevant Words Misidentified"},{"question_type":"Weaken","question_name":"Recycling municipal solid waste","difficulty":"Hard","correct":false,"time_secs":457,"prethink_quality":"partial","trap":"Mild Weakener"},{"question_type":"Weaken","question_name":"Bicycle paths lanes commuters","difficulty":"Hard","correct":false,"time_secs":342,"prethink_quality":"off-track","trap":"B causes A"},{"question_type":"Weaken","question_name":"School District online tutoring platform","difficulty":"Hard","correct":false,"time_secs":422,"prethink_quality":"partial","trap":"Understanding"},{"question_type":"Strengthen","question_name":"Student Essays Computer vs Teachers","difficulty":"Hard","correct":false,"time_secs":242,"prethink_quality":"partial","trap":"Conclusion not Addressed"},{"question_type":"Other","question_name":"Mandatory Standardized Testing","difficulty":"Hard","correct":false,"time_secs":400,"prethink_quality":"off-track","trap":"Strengthen Conclusion Causation"},{"question_type":"Other","question_name":"Posthumous Publications","difficulty":"Hard","correct":false,"time_secs":397,"prethink_quality":"off-track","trap":"Conclusion not Addressed"},{"question_type":"Other","question_name":"Advanced Diagnostic Imaging Shutdown","difficulty":"Hard","correct":false,"time_secs":462,"prethink_quality":"partial","trap":"Conclusion not Addressed"},{"question_type":"Other","question_name":"Obesity in US FastFood","difficulty":"Hard","correct":false,"time_secs":525,"prethink_quality":null,"trap":"Missed Contradictory Word"},{"question_type":"Weaken","question_name":"Businesses development loans Govt tax","difficulty":"Hard","correct":false,"time_secs":580,"prethink_quality":"partial","trap":"Assumptions Made in Answer Choice"},{"question_type":"Inference","question_name":"High Resolution Satellite Nordic region","difficulty":"Hard","correct":false,"time_secs":512,"prethink_quality":null,"trap":"Not Mentioned in the passage"},{"question_type":"Inference","question_name":"University Book Store Engineering programs","difficulty":"Hard","correct":false,"time_secs":377,"prethink_quality":"off-track","trap":"Stress Fear Time Pressure"},{"question_type":"Other","question_name":"Attention Deficit James Morrison","difficulty":"Hard","correct":false,"time_secs":225,"prethink_quality":"partial","trap":"Memory instead of process"},{"question_type":"Evaluate","question_name":"Chimpanzee Grape Altruism Experiment","difficulty":"Hard","correct":false,"time_secs":310,"prethink_quality":"partial","trap":"Memory instead of process"},{"question_type":"Other","question_name":"Maplewood Library Book Reservations","difficulty":"Hard","correct":false,"time_secs":590,"prethink_quality":"partial","trap":"Scope of the Argument"}];
 
-let attempts=JSON.parse(localStorage.getItem('cr_attempts')||'null');
-if(!attempts){
-  attempts=SEED.map((a,i)=>({...a,id:i+1,logged_at:new Date(Date.now()-(SEED.length-i)*28800000).toISOString(),source:'excel'}));
-  localStorage.setItem('cr_attempts',JSON.stringify(attempts));
-}
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let attempts = [];    // live in-memory copy, synced from Supabase
+const TYPES = ['Assumption','Weaken','Strengthen','Inference','Evaluate','Bold Face','Other'];
+const PQO   = ['solid','partial','off-track'];
+const PQL   = {solid:'🟢 Solid',partial:'🟡 Partial','off-track':'🔴 Off-track'};
 
-const TYPES=['Assumption','Weaken','Strengthen','Inference','Evaluate','Bold Face','Other'];
-const PQO=['solid','partial','off-track'];
-const PQL={solid:'🟢 Solid',partial:'🟡 Partial','off-track':'🔴 Off-track'};
+// form state
+let _type=null,_diff=null,_res=null,_pq=null;
+// timer state
+let _tSecs=0,_tRun=false,_tInt=null;
 
+// ═══════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════
 function pct(c,n){return n===0?0:Math.round(c/n*100)}
 function accCol(p){return p>=55?'var(--green)':p>=30?'var(--amber)':'var(--red)'}
 function fmtT(s){if(!s&&s!==0)return'—';return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
 
-let _type=null,_diff=null,_res=null,_pq=null,_pqCls=null;
-let _tSecs=0,_tRun=false,_tInt=null;
+function showLoading(on){
+  document.getElementById('loading-overlay').classList.toggle('hidden',!on);
+}
+function showError(msg){
+  const el=document.getElementById('error-bar');
+  el.textContent=msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),5000);
+}
+function showToast(){
+  const t=document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
 
+// ═══════════════════════════════════════════════════════════
+//  SUPABASE — LOAD + SEED
+// ═══════════════════════════════════════════════════════════
+async function loadAttempts(){
+  showLoading(true);
+  try {
+    const { data, error } = await sb
+      .from('cr_attempts')
+      .select('*')
+      .order('logged_at', { ascending: true });
+
+    if (error) throw error;
+
+    // First-time seed: if table is empty, insert the 83 seed rows
+    if (data.length === 0) {
+      const seedRows = SEED.map((a, i) => ({
+        source: 'excel',
+        logged_at: new Date(Date.now() - (SEED.length - i) * 28_800_000).toISOString(),
+        question_type:    a.question_type,
+        question_name:    a.question_name   || null,
+        difficulty:       a.difficulty,
+        correct:          a.correct,
+        time_secs:        a.time_secs       || null,
+        prethink_quality: a.prethink_quality|| null,
+        trap:             a.trap            || null,
+        comments:         null,
+      }));
+      const { error: seedErr } = await sb.from('cr_attempts').insert(seedRows);
+      if (seedErr) throw seedErr;
+      // reload after seed
+      const { data: seeded, error: seedErr2 } = await sb
+        .from('cr_attempts').select('*').order('logged_at', { ascending: true });
+      if (seedErr2) throw seedErr2;
+      attempts = seeded;
+    } else {
+      attempts = data;
+    }
+  } catch(err){
+    showError('Supabase error: ' + err.message + '. Check SUPABASE_URL / SUPABASE_ANON_KEY.');
+    console.error(err);
+  } finally {
+    showLoading(false);
+  }
+  render();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SUPABASE — INSERT
+// ═══════════════════════════════════════════════════════════
+async function submitAttempt(){
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  const row = {
+    source:           'manual',
+    logged_at:        new Date().toISOString(),
+    question_type:    _type,
+    difficulty:       _diff,
+    correct:          _res === 'correct',
+    time_secs:        _tSecs || null,
+    prethink_quality: _pq   || null,
+    question_name:    document.getElementById('qname').value.trim()  || null,
+    trap:             document.getElementById('qtrap').value.trim()  || null,
+    comments:         document.getElementById('qnotes').value.trim() || null,
+  };
+
+  try {
+    const { data, error } = await sb.from('cr_attempts').insert([row]).select().single();
+    if (error) throw error;
+    attempts.push(data);
+    timerReset();
+    _type=_diff=_res=_pq=null;
+    document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('active','c-active','w-active','pqs-active','pqp-active','pqo-active'));
+    ['qname','qtrap','qnotes'].forEach(id=>document.getElementById(id).value='');
+    showToast();
+    render();
+  } catch(err){
+    showError('Save failed: ' + err.message);
+  } finally {
+    btn.disabled = !(_type&&_diff&&_res);
+    btn.textContent = 'Save Attempt';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FORM HELPERS
+// ═══════════════════════════════════════════════════════════
 function selType(el,v){document.querySelectorAll('#type-chips .fchip').forEach(c=>c.classList.remove('active'));el.classList.add('active');_type=v;chkForm()}
 function selDiff(el,v){document.querySelectorAll('#diff-chips .fchip').forEach(c=>c.classList.remove('active'));el.classList.add('active');_diff=v;chkForm()}
 function selRes(el,v){
@@ -691,35 +625,31 @@ function selPQ(el,v,cls){
 }
 function chkForm(){document.getElementById('submit-btn').disabled=!(_type&&_diff&&_res)}
 
+// ═══════════════════════════════════════════════════════════
+//  TIMER
+// ═══════════════════════════════════════════════════════════
 function timerStart(){if(_tRun)return;_tRun=true;_tInt=setInterval(()=>{_tSecs++;updTimer()},1000)}
 function timerPause(){_tRun=false;clearInterval(_tInt)}
 function timerReset(){timerPause();_tSecs=0;updTimer()}
 function updTimer(){document.getElementById('timer-display').textContent=Math.floor(_tSecs/60)+':'+String(_tSecs%60).padStart(2,'0')}
 
-function submitAttempt(){
-  const a={id:Date.now(),logged_at:new Date().toISOString(),source:'manual',
-    question_type:_type,difficulty:_diff,correct:_res==='correct',
-    time_secs:_tSecs,prethink_quality:_pq,
-    question_name:document.getElementById('qname').value.trim()||null,
-    trap:document.getElementById('qtrap').value.trim()||null,
-    comments:document.getElementById('qnotes').value.trim()||null};
-  attempts.push(a);
-  localStorage.setItem('cr_attempts',JSON.stringify(attempts));
-  timerReset();
-  _type=_diff=_res=_pq=null;
-  document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('active','c-active','w-active','pqs-active','pqp-active','pqo-active'));
-  ['qname','qtrap','qnotes'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('submit-btn').disabled=true;
-  const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);
-  render();
-}
-
+// ═══════════════════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════════════════
 function showTab(name){
   ['analytics','log','entry'].forEach(t=>{document.getElementById('tab-'+t).style.display=t===name?'block':'none'});
   document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['analytics','log','entry'][i]===name));
 }
 
+// ═══════════════════════════════════════════════════════════
+//  RENDER  (identical logic to original, reads from `attempts`)
+// ═══════════════════════════════════════════════════════════
 function render(){
+  if(!attempts.length){
+    document.getElementById('hero-cards').innerHTML='<div style="color:var(--text-muted);font-size:13px;padding:12px 0;grid-column:1/-1">No attempts yet. Log your first one!</div>';
+    return;
+  }
+
   const total=attempts.length;
   const correct=attempts.filter(a=>a.correct===true).length;
   const overall=pct(correct,total);
@@ -728,42 +658,36 @@ function render(){
   const noP=attempts.filter(a=>!a.prethink_quality||a.prethink_quality==='off-track');
   const noPAcc=pct(noP.filter(a=>a.correct).length,noP.length);
   const lift=solidAcc-noPAcc;
-  const avgT=Math.round(attempts.filter(a=>a.time_secs).reduce((s,a)=>s+a.time_secs,0)/attempts.filter(a=>a.time_secs).length);
+  const timed=attempts.filter(a=>a.time_secs);
+  const avgT=timed.length?Math.round(timed.reduce((s,a)=>s+a.time_secs,0)/timed.length):0;
 
-  // Date
   document.getElementById('tb-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('sb-footer-count').textContent=`${total} total attempts`;
 
-  // Topbar chips
   document.getElementById('tb-chips').innerHTML=`
     <div class="t-chip ${overall>=50?'green':overall>=25?'amber':'red'}"><i class="ti ti-target"></i>${overall}% accuracy</div>
     <div class="t-chip indigo"><i class="ti ti-list-check"></i>${total} attempts</div>
     <div class="t-chip green"><i class="ti ti-brain"></i>${solidAcc}% w/ solid prethink</div>
     <div class="t-chip ${lift>10?'green':'amber'}"><i class="ti ti-trending-up"></i>+${lift}pp prethink lift</div>
-    <div class="t-chip"><i class="ti ti-clock"></i>Avg ${fmtT(avgT)}</div>
-  `;
+    <div class="t-chip"><i class="ti ti-clock"></i>Avg ${fmtT(avgT)}</div>`;
 
-  // Type stats
   const byType={};TYPES.forEach(t=>byType[t]={c:0,n:0});
   attempts.forEach(a=>{const t=a.question_type||'Other';if(!byType[t])byType[t]={c:0,n:0};byType[t].n++;if(a.correct)byType[t].c++});
 
-  // Sidebar types
   document.getElementById('sb-types').innerHTML=TYPES.map(t=>{
     const{c,n}=byType[t]||{c:0,n:0};const p=pct(c,n);
     const cls=!n?'':p>=50?'green':p>=25?'amber':'red';
     return`<div class="sb-topic-row"><span>${t}</span><span class="sb-topic-badge ${cls}">${n?p+'%':'—'}</span></div>`;
   }).join('');
 
-  // Sidebar diff
   const dM=attempts.filter(a=>a.difficulty==='Medium');
   const dH=attempts.filter(a=>a.difficulty==='Hard');
   const pM=pct(dM.filter(a=>a.correct).length,dM.length);
   const pH=pct(dH.filter(a=>a.correct).length,dH.length);
   document.getElementById('sb-diff').innerHTML=`
     <div class="sb-topic-row"><span>Medium</span><span class="sb-topic-badge ${pM>=50?'green':pM>=25?'amber':'red'}">${pM}%</span></div>
-    <div class="sb-topic-row"><span>Hard</span><span class="sb-topic-badge ${pH>=50?'green':pH>=25?'amber':'red'}">${pH}%</span></div>
-  `;
+    <div class="sb-topic-row"><span>Hard</span><span class="sb-topic-badge ${pH>=50?'green':pH>=25?'amber':'red'}">${pH}%</span></div>`;
 
-  // Insight banner
   const worstT=TYPES.slice().sort((a,b)=>pct(byType[a].c,byType[a].n)-pct(byType[b].c,byType[b].n))[0];
   const wAcc=pct(byType[worstT].c,byType[worstT].n);
   const insightText=lift>15
@@ -771,12 +695,8 @@ function render(){
     :`The collapse is happening post-prethink, at the answer-choice elimination stage. Solid prethink only gets you to ${solidAcc}% — check Correct Choice Analysis. Your top traps confirm this. Weakest type: <strong>${worstT}</strong> at <strong>${wAcc}%</strong> across ${byType[worstT].n} attempts.`;
   document.getElementById('insight-banner').innerHTML=`
     <div class="insight-orb">🔍</div>
-    <div>
-      <div class="insight-label">Sheldon Analysis — Pattern Detected</div>
-      <div class="insight-text">${insightText}</div>
-    </div>`;
+    <div><div class="insight-label">Sheldon Analysis — Pattern Detected</div><div class="insight-text">${insightText}</div></div>`;
 
-  // Hero cards
   document.getElementById('hero-cards').innerHTML=`
     <div class="card">
       <div class="card-eyebrow">Total Attempts <i class="ti ti-list-numbers"></i></div>
@@ -799,7 +719,6 @@ function render(){
       <div class="card-sub">Target: under 2:00 per CR</div>
     </div>`;
 
-  // Type bars
   document.getElementById('type-bars').innerHTML=TYPES.map(t=>{
     const{c,n}=byType[t]||{c:0,n:0};const p=pct(c,n);const col=accCol(p);
     return`<div class="acc-row">
@@ -810,7 +729,6 @@ function render(){
     </div>`;
   }).join('');
 
-  // Prethink matrix
   const byPQ={solid:{c:0,n:0},partial:{c:0,n:0},'off-track':{c:0,n:0}};
   attempts.forEach(a=>{const pq=a.prethink_quality;if(pq&&byPQ[pq]){byPQ[pq].n++;if(a.correct)byPQ[pq].c++}});
   const maxPQN=Math.max(...Object.values(byPQ).map(v=>v.n));
@@ -824,7 +742,6 @@ function render(){
     </div>`;
   }).join('');
 
-  // Stacked
   document.getElementById('prethink-stacked').innerHTML=TYPES.map(t=>{
     const ta=attempts.filter(a=>a.question_type===t);if(!ta.length)return'';
     const s=ta.filter(a=>a.prethink_quality==='solid').length;
@@ -842,7 +759,6 @@ function render(){
     </div>`;
   }).join('');
 
-  // Traps
   const tC={};attempts.forEach(a=>{if(a.trap){const k=a.trap.replace(/\n/g,' ').trim();tC[k]=(tC[k]||0)+1}});
   const sortedT=Object.entries(tC).sort((a,b)=>b[1]-a[1]).slice(0,12);
   const mxT=sortedT[0]?.[1]||1;
@@ -854,9 +770,8 @@ function render(){
       <div class="trap-n">${cnt}</div>
     </div>`).join('');
 
-  // Diff breakdown
   let diffHTML='';
-  ['Medium','Hard'].forEach((d,i)=>{
+  ['Medium','Hard'].forEach(d=>{
     const da=attempts.filter(a=>a.difficulty===d);
     const dc=da.filter(a=>a.correct).length;
     const dp=pct(dc,da.length);
@@ -877,7 +792,6 @@ function render(){
   });
   document.getElementById('diff-breakdown').innerHTML=diffHTML;
 
-  // Log table
   document.getElementById('log-count').textContent=attempts.length;
   document.getElementById('log-tbody').innerHTML=[...attempts].reverse().map((a,i)=>{
     const pqCls=a.prethink_quality==='solid'?'solid':a.prethink_quality==='partial'?'partial':a.prethink_quality==='off-track'?'off':null;
@@ -895,7 +809,6 @@ function render(){
     </tr>`;
   }).join('');
 
-  // Quick stats
   document.getElementById('quick-stats').innerHTML=TYPES.slice(0,5).map(t=>{
     const{c,n}=byType[t]||{c:0,n:0};const p=pct(c,n);const col=accCol(p);
     return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
@@ -906,7 +819,10 @@ function render(){
   }).join('');
 }
 
-render();
+// ═══════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════
+loadAttempts();
 </script>
 </body>
 </html>
