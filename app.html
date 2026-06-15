@@ -23788,11 +23788,11 @@ function _doRender() {
           headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
           body: '{}'
         });
-        var data = await res.json();
-        if (data.ok) {
+        if (res.ok || res.status === 200) {
           if (typeof showToast === 'function') showToast('📧', 'Review sent!', 'Check your inbox — Sheldon\'s weekly summary is on its way.');
         } else {
-          throw new Error('Send failed');
+          var data = await res.json().catch(function(){ return {}; });
+          throw new Error(data.error || 'Send failed');
         }
       } catch(e) {
         if (typeof scNotify === 'function') scNotify('Could not send email — check Resend API key in Supabase secrets.', 'error');
