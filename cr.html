@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CR Drill Tracker — ScoreConsole</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='r' x1='6' y1='26' x2='26' y2='6' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%238b7cf8'/%3E%3Cstop offset='1' stop-color='%235fd9a8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%2313161f'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='rgba(255,255,255,0.12)' stroke-width='3'/%3E%3Cpath d='M21.2 8.4 A 9 9 0 1 1 10.8 8.4' fill='none' stroke='url(%23r)' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='21.2' cy='8.4' r='2' fill='%235fd9a8'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@300,400,500,700,900&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@500,700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;height:100%}
+
+:root{
+  --bg-base:#0f0c1a;
+  --bg-panel:rgba(18,14,32,0.92);
+  --bg-card:rgba(255,255,255,0.055);
+  --bg-card-hover:rgba(255,255,255,0.085);
+  --bg-card-strong:rgba(255,255,255,0.11);
+  --bg-input:rgba(255,255,255,0.07);
+  --bg-input-focus:rgba(255,255,255,0.12);
+  --border:rgba(255,255,255,0.10);
+  --border-subtle:rgba(255,255,255,0.06);
+  --border-accent:rgba(124,106,246,0.40);
+  --border-strong:rgba(255,255,255,0.18);
+  --text-primary:rgba(255,255,255,0.95);
+  --text-secondary:rgba(255,255,255,0.65);
+  --text-tertiary:rgba(255,255,255,0.38);
+  --text-muted:rgba(255,255,255,0.22);
+  --accent:#8b7cf8;
+  --accent-bright:#a78bfa;
+  --accent-soft:rgba(139,124,248,0.16);
+  --accent-glow:rgba(139,124,248,0.35);
+  --green:#34d399;
+  --green-bright:#10b981;
+  --green-soft:rgba(52,211,153,0.14);
+  --green-glow:rgba(52,211,153,0.30);
+  --red:#fb7185;
+  --red-soft:rgba(251,113,133,0.12);
+  --amber:#fbbf24;
+  --amber-soft:rgba(251,191,36,0.13);
+  --blue:#60a5fa;
+  --blue-soft:rgba(96,165,250,0.13);
+  --shadow-card:0 1px 0 rgba(255,255,255,0.06) inset,0 8px 32px rgba(0,0,0,0.30);
+  --shadow-card-hover:0 1px 0 rgba(255,255,255,0.10) inset,0 16px 48px rgba(0,0,0,0.45),0 0 0 1px rgba(139,124,248,0.18);
+}
+
+body{
+  font-family:'Satoshi',system-ui,sans-serif;
+  background:var(--bg-base);
+  color:var(--text-primary);
+  min-height:100vh;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  position:relative;
+  overflow-x:hidden;
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  overflow:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 70% 55% at 82% 6%,rgba(120,90,230,0.13) 0%,transparent 58%),
+    radial-gradient(ellipse 60% 50% at 8% 88%,rgba(40,180,130,0.06) 0%,transparent 55%),
+    linear-gradient(160deg,#0e0b18 0%,#110e1f 50%,#0e0d18 100%);
+  animation:bgDrift 40s ease-in-out infinite alternate;
+}
+body::after{
+  content:'';position:fixed;inset:0;z-index:0;
+  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;
+}
+@keyframes bgDrift{
+  0%{opacity:.9;transform:scale(1) rotate(0deg)}
+  100%{opacity:1;transform:scale(1.04) rotate(0.3deg)}
+}
+
+/* ── SHELL ── */
+.shell{
+  display:grid;grid-template-columns:218px 1fr;
+  height:100vh;position:relative;z-index:1;overflow:hidden;
+}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  background:rgba(10,7,22,0.88);
+  backdrop-filter:blur(40px) saturate(180%);
+  -webkit-backdrop-filter:blur(40px) saturate(180%);
+  border-right:1px solid rgba(255,255,255,0.07);
+  display:flex;flex-direction:column;
+  height:100vh;overflow-y:auto;
+  box-shadow:1px 0 0 rgba(255,255,255,0.04),inset -1px 0 30px rgba(0,0,0,0.30);
+}
+.sb-logo{
+  display:flex;align-items:center;gap:10px;
+  padding:20px 16px 16px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.sb-logo-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:#13161f;
+  border:1px solid rgba(139,124,248,0.28);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 4px 18px rgba(139,124,248,0.15);
+}
+.sb-logo-name{
+  font-family:'Clash Display',sans-serif;font-size:14px;font-weight:700;
+  color:var(--text-primary);letter-spacing:-0.3px;
+}
+.sb-logo-sub{font-size:9.5px;color:var(--text-tertiary);font-weight:400;margin-top:1px;letter-spacing:0.04em}
+
+.sb-section{padding:14px 10px 5px}
+.sb-section-label{
+  font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--text-muted);padding:0 8px;margin-bottom:4px;
+}
+.sb-nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 10px;border-radius:8px;
+  font-size:13px;font-weight:500;color:var(--text-secondary);
+  cursor:pointer;transition:all .15s;text-decoration:none;
+  border:1px solid transparent;
+}
+.sb-nav-item:hover{background:var(--bg-card);color:var(--text-primary)}
+.sb-nav-item.active{
+  background:var(--accent-soft);color:var(--accent-bright);
+  border-color:var(--border-accent);
+}
+.sb-nav-item i{font-size:15px;flex-shrink:0}
+
+.sb-topic-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 10px;border-radius:7px;cursor:pointer;
+  font-size:12px;color:var(--text-tertiary);font-weight:500;
+  transition:all .12s;
+}
+.sb-topic-row:hover{background:var(--bg-card);color:var(--text-secondary)}
+.sb-topic-badge{
+  font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;
+  background:var(--bg-card);border:1px solid var(--border-subtle);
+  color:var(--text-tertiary);
+}
+.sb-topic-badge.lit{background:var(--accent-soft);border-color:var(--border-accent);color:var(--accent-bright)}
+.sb-topic-badge.green{background:var(--green-soft);border-color:rgba(52,211,153,0.25);color:var(--green)}
+.sb-topic-badge.red{background:var(--red-soft);border-color:rgba(251,113,133,0.25);color:var(--red)}
+.sb-topic-badge.amber{background:var(--amber-soft);border-color:rgba(251,191,36,0.25);color:var(--amber)}
+
+.sb-divider{height:1px;background:var(--border-subtle);margin:10px 14px}
+
+/* ── MAIN AREA ── */
+.main{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+/* ── TOP BAR ── */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 28px;
+  border-bottom:1px solid var(--border-subtle);
+  background:rgba(10,7,22,0.60);
+  backdrop-filter:blur(20px);
+  flex-shrink:0;gap:16px;
+}
+.topbar-left{display:flex;flex-direction:column;gap:1px}
+.topbar-title{font-family:'Clash Display',sans-serif;font-size:17px;font-weight:700;letter-spacing:-0.3px}
+.topbar-sub{font-size:11px;color:var(--text-tertiary);font-weight:400}
+.topbar-chips{display:flex;align-items:center;gap:6px;flex:1;justify-content:center;flex-wrap:wrap}
+.t-chip{
+  display:flex;align-items:center;gap:6px;
+  font-size:11.5px;font-weight:500;
+  padding:5px 11px;border-radius:20px;
+  border:1px solid var(--border-subtle);
+  background:var(--bg-card);
+  color:var(--text-secondary);
+  white-space:nowrap;
+}
+.t-chip i{font-size:12px}
+.t-chip.green{color:var(--green);border-color:rgba(52,211,153,0.2);background:var(--green-soft)}
+.t-chip.indigo{color:var(--accent-bright);border-color:var(--border-accent);background:var(--accent-soft)}
+.t-chip.amber{color:var(--amber);border-color:rgba(251,191,36,0.2);background:var(--amber-soft)}
+.t-chip.red{color:var(--red);border-color:rgba(251,113,133,0.2);background:var(--red-soft)}
+.btn-primary{
+  font-family:'Satoshi',sans-serif;font-size:12px;font-weight:700;
+  padding:7px 16px;border-radius:8px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),#6366f1);
+  color:#fff;letter-spacing:0.01em;
+  box-shadow:0 4px 14px rgba(139,124,248,0.30);
+  transition:all .15s;white-space:nowrap;
+}
+.btn-primary:hover{opacity:.88;transform:translateY(-1px)}
+
+/* ── TABS ── */
+.tabs-row{
+  display:flex;align-items:center;gap:0;
+  border-bottom:1px solid var(--border-subtle);
+  padding:0 28px;flex-shrink:0;
+  background:rgba(10,7,22,0.40);
+}
+.tab-btn{
+  font-family:'Satoshi',sans-serif;font-size:11.5px;font-weight:600;
+  letter-spacing:0.06em;text-transform:uppercase;
+  padding:13px 14px;border:none;background:none;
+  color:var(--text-muted);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:all .15s;
+}
+.tab-btn:hover{color:var(--text-secondary)}
+.tab-btn.active{color:var(--accent-bright);border-bottom-color:var(--accent)}
+
+/* ── CONTENT ── */
+.content-area{flex:1;overflow-y:auto;padding:24px 28px 48px}
+
+/* ── EYEBROW ── */
+.eyebrow{
+  font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:14px;
+}
+
+/* ── GRID ── */
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.grid-full{margin-bottom:18px}
+
+/* ── CARD ── */
+.card{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:var(--shadow-card);
+  padding:20px;
+  position:relative;overflow:hidden;
+  transition:box-shadow .2s,background .2s;
+}
+.card:hover{background:var(--bg-card-hover);box-shadow:var(--shadow-card-hover)}
+.card-eyebrow{
+  font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:10px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-eyebrow i{font-size:14px;color:var(--text-muted)}
+.big-num{
+  font-family:'Fraunces',serif;font-size:38px;font-weight:600;
+  line-height:1;letter-spacing:-0.02em;margin-bottom:5px;
+}
+.big-num.green{color:var(--green)}
+.big-num.indigo{color:var(--accent-bright)}
+.big-num.amber{color:var(--amber)}
+.big-num.red{color:var(--red)}
+.big-num.white{color:var(--text-primary)}
+.card-sub{font-size:11px;color:var(--text-tertiary);font-weight:400}
+
+/* ── INSIGHT BANNER ── */
+.insight-banner{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-left:3px solid var(--accent);
+  border-radius:14px;
+  box-shadow:var(--shadow-card);
+  padding:16px 20px;
+  display:flex;align-items:flex-start;gap:14px;
+  margin-bottom:18px;
+}
+.insight-orb{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  background:var(--accent-soft);border:1px solid var(--border-accent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;
+}
+.insight-label{
+  font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--accent-bright);margin-bottom:4px;
+}
+.insight-text{font-size:12.5px;color:var(--text-secondary);line-height:1.55}
+.insight-text strong{color:var(--text-primary)}
+
+/* ── ACC BARS ── */
+.acc-list{display:flex;flex-direction:column}
+.acc-row{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--border-subtle);
+}
+.acc-row:last-child{border-bottom:none}
+.acc-label{font-size:12px;font-weight:500;color:var(--text-secondary);width:96px;flex-shrink:0}
+.acc-track{flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
+.acc-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.acc-pct{font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0}
+.acc-n{font-size:10px;color:var(--text-muted);width:26px;text-align:right;flex-shrink:0}
+
+/* ── MATRIX ── */
+.matrix-list{display:flex;flex-direction:column}
+.matrix-row{
+  display:grid;grid-template-columns:96px 1fr 48px 56px;
+  align-items:center;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--border-subtle);
+}
+.matrix-row:last-child{border-bottom:none}
+.matrix-label{font-size:12px;font-weight:500;color:var(--text-secondary)}
+.matrix-track{height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
+.matrix-fill{height:100%;border-radius:2px;transition:width .5s}
+.matrix-pct{font-size:11px;font-weight:700;text-align:right}
+.matrix-n{font-size:10px;color:var(--text-muted);text-align:right}
+
+/* ── STACKED PRETHINK ── */
+.stack-row{margin-bottom:9px}
+.stack-header{display:flex;justify-content:space-between;margin-bottom:4px}
+.stack-label{font-size:11px;font-weight:500;color:var(--text-secondary)}
+.stack-count{font-size:10px;color:var(--text-muted)}
+.stack-bar{height:4px;border-radius:2px;overflow:hidden;display:flex}
+
+/* ── TRAPS ── */
+.trap-list{display:flex;flex-direction:column}
+.trap-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 0;border-bottom:1px solid var(--border-subtle);
+}
+.trap-row:last-child{border-bottom:none}
+.trap-rank{font-family:'Fraunces',serif;font-size:13px;font-weight:600;color:var(--text-muted);width:18px;flex-shrink:0}
+.trap-name{flex:1;font-size:12px;color:var(--text-secondary)}
+.trap-bar{height:3px;border-radius:2px;background:var(--accent)}
+.trap-n{font-size:11px;font-weight:700;color:var(--accent-bright);width:18px;text-align:right;flex-shrink:0}
+
+/* ── DIFF BREAKDOWN ── */
+.diff-block{padding-bottom:16px}
+.diff-block+.diff-block{padding-top:16px;border-top:1px solid var(--border-subtle);padding-bottom:0}
+
+/* ── TAGS ── */
+.tag{
+  display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:0.04em;
+  text-transform:uppercase;padding:2px 7px;border-radius:4px;
+}
+.tag-correct{background:var(--green-soft);color:var(--green)}
+.tag-wrong{background:var(--red-soft);color:var(--red)}
+.tag-type{background:var(--accent-soft);color:var(--accent-bright)}
+.tag-solid{background:var(--green-soft);color:var(--green)}
+.tag-partial{background:var(--amber-soft);color:var(--amber)}
+.tag-off{background:var(--red-soft);color:var(--red)}
+.diff-badge{
+  display:inline-block;font-size:9.5px;font-weight:700;
+  letter-spacing:0.04em;text-transform:uppercase;
+  padding:2px 7px;border-radius:4px;
+}
+.diff-badge.Hard{background:var(--red-soft);color:var(--red)}
+.diff-badge.Medium{background:var(--amber-soft);color:var(--amber)}
+.diff-badge.Easy{background:var(--green-soft);color:var(--green)}
+
+/* ── LOG TABLE ── */
+.table-outer{overflow-x:auto}
+.table-inner{max-height:480px;overflow-y:auto}
+.log-table{width:100%;border-collapse:collapse;font-size:12px}
+.log-table th{
+  text-align:left;padding:9px 12px;
+  font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--text-muted);border-bottom:1px solid var(--border-subtle);
+  white-space:nowrap;position:sticky;top:0;background:rgba(10,7,22,0.95);
+}
+.log-table td{padding:9px 12px;border-bottom:1px solid var(--border-subtle);vertical-align:middle}
+.log-table tbody tr:hover td{background:var(--bg-card)}
+
+/* ── FORM ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{margin-bottom:16px}
+.form-group:last-of-type{margin-bottom:0}
+.form-label{
+  display:block;font-size:9px;font-weight:700;letter-spacing:0.12em;
+  text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;
+}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px}
+.fchip{
+  font-family:'Satoshi',sans-serif;font-size:11px;font-weight:500;
+  padding:5px 12px;border-radius:20px;
+  border:1px solid var(--border-subtle);background:var(--bg-card);
+  color:var(--text-tertiary);cursor:pointer;transition:all .12s;
+}
+.fchip:hover{border-color:var(--border);color:var(--text-secondary)}
+.fchip.active{background:var(--accent-soft);border-color:var(--border-accent);color:var(--accent-bright)}
+.fchip.c-active{background:var(--green-soft);border-color:rgba(52,211,153,0.3);color:var(--green)}
+.fchip.w-active{background:var(--red-soft);border-color:rgba(251,113,133,0.3);color:var(--red)}
+.fchip.pqs-active{background:var(--green-soft);border-color:rgba(52,211,153,0.3);color:var(--green)}
+.fchip.pqp-active{background:var(--amber-soft);border-color:rgba(251,191,36,0.3);color:var(--amber)}
+.fchip.pqo-active{background:var(--red-soft);border-color:rgba(251,113,133,0.3);color:var(--red)}
+
+.finput{
+  font-family:'Satoshi',sans-serif;font-size:13px;
+  background:var(--bg-input);
+  border:1px solid var(--border-subtle);
+  color:var(--text-primary);padding:9px 12px;border-radius:9px;
+  outline:none;transition:all .15s;width:100%;
+}
+.finput:focus{border-color:var(--border-accent);background:var(--bg-input-focus)}
+.finput::placeholder{color:var(--text-muted)}
+textarea.finput{resize:none;font-size:12px;line-height:1.5}
+
+.timer-num{
+  font-family:'Fraunces',serif;font-size:54px;font-weight:600;
+  color:var(--accent-bright);text-align:center;letter-spacing:-2px;
+  line-height:1;margin:10px 0 12px;
+}
+.timer-btns{display:flex;gap:6px;justify-content:center}
+.tbtn{
+  font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:7px;
+  border:1px solid var(--border-subtle);background:var(--bg-card);
+  color:var(--text-tertiary);cursor:pointer;transition:all .12s;
+}
+.tbtn:hover{color:var(--text-secondary);border-color:var(--border);background:var(--bg-card-hover)}
+
+.btn-submit{
+  font-family:'Satoshi',sans-serif;font-size:13px;font-weight:700;
+  padding:11px;border-radius:9px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),#6366f1);
+  color:#fff;width:100%;margin-top:16px;
+  box-shadow:0 4px 14px rgba(139,124,248,0.30);
+  transition:all .15s;
+}
+.btn-submit:hover{opacity:.88;transform:translateY(-1px)}
+.btn-submit:disabled{opacity:.35;cursor:not-allowed;transform:none}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--bg-panel);backdrop-filter:blur(20px);
+  border:1px solid rgba(52,211,153,0.3);color:var(--green);
+  font-size:12px;font-weight:600;padding:9px 18px;border-radius:9px;
+  opacity:0;pointer-events:none;transition:opacity .2s;z-index:999;
+  box-shadow:0 8px 32px rgba(0,0,0,0.40);
+}
+.toast.show{opacity:1}
+
+/* ── SCROLLBARS ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.14)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">
+        <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="brandGrad" x1="6" y1="26" x2="26" y2="6" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#8b7cf8"/>
+              <stop offset="1" stop-color="#5fd9a8"/>
+            </linearGradient>
+          </defs>
+          <circle cx="16" cy="16" r="9" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="3"/>
+          <path d="M21.2 8.4 A 9 9 0 1 1 10.8 8.4" fill="none" stroke="url(#brandGrad)" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="21.2" cy="8.4" r="2" fill="#5fd9a8"/>
+        </svg>
+      </div>
+      <div>
+        <div class="sb-logo-name">ScoreConsole</div>
+        <div class="sb-logo-sub">CR Drill Tracker</div>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-label">Navigation</div>
+      <a href="https://scoreconsole.com/app.html" class="sb-nav-item">
+        <i class="ti ti-layout-dashboard"></i>Dashboard
+      </a>
+      <div class="sb-nav-item active">
+        <i class="ti ti-activity"></i>CR Tracker
+      </div>
+    </div>
+
+    <div class="sb-divider"></div>
+
+    <div class="sb-section">
+      <div class="sb-section-label">Question Types</div>
+      <div id="sb-types"></div>
+    </div>
+
+    <div class="sb-divider"></div>
+
+    <div class="sb-section">
+      <div class="sb-section-label">Difficulty</div>
+      <div id="sb-diff"></div>
+    </div>
+
+    <div style="flex:1"></div>
+    <div style="padding:16px;border-top:1px solid var(--border-subtle)">
+      <div style="font-size:10px;color:var(--text-muted);text-align:center">83 attempts from error log</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">CR Drill Tracker</div>
+        <div class="topbar-sub" id="tb-date"></div>
+      </div>
+      <div class="topbar-chips" id="tb-chips"></div>
+      <button class="btn-primary" onclick="showTab('entry')">
+        <i class="ti ti-plus"></i> Log Attempt
+      </button>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs-row">
+      <button class="tab-btn active" onclick="showTab('analytics')">Analytics</button>
+      <button class="tab-btn" onclick="showTab('log')">Attempt Log</button>
+      <button class="tab-btn" onclick="showTab('entry')">Log Attempt</button>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div id="tab-analytics" class="content-area">
+      <div id="insight-banner" class="insight-banner"></div>
+
+      <div class="eyebrow">Overview</div>
+      <div class="grid-4" id="hero-cards"></div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-eyebrow">Accuracy by Question Type <i class="ti ti-chart-bar"></i></div>
+          <div class="acc-list" id="type-bars"></div>
+        </div>
+        <div class="card">
+          <div class="card-eyebrow">Prethink Quality → Accuracy <i class="ti ti-brain"></i></div>
+          <div class="matrix-list" id="prethink-matrix"></div>
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border-subtle)">
+            <div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">Prethink Rate by Type</div>
+            <div id="prethink-stacked"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-eyebrow">Top Error Traps <i class="ti ti-alert-triangle"></i></div>
+          <div class="trap-list" id="trap-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-eyebrow">Medium vs Hard <i class="ti ti-chart-dots"></i></div>
+          <div id="diff-breakdown"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOG -->
+    <div id="tab-log" class="content-area" style="display:none">
+      <div class="eyebrow">All Attempts — <span id="log-count">0</span> total</div>
+      <div class="card" style="padding:0">
+        <div class="table-outer">
+          <div class="table-inner">
+            <table class="log-table">
+              <thead>
+                <tr>
+                  <th>#</th><th>Question</th><th>Type</th><th>Diff</th>
+                  <th>Result</th><th>Time</th><th>Prethink</th><th>Trap</th>
+                </tr>
+              </thead>
+              <tbody id="log-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENTRY -->
+    <div id="tab-entry" class="content-area" style="display:none">
+      <div class="eyebrow">Log a CR Attempt</div>
+      <div class="form-grid">
+
+        <div class="card">
+          <div class="form-group">
+            <label class="form-label">Question Type</label>
+            <div class="chip-row" id="type-chips">
+              <div class="fchip" onclick="selType(this,'Assumption')">Assumption</div>
+              <div class="fchip" onclick="selType(this,'Weaken')">Weaken</div>
+              <div class="fchip" onclick="selType(this,'Strengthen')">Strengthen</div>
+              <div class="fchip" onclick="selType(this,'Inference')">Inference</div>
+              <div class="fchip" onclick="selType(this,'Evaluate')">Evaluate</div>
+              <div class="fchip" onclick="selType(this,'Bold Face')">Bold Face</div>
+              <div class="fchip" onclick="selType(this,'Other')">Other</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Difficulty</label>
+            <div class="chip-row" id="diff-chips">
+              <div class="fchip" onclick="selDiff(this,'Easy')">Easy</div>
+              <div class="fchip" onclick="selDiff(this,'Medium')">Medium</div>
+              <div class="fchip" onclick="selDiff(this,'Hard')">Hard</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Result</label>
+            <div class="chip-row" id="res-chips">
+              <div class="fchip" onclick="selRes(this,'correct')">✓ Correct</div>
+              <div class="fchip" onclick="selRes(this,'wrong')">✗ Wrong</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Prethink Quality</label>
+            <div class="chip-row" id="pq-chips">
+              <div class="fchip pqs" onclick="selPQ(this,'solid','pqs-active')">🟢 Solid</div>
+              <div class="fchip pqp" onclick="selPQ(this,'partial','pqp-active')">🟡 Partial</div>
+              <div class="fchip pqo" onclick="selPQ(this,'off-track','pqo-active')">🔴 Off-track</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Question Name (optional)</label>
+            <input class="finput" id="qname" type="text" placeholder="e.g. Earthlike Worlds">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Trap / Error Pattern (optional)</label>
+            <input class="finput" id="qtrap" type="text" placeholder="e.g. Conclusion not Addressed">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes</label>
+            <textarea class="finput" id="qnotes" rows="3" placeholder="What went wrong? Corrective action?"></textarea>
+          </div>
+          <button class="btn-submit" id="submit-btn" onclick="submitAttempt()" disabled>Save Attempt</button>
+        </div>
+
+        <div class="card">
+          <div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Timer</div>
+          <div class="timer-num" id="timer-display">0:00</div>
+          <div class="timer-btns">
+            <button class="tbtn" onclick="timerStart()"><i class="ti ti-player-play"></i> Start</button>
+            <button class="tbtn" onclick="timerPause()"><i class="ti ti-player-pause"></i> Pause</button>
+            <button class="tbtn" onclick="timerReset()"><i class="ti ti-refresh"></i> Reset</button>
+          </div>
+
+          <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border-subtle)">
+            <div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px">Your Stats at a Glance</div>
+            <div id="quick-stats"></div>
+          </div>
+
+          <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border-subtle)">
+            <div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">GMAT CR Benchmark</div>
+            <div style="font-size:11px;color:var(--text-tertiary);line-height:1.6">
+              Target: <span style="color:var(--text-secondary);font-weight:600">≥70% overall</span><br>
+              Time per Q: <span style="color:var(--text-secondary);font-weight:600">&lt;2:00</span><br>
+              Prethink solid rate: <span style="color:var(--text-secondary);font-weight:600">≥60%</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="ti ti-check"></i> Attempt saved</div>
+
+<script>
+const SEED=[{"question_type":"Strengthen","question_name":"Marlandia Reptiles","difficulty":"Medium","correct":true,"time_secs":1800,"prethink_quality":"partial","trap":"Not found does not exist"},{"question_type":"Weaken","question_name":"Earthlike Worlds","difficulty":"Medium","correct":false,"time_secs":900,"prethink_quality":"solid","trap":"Not attempted Different Results"},{"question_type":"Inference","question_name":"Ground Water Scarcity","difficulty":"Medium","correct":false,"time_secs":480,"prethink_quality":"off-track","trap":"Existing System Fails"},{"question_type":"Assumption","question_name":"Tranquilizer Spray Vs Injection","difficulty":"Medium","correct":true,"time_secs":660,"prethink_quality":"partial","trap":"Correlation Vs Cause and Effect"},{"question_type":"Bold Face","question_name":"Traditional Lecture Teaching Methods","difficulty":"Medium","correct":false,"time_secs":420,"prethink_quality":null,"trap":"Reference Change"},{"question_type":"Other","question_name":"CyberSecurity Breaches","difficulty":"Medium","correct":true,"time_secs":600,"prethink_quality":"solid","trap":"Direct vs Indirect Explanation"},{"question_type":"Evaluate","question_name":"VRK and VRX","difficulty":"Medium","correct":false,"time_secs":780,"prethink_quality":"solid","trap":"Existing System Fails"},{"question_type":"Other","question_name":"BellaVista ranking fell","difficulty":"Medium","correct":false,"time_secs":360,"prethink_quality":"solid","trap":"Entities Missing"},{"question_type":"Weaken","question_name":"MixIt Smoothie Makers","difficulty":"Medium","correct":true,"time_secs":390,"prethink_quality":"solid","trap":"Prethinking"},{"question_type":"Inference","question_name":"Fizz 1l and half variant","difficulty":"Medium","correct":true,"time_secs":640,"prethink_quality":"off-track","trap":"Table Data for inference"},{"question_type":"Strengthen","question_name":"Rent Stabilization","difficulty":"Medium","correct":true,"time_secs":650,"prethink_quality":"off-track","trap":"Strengthen with Similarity"},{"question_type":"Evaluate","question_name":"Govt School Teachers 7th pay commission","difficulty":"Medium","correct":false,"time_secs":710,"prethink_quality":"off-track","trap":"Disagreement Identification"},{"question_type":"Weaken","question_name":"Targania Exports","difficulty":"Medium","correct":false,"time_secs":250,"prethink_quality":"off-track","trap":"Unrelated to Conclusion"},{"question_type":"Inference","question_name":"STEM curriculum Riverside school","difficulty":"Medium","correct":false,"time_secs":630,"prethink_quality":null,"trap":"Out of scope"},{"question_type":"Strengthen","question_name":"Digital Infrastructure local companies","difficulty":"Medium","correct":false,"time_secs":620,"prethink_quality":"partial","trap":"Generalization"},{"question_type":"Strengthen","question_name":"Watching Sports Temporary Escape","difficulty":"Medium","correct":false,"time_secs":185,"prethink_quality":"off-track","trap":"Irrelevant Comparison"},{"question_type":"Evaluate","question_name":"Stars into Supernova","difficulty":"Medium","correct":false,"time_secs":442,"prethink_quality":"off-track","trap":"Correlation Vs Cause and Effect"},{"question_type":"Inference","question_name":"Riverside School new teaching method","difficulty":"Medium","correct":false,"time_secs":437,"prethink_quality":null,"trap":"Scope of Data Total Avg"},{"question_type":"Other","question_name":"MeloStream daily active users","difficulty":"Medium","correct":false,"time_secs":522,"prethink_quality":"partial","trap":"Question Stem Trap"},{"question_type":"Inference","question_name":"Health Conditions exercise daily","difficulty":"Medium","correct":false,"time_secs":430,"prethink_quality":null,"trap":"Correlation Vs Cause and Effect"},{"question_type":"Other","question_name":"Speed Limits in Bravia","difficulty":"Medium","correct":false,"time_secs":1007,"prethink_quality":"solid","trap":"Unclear Paradox Resolution"},{"question_type":"Evaluate","question_name":"Virulent Microbes WHO","difficulty":"Medium","correct":false,"time_secs":517,"prethink_quality":"partial","trap":"Not Related to conclusion"},{"question_type":"Strengthen","question_name":"Pressure Flaking Early Men","difficulty":"Medium","correct":false,"time_secs":690,"prethink_quality":"partial","trap":"Chronological discrepancy"},{"question_type":"Inference","question_name":"Discounted Fare Program","difficulty":"Medium","correct":false,"time_secs":720,"prethink_quality":"partial","trap":"Safe Choice Conundrum"},{"question_type":"Weaken","question_name":"BurgerMan Egg Vs Veg Sandwich","difficulty":"Medium","correct":false,"time_secs":382,"prethink_quality":"off-track","trap":"Assumed Worldly Logic"},{"question_type":"Bold Face","question_name":"Dramatic Elevation academic standards","difficulty":"Medium","correct":false,"time_secs":267,"prethink_quality":null,"trap":"Intermediate vs main conclusion"},{"question_type":"Other","question_name":"Investment Firm Vs Financial Regulator","difficulty":"Medium","correct":false,"time_secs":430,"prethink_quality":"partial","trap":"Contradiction Identification"},{"question_type":"Assumption","question_name":"Britains Car Industry Jaguar","difficulty":"Medium","correct":false,"time_secs":337,"prethink_quality":"off-track","trap":"Question Stem Trap"},{"question_type":"Inference","question_name":"Sniper vibrations of heartbeat","difficulty":"Medium","correct":false,"time_secs":220,"prethink_quality":null,"trap":"Improved version trap"},{"question_type":"Inference","question_name":"Business Major vs Psycho CS","difficulty":"Medium","correct":false,"time_secs":477,"prethink_quality":null,"trap":"Numbers Avg Trap"},{"question_type":"Other","question_name":"WestView Academy Software","difficulty":"Medium","correct":false,"time_secs":367,"prethink_quality":"off-track","trap":"Question Stem Trap"},{"question_type":"Weaken","question_name":"Searton RDV Players and Disks","difficulty":"Medium","correct":false,"time_secs":375,"prethink_quality":"partial","trap":"Existing System"},{"question_type":"Weaken","question_name":"GM vs Toyota Volt vs Prius","difficulty":"Medium","correct":false,"time_secs":407,"prethink_quality":"off-track","trap":"C causes B"},{"question_type":"Inference","question_name":"Decline in Manufacturing new products","difficulty":"Medium","correct":false,"time_secs":340,"prethink_quality":"solid","trap":"Short Term Vs Long Term"},{"question_type":"Evaluate","question_name":"Sarah assignment to TechFlow","difficulty":"Medium","correct":false,"time_secs":587,"prethink_quality":"partial","trap":"Cost-Benefit Analysis"},{"question_type":"Evaluate","question_name":"Two year vs Four year degree","difficulty":"Medium","correct":false,"time_secs":215,"prethink_quality":"solid","trap":"Negligence Too quick"},{"question_type":"Other","question_name":"Schools conforming to dress code","difficulty":"Medium","correct":false,"time_secs":257,"prethink_quality":null,"trap":"Attention To Details"},{"question_type":"Strengthen","question_name":"Country X Fish and Fish Oil","difficulty":"Medium","correct":false,"time_secs":555,"prethink_quality":"partial","trap":"Existing System"},{"question_type":"Bold Face","question_name":"Local Healthcare System","difficulty":"Medium","correct":false,"time_secs":337,"prethink_quality":null,"trap":"Missed Contradictory Word"},{"question_type":"Other","question_name":"Colonial Quilting Wealthy Women","difficulty":"Medium","correct":false,"time_secs":480,"prethink_quality":"off-track","trap":"Stick to Conclusion"},{"question_type":"Other","question_name":"Riverside School AI tutoring system","difficulty":"Medium","correct":false,"time_secs":680,"prethink_quality":null,"trap":"Good vs Bad Completion"},{"question_type":"Strengthen","question_name":"Cleanville recyclable waste","difficulty":"Medium","correct":false,"time_secs":347,"prethink_quality":"partial","trap":"Stick to Conclusion"},{"question_type":"Other","question_name":"Wississipi Solar Power","difficulty":"Medium","correct":false,"time_secs":370,"prethink_quality":"partial","trap":"Negligence Too quick"},{"question_type":"Other","question_name":"FlightStats United Airlines","difficulty":"Medium","correct":false,"time_secs":2850,"prethink_quality":"partial","trap":"Quant-Based CR Averages"},{"question_type":"Strengthen","question_name":"DuoChemicals for roads","difficulty":"Medium","correct":false,"time_secs":750,"prethink_quality":"off-track","trap":"Quant-Based"},{"question_type":"Inference","question_name":"Shipping Clerk Truax Construction","difficulty":"Hard","correct":false,"time_secs":627,"prethink_quality":"off-track","trap":"Word Missed"},{"question_type":"Inference","question_name":"Medieval Manuscripts Euripides","difficulty":"Hard","correct":false,"time_secs":680,"prethink_quality":"partial","trap":"Out of scope"},{"question_type":"Inference","question_name":"Travel Expenses Airplanes vs Other modes","difficulty":"Hard","correct":false,"time_secs":795,"prethink_quality":"off-track","trap":"Not Mentioned in the passage"},{"question_type":"Other","question_name":"Sealice Broughton Archipelago","difficulty":"Hard","correct":false,"time_secs":310,"prethink_quality":"partial","trap":"Misunderstood word meaning"},{"question_type":"Other","question_name":"Banks revitalize impoverished communities","difficulty":"Hard","correct":false,"time_secs":317,"prethink_quality":"off-track","trap":"Prethinking Missed"},{"question_type":"Other","question_name":"Films Barbizon Film Festival","difficulty":"Hard","correct":true,"time_secs":567,"prethink_quality":"solid","trap":"Simpsons Paradox"},{"question_type":"Other","question_name":"MorganVille Downtown vs SaveMart","difficulty":"Hard","correct":false,"time_secs":552,"prethink_quality":"partial","trap":"Conclusion not Addressed"},{"question_type":"Inference","question_name":"Forests Thailand Evergreen Vs Deciduous","difficulty":"Hard","correct":false,"time_secs":507,"prethink_quality":"off-track","trap":"Not Mentioned in the passage"},{"question_type":"Inference","question_name":"Advik Stores owned by Women","difficulty":"Hard","correct":false,"time_secs":740,"prethink_quality":null,"trap":"Table Data for inference"},{"question_type":"Inference","question_name":"Careful Pricing Voter approval","difficulty":"Hard","correct":false,"time_secs":550,"prethink_quality":null,"trap":"Not Mentioned in the passage"},{"question_type":"Inference","question_name":"Lyme Disease Deer Ticks","difficulty":"Hard","correct":false,"time_secs":565,"prethink_quality":null,"trap":"Not Mentioned in the passage"},{"question_type":"Weaken","question_name":"Suriland Farmers selling wheat","difficulty":"Hard","correct":false,"time_secs":1710,"prethink_quality":"partial","trap":"Hypothetical VS Current Situation"},{"question_type":"Other","question_name":"Digit Electronics BillBoards Strategy","difficulty":"Hard","correct":false,"time_secs":1825,"prethink_quality":"partial","trap":"Structure Identification"},{"question_type":"Weaken","question_name":"Transportation Analyst Parking Facilities","difficulty":"Hard","correct":true,"time_secs":640,"prethink_quality":"partial","trap":"Quant-Based CR Averages"},{"question_type":"Bold Face","question_name":"US and NewZealand DTC advertisements","difficulty":"Hard","correct":false,"time_secs":650,"prethink_quality":null,"trap":"Missed Keyword in Boldface"},{"question_type":"Strengthen","question_name":"Two Month Workplace Study group","difficulty":"Hard","correct":false,"time_secs":742,"prethink_quality":"partial","trap":"Supporting Evidence Study"},{"question_type":"Weaken","question_name":"Pharmaceutical Company No FDA","difficulty":"Hard","correct":false,"time_secs":442,"prethink_quality":"partial","trap":"Conclusion not Addressed"},{"question_type":"Inference","question_name":"Performance Metrics Objectivity Subjectivity","difficulty":"Hard","correct":false,"time_secs":455,"prethink_quality":"partial","trap":"Not Mentioned in the passage"},{"question_type":"Weaken","question_name":"Climatologist Alps human activity","difficulty":"Hard","correct":false,"time_secs":460,"prethink_quality":"partial","trap":"Misunderstood word meaning"},{"question_type":"Strengthen","question_name":"CS Students programming fundamentals","difficulty":"Hard","correct":false,"time_secs":352,"prethink_quality":"off-track","trap":"Extreme Choice"},{"question_type":"Strengthen","question_name":"Social Learning Academic Misconduct","difficulty":"Hard","correct":false,"time_secs":325,"prethink_quality":"partial","trap":null},{"question_type":"Inference","question_name":"COVID Customers Hospitality Real State","difficulty":"Hard","correct":false,"time_secs":342,"prethink_quality":"off-track","trap":"Table Data for inference"},{"question_type":"Weaken","question_name":"Conservation Easement of a land","difficulty":"Hard","correct":false,"time_secs":452,"prethink_quality":"partial","trap":"Topic Understanding"},{"question_type":"Strengthen","question_name":"Native American Camp New Dumaw Creek","difficulty":"Hard","correct":false,"time_secs":370,"prethink_quality":"partial","trap":"Relevant Words Misidentified"},{"question_type":"Weaken","question_name":"Recycling municipal solid waste","difficulty":"Hard","correct":false,"time_secs":457,"prethink_quality":"partial","trap":"Mild Weakener"},{"question_type":"Weaken","question_name":"Bicycle paths lanes commuters","difficulty":"Hard","correct":false,"time_secs":342,"prethink_quality":"off-track","trap":"B causes A"},{"question_type":"Weaken","question_name":"School District online tutoring platform","difficulty":"Hard","correct":false,"time_secs":422,"prethink_quality":"partial","trap":"Understanding"},{"question_type":"Strengthen","question_name":"Student Essays Computer vs Teachers","difficulty":"Hard","correct":false,"time_secs":242,"prethink_quality":"partial","trap":"Conclusion not Addressed"},{"question_type":"Other","question_name":"Mandatory Standardized Testing","difficulty":"Hard","correct":false,"time_secs":400,"prethink_quality":"off-track","trap":"Strengthen Conclusion Causation"},{"question_type":"Other","question_name":"Posthumous Publications","difficulty":"Hard","correct":false,"time_secs":397,"prethink_quality":"off-track","trap":"Conclusion not Addressed"},{"question_type":"Other","question_name":"Advanced Diagnostic Imaging Shutdown","difficulty":"Hard","correct":false,"time_secs":462,"prethink_quality":"partial","trap":"Conclusion not Addressed"},{"question_type":"Other","question_name":"Obesity in US FastFood","difficulty":"Hard","correct":false,"time_secs":525,"prethink_quality":null,"trap":"Missed Contradictory Word"},{"question_type":"Weaken","question_name":"Businesses development loans Govt tax","difficulty":"Hard","correct":false,"time_secs":580,"prethink_quality":"partial","trap":"Assumptions Made in Answer Choice"},{"question_type":"Inference","question_name":"High Resolution Satellite Nordic region","difficulty":"Hard","correct":false,"time_secs":512,"prethink_quality":null,"trap":"Not Mentioned in the passage"},{"question_type":"Inference","question_name":"University Book Store Engineering programs","difficulty":"Hard","correct":false,"time_secs":377,"prethink_quality":"off-track","trap":"Stress Fear Time Pressure"},{"question_type":"Other","question_name":"Attention Deficit James Morrison","difficulty":"Hard","correct":false,"time_secs":225,"prethink_quality":"partial","trap":"Memory instead of process"},{"question_type":"Evaluate","question_name":"Chimpanzee Grape Altruism Experiment","difficulty":"Hard","correct":false,"time_secs":310,"prethink_quality":"partial","trap":"Memory instead of process"},{"question_type":"Other","question_name":"Maplewood Library Book Reservations","difficulty":"Hard","correct":false,"time_secs":590,"prethink_quality":"partial","trap":"Scope of the Argument"}];
+
+let attempts=JSON.parse(localStorage.getItem('cr_attempts')||'null');
+if(!attempts){
+  attempts=SEED.map((a,i)=>({...a,id:i+1,logged_at:new Date(Date.now()-(SEED.length-i)*28800000).toISOString(),source:'excel'}));
+  localStorage.setItem('cr_attempts',JSON.stringify(attempts));
+}
+
+const TYPES=['Assumption','Weaken','Strengthen','Inference','Evaluate','Bold Face','Other'];
+const PQO=['solid','partial','off-track'];
+const PQL={solid:'🟢 Solid',partial:'🟡 Partial','off-track':'🔴 Off-track'};
+
+function pct(c,n){return n===0?0:Math.round(c/n*100)}
+function accCol(p){return p>=55?'var(--green)':p>=30?'var(--amber)':'var(--red)'}
+function fmtT(s){if(!s&&s!==0)return'—';return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+
+let _type=null,_diff=null,_res=null,_pq=null,_pqCls=null;
+let _tSecs=0,_tRun=false,_tInt=null;
+
+function selType(el,v){document.querySelectorAll('#type-chips .fchip').forEach(c=>c.classList.remove('active'));el.classList.add('active');_type=v;chkForm()}
+function selDiff(el,v){document.querySelectorAll('#diff-chips .fchip').forEach(c=>c.classList.remove('active'));el.classList.add('active');_diff=v;chkForm()}
+function selRes(el,v){
+  document.querySelectorAll('#res-chips .fchip').forEach(c=>c.classList.remove('active','c-active','w-active'));
+  el.classList.add('active',v==='correct'?'c-active':'w-active');_res=v;chkForm();
+}
+function selPQ(el,v,cls){
+  document.querySelectorAll('#pq-chips .fchip').forEach(c=>c.classList.remove('active','pqs-active','pqp-active','pqo-active'));
+  el.classList.add('active',cls);_pq=v;
+}
+function chkForm(){document.getElementById('submit-btn').disabled=!(_type&&_diff&&_res)}
+
+function timerStart(){if(_tRun)return;_tRun=true;_tInt=setInterval(()=>{_tSecs++;updTimer()},1000)}
+function timerPause(){_tRun=false;clearInterval(_tInt)}
+function timerReset(){timerPause();_tSecs=0;updTimer()}
+function updTimer(){document.getElementById('timer-display').textContent=Math.floor(_tSecs/60)+':'+String(_tSecs%60).padStart(2,'0')}
+
+function submitAttempt(){
+  const a={id:Date.now(),logged_at:new Date().toISOString(),source:'manual',
+    question_type:_type,difficulty:_diff,correct:_res==='correct',
+    time_secs:_tSecs,prethink_quality:_pq,
+    question_name:document.getElementById('qname').value.trim()||null,
+    trap:document.getElementById('qtrap').value.trim()||null,
+    comments:document.getElementById('qnotes').value.trim()||null};
+  attempts.push(a);
+  localStorage.setItem('cr_attempts',JSON.stringify(attempts));
+  timerReset();
+  _type=_diff=_res=_pq=null;
+  document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('active','c-active','w-active','pqs-active','pqp-active','pqo-active'));
+  ['qname','qtrap','qnotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('submit-btn').disabled=true;
+  const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);
+  render();
+}
+
+function showTab(name){
+  ['analytics','log','entry'].forEach(t=>{document.getElementById('tab-'+t).style.display=t===name?'block':'none'});
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['analytics','log','entry'][i]===name));
+}
+
+function render(){
+  const total=attempts.length;
+  const correct=attempts.filter(a=>a.correct===true).length;
+  const overall=pct(correct,total);
+  const solidA=attempts.filter(a=>a.prethink_quality==='solid');
+  const solidAcc=pct(solidA.filter(a=>a.correct).length,solidA.length);
+  const noP=attempts.filter(a=>!a.prethink_quality||a.prethink_quality==='off-track');
+  const noPAcc=pct(noP.filter(a=>a.correct).length,noP.length);
+  const lift=solidAcc-noPAcc;
+  const avgT=Math.round(attempts.filter(a=>a.time_secs).reduce((s,a)=>s+a.time_secs,0)/attempts.filter(a=>a.time_secs).length);
+
+  // Date
+  document.getElementById('tb-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  // Topbar chips
+  document.getElementById('tb-chips').innerHTML=`
+    <div class="t-chip ${overall>=50?'green':overall>=25?'amber':'red'}"><i class="ti ti-target"></i>${overall}% accuracy</div>
+    <div class="t-chip indigo"><i class="ti ti-list-check"></i>${total} attempts</div>
+    <div class="t-chip green"><i class="ti ti-brain"></i>${solidAcc}% w/ solid prethink</div>
+    <div class="t-chip ${lift>10?'green':'amber'}"><i class="ti ti-trending-up"></i>+${lift}pp prethink lift</div>
+    <div class="t-chip"><i class="ti ti-clock"></i>Avg ${fmtT(avgT)}</div>
+  `;
+
+  // Type stats
+  const byType={};TYPES.forEach(t=>byType[t]={c:0,n:0});
+  attempts.forEach(a=>{const t=a.question_type||'Other';if(!byType[t])byType[t]={c:0,n:0};byType[t].n++;if(a.correct)byType[t].c++});
+
+  // Sidebar types
+  document.getElementById('sb-types').innerHTML=TYPES.map(t=>{
+    const{c,n}=byType[t]||{c:0,n:0};const p=pct(c,n);
+    const cls=!n?'':p>=50?'green':p>=25?'amber':'red';
+    return`<div class="sb-topic-row"><span>${t}</span><span class="sb-topic-badge ${cls}">${n?p+'%':'—'}</span></div>`;
+  }).join('');
+
+  // Sidebar diff
+  const dM=attempts.filter(a=>a.difficulty==='Medium');
+  const dH=attempts.filter(a=>a.difficulty==='Hard');
+  const pM=pct(dM.filter(a=>a.correct).length,dM.length);
+  const pH=pct(dH.filter(a=>a.correct).length,dH.length);
+  document.getElementById('sb-diff').innerHTML=`
+    <div class="sb-topic-row"><span>Medium</span><span class="sb-topic-badge ${pM>=50?'green':pM>=25?'amber':'red'}">${pM}%</span></div>
+    <div class="sb-topic-row"><span>Hard</span><span class="sb-topic-badge ${pH>=50?'green':pH>=25?'amber':'red'}">${pH}%</span></div>
+  `;
+
+  // Insight banner
+  const worstT=TYPES.slice().sort((a,b)=>pct(byType[a].c,byType[a].n)-pct(byType[b].c,byType[b].n))[0];
+  const wAcc=pct(byType[worstT].c,byType[worstT].n);
+  const insightText=lift>15
+    ?`Solid prethinking gives you <strong>+${lift}pp</strong> accuracy — your biggest single lever. Of ${solidA.length} attempts with a solid prethink, ${solidA.filter(a=>a.correct).length} were correct. The fix: force the Ask-the-Question and Framework stages before any answer choice. Weakest type: <strong>${worstT}</strong> at <strong>${wAcc}%</strong>.`
+    :`The collapse is happening post-prethink, at the answer-choice elimination stage. Solid prethink only gets you to ${solidAcc}% — check Correct Choice Analysis. Your top traps confirm this. Weakest type: <strong>${worstT}</strong> at <strong>${wAcc}%</strong> across ${byType[worstT].n} attempts.`;
+  document.getElementById('insight-banner').innerHTML=`
+    <div class="insight-orb">🔍</div>
+    <div>
+      <div class="insight-label">Sheldon Analysis — Pattern Detected</div>
+      <div class="insight-text">${insightText}</div>
+    </div>`;
+
+  // Hero cards
+  document.getElementById('hero-cards').innerHTML=`
+    <div class="card">
+      <div class="card-eyebrow">Total Attempts <i class="ti ti-list-numbers"></i></div>
+      <div class="big-num indigo">${total}</div>
+      <div class="card-sub">${attempts.filter(a=>a.source==='excel').length} from error log · ${attempts.filter(a=>a.source==='manual').length} manual</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Overall Accuracy <i class="ti ti-target"></i></div>
+      <div class="big-num ${overall>=50?'green':overall>=25?'amber':'red'}">${overall}%</div>
+      <div class="card-sub">${correct} correct · ${total-correct} wrong</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Solid Prethink Acc. <i class="ti ti-brain"></i></div>
+      <div class="big-num green">${solidAcc}%</div>
+      <div class="card-sub">${solidA.length} attempts with solid prethink</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Avg. Time / Question <i class="ti ti-clock"></i></div>
+      <div class="big-num white">${fmtT(avgT)}</div>
+      <div class="card-sub">Target: under 2:00 per CR</div>
+    </div>`;
+
+  // Type bars
+  document.getElementById('type-bars').innerHTML=TYPES.map(t=>{
+    const{c,n}=byType[t]||{c:0,n:0};const p=pct(c,n);const col=accCol(p);
+    return`<div class="acc-row">
+      <div class="acc-label">${t}</div>
+      <div class="acc-track"><div class="acc-fill" style="width:${p}%;background:${col}"></div></div>
+      <div class="acc-pct" style="color:${col}">${p}%</div>
+      <div class="acc-n">${n}q</div>
+    </div>`;
+  }).join('');
+
+  // Prethink matrix
+  const byPQ={solid:{c:0,n:0},partial:{c:0,n:0},'off-track':{c:0,n:0}};
+  attempts.forEach(a=>{const pq=a.prethink_quality;if(pq&&byPQ[pq]){byPQ[pq].n++;if(a.correct)byPQ[pq].c++}});
+  const maxPQN=Math.max(...Object.values(byPQ).map(v=>v.n));
+  document.getElementById('prethink-matrix').innerHTML=PQO.map(pq=>{
+    const{c,n}=byPQ[pq];const p=pct(c,n);const col=accCol(p);
+    return`<div class="matrix-row">
+      <div class="matrix-label">${PQL[pq]}</div>
+      <div class="matrix-track"><div class="matrix-fill" style="width:${maxPQN?Math.round(n/maxPQN*100):0}%;background:${col}"></div></div>
+      <div class="matrix-pct" style="color:${col}">${p}%</div>
+      <div class="matrix-n">${n} att.</div>
+    </div>`;
+  }).join('');
+
+  // Stacked
+  document.getElementById('prethink-stacked').innerHTML=TYPES.map(t=>{
+    const ta=attempts.filter(a=>a.question_type===t);if(!ta.length)return'';
+    const s=ta.filter(a=>a.prethink_quality==='solid').length;
+    const p=ta.filter(a=>a.prethink_quality==='partial').length;
+    const o=ta.filter(a=>a.prethink_quality==='off-track').length;
+    const tot=ta.length;
+    return`<div class="stack-row">
+      <div class="stack-header"><span class="stack-label">${t}</span><span class="stack-count">${tot}q</span></div>
+      <div class="stack-bar">
+        <div style="width:${pct(s,tot)}%;background:var(--green)"></div>
+        <div style="width:${pct(p,tot)}%;background:var(--amber)"></div>
+        <div style="width:${pct(o,tot)}%;background:var(--red)"></div>
+        <div style="flex:1;background:rgba(255,255,255,0.05)"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Traps
+  const tC={};attempts.forEach(a=>{if(a.trap){const k=a.trap.replace(/\n/g,' ').trim();tC[k]=(tC[k]||0)+1}});
+  const sortedT=Object.entries(tC).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const mxT=sortedT[0]?.[1]||1;
+  document.getElementById('trap-list').innerHTML=sortedT.map(([name,cnt],i)=>`
+    <div class="trap-row">
+      <div class="trap-rank">${i+1}</div>
+      <div class="trap-name">${name.substring(0,40)}${name.length>40?'…':''}</div>
+      <div style="flex:1"><div class="trap-bar" style="width:${Math.round(cnt/mxT*100)}%;opacity:${0.35+cnt/mxT*0.65}"></div></div>
+      <div class="trap-n">${cnt}</div>
+    </div>`).join('');
+
+  // Diff breakdown
+  let diffHTML='';
+  ['Medium','Hard'].forEach((d,i)=>{
+    const da=attempts.filter(a=>a.difficulty===d);
+    const dc=da.filter(a=>a.correct).length;
+    const dp=pct(dc,da.length);
+    const col=accCol(dp);
+    const ptR=pct(da.filter(a=>a.prethink_quality==='solid').length,da.length);
+    diffHTML+=`<div class="diff-block">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:10px">
+        <span class="diff-badge ${d}">${d}</span>
+        <span style="font-family:'Fraunces',serif;font-size:30px;font-weight:600;color:${col};line-height:1">${dp}%</span>
+        <span style="font-size:11px;color:var(--text-muted)">${da.length} questions</span>
+      </div>
+      <div class="acc-track" style="height:4px;margin-bottom:10px"><div class="acc-fill" style="width:${dp}%;background:${col}"></div></div>
+      <div style="display:flex;gap:14px">
+        <span style="font-size:11px;color:var(--text-tertiary)">${dc} correct · ${da.length-dc} wrong</span>
+        <span style="font-size:11px;color:var(--text-tertiary)">Solid prethink: <span style="color:var(--green)">${ptR}%</span></span>
+      </div>
+    </div>`;
+  });
+  document.getElementById('diff-breakdown').innerHTML=diffHTML;
+
+  // Log table
+  document.getElementById('log-count').textContent=attempts.length;
+  document.getElementById('log-tbody').innerHTML=[...attempts].reverse().map((a,i)=>{
+    const pqCls=a.prethink_quality==='solid'?'solid':a.prethink_quality==='partial'?'partial':a.prethink_quality==='off-track'?'off':null;
+    const pqTag=pqCls?`<span class="tag tag-${pqCls}">${a.prethink_quality}</span>`:`<span style="color:var(--text-muted);font-size:10px">—</span>`;
+    const trap=a.trap?`<span style="font-size:11px;color:var(--text-tertiary)">${a.trap.substring(0,32)}${a.trap.length>32?'…':''}</span>`:`<span style="color:var(--text-muted)">—</span>`;
+    return`<tr>
+      <td style="color:var(--text-muted);font-size:10px">${attempts.length-i}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-secondary)">${a.question_name||'—'}</td>
+      <td><span class="tag tag-type">${a.question_type}</span></td>
+      <td><span class="diff-badge ${a.difficulty}">${a.difficulty}</span></td>
+      <td><span class="tag ${a.correct?'tag-correct':'tag-wrong'}">${a.correct?'✓':'✗'}</span></td>
+      <td style="color:var(--text-tertiary);font-size:11px">${fmtT(a.time_secs)}</td>
+      <td>${pqTag}</td>
+      <td>${trap}</td>
+    </tr>`;
+  }).join('');
+
+  // Quick stats
+  document.getElementById('quick-stats').innerHTML=TYPES.slice(0,5).map(t=>{
+    const{c,n}=byType[t]||{c:0,n:0};const p=pct(c,n);const col=accCol(p);
+    return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+      <span style="font-size:11px;color:var(--text-tertiary);width:88px;flex-shrink:0">${t}</span>
+      <div class="acc-track" style="flex:1"><div class="acc-fill" style="width:${p}%;background:${col}"></div></div>
+      <span style="font-size:11px;font-weight:700;color:${col};width:28px;text-align:right">${p}%</span>
+    </div>`;
+  }).join('');
+}
+
+render();
+</script>
+</body>
+</html>
