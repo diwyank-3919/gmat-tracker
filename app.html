@@ -13919,7 +13919,11 @@ async function buildCRSessionContext(supa, userId, limit = 15) {
         var _memBlock = typeof window.buildSheldonMemoryContext === 'function' ? window.buildSheldonMemoryContext() : '';
         if (_memBlock) _msgPayload = _memBlock + _msgPayload;
         /* inject CR session history (parsed accuracy from notes) on every message */
-        buildCRSessionContext(supa, uid).then(function(_crBlock) {
+        /* inject CR session history (parsed accuracy from notes) on every message */
+        supa.auth.getSession().then(function(sessRes) {
+            var _authUid = sessRes && sessRes.data && sessRes.data.session && sessRes.data.session.user && sessRes.data.session.user.id;
+            return _authUid ? buildCRSessionContext(supa, _authUid) : Promise.resolve('');
+        }).then(function(_crBlock) {
             if (_crBlock) _msgPayload = _crBlock + _msgPayload;
             supa.functions.invoke('sheldon', {
                 body: { message: _msgPayload, context: _ctx, history: sheldonHistory.slice(0, -1).slice(-6) }
