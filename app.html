@@ -13853,6 +13853,12 @@
             });
             return block;
         }
+        function buildNoticesContextBlock(notices) {
+            if (!notices || !notices.length) return '';
+            var block = '\n[SHELDON NOTICES — patterns detected in user data, mention naturally if relevant, do not just list them]\n';
+            notices.forEach(function (n) { block += '- (' + n.severity + ') ' + n.text + '\n'; });
+            return block;
+        }
 
         function buildSheldonContext() {
             var tot = sessions.reduce(function (a, s) { return a + s.mins; }, 0);
@@ -13922,12 +13928,21 @@
             var _memBlock = typeof window.buildSheldonMemoryContext === 'function' ? window.buildSheldonMemoryContext() : '';
             if (_memBlock) _msgPayload = _memBlock + _msgPayload;
             /* inject CR session history (parsed accuracy from notes) on every message */
-            /* inject CR session history (parsed accuracy from notes) on every message */
             supa.auth.getSession().then(function (sessRes) {
                 var _authUid = sessRes && sessRes.data && sessRes.data.session && sessRes.data.session.user && sessRes.data.session.user.id;
                 return _authUid ? buildCRSessionContext(supa, _authUid) : Promise.resolve('');
             }).then(function (_crBlock) {
                 if (_crBlock) _msgPayload = _crBlock + _msgPayload;
+
+                /* inject Sheldon Notices so Sheldon can mention them unprompted */
+                if (typeof computeSheldonNotices === 'function') {
+                    var _crSessForNotices = (typeof sessions !== 'undefined' && sessions) ? sessions.filter(function (s) { return s.topic === 'CR' && !s.deleted; }) : [];
+                    var _attemptsForNotices = (typeof window._crAttemptsCache !== 'undefined') ? window._crAttemptsCache : [];
+                    var _notices = computeSheldonNotices(_attemptsForNotices, _crSessForNotices);
+                    var _noticesBlock = (typeof buildNoticesContextBlock === 'function') ? buildNoticesContextBlock(_notices) : '';
+                    if (_noticesBlock) _msgPayload = _noticesBlock + _msgPayload;
+                }
+
                 supa.functions.invoke('sheldon', {
                     body: { message: _msgPayload, context: _ctx, history: sheldonHistory.slice(0, -1).slice(-6) }
                 }).then(function (res) {
@@ -22241,6 +22256,92 @@
     <script id="sheldon-nudge-js">
         (function () {
             var NUDGE_KEY = 'sc_nudge_date';
+            function computeSheldonNotices(attemptsArr, sessionsArr) {
+                var notices = [];
+                attemptsArr = attemptsArr || [];
+                sessionsArr = sessionsArr || [];
+                function _pct(c, n) { return n === 0 ? 0 : Math.round((c / n) * 100); }
+
+                var solid = attemptsArr.filter(function (a) { return a.prethink_quality === 'solid'; });
+                var weak = attemptsArr.filter(function (a) { return !a.prethink_quality || a.prethink_quality === 'off-track'; });
+                if (solid.length >= 5 && weak.length >= 5) {
+                    var solidAcc = _pct(solid.filter(function (a) { return a.correct; }).length, solid.length);
+                    var weakAcc = _pct(weak.filter(function (a) { return a.correct; }).length, weak.length);
+                    var lift = solidAcc - weakAcc;
+                    if (lift >= 15) notices.push({ id: 'prethink_lift', severity: 'positive', text: 'Solid prethinking gives you +' + lift + 'pp accuracy (' + solidAcc + '% vs ' + weakAcc + '%) — your single biggest lever right now.' });
+                }
+
+                var byType = {};
+                attemptsArr.forEach(function (a) {
+                    var t = a.question_type || 'Other';
+                    if (!byType[t]) byType[t] = { c: 0, n: 0 };
+                    byType[t].n++;
+                    if (a.correct) byType[t].c++;
+                });
+                var eligible = Object.keys(byType).filter(function (t) { return byType[t].n >= 5; });
+                if (eligible.length) {
+                    var worstType = eligible.sort(function (a, b) { return _pct(byType[a].c, byType[a].n) - _pct(byType[b].c, byType[b].n); })[0];
+                    var wAcc = _pct(byType[worstType].c, byType[worstType].n);
+                    if (wAcc < 40) notices.push({ id: 'worst_type', severity: 'warning', text: worstType + ' accuracy is ' + wAcc + '% across ' + byType[worstType].n + ' attempts — your weakest CR question type right now.' });
+                }
+
+                var sortedA = attemptsArr.slice().sort(function (a, b) { return new Date(a.logged_at) - new Date(b.logged_at); });
+                if (sortedA.length >= 10) {
+                    var last5 = sortedA.slice(-5);
+                    var prior5 = sortedA.slice(-10, -5);
+                    var lastAcc = _pct(last5.filter(function (a) { return a.correct; }).length, 5);
+                    var priorAcc = _pct(prior5.filter(function (a) { return a.correct; }).length, 5);
+                    var delta = lastAcc - priorAcc;
+                    if (delta <= -20) notices.push({ id: 'recent_decline', severity: 'warning', text: 'Your last 5 attempts dropped to ' + lastAcc + '% accuracy, down from ' + priorAcc + '% in the previous 5 — worth a quick reset before pushing more volume.' });
+                    else if (delta >= 20) notices.push({ id: 'recent_improvement', severity: 'positive', text: 'Your last 5 attempts jumped to ' + lastAcc + '% accuracy, up from ' + priorAcc + '% — whatever you just changed is working.' });
+                }
+
+                if (sessionsArr.length) {
+                    var mostRecent = sessionsArr.reduce(function (latest, s) { return new Date(s.date) > new Date(latest.date) ? s : latest; });
+                    var daysSince = Math.floor((Date.now() - new Date(mostRecent.date)) / 86400000);
+                    if (daysSince >= 3) notices.push({ id: 'stale_topic', severity: 'warning', text: 'CR hasn\'t been touched in ' + daysSince + ' days — a short focused session would close the gap.' });
+                }
+
+                function _parseAcc(noteText) {
+                    if (!noteText) return null;
+                    var m = noteText.match(/(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)\s*%/) || noteText.match(/accuracy[\s:-]*(\d+)\s*\/\s*(\d+)/i);
+                    if (!m) return null;
+                    var correct = parseInt(m[1], 10), total = parseInt(m[2], 10);
+                    var p = m[3] ? parseInt(m[3], 10) : Math.round((correct / total) * 100);
+                    return total > 0 ? p : null;
+                }
+                var scoredSessions = sessionsArr.map(function (s) { return { date: s.date, acc: _parseAcc(s.notes) }; })
+                    .filter(function (s) { return s.acc !== null; })
+                    .sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+                if (scoredSessions.length >= 3) {
+                    var streak = 1, best = 1;
+                    for (var i = 1; i < scoredSessions.length; i++) {
+                        if (scoredSessions[i].acc >= scoredSessions[i - 1].acc) { streak++; if (streak > best) best = streak; }
+                        else streak = 1;
+                    }
+                    if (best >= 3) notices.push({ id: 'improving_streak', severity: 'positive', text: 'You\'re on a ' + best + '-session improving streak in CR accuracy — keep the momentum going.' });
+                }
+
+                var PRIORITY = { stale_topic: 1, recent_decline: 2, worst_type: 3, prethink_lift: 4, recent_improvement: 5, improving_streak: 6 };
+                notices.sort(function (a, b) { return (PRIORITY[a.id] || 99) - (PRIORITY[b.id] || 99); });
+                return notices.slice(0, 3);
+            }
+            /* ── Fetch cr_attempts once, cache for notice rules ── */
+            function fetchCRAttemptsCache() {
+                return getUid().then(function (uid) {
+                    if (!uid) { window._crAttemptsCache = []; return; }
+                    return supa.from('cr_attempts')
+                        .select('*')
+                        .eq('user_id', uid)
+                        .order('logged_at', { ascending: true })
+                        .limit(2000)
+                        .then(function (res) {
+                            window._crAttemptsCache = (res && res.data) || [];
+                        });
+                }).catch(function () {
+                    window._crAttemptsCache = [];
+                });
+            }
 
             /* ── Build the nudge message from live dashboard data ── */
             function buildNudge() {
@@ -22371,6 +22472,71 @@
                 });
             }
 
+            /* ── Inject Sheldon Notices container (separate from nudge banner) ── */
+            function injectNoticesContainer() {
+                if (document.getElementById('sh-notices-wrap')) return;
+                var dash = document.getElementById('view-dashboard');
+                if (!dash) return;
+                var wrap = document.createElement('div');
+                wrap.id = 'sh-notices-wrap';
+                wrap.style.cssText = 'display:flex;flex-direction:column;gap:7px;margin-bottom:14px';
+                dash.insertBefore(wrap, dash.firstChild);
+            }
+
+            /* ── Render Sheldon Notices (up to 3, each independently dismissible) ── */
+            function renderDashboardNotices() {
+                if (typeof computeSheldonNotices !== 'function') return;
+                if (typeof sessions === 'undefined' || !sessions) return;
+
+                var crSessions = sessions.filter(function (s) { return s.topic === 'CR' && !s.deleted; });
+                var attemptsForNotices = (typeof window._crAttemptsCache !== 'undefined') ? window._crAttemptsCache : [];
+
+                var notices = computeSheldonNotices(attemptsForNotices, crSessions);
+
+                getUid().then(function (uid) {
+                    if (!uid) { paintNotices(notices, []); return; }
+                    supa.from('sheldon_notice_dismissals')
+                        .select('notice_id, dismissed_until')
+                        .eq('user_id', uid)
+                        .gt('dismissed_until', new Date().toISOString())
+                        .then(function (res) {
+                            var dismissedIds = (res.data || []).map(function (d) { return d.notice_id; });
+                            paintNotices(notices, dismissedIds);
+                        });
+                });
+            }
+
+            function paintNotices(notices, dismissedIds) {
+                injectNoticesContainer();
+                var wrap = document.getElementById('sh-notices-wrap');
+                if (!wrap) return;
+                var visible = notices.filter(function (n) { return dismissedIds.indexOf(n.id) === -1; });
+                if (!visible.length) { wrap.innerHTML = ''; return; }
+                wrap.innerHTML = visible.map(function (n) {
+                    var color = n.severity === 'positive' ? '#46c98f' : '#f0bd6a';
+                    var icon = n.severity === 'positive' ? 'ti-check' : 'ti-alert-triangle';
+                    return '<div class="sh-dash-notice" data-notice-id="' + n.id + '" style="display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.025);font-size:12px;color:var(--text-secondary,#9ca3af)">' +
+                        '<i class="ti ' + icon + '" style="color:' + color + ';font-size:14px;flex-shrink:0"></i>' +
+                        '<span style="flex:1;line-height:1.4">' + n.text + '</span>' +
+                        '<button onclick="window._dismissDashNotice(\'' + n.id + '\')" style="width:18px;height:18px;border-radius:5px;border:none;background:none;color:var(--text-tertiary,#6b7280);cursor:pointer;font-size:14px;flex-shrink:0">&times;</button>' +
+                        '</div>';
+                }).join('');
+            }
+
+            window._dismissDashNotice = function (noticeId) {
+                getUid().then(function (uid) {
+                    if (!uid) return;
+                    var until = new Date(Date.now() + 7 * 86400000).toISOString();
+                    supa.from('sheldon_notice_dismissals').upsert(
+                        { user_id: uid, notice_id: noticeId, dismissed_at: new Date().toISOString(), dismissed_until: until },
+                        { onConflict: 'user_id,notice_id' }
+                    ).then(function () {
+                        var el = document.querySelector('[data-notice-id="' + noticeId + '"]');
+                        if (el) el.remove();
+                    });
+                });
+            };
+
             /* ── Inject FAB badge ── */
             function injectFabBadge() {
                 var core = document.getElementById('sheldonCore');
@@ -22449,6 +22615,8 @@
 
                 /* need sessions to be loaded */
                 if (typeof sessions === 'undefined' || !sessions) return;
+
+                fetchCRAttemptsCache().then(renderDashboardNotices);
 
                 var data = buildNudge();
                 if (!data) return;
