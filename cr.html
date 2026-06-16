@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@500,700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px;height:100%}
@@ -425,7 +426,123 @@ textarea.finput{resize:none;font-size:12px;line-height:1.5}
 }
 .toast.show{opacity:1}
 
-/* ── SCROLLBARS ── */
+/* ── JOURNEY BUTTON ── */
+.journey-btn{
+  display:flex;align-items:center;gap:8px;
+  font-family:'Satoshi',sans-serif;font-size:12.5px;font-weight:700;
+  padding:10px 18px;border-radius:10px;border:1px solid var(--border-accent);
+  background:linear-gradient(135deg,rgba(139,124,248,0.18),rgba(95,217,168,0.10));
+  color:var(--accent-bright);cursor:pointer;
+  box-shadow:0 4px 18px rgba(139,124,248,0.18);
+  transition:all .2s;margin-bottom:18px;width:100%;justify-content:center;
+}
+.journey-btn:hover{
+  background:linear-gradient(135deg,rgba(139,124,248,0.28),rgba(95,217,168,0.16));
+  transform:translateY(-1px);
+  box-shadow:0 8px 28px rgba(139,124,248,0.28);
+}
+.journey-btn i{font-size:16px}
+
+/* ── JOURNEY MODAL ── */
+.journey-overlay{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(8,6,16,0.78);
+  backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;
+  padding:24px;
+  animation:overlayFade .25s ease;
+}
+.journey-overlay.show{display:flex}
+@keyframes overlayFade{from{opacity:0}to{opacity:1}}
+
+.journey-modal{
+  width:100%;max-width:980px;max-height:90vh;overflow-y:auto;
+  background:linear-gradient(165deg,rgba(24,18,40,0.97),rgba(15,12,26,0.99));
+  border:1px solid var(--border);
+  border-radius:20px;
+  box-shadow:0 24px 80px rgba(0,0,0,0.55),0 0 0 1px rgba(139,124,248,0.12),0 1px 0 rgba(255,255,255,0.08) inset;
+  padding:28px 30px 32px;
+  animation:modalRise .35s cubic-bezier(.22,1,.36,1);
+  position:relative;
+}
+@keyframes modalRise{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+.journey-modal::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:120px;
+  background:radial-gradient(ellipse 60% 100% at 50% 0%,rgba(139,124,248,0.14) 0%,transparent 70%);
+  border-radius:20px 20px 0 0;pointer-events:none;
+}
+
+.journey-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;position:relative;z-index:1}
+.journey-title{font-family:'Clash Display',sans-serif;font-size:24px;font-weight:700;letter-spacing:-0.4px;
+  background:linear-gradient(135deg,#fff,#c9c2f5);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.journey-sub{font-size:12px;color:var(--text-tertiary);margin-top:3px}
+.journey-close{
+  width:32px;height:32px;border-radius:9px;border:1px solid var(--border-subtle);
+  background:var(--bg-card);color:var(--text-tertiary);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  transition:all .15s;flex-shrink:0;
+}
+.journey-close:hover{background:var(--bg-card-hover);color:var(--text-primary)}
+
+.journey-controls{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin:18px 0 8px;flex-wrap:wrap;
+}
+.seg-control{
+  display:flex;background:var(--bg-card);border:1px solid var(--border-subtle);
+  border-radius:9px;padding:3px;gap:2px;
+}
+.seg-btn{
+  font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;
+  padding:6px 13px;border-radius:7px;border:none;background:none;
+  color:var(--text-tertiary);cursor:pointer;transition:all .15s;
+}
+.seg-btn.active{background:var(--accent-soft);color:var(--accent-bright);box-shadow:0 1px 0 rgba(255,255,255,0.06) inset}
+
+.type-select{
+  font-family:'Satoshi',sans-serif;font-size:11.5px;font-weight:600;
+  background:var(--bg-card);border:1px solid var(--border-subtle);
+  color:var(--text-secondary);padding:7px 12px;border-radius:9px;
+  outline:none;cursor:pointer;
+}
+
+.journey-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0 20px}
+.j-stat{
+  background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);
+  border-radius:11px;padding:13px 14px;text-align:center;
+  transition:transform .2s;
+}
+.j-stat:hover{transform:translateY(-2px)}
+.j-stat-val{font-family:'Fraunces',serif;font-size:24px;font-weight:600;line-height:1;margin-bottom:3px}
+.j-stat-label{font-size:9.5px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted)}
+
+.journey-chart-wrap{
+  position:relative;height:340px;
+  background:rgba(255,255,255,0.02);
+  border:1px solid var(--border-subtle);
+  border-radius:14px;padding:18px 14px 8px;
+}
+
+.journey-empty{
+  text-align:center;padding:60px 20px;color:var(--text-tertiary);
+}
+.journey-empty i{font-size:40px;color:var(--text-muted);margin-bottom:14px;display:block}
+
+.milestone-strip{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.milestone-chip{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:600;padding:6px 12px;border-radius:20px;
+  border:1px solid var(--border-subtle);background:rgba(255,255,255,0.03);
+  color:var(--text-secondary);
+}
+.milestone-chip.peak{border-color:rgba(52,211,153,0.3);background:var(--green-soft);color:var(--green)}
+.milestone-chip.streak{border-color:var(--border-accent);background:var(--accent-soft);color:var(--accent-bright)}
+.milestone-chip i{font-size:13px}
+
+
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px}
@@ -512,6 +629,10 @@ textarea.finput{resize:none;font-size:12px;line-height:1.5}
     <!-- ANALYTICS -->
     <div id="tab-analytics" class="content-area">
       <div id="insight-banner" class="insight-banner"></div>
+
+      <button class="journey-btn" onclick="openJourney()">
+        <i class="ti ti-chart-line"></i> View CR Journey — see your accuracy climb over time
+      </button>
 
       <div class="eyebrow">Overview</div>
       <div class="grid-4" id="hero-cards"></div>
@@ -646,6 +767,42 @@ textarea.finput{resize:none;font-size:12px;line-height:1.5}
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- JOURNEY MODAL -->
+<div class="journey-overlay" id="journey-overlay" onclick="if(event.target===this)closeJourney()">
+  <div class="journey-modal">
+    <div class="journey-header">
+      <div>
+        <div class="journey-title">Your CR Journey</div>
+        <div class="journey-sub" id="journey-sub">Tracking accuracy across logged study sessions</div>
+      </div>
+      <button class="journey-close" onclick="closeJourney()"><i class="ti ti-x"></i></button>
+    </div>
+
+    <div class="journey-controls">
+      <div class="seg-control" id="journey-xaxis-toggle">
+        <button class="seg-btn active" onclick="setJourneyXAxis('session',this)">By Session</button>
+        <button class="seg-btn" onclick="setJourneyXAxis('date',this)">By Date</button>
+      </div>
+      <select class="type-select" id="journey-type-filter" onchange="renderJourneyChart()">
+        <option value="all">All CR Sessions</option>
+      </select>
+    </div>
+
+    <div class="journey-stat-row" id="journey-stats"></div>
+
+    <div class="journey-chart-wrap">
+      <canvas id="journey-canvas"></canvas>
+      <div id="journey-empty-state" class="journey-empty" style="display:none">
+        <i class="ti ti-chart-line"></i>
+        <div style="font-size:14px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">No scored CR sessions yet</div>
+        <div style="font-size:12px">Log a session with an accuracy note (e.g. "6/10=60%") to start your journey graph.</div>
+      </div>
+    </div>
+
+    <div class="milestone-strip" id="journey-milestones"></div>
   </div>
 </div>
 
@@ -994,6 +1151,217 @@ function render(){
       <span style="font-size:11px;font-weight:700;color:${col};width:28px;text-align:right">${p}%</span>
     </div>`;
   }).join('');
+}
+
+// ══════════════════════════════════════════
+// CR JOURNEY — session-notes parsing + chart
+// ══════════════════════════════════════════
+let _journeySessions = [];
+let _journeyChart = null;
+let _journeyXAxis = 'session';
+let _journeyTagPool = [];
+
+function parseCRAccuracy(noteText) {
+  if (!noteText) return null;
+  const patterns = [
+    /(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)\s*%/,
+    /accuracy[\s:-]*(\d+)\s*\/\s*(\d+)/i,
+  ];
+  for (const re of patterns) {
+    const m = noteText.match(re);
+    if (m) {
+      const correct = parseInt(m[1], 10);
+      const total = parseInt(m[2], 10);
+      const pct = m[3] ? parseInt(m[3], 10) : Math.round((correct / total) * 100);
+      if (total > 0 && !isNaN(pct)) return { correct, total, pct };
+    }
+  }
+  return null;
+}
+
+function guessSessionTag(notes) {
+  if (!notes) return 'General';
+  const n = notes.toLowerCase();
+  if (n.includes('mixed bag')) return 'Mixed Bag';
+  if (n.includes('reviewing')) return 'Review';
+  if (n.includes('hard')) return 'Hard Drill';
+  if (n.includes('med')) return 'Medium Drill';
+  if (n.includes('quiz')) return 'Quiz';
+  return 'General';
+}
+
+async function openJourney() {
+  document.getElementById('journey-overlay').classList.add('show');
+  await loadJourneySessions();
+  renderJourneyChart();
+}
+function closeJourney() {
+  document.getElementById('journey-overlay').classList.remove('show');
+}
+function setJourneyXAxis(mode, el) {
+  _journeyXAxis = mode;
+  document.querySelectorAll('#journey-xaxis-toggle .seg-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderJourneyChart();
+}
+
+async function loadJourneySessions() {
+  const { data, error } = await supa
+    .from('sessions')
+    .select('id, date, notes, mins, created_at')
+    .eq('user_id', _uid)
+    .eq('topic', 'CR')
+    .eq('deleted', false)
+    .order('date', { ascending: true })
+    .order('created_at', { ascending: true });
+
+  if (error || !data) { _journeySessions = []; return; }
+
+  _journeySessions = data.map((s, i) => {
+    const acc = parseCRAccuracy(s.notes);
+    return {
+      idx: i + 1,
+      date: s.date,
+      notes: s.notes || '',
+      mins: s.mins,
+      tag: guessSessionTag(s.notes),
+      acc, // null if unparseable
+    };
+  });
+
+  // Build tag dropdown options once
+  const tags = [...new Set(_journeySessions.map(s => s.tag))];
+  const sel = document.getElementById('journey-type-filter');
+  sel.innerHTML = `<option value="all">All CR Sessions</option>` +
+    tags.map(t => `<option value="${t}">${t} only</option>`).join('');
+}
+
+function renderJourneyChart() {
+  const filterVal = document.getElementById('journey-type-filter').value;
+  let scored = _journeySessions.filter(s => s.acc);
+  if (filterVal !== 'all') scored = scored.filter(s => s.tag === filterVal);
+
+  const emptyState = document.getElementById('journey-empty-state');
+  const canvas = document.getElementById('journey-canvas');
+
+  if (!scored.length) {
+    emptyState.style.display = 'block';
+    canvas.style.display = 'none';
+    document.getElementById('journey-stats').innerHTML = '';
+    document.getElementById('journey-milestones').innerHTML = '';
+    if (_journeyChart) { _journeyChart.destroy(); _journeyChart = null; }
+    return;
+  }
+  emptyState.style.display = 'none';
+  canvas.style.display = 'block';
+
+  const labels = scored.map(s =>
+    _journeyXAxis === 'session'
+      ? `#${s.idx}`
+      : new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  );
+  const values = scored.map(s => s.acc.pct);
+
+  // ── Stats row ──
+  const first = values[0], last = values[values.length - 1];
+  const peak = Math.max(...values);
+  const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+  const delta = last - first;
+  document.getElementById('journey-stats').innerHTML = `
+    <div class="j-stat"><div class="j-stat-val" style="color:var(--accent-bright)">${scored.length}</div><div class="j-stat-label">Scored Sessions</div></div>
+    <div class="j-stat"><div class="j-stat-val" style="color:var(--green)">${peak}%</div><div class="j-stat-label">Peak Accuracy</div></div>
+    <div class="j-stat"><div class="j-stat-val" style="color:#fbbf24">${avg}%</div><div class="j-stat-label">Average</div></div>
+    <div class="j-stat"><div class="j-stat-val" style="color:${delta>=0?'var(--green)':'var(--red)'}">${delta>=0?'+':''}${delta}pp</div><div class="j-stat-label">First → Last</div></div>
+  `;
+
+  // ── Milestones ──
+  const peakIdx = values.indexOf(peak);
+  let milestoneHTML = `<div class="milestone-chip peak"><i class="ti ti-trophy"></i> Peak: ${peak}% on session #${scored[peakIdx].idx}</div>`;
+  // Find longest improving streak
+  let curStreak = 1, bestStreak = 1, bestEnd = 0;
+  for (let i = 1; i < values.length; i++) {
+    if (values[i] >= values[i-1]) { curStreak++; if (curStreak > bestStreak) { bestStreak = curStreak; bestEnd = i; } }
+    else curStreak = 1;
+  }
+  if (bestStreak >= 3) {
+    milestoneHTML += `<div class="milestone-chip streak"><i class="ti ti-trending-up"></i> ${bestStreak}-session improving streak</div>`;
+  }
+  if (delta > 0) {
+    milestoneHTML += `<div class="milestone-chip"><i class="ti ti-rocket"></i> Up ${delta}pp since your first scored session</div>`;
+  }
+  document.getElementById('journey-milestones').innerHTML = milestoneHTML;
+
+  // ── Chart.js render ──
+  if (_journeyChart) _journeyChart.destroy();
+  const ctx = canvas.getContext('2d');
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+  gradient.addColorStop(0, 'rgba(139,124,248,0.35)');
+  gradient.addColorStop(1, 'rgba(139,124,248,0.0)');
+
+  _journeyChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'CR Accuracy',
+        data: values,
+        borderColor: '#a78bfa',
+        borderWidth: 3,
+        backgroundColor: gradient,
+        fill: true,
+        tension: 0.35,
+        pointRadius: 4,
+        pointBackgroundColor: '#0f0c1a',
+        pointBorderColor: '#a78bfa',
+        pointBorderWidth: 2,
+        pointHoverRadius: 7,
+        pointHoverBackgroundColor: '#a78bfa',
+        pointHoverBorderColor: '#fff',
+        pointHoverBorderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 1100, easing: 'easeOutQuart' },
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(18,14,32,0.96)',
+          borderColor: 'rgba(139,124,248,0.3)',
+          borderWidth: 1,
+          padding: 12,
+          titleFont: { family: 'Satoshi', size: 12, weight: '700' },
+          bodyFont: { family: 'Satoshi', size: 12 },
+          callbacks: {
+            title: (items) => {
+              const i = items[0].dataIndex;
+              return _journeyXAxis === 'session' ? `Session #${scored[i].idx}` : scored[i].date;
+            },
+            label: (item) => {
+              const s = scored[item.dataIndex];
+              return [`Accuracy: ${s.acc.pct}% (${s.acc.correct}/${s.acc.total})`, s.notes.substring(0, 50)];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.05)', drawTicks: false },
+          ticks: { color: 'rgba(255,255,255,0.38)', font: { family: 'Satoshi', size: 10 } },
+          border: { display: false }
+        },
+        y: {
+          min: 0, max: 100,
+          grid: { color: 'rgba(255,255,255,0.05)', drawTicks: false },
+          ticks: { color: 'rgba(255,255,255,0.38)', font: { family: 'Satoshi', size: 10 }, callback: v => v + '%' },
+          border: { display: false }
+        }
+      }
+    }
+  });
 }
 
 init();
