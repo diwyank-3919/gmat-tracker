@@ -20257,6 +20257,7 @@
                 currentUserId = r && r.data && r.data.user && r.data.user.id;
                 return currentUserId;
             }
+            window.getUid = getUid;
 
             async function createSession(firstMsg) {
                 var uid = await getUid(); if (!uid) return null;
@@ -22328,7 +22329,7 @@
             }
             /* ── Fetch cr_attempts once, cache for notice rules ── */
             function fetchCRAttemptsCache() {
-                return getUid().then(function (uid) {
+                return window.getUid().then(function (uid) {
                     if (!uid) { window._crAttemptsCache = []; return; }
                     return supa.from('cr_attempts')
                         .select('*')
@@ -22342,6 +22343,7 @@
                     window._crAttemptsCache = [];
                 });
             }
+            window.fetchCRAttemptsCache = fetchCRAttemptsCache;
 
             /* ── Build the nudge message from live dashboard data ── */
             function buildNudge() {
