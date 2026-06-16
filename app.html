@@ -13806,6 +13806,50 @@ function _doRender() {
                 if (_thinkTimer) { clearInterval(_thinkTimer); _thinkTimer = null; }
             }
         }
+        // ── CR Session Notes Parser ──
+function parseCRAccuracy(noteText) {
+  if (!noteText) return null;
+  const patterns = [
+    /(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)%/,
+    /(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)\s*%/,
+    /accuracy[\s:-]*(\d+)\s*\/\s*(\d+)/i,
+  ];
+  for (const re of patterns) {
+    const m = noteText.match(re);
+    if (m) {
+      const correct = parseInt(m[1], 10);
+      const total = parseInt(m[2], 10);
+      const pct = m[3] ? parseInt(m[3], 10) : Math.round((correct / total) * 100);
+      if (total > 0) return { correct, total, pct, raw: noteText };
+    }
+  }
+  return null;
+}
+
+async function buildCRSessionContext(supa, userId, limit = 15) {
+  const { data, error } = await supa
+    .from('sessions')
+    .select('date, notes, mins, created_at')
+    .eq('user_id', userId)
+    .eq('topic', 'CR')
+    .eq('deleted', false)
+    .order('date', { ascending: false })
+    .limit(limit);
+  if (error || !data || !data.length) return '';
+  const parsed = data.map(s => ({ ...s, acc: parseCRAccuracy(s.notes) }));
+  const withAccuracy = parsed.filter(s => s.acc);
+  const avgAcc = withAccuracy.length
+    ? Math.round(withAccuracy.reduce((sum, s) => sum + s.acc.pct, 0) / withAccuracy.length)
+    : null;
+  let block = `\n[CR SESSION HISTORY — last ${data.length} CR sessions]\n`;
+  if (avgAcc !== null) block += `Average parsed accuracy across ${withAccuracy.length} sessions with scores: ${avgAcc}%\n`;
+  parsed.forEach(s => {
+    block += s.acc
+      ? `- ${s.date} (${s.mins}min): "${s.notes}" → ${s.acc.correct}/${s.acc.total} = ${s.acc.pct}%\n`
+      : `- ${s.date} (${s.mins}min): "${s.notes}" (no parseable score)\n`;
+  });
+  return block;
+}
 
         function buildSheldonContext() {
             var tot = sessions.reduce(function (a, s) { return a + s.mins; }, 0);
@@ -13874,6 +13918,9 @@ function _doRender() {
         /* inject memory on every message */
         var _memBlock = typeof window.buildSheldonMemoryContext === 'function' ? window.buildSheldonMemoryContext() : '';
         if (_memBlock) _msgPayload = _memBlock + _msgPayload;
+        /* inject CR session history (parsed accuracy from notes) on every message */
+        buildCRSessionContext(supa, uid).then(function(_crBlock) {
+            if (_crBlock) _msgPayload = _crBlock + _msgPayload;
             supa.functions.invoke('sheldon', {
                 body: { message: _msgPayload, context: _ctx, history: sheldonHistory.slice(0, -1).slice(-6) }
             }).then(function (res) {
@@ -13899,6 +13946,7 @@ function _doRender() {
                 document.getElementById('sheldonSend').disabled = false;
                 var inp = document.getElementById('sheldonInput'); if (inp) inp.focus();
             });
+        });
         }
     </script>
 
