@@ -137,22 +137,14 @@ body::after{
 }
 .sb-nav-item i{font-size:15px;flex-shrink:0}
 
-.sb-topic-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:6px 10px;border-radius:7px;cursor:pointer;
-  font-size:12px;color:var(--text-tertiary);font-weight:500;
-  transition:all .12s;
-}
-.sb-topic-row:hover{background:var(--bg-card);color:var(--text-secondary)}
-.sb-topic-badge{
-  font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;
-  background:var(--bg-card);border:1px solid var(--border-subtle);
-  color:var(--text-tertiary);
-}
-.sb-topic-badge.lit{background:var(--accent-soft);border-color:var(--border-accent);color:var(--accent-bright)}
-.sb-topic-badge.green{background:var(--green-soft);border-color:rgba(52,211,153,0.25);color:var(--green)}
-.sb-topic-badge.red{background:var(--red-soft);border-color:rgba(251,113,133,0.25);color:var(--red)}
-.sb-topic-badge.amber{background:var(--amber-soft);border-color:rgba(251,191,36,0.25);color:var(--amber)}
+.sb-topic-item{padding:7px 10px;border-radius:7px;cursor:pointer;transition:background .12s}
+.sb-topic-item:hover{background:var(--bg-card)}
+.sb-topic-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.sb-topic-name{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500;color:var(--text-secondary)}
+.sb-topic-name i{font-size:13px}
+.sb-topic-hours{font-size:11px;font-weight:600;color:var(--text-tertiary);background:var(--bg-card);border:1px solid var(--border-subtle);padding:2px 7px;border-radius:5px}
+.sb-topic-track{height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
+.sb-topic-fill{height:100%;border-radius:2px;transition:width .5s}
 
 .sb-divider{height:1px;background:var(--border-subtle);margin:10px 14px}
 
@@ -169,7 +161,7 @@ body::after{
   flex-shrink:0;gap:16px;
 }
 .topbar-left{display:flex;flex-direction:column;gap:1px}
-.topbar-title{font-family:'Clash Display',sans-serif;font-size:17px;font-weight:700;letter-spacing:-0.3px}
+.topbar-title{font-family:'Clash Display',sans-serif;font-size:23px;font-weight:700;letter-spacing:-0.3px}
 .topbar-sub{font-size:11px;color:var(--text-tertiary);font-weight:400}
 .topbar-chips{display:flex;align-items:center;gap:6px;flex:1;justify-content:center;flex-wrap:wrap}
 .t-chip{
@@ -230,7 +222,7 @@ body::after{
 
 /* ── CARD ── */
 .card{
-  background:var(--bg-card);
+  background:linear-gradient(180deg,rgba(255,255,255,0.065),rgba(255,255,255,0.045));
   border:1px solid var(--border);
   border-radius:14px;
   box-shadow:var(--shadow-card);
@@ -238,7 +230,7 @@ body::after{
   position:relative;overflow:hidden;
   transition:box-shadow .2s,background .2s;
 }
-.card:hover{background:var(--bg-card-hover);box-shadow:var(--shadow-card-hover)}
+.card:hover{background:linear-gradient(180deg,rgba(255,255,255,0.095),rgba(255,255,255,0.07));box-shadow:var(--shadow-card-hover)}
 .card-eyebrow{
   font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
   color:var(--text-muted);margin-bottom:10px;
@@ -258,7 +250,7 @@ body::after{
 
 /* ── INSIGHT BANNER ── */
 .insight-banner{
-  background:var(--bg-card);
+  background:linear-gradient(180deg,rgba(255,255,255,0.065),rgba(255,255,255,0.045));
   border:1px solid var(--border);
   border-left:3px solid var(--accent);
   border-radius:14px;
@@ -671,24 +663,41 @@ let _uid = null;
 
 // ── AUTH GUARD ──
 async function init() {
-  const { data: { session } } = await supa.auth.getSession();
-  if (!session) { window.location.href = '/app.html'; return; }
-  _uid = session.user.id;
-  await loadAttempts();
+  try {
+    const { data: { session }, error: sessErr } = await supa.auth.getSession();
+    if (sessErr) { showFatalError('Auth error: ' + sessErr.message); return; }
+    if (!session) {
+      showFatalError('Not signed in — redirecting to dashboard…');
+      setTimeout(() => { window.location.href = '/app.html'; }, 1200);
+      return;
+    }
+    _uid = session.user.id;
+    await loadAttempts();
+  } catch (e) {
+    showFatalError('Unexpected error: ' + (e?.message || e));
+  }
+}
+
+function showFatalError(msg) {
+  const el = document.getElementById('insight-banner');
+  el.innerHTML = `<div class="insight-orb">⚠️</div><div><div class="insight-label" style="color:var(--red)">Couldn't Load</div><div class="insight-text">${msg}</div></div>`;
 }
 
 async function loadAttempts() {
   showLoading(true);
-  const { data, error } = await supa
-    .from('cr_attempts')
-    .select('*')
-    .eq('user_id', _uid)
-    .order('logged_at', { ascending: true })
-    .limit(2000);
-  if (error) { console.error('load error', error); showLoading(false); return; }
-  attempts = data || [];
-  showLoading(false);
-  render();
+  try {
+    const { data, error } = await supa
+      .from('cr_attempts')
+      .select('*')
+      .eq('user_id', _uid)
+      .order('logged_at', { ascending: true })
+      .limit(2000);
+    if (error) { showFatalError('Database error: ' + error.message); return; }
+    attempts = data || [];
+    render();
+  } catch (e) {
+    showFatalError('Network error loading attempts: ' + (e?.message || e));
+  }
 }
 
 function showLoading(on) {
@@ -762,6 +771,9 @@ function showTab(name){
   ['analytics','log','entry'].forEach(t=>{document.getElementById('tab-'+t).style.display=t===name?'block':'none'});
   document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['analytics','log','entry'][i]===name));
 }
+function filterByType(t){
+  showTab('log');
+}
 
 // ── CONSTANTS ──
 const TYPES=['Assumption','Weaken','Strengthen','Inference','Evaluate','Bold Face','Other'];
@@ -798,20 +810,55 @@ function render(){
   const byType={};TYPES.forEach(t=>byType[t]={c:0,n:0});
   attempts.forEach(a=>{const t=a.question_type||'Other';if(!byType[t])byType[t]={c:0,n:0};byType[t].n++;if(a.correct)byType[t].c++});
 
-  document.getElementById('sb-types').innerHTML=TYPES.map(t=>{
-    const{c,n}=byType[t]||{c:0,n:0};const p=pct(c,n);
-    const cls=!n?'':p>=50?'green':p>=25?'amber':'red';
-    return`<div class="sb-topic-row"><span>${t}</span><span class="sb-topic-badge ${cls}">${n?p+'%':'—'}</span></div>`;
-  }).join('');
+  const TYPE_ICONS={
+    Assumption:['ti-stairs','#8b7cf8'],
+    Weaken:['ti-arrow-down-circle','#fb7185'],
+    Strengthen:['ti-arrow-up-circle','#34d399'],
+    Inference:['ti-bulb','#60a5fa'],
+    Evaluate:['ti-scale','#fbbf24'],
+    'Bold Face':['ti-bold','#f472b6'],
+    Other:['ti-dots','#fb923c'],
+  };
+  if (!total) {
+    document.getElementById('sb-types').innerHTML = `<div style="padding:10px;font-size:11px;color:var(--text-muted)">No attempts logged yet.</div>`;
+    document.getElementById('sb-diff').innerHTML = '';
+  } else {
+    document.getElementById('sb-types').innerHTML=TYPES.map(t=>{
+      const{c,n}=byType[t]||{c:0,n:0};const p=pct(c,n);
+      const col=!n?'var(--text-muted)':p>=50?'var(--green)':p>=25?'var(--amber)':'var(--red)';
+      const [icon,iconCol]=TYPE_ICONS[t]||['ti-circle','#8b7cf8'];
+      return`<div class="sb-topic-item" onclick="filterByType('${t}')">
+        <div class="sb-topic-row">
+          <div class="sb-topic-name"><i class="ti ${icon}" style="color:${iconCol}"></i> ${t}</div>
+          <span class="sb-topic-hours" style="color:${col}">${n?p+'%':'—'}</span>
+        </div>
+        <div class="sb-topic-track"><div class="sb-topic-fill" style="width:${n?p:0}%;background:${col}"></div></div>
+      </div>`;
+    }).join('');
+  }
 
-  const dM=attempts.filter(a=>a.difficulty==='Medium');
-  const dH=attempts.filter(a=>a.difficulty==='Hard');
-  const pM=pct(dM.filter(a=>a.correct).length,dM.length);
-  const pH=pct(dH.filter(a=>a.correct).length,dH.length);
-  document.getElementById('sb-diff').innerHTML=`
-    <div class="sb-topic-row"><span>Medium</span><span class="sb-topic-badge ${pM>=50?'green':pM>=25?'amber':'red'}">${pM}%</span></div>
-    <div class="sb-topic-row"><span>Hard</span><span class="sb-topic-badge ${pH>=50?'green':pH>=25?'amber':'red'}">${pH}%</span></div>
-  `;
+  if (total) {
+    const dM=attempts.filter(a=>a.difficulty==='Medium');
+    const dH=attempts.filter(a=>a.difficulty==='Hard');
+    const pM=pct(dM.filter(a=>a.correct).length,dM.length);
+    const pH=pct(dH.filter(a=>a.correct).length,dH.length);
+    document.getElementById('sb-diff').innerHTML=`
+      <div class="sb-topic-item">
+        <div class="sb-topic-row">
+          <div class="sb-topic-name"><i class="ti ti-flag-2" style="color:#fbbf24"></i> Medium</div>
+          <span class="sb-topic-hours" style="color:${pM>=50?'var(--green)':pM>=25?'var(--amber)':'var(--red)'}">${pM}%</span>
+        </div>
+        <div class="sb-topic-track"><div class="sb-topic-fill" style="width:${pM}%;background:${pM>=50?'var(--green)':pM>=25?'var(--amber)':'var(--red)'}"></div></div>
+      </div>
+      <div class="sb-topic-item">
+        <div class="sb-topic-row">
+          <div class="sb-topic-name"><i class="ti ti-flame" style="color:#fb7185"></i> Hard</div>
+          <span class="sb-topic-hours" style="color:${pH>=50?'var(--green)':pH>=25?'var(--amber)':'var(--red)'}">${pH}%</span>
+        </div>
+        <div class="sb-topic-track"><div class="sb-topic-fill" style="width:${pH}%;background:${pH>=50?'var(--green)':pH>=25?'var(--amber)':'var(--red)'}"></div></div>
+      </div>
+    `;
+  }
 
   const worstT=TYPES.slice().sort((a,b)=>pct(byType[a].c,byType[a].n)-pct(byType[b].c,byType[b].n))[0];
   const wAcc=pct(byType[worstT].c,byType[worstT].n);
