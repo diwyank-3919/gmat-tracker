@@ -22609,16 +22609,17 @@
 
             /* ── Main trigger ── */
             function tryNudge() {
-                /* only once per day */
+                /* need sessions to be loaded */
+                if (typeof sessions === 'undefined' || !sessions) return;
+
+                /* Sheldon Notices run every visit, independent of the once-per-day nudge gate */
+                fetchCRAttemptsCache().then(renderDashboardNotices);
+
+                /* nudge banner: only once per day */
                 try {
                     var last = localStorage.getItem(NUDGE_KEY);
                     if (last === dateStr(today)) return;
                 } catch (e) { }
-
-                /* need sessions to be loaded */
-                if (typeof sessions === 'undefined' || !sessions) return;
-
-                fetchCRAttemptsCache().then(renderDashboardNotices);
 
                 var data = buildNudge();
                 if (!data) return;
