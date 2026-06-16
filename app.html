@@ -10662,10 +10662,13 @@
                         <div class="sb-topic-fill" id="sbf-rc" style="width:0%;background:#34d399"></div>
                     </div>
                 </div>
-               <div class="sb-topic-item" id="sbt-cr" style="cursor:pointer" onclick="window.location='/cr.html'" title="Open CR Drill Tracker">
+                <div class="sb-topic-item" id="sbt-cr" style="cursor:pointer" onclick="window.location='/cr.html'"
+                    title="Open CR Drill Tracker">
                     <div class="sb-topic-row">
                         <div class="sb-topic-name"><i class="ti ti-brain" style="color:#fbbf24"></i> CR</div>
-                        <span class="sb-topic-hours" id="sb-cr" style="display:flex;align-items:center;gap:6px">0h <span style="font-size:9px;font-weight:700;letter-spacing:0.06em;background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.2);padding:1px 5px;border-radius:4px">DRILL →</span></span>
+                        <span class="sb-topic-hours" id="sb-cr" style="display:flex;align-items:center;gap:6px">0h <span
+                                style="font-size:9px;font-weight:700;letter-spacing:0.06em;background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.2);padding:1px 5px;border-radius:4px">DRILL
+                                →</span></span>
                     </div>
                     <div class="sb-topic-track">
                         <div class="sb-topic-fill" id="sbf-cr" style="width:0%;background:#fbbf24"></div>
@@ -12437,13 +12440,13 @@
         }
 
         var _renderTimer = null;
-var _renderTimer = null;
-function render() {
-    if (!window._sessionsReady) return;
-    clearTimeout(_renderTimer);
-    _renderTimer = setTimeout(_doRender, 80);
-}
-function _doRender() {
+        var _renderTimer = null;
+        function render() {
+            if (!window._sessionsReady) return;
+            clearTimeout(_renderTimer);
+            _renderTimer = setTimeout(_doRender, 80);
+        }
+        function _doRender() {
             var ts, tm, tt, tpct, tmet, ws, wm, wt, wpct, ms, me, mm, msc, dd, tot, sd, streak, cur, ds2, qi, topicTotals, wd;
             ["week", "month", "all"].forEach(function (v) { document.getElementById("f-" + v).className = "fpill" + (viewMode === v ? " active" : ""); });
             document.getElementById("f-range-label").textContent = getRangeLabel();
@@ -13392,9 +13395,9 @@ function _doRender() {
                 requestAnimationFrame(step);
             }
             render = function () {
-    if (!window._sessionsReady) return;
-    var fromVals = {};
-    COUNTERS.forEach(function (c) {
+                if (!window._sessionsReady) return;
+                var fromVals = {};
+                COUNTERS.forEach(function (c) {
                     var el = document.getElementById(c.id);
                     fromVals[c.id] = el ? parseMinutes(el.textContent) : 0;
                 });
@@ -13807,49 +13810,49 @@ function _doRender() {
             }
         }
         // ── CR Session Notes Parser ──
-function parseCRAccuracy(noteText) {
-  if (!noteText) return null;
-  const patterns = [
-    /(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)%/,
-    /(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)\s*%/,
-    /accuracy[\s:-]*(\d+)\s*\/\s*(\d+)/i,
-  ];
-  for (const re of patterns) {
-    const m = noteText.match(re);
-    if (m) {
-      const correct = parseInt(m[1], 10);
-      const total = parseInt(m[2], 10);
-      const pct = m[3] ? parseInt(m[3], 10) : Math.round((correct / total) * 100);
-      if (total > 0) return { correct, total, pct, raw: noteText };
-    }
-  }
-  return null;
-}
+        function parseCRAccuracy(noteText) {
+            if (!noteText) return null;
+            const patterns = [
+                /(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)%/,
+                /(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)\s*%/,
+                /accuracy[\s:-]*(\d+)\s*\/\s*(\d+)/i,
+            ];
+            for (const re of patterns) {
+                const m = noteText.match(re);
+                if (m) {
+                    const correct = parseInt(m[1], 10);
+                    const total = parseInt(m[2], 10);
+                    const pct = m[3] ? parseInt(m[3], 10) : Math.round((correct / total) * 100);
+                    if (total > 0) return { correct, total, pct, raw: noteText };
+                }
+            }
+            return null;
+        }
 
-async function buildCRSessionContext(supa, userId, limit = 15) {
-  const { data, error } = await supa
-    .from('sessions')
-    .select('date, notes, mins, created_at')
-    .eq('user_id', userId)
-    .eq('topic', 'CR')
-    .eq('deleted', false)
-    .order('date', { ascending: false })
-    .limit(limit);
-  if (error || !data || !data.length) return '';
-  const parsed = data.map(s => ({ ...s, acc: parseCRAccuracy(s.notes) }));
-  const withAccuracy = parsed.filter(s => s.acc);
-  const avgAcc = withAccuracy.length
-    ? Math.round(withAccuracy.reduce((sum, s) => sum + s.acc.pct, 0) / withAccuracy.length)
-    : null;
-  let block = `\n[CR SESSION HISTORY — last ${data.length} CR sessions]\n`;
-  if (avgAcc !== null) block += `Average parsed accuracy across ${withAccuracy.length} sessions with scores: ${avgAcc}%\n`;
-  parsed.forEach(s => {
-    block += s.acc
-      ? `- ${s.date} (${s.mins}min): "${s.notes}" → ${s.acc.correct}/${s.acc.total} = ${s.acc.pct}%\n`
-      : `- ${s.date} (${s.mins}min): "${s.notes}" (no parseable score)\n`;
-  });
-  return block;
-}
+        async function buildCRSessionContext(supa, userId, limit = 15) {
+            const { data, error } = await supa
+                .from('sessions')
+                .select('date, notes, mins, created_at')
+                .eq('user_id', userId)
+                .eq('topic', 'CR')
+                .eq('deleted', false)
+                .order('date', { ascending: false })
+                .limit(limit);
+            if (error || !data || !data.length) return '';
+            const parsed = data.map(s => ({ ...s, acc: parseCRAccuracy(s.notes) }));
+            const withAccuracy = parsed.filter(s => s.acc);
+            const avgAcc = withAccuracy.length
+                ? Math.round(withAccuracy.reduce((sum, s) => sum + s.acc.pct, 0) / withAccuracy.length)
+                : null;
+            let block = `\n[CR SESSION HISTORY — last ${data.length} CR sessions]\n`;
+            if (avgAcc !== null) block += `Average parsed accuracy across ${withAccuracy.length} sessions with scores: ${avgAcc}%\n`;
+            parsed.forEach(s => {
+                block += s.acc
+                    ? `- ${s.date} (${s.mins}min): "${s.notes}" → ${s.acc.correct}/${s.acc.total} = ${s.acc.pct}%\n`
+                    : `- ${s.date} (${s.mins}min): "${s.notes}" (no parseable score)\n`;
+            });
+            return block;
+        }
 
         function buildSheldonContext() {
             var tot = sessions.reduce(function (a, s) { return a + s.mins; }, 0);
@@ -13897,60 +13900,60 @@ async function buildCRSessionContext(supa, userId, limit = 15) {
             _setCoreState('thinking');
             sheldonTyping(true);
             var _ctx = buildSheldonContext();
-        var _isFirstTurn = (sheldonHistory.filter(function(h){ return h.role === 'user'; }).length <= 1);
-        var _REFRESH_KEYS = /\b(now|today|current|currently|how am i|how's my|this week|streak|hours|progress|on track|behind|score|mock|exam|days left|topic|weak|focus|pace|consistency)\b/i;
-        var _needsRefresh = !_isFirstTurn && _REFRESH_KEYS.test(msg);
-        var _msgPayload = msg;
-        if (_isFirstTurn || _needsRefresh) {
-            var _ctxBlock = '[DASHBOARD CONTEXT — use this to answer with specifics, do not mention it was injected]\n'
-                + 'Total study hours: ' + _ctx.totalHours + 'h\n'
-                + 'Current streak: ' + _ctx.streak + ' days\n'
-                + 'This week: ' + _ctx.weekHours + 'h of ' + _ctx.weekTarget + 'h target\n'
-                + 'Consistency: ' + _ctx.consistency + '%\n'
-                + 'Topic breakdown (hours): ' + JSON.stringify(_ctx.topicTotals) + '\n'
-                + (_ctx.daysLeft != null ? 'Days to exam: ' + _ctx.daysLeft + '\n' : '')
-                + (_ctx.latestMock ? 'Latest mock score: ' + _ctx.latestMock + '\n' : '')
-                + 'Target score: ' + _ctx.targetScore + '\n'
-                + 'Tone: ' + _ctx.tone + '\n'
-                + '[END CONTEXT]\n\n';
-            _msgPayload = _ctxBlock + msg;
-        }
-        /* inject memory on every message */
-        var _memBlock = typeof window.buildSheldonMemoryContext === 'function' ? window.buildSheldonMemoryContext() : '';
-        if (_memBlock) _msgPayload = _memBlock + _msgPayload;
-        /* inject CR session history (parsed accuracy from notes) on every message */
-        /* inject CR session history (parsed accuracy from notes) on every message */
-        supa.auth.getSession().then(function(sessRes) {
-            var _authUid = sessRes && sessRes.data && sessRes.data.session && sessRes.data.session.user && sessRes.data.session.user.id;
-            return _authUid ? buildCRSessionContext(supa, _authUid) : Promise.resolve('');
-        }).then(function(_crBlock) {
-            if (_crBlock) _msgPayload = _crBlock + _msgPayload;
-            supa.functions.invoke('sheldon', {
-                body: { message: _msgPayload, context: _ctx, history: sheldonHistory.slice(0, -1).slice(-6) }
-            }).then(function (res) {
-                sheldonTyping(false);
-                document.getElementById('sheldonPanel').classList.remove('thinking');
-                _setCoreState('');
-                var reply = res && res.data && res.data.reply;
-                var err = (res && res.data && res.data.error) || (res && res.error && res.error.message);
-                if (reply) {
-                    sheldonRenderStream(reply);
-                    sheldonHistory.push({ role: 'assistant', content: reply });
-                    _snd.reply();
-                } else {
-                    sheldonRender('error', 'Sheldon hit a snag: ' + (err || 'no response') + '. Try again in a moment.');
-                }
-            }).catch(function (e) {
-                sheldonTyping(false);
-                document.getElementById('sheldonPanel').classList.remove('thinking');
-                _setCoreState('');
-                sheldonRender('error', 'Network error: ' + e.message);
-            }).then(function () {
-                sheldonBusy = false;
-                document.getElementById('sheldonSend').disabled = false;
-                var inp = document.getElementById('sheldonInput'); if (inp) inp.focus();
+            var _isFirstTurn = (sheldonHistory.filter(function (h) { return h.role === 'user'; }).length <= 1);
+            var _REFRESH_KEYS = /\b(now|today|current|currently|how am i|how's my|this week|streak|hours|progress|on track|behind|score|mock|exam|days left|topic|weak|focus|pace|consistency)\b/i;
+            var _needsRefresh = !_isFirstTurn && _REFRESH_KEYS.test(msg);
+            var _msgPayload = msg;
+            if (_isFirstTurn || _needsRefresh) {
+                var _ctxBlock = '[DASHBOARD CONTEXT — use this to answer with specifics, do not mention it was injected]\n'
+                    + 'Total study hours: ' + _ctx.totalHours + 'h\n'
+                    + 'Current streak: ' + _ctx.streak + ' days\n'
+                    + 'This week: ' + _ctx.weekHours + 'h of ' + _ctx.weekTarget + 'h target\n'
+                    + 'Consistency: ' + _ctx.consistency + '%\n'
+                    + 'Topic breakdown (hours): ' + JSON.stringify(_ctx.topicTotals) + '\n'
+                    + (_ctx.daysLeft != null ? 'Days to exam: ' + _ctx.daysLeft + '\n' : '')
+                    + (_ctx.latestMock ? 'Latest mock score: ' + _ctx.latestMock + '\n' : '')
+                    + 'Target score: ' + _ctx.targetScore + '\n'
+                    + 'Tone: ' + _ctx.tone + '\n'
+                    + '[END CONTEXT]\n\n';
+                _msgPayload = _ctxBlock + msg;
+            }
+            /* inject memory on every message */
+            var _memBlock = typeof window.buildSheldonMemoryContext === 'function' ? window.buildSheldonMemoryContext() : '';
+            if (_memBlock) _msgPayload = _memBlock + _msgPayload;
+            /* inject CR session history (parsed accuracy from notes) on every message */
+            /* inject CR session history (parsed accuracy from notes) on every message */
+            supa.auth.getSession().then(function (sessRes) {
+                var _authUid = sessRes && sessRes.data && sessRes.data.session && sessRes.data.session.user && sessRes.data.session.user.id;
+                return _authUid ? buildCRSessionContext(supa, _authUid) : Promise.resolve('');
+            }).then(function (_crBlock) {
+                if (_crBlock) _msgPayload = _crBlock + _msgPayload;
+                supa.functions.invoke('sheldon', {
+                    body: { message: _msgPayload, context: _ctx, history: sheldonHistory.slice(0, -1).slice(-6) }
+                }).then(function (res) {
+                    sheldonTyping(false);
+                    document.getElementById('sheldonPanel').classList.remove('thinking');
+                    _setCoreState('');
+                    var reply = res && res.data && res.data.reply;
+                    var err = (res && res.data && res.data.error) || (res && res.error && res.error.message);
+                    if (reply) {
+                        sheldonRenderStream(reply);
+                        sheldonHistory.push({ role: 'assistant', content: reply });
+                        _snd.reply();
+                    } else {
+                        sheldonRender('error', 'Sheldon hit a snag: ' + (err || 'no response') + '. Try again in a moment.');
+                    }
+                }).catch(function (e) {
+                    sheldonTyping(false);
+                    document.getElementById('sheldonPanel').classList.remove('thinking');
+                    _setCoreState('');
+                    sheldonRender('error', 'Network error: ' + e.message);
+                }).then(function () {
+                    sheldonBusy = false;
+                    document.getElementById('sheldonSend').disabled = false;
+                    var inp = document.getElementById('sheldonInput'); if (inp) inp.focus();
+                });
             });
-        });
         }
     </script>
 
@@ -20266,11 +20269,11 @@ async function buildCRSessionContext(supa, userId, limit = 15) {
                     .update({ updated_at: new Date().toISOString() })
                     .eq('id', currentSessionId);
                 /* refresh sidebar */
-                await loadSessions();
+                await loadChatSessions();
                 renderSidebar();
             }
 
-            async function loadSessions() {
+            async function loadChatSessions() {
                 var uid = await getUid(); if (!uid) return;
                 var r = await supa.from('sheldon_sessions')
                     .select('id, title, created_at, updated_at, message_count')
@@ -20298,7 +20301,7 @@ async function buildCRSessionContext(supa, userId, limit = 15) {
                     currentSessionId = null;
                     startNewChat();
                 }
-                await loadSessions();
+                await loadChatSessions();
                 renderSidebar();
             }
 
@@ -20367,7 +20370,7 @@ async function buildCRSessionContext(supa, userId, limit = 15) {
                 if (sb) sb.classList.toggle('open', sidebarOpen);
                 if (btn) btn.classList.toggle('active', sidebarOpen);
                 if (sidebarOpen) {
-                    loadSessions().then(renderSidebar);
+                    loadChatSessions().then(renderSidebar);
                 }
             }
 
@@ -20637,8 +20640,8 @@ async function buildCRSessionContext(supa, userId, limit = 15) {
                 buildSidebar();
                 injectHistoryBtn();
                 hookSend();
-                /* load sessions in background */
-                loadSessions().then(function () {
+                /* load chat sessions in background */
+                loadChatSessions().then(function () {
                     if (sidebarOpen) renderSidebar();
                 });
             }
@@ -20650,7 +20653,7 @@ async function buildCRSessionContext(supa, userId, limit = 15) {
                     buildSidebar();
                     injectHistoryBtn();
                     hookSend();
-                    loadSessions().then(renderSidebar);
+                    loadChatSessions().then(renderSidebar);
                 }, 120);
             };
 
@@ -20753,8 +20756,8 @@ async function buildCRSessionContext(supa, userId, limit = 15) {
                 if (panel) panel.classList.toggle('sh-sidebar-open', !isOpen);
                 if (btn) btn.classList.toggle('active', !isOpen);
 
-                if (!isOpen && typeof loadSessions === 'function') {
-                    loadSessions().then(function () {
+                if (!isOpen && typeof loadChatSessions === 'function') {
+                    loadChatSessions().then(function () {
                         if (typeof renderSidebar === 'function') renderSidebar();
                     });
                 }
@@ -22456,10 +22459,10 @@ async function buildCRSessionContext(supa, userId, limit = 15) {
                 showNudge(data);
             }
 
-            /* ── Hook into loadSessions so nudge fires after data is ready ── */
-            var _origLoad = window.loadSessions;
+            /* ── Hook into loadChatSessions so nudge fires after data is ready ── */
+            var _origLoad = window.loadChatSessions;
             if (typeof _origLoad === 'function') {
-                window.loadSessions = function () {
+                window.loadChatSessions = function () {
                     var result = _origLoad.apply(this, arguments);
                     /* wait for sessions array to populate then nudge */
                     setTimeout(tryNudge, 800);
@@ -22496,1329 +22499,1504 @@ async function buildCRSessionContext(supa, userId, limit = 15) {
     </script>
 
     <!-- ══ SHELDON REACTION BUTTONS ══ -->
-<style id="sheldon-reactions-css">
-  .sh-react-row {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 8px;
-    opacity: 0;
-    transform: translateY(3px);
-    transition: opacity 0.18s ease, transform 0.18s ease;
-    pointer-events: none;
-  }
-  .sh-msg-wrap:hover .sh-react-row,
-  .sh-react-row.sh-reacted {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-  }
-  .sh-react-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 9px;
-    border-radius: 8px;
-    font-family: 'Hanken Grotesk', sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid rgba(255,255,255,0.08);
-    background: rgba(255,255,255,0.04);
-    color: rgba(190,196,235,0.45);
-    transition: all 0.15s cubic-bezier(.34,1.56,.64,1);
-    white-space: nowrap;
-  }
-  .sh-react-btn:hover {
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.14);
-    color: rgba(190,196,235,0.80);
-    transform: translateY(-1px);
-  }
-  .sh-react-btn:active { transform: scale(0.93); }
-  .sh-react-btn.sh-active-up {
-    background: rgba(70,201,143,0.12);
-    border-color: rgba(70,201,143,0.30);
-    color: #46c98f;
-  }
-  .sh-react-btn.sh-active-down {
-    background: rgba(251,113,133,0.12);
-    border-color: rgba(251,113,133,0.28);
-    color: #fb7185;
-  }
-  .sh-react-btn.sh-active-pin {
-    background: rgba(240,189,106,0.12);
-    border-color: rgba(240,189,106,0.28);
-    color: #f0bd6a;
-  }
-  .sh-react-btn.sh-active-report {
-    background: rgba(251,113,133,0.08);
-    border-color: rgba(251,113,133,0.20);
-    color: #fb7185;
-  }
-  .sh-react-sep {
-    width: 1px;
-    height: 14px;
-    background: rgba(255,255,255,0.08);
-    margin: 0 2px;
-  }
-  /* Pins panel */
-  #sh-pins-panel {
-    position: fixed;
-    bottom: 28px;
-    right: 108px;
-    z-index: 9996;
-    width: 320px;
-    max-height: 480px;
-    display: none;
-    flex-direction: column;
-    background: rgba(13,15,28,0.97);
-    border: 1px solid rgba(240,189,106,0.28);
-    border-radius: 20px;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.55);
-    overflow: hidden;
-    animation: fadeUp 0.3s cubic-bezier(.34,1.56,.64,1) both;
-  }
-  #sh-pins-panel.open { display: flex; }
-  .sh-pins-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 16px 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
-    flex-shrink: 0;
-  }
-  .sh-pins-title {
-    font-family: 'Fraunces', serif;
-    font-size: 15px;
-    font-weight: 600;
-    color: #f0bd6a;
-  }
-  .sh-pins-close {
-    width: 26px; height: 26px;
-    border-radius: 7px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: rgba(190,196,235,0.40);
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px;
-    transition: all 0.12s;
-  }
-  .sh-pins-close:hover { color: #fb7185; background: rgba(251,113,133,0.10); border-color: rgba(251,113,133,0.25); }
-  .sh-pins-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .sh-pins-list::-webkit-scrollbar { width: 3px; }
-  .sh-pins-list::-webkit-scrollbar-thumb { background: rgba(240,189,106,0.25); border-radius: 2px; }
-  .sh-pin-item {
-    padding: 10px 12px;
-    border-radius: 11px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(240,189,106,0.14);
-    font-size: 12px;
-    line-height: 1.55;
-    color: rgba(218,222,248,0.78);
-    position: relative;
-  }
-  .sh-pin-item strong { color: #fff; font-weight: 650; }
-  .sh-pin-date {
-    font-size: 10px;
-    color: rgba(190,196,235,0.30);
-    margin-top: 6px;
-  }
-  .sh-pin-del {
-    position: absolute;
-    top: 7px; right: 7px;
-    background: none; border: none;
-    cursor: pointer;
-    color: rgba(190,196,235,0.20);
-    font-size: 12px;
-    padding: 2px;
-    border-radius: 5px;
-    display: none;
-    transition: color 0.12s;
-  }
-  .sh-pin-item:hover .sh-pin-del { display: block; }
-  .sh-pin-del:hover { color: #fb7185; }
-  .sh-pins-empty {
-    text-align: center;
-    padding: 28px 12px;
-    font-size: 12px;
-    color: rgba(190,196,235,0.28);
-    line-height: 1.5;
-  }
-  /* Pins FAB button */
-  #sh-pins-fab {
-    position: fixed;
-    bottom: 108px;
-    right: 28px;
-    z-index: 9996;
-    width: 42px; height: 42px;
-    border-radius: 14px;
-    background: rgba(13,15,28,0.92);
-    border: 1px solid rgba(240,189,106,0.30);
-    color: #f0bd6a;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    font-size: 17px;
-    cursor: pointer;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
-    transition: all 0.18s cubic-bezier(.34,1.56,.64,1);
-  }
-  #sh-pins-fab.show { display: flex; }
-  #sh-pins-fab:hover { transform: translateY(-2px) scale(1.06); border-color: rgba(240,189,106,0.55); }
-  #sh-pins-fab-count {
-    position: absolute;
-    top: -5px; right: -5px;
-    width: 16px; height: 16px;
-    background: #f0bd6a;
-    border-radius: 50%;
-    border: 2px solid #0d1018;
-    font-size: 9px;
-    font-weight: 700;
-    color: #0d1018;
-    display: flex; align-items: center; justify-content: center;
-  }
-  /* light theme */
-  html.sc-light .sh-react-btn {
-    background: rgba(15,17,40,0.04);
-    border-color: rgba(15,17,40,0.09);
-    color: rgba(23,27,46,0.38);
-  }
-  html.sc-light .sh-react-btn:hover {
-    background: rgba(15,17,40,0.07);
-    color: rgba(23,27,46,0.70);
-  }
-  html.sc-light #sh-pins-panel {
-    background: rgba(248,249,255,0.98);
-    border-color: rgba(196,127,42,0.30);
-  }
-  html.sc-light .sh-pin-item {
-    background: #fff;
-    border-color: rgba(196,127,42,0.16);
-    color: rgba(23,27,46,0.75);
-  }
-  html.sc-light .sh-pin-item strong { color: #0e1020; }
-  html.sc-light #sh-pins-fab {
-    background: rgba(255,255,255,0.96);
-    border-color: rgba(196,127,42,0.35);
-  }
-</style>
+    <style id="sheldon-reactions-css">
+        .sh-react-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 8px;
+            opacity: 0;
+            transform: translateY(3px);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+            pointer-events: none;
+        }
 
-<script id="sheldon-reactions-js">
-(function () {
+        .sh-msg-wrap:hover .sh-react-row,
+        .sh-react-row.sh-reacted {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
 
-  var _reactCache = {}; /* msgHash -> {up,down,pin,report} */
-  var _pins = [];
-  var _currentSessionId_rx = null;
+        .sh-react-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 9px;
+            border-radius: 8px;
+            font-family: 'Hanken Grotesk', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            color: rgba(190, 196, 235, 0.45);
+            transition: all 0.15s cubic-bezier(.34, 1.56, .64, 1);
+            white-space: nowrap;
+        }
 
-  /* simple hash for message content */
-  function msgHash(content) {
-    var h = 0, i, c;
-    for (i = 0; i < content.length; i++) {
-      c = content.charCodeAt(i);
-      h = ((h << 5) - h) + c; h |= 0;
-    }
-    return 'rx_' + Math.abs(h);
-  }
+        .sh-react-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.14);
+            color: rgba(190, 196, 235, 0.80);
+            transform: translateY(-1px);
+        }
 
-  /* ── Supabase helpers ── */
-  async function getUid() {
-    var r = await supa.auth.getUser();
-    return r && r.data && r.data.user && r.data.user.id;
-  }
+        .sh-react-btn:active {
+            transform: scale(0.93);
+        }
 
-  async function saveReaction(content, reaction, sessionId) {
-    var uid = await getUid(); if (!uid) return;
-    await supa.from('sheldon_reactions').insert({
-      user_id: uid,
-      session_id: sessionId || null,
-      message_content: content.slice(0, 2000),
-      reaction: reaction
-    });
-  }
+        .sh-react-btn.sh-active-up {
+            background: rgba(70, 201, 143, 0.12);
+            border-color: rgba(70, 201, 143, 0.30);
+            color: #46c98f;
+        }
 
-  async function deleteReaction(content, reaction) {
-    var uid = await getUid(); if (!uid) return;
-    await supa.from('sheldon_reactions')
-      .delete()
-      .eq('user_id', uid)
-      .eq('reaction', reaction)
-      .eq('message_content', content.slice(0, 2000));
-  }
+        .sh-react-btn.sh-active-down {
+            background: rgba(251, 113, 133, 0.12);
+            border-color: rgba(251, 113, 133, 0.28);
+            color: #fb7185;
+        }
 
-  async function loadPins() {
-    var uid = await getUid(); if (!uid) return;
-    var r = await supa.from('sheldon_reactions')
-      .select('message_content, created_at')
-      .eq('user_id', uid)
-      .eq('reaction', 'pin')
-      .order('created_at', { ascending: false })
-      .limit(50);
-    if (!r.error) {
-      _pins = r.data || [];
-      updatePinsFab();
-      renderPinsPanel();
-    }
-  }
+        .sh-react-btn.sh-active-pin {
+            background: rgba(240, 189, 106, 0.12);
+            border-color: rgba(240, 189, 106, 0.28);
+            color: #f0bd6a;
+        }
 
-  /* ── Pins FAB ── */
-  function injectPinsFab() {
-    if (document.getElementById('sh-pins-fab')) return;
-    var fab = document.createElement('div');
-    fab.id = 'sh-pins-fab';
-    fab.setAttribute('role', 'button');
-    fab.setAttribute('aria-label', 'Pinned insights');
-    fab.title = 'Pinned insights';
-    fab.innerHTML = '<i class="ti ti-bookmark" style="font-size:17px" aria-hidden="true"></i><span id="sh-pins-fab-count" style="display:none"></span>';
-    fab.addEventListener('click', togglePinsPanel);
-    document.body.appendChild(fab);
+        .sh-react-btn.sh-active-report {
+            background: rgba(251, 113, 133, 0.08);
+            border-color: rgba(251, 113, 133, 0.20);
+            color: #fb7185;
+        }
 
-    var panel = document.createElement('div');
-    panel.id = 'sh-pins-panel';
-    panel.innerHTML =
-      '<div class="sh-pins-head">' +
-        '<div class="sh-pins-title"><i class="ti ti-bookmark" style="font-size:14px;margin-right:6px" aria-hidden="true"></i>Pinned insights</div>' +
-        '<button class="sh-pins-close" onclick="togglePinsPanel()" aria-label="Close"><i class="ti ti-x"></i></button>' +
-      '</div>' +
-      '<div class="sh-pins-list" id="sh-pins-list"><div class="sh-pins-empty">No pins yet.<br>Save Sheldon\'s best advice here.</div></div>';
-    document.body.appendChild(panel);
-  }
+        .sh-react-sep {
+            width: 1px;
+            height: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            margin: 0 2px;
+        }
 
-  function updatePinsFab() {
-    var fab = document.getElementById('sh-pins-fab');
-    var cnt = document.getElementById('sh-pins-fab-count');
-    if (!fab) return;
-    if (_pins.length > 0) {
-      fab.classList.add('show');
-      if (cnt) { cnt.style.display = 'flex'; cnt.textContent = _pins.length > 9 ? '9+' : _pins.length; }
-    } else {
-      fab.classList.remove('show');
-      if (cnt) cnt.style.display = 'none';
-    }
-  }
+        /* Pins panel */
+        #sh-pins-panel {
+            position: fixed;
+            bottom: 28px;
+            right: 108px;
+            z-index: 9996;
+            width: 320px;
+            max-height: 480px;
+            display: none;
+            flex-direction: column;
+            background: rgba(13, 15, 28, 0.97);
+            border: 1px solid rgba(240, 189, 106, 0.28);
+            border-radius: 20px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+            overflow: hidden;
+            animation: fadeUp 0.3s cubic-bezier(.34, 1.56, .64, 1) both;
+        }
 
-  window.togglePinsPanel = function () {
-    var panel = document.getElementById('sh-pins-panel');
-    if (!panel) return;
-    var isOpen = panel.classList.contains('open');
-    panel.classList.toggle('open', !isOpen);
-    if (!isOpen) { loadPins(); }
-  };
+        #sh-pins-panel.open {
+            display: flex;
+        }
 
-  function renderPinsPanel() {
-    var list = document.getElementById('sh-pins-list'); if (!list) return;
-    if (!_pins.length) {
-      list.innerHTML = '<div class="sh-pins-empty">No pins yet.<br>Save Sheldon\'s best advice here.</div>';
-      return;
-    }
-    list.innerHTML = _pins.map(function (p, i) {
-      var d = new Date(p.created_at);
-      var dateStr2 = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-      var preview = (p.message_content || '').replace(/<[^>]+>/g, '').slice(0, 180);
-      return '<div class="sh-pin-item">' +
-        preview + (p.message_content.length > 180 ? '…' : '') +
-        '<div class="sh-pin-date">' + dateStr2 + '</div>' +
-        '<button class="sh-pin-del" data-idx="' + i + '" title="Unpin" aria-label="Unpin"><i class="ti ti-x"></i></button>' +
-        '</div>';
-    }).join('');
+        .sh-pins-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            flex-shrink: 0;
+        }
 
-    list.querySelectorAll('.sh-pin-del').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var idx = parseInt(this.getAttribute('data-idx'));
-        var pin = _pins[idx];
-        if (!pin) return;
-        deleteReaction(pin.message_content, 'pin').then(function () {
-          _pins.splice(idx, 1);
-          updatePinsFab();
-          renderPinsPanel();
-          /* un-highlight any visible pin button for this message */
-          document.querySelectorAll('.sh-react-btn[data-action="pin"]').forEach(function (b) {
-            if (b.dataset.content === pin.message_content.slice(0, 2000)) {
-              b.classList.remove('sh-active-pin');
+        .sh-pins-title {
+            font-family: 'Fraunces', serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: #f0bd6a;
+        }
+
+        .sh-pins-close {
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(190, 196, 235, 0.40);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            transition: all 0.12s;
+        }
+
+        .sh-pins-close:hover {
+            color: #fb7185;
+            background: rgba(251, 113, 133, 0.10);
+            border-color: rgba(251, 113, 133, 0.25);
+        }
+
+        .sh-pins-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sh-pins-list::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .sh-pins-list::-webkit-scrollbar-thumb {
+            background: rgba(240, 189, 106, 0.25);
+            border-radius: 2px;
+        }
+
+        .sh-pin-item {
+            padding: 10px 12px;
+            border-radius: 11px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(240, 189, 106, 0.14);
+            font-size: 12px;
+            line-height: 1.55;
+            color: rgba(218, 222, 248, 0.78);
+            position: relative;
+        }
+
+        .sh-pin-item strong {
+            color: #fff;
+            font-weight: 650;
+        }
+
+        .sh-pin-date {
+            font-size: 10px;
+            color: rgba(190, 196, 235, 0.30);
+            margin-top: 6px;
+        }
+
+        .sh-pin-del {
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: rgba(190, 196, 235, 0.20);
+            font-size: 12px;
+            padding: 2px;
+            border-radius: 5px;
+            display: none;
+            transition: color 0.12s;
+        }
+
+        .sh-pin-item:hover .sh-pin-del {
+            display: block;
+        }
+
+        .sh-pin-del:hover {
+            color: #fb7185;
+        }
+
+        .sh-pins-empty {
+            text-align: center;
+            padding: 28px 12px;
+            font-size: 12px;
+            color: rgba(190, 196, 235, 0.28);
+            line-height: 1.5;
+        }
+
+        /* Pins FAB button */
+        #sh-pins-fab {
+            position: fixed;
+            bottom: 108px;
+            right: 28px;
+            z-index: 9996;
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: rgba(13, 15, 28, 0.92);
+            border: 1px solid rgba(240, 189, 106, 0.30);
+            color: #f0bd6a;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+            transition: all 0.18s cubic-bezier(.34, 1.56, .64, 1);
+        }
+
+        #sh-pins-fab.show {
+            display: flex;
+        }
+
+        #sh-pins-fab:hover {
+            transform: translateY(-2px) scale(1.06);
+            border-color: rgba(240, 189, 106, 0.55);
+        }
+
+        #sh-pins-fab-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 16px;
+            height: 16px;
+            background: #f0bd6a;
+            border-radius: 50%;
+            border: 2px solid #0d1018;
+            font-size: 9px;
+            font-weight: 700;
+            color: #0d1018;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* light theme */
+        html.sc-light .sh-react-btn {
+            background: rgba(15, 17, 40, 0.04);
+            border-color: rgba(15, 17, 40, 0.09);
+            color: rgba(23, 27, 46, 0.38);
+        }
+
+        html.sc-light .sh-react-btn:hover {
+            background: rgba(15, 17, 40, 0.07);
+            color: rgba(23, 27, 46, 0.70);
+        }
+
+        html.sc-light #sh-pins-panel {
+            background: rgba(248, 249, 255, 0.98);
+            border-color: rgba(196, 127, 42, 0.30);
+        }
+
+        html.sc-light .sh-pin-item {
+            background: #fff;
+            border-color: rgba(196, 127, 42, 0.16);
+            color: rgba(23, 27, 46, 0.75);
+        }
+
+        html.sc-light .sh-pin-item strong {
+            color: #0e1020;
+        }
+
+        html.sc-light #sh-pins-fab {
+            background: rgba(255, 255, 255, 0.96);
+            border-color: rgba(196, 127, 42, 0.35);
+        }
+    </style>
+
+    <script id="sheldon-reactions-js">
+        (function () {
+
+            var _reactCache = {}; /* msgHash -> {up,down,pin,report} */
+            var _pins = [];
+            var _currentSessionId_rx = null;
+
+            /* simple hash for message content */
+            function msgHash(content) {
+                var h = 0, i, c;
+                for (i = 0; i < content.length; i++) {
+                    c = content.charCodeAt(i);
+                    h = ((h << 5) - h) + c; h |= 0;
+                }
+                return 'rx_' + Math.abs(h);
             }
-          });
-        });
-      });
-    });
-  }
 
-  /* ── React buttons ── */
-  function getContent(msgEl) {
-    return (msgEl.innerText || msgEl.textContent || '').replace(/Copy$/, '').trim();
-  }
+            /* ── Supabase helpers ── */
+            async function getUid() {
+                var r = await supa.auth.getUser();
+                return r && r.data && r.data.user && r.data.user.id;
+            }
 
-  function addReactRow(msgWrap) {
-    if (msgWrap.querySelector('.sh-react-row')) return;
-    var botMsg = msgWrap.querySelector('.sheldon-msg.bot');
-    if (!botMsg) return;
+            async function saveReaction(content, reaction, sessionId) {
+                var uid = await getUid(); if (!uid) return;
+                await supa.from('sheldon_reactions').insert({
+                    user_id: uid,
+                    session_id: sessionId || null,
+                    message_content: content.slice(0, 2000),
+                    reaction: reaction
+                });
+            }
 
-    var content = getContent(botMsg);
-    var hash = msgHash(content);
-    var cached = _reactCache[hash] || {};
+            async function deleteReaction(content, reaction) {
+                var uid = await getUid(); if (!uid) return;
+                await supa.from('sheldon_reactions')
+                    .delete()
+                    .eq('user_id', uid)
+                    .eq('reaction', reaction)
+                    .eq('message_content', content.slice(0, 2000));
+            }
 
-    var row = document.createElement('div');
-    row.className = 'sh-react-row' + (Object.keys(cached).length ? ' sh-reacted' : '');
+            async function loadPins() {
+                var uid = await getUid(); if (!uid) return;
+                var r = await supa.from('sheldon_reactions')
+                    .select('message_content, created_at')
+                    .eq('user_id', uid)
+                    .eq('reaction', 'pin')
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+                if (!r.error) {
+                    _pins = r.data || [];
+                    updatePinsFab();
+                    renderPinsPanel();
+                }
+            }
 
-    function btn(action, icon, label, activeClass) {
-      var b = document.createElement('button');
-      b.className = 'sh-react-btn' + (cached[action] ? ' ' + activeClass : '');
-      b.setAttribute('data-action', action);
-      b.setAttribute('data-content', content.slice(0, 2000));
-      b.setAttribute('aria-label', label);
-      b.title = label;
-      b.innerHTML = '<i class="ti ' + icon + '" style="font-size:12px" aria-hidden="true"></i> ' + label;
-      b.addEventListener('click', function () { handleReact(b, action, content, hash, row); });
-      return b;
-    }
+            /* ── Pins FAB ── */
+            function injectPinsFab() {
+                if (document.getElementById('sh-pins-fab')) return;
+                var fab = document.createElement('div');
+                fab.id = 'sh-pins-fab';
+                fab.setAttribute('role', 'button');
+                fab.setAttribute('aria-label', 'Pinned insights');
+                fab.title = 'Pinned insights';
+                fab.innerHTML = '<i class="ti ti-bookmark" style="font-size:17px" aria-hidden="true"></i><span id="sh-pins-fab-count" style="display:none"></span>';
+                fab.addEventListener('click', togglePinsPanel);
+                document.body.appendChild(fab);
 
-    row.appendChild(btn('up', 'ti-thumb-up', 'Helpful', 'sh-active-up'));
-    row.appendChild(btn('down', 'ti-thumb-down', 'Not helpful', 'sh-active-down'));
-    var sep = document.createElement('div'); sep.className = 'sh-react-sep';
-    row.appendChild(sep);
-    row.appendChild(btn('pin', 'ti-bookmark', 'Save', 'sh-active-pin'));
-    row.appendChild(btn('report', 'ti-flag', 'Report', 'sh-active-report'));
+                var panel = document.createElement('div');
+                panel.id = 'sh-pins-panel';
+                panel.innerHTML =
+                    '<div class="sh-pins-head">' +
+                    '<div class="sh-pins-title"><i class="ti ti-bookmark" style="font-size:14px;margin-right:6px" aria-hidden="true"></i>Pinned insights</div>' +
+                    '<button class="sh-pins-close" onclick="togglePinsPanel()" aria-label="Close"><i class="ti ti-x"></i></button>' +
+                    '</div>' +
+                    '<div class="sh-pins-list" id="sh-pins-list"><div class="sh-pins-empty">No pins yet.<br>Save Sheldon\'s best advice here.</div></div>';
+                document.body.appendChild(panel);
+            }
 
-    msgWrap.appendChild(row);
-  }
+            function updatePinsFab() {
+                var fab = document.getElementById('sh-pins-fab');
+                var cnt = document.getElementById('sh-pins-fab-count');
+                if (!fab) return;
+                if (_pins.length > 0) {
+                    fab.classList.add('show');
+                    if (cnt) { cnt.style.display = 'flex'; cnt.textContent = _pins.length > 9 ? '9+' : _pins.length; }
+                } else {
+                    fab.classList.remove('show');
+                    if (cnt) cnt.style.display = 'none';
+                }
+            }
 
-  async function handleReact(btn, action, content, hash, row) {
-    var activeClass = 'sh-active-' + action;
-    var isActive = btn.classList.contains(activeClass);
+            window.togglePinsPanel = function () {
+                var panel = document.getElementById('sh-pins-panel');
+                if (!panel) return;
+                var isOpen = panel.classList.contains('open');
+                panel.classList.toggle('open', !isOpen);
+                if (!isOpen) { loadPins(); }
+            };
 
-    /* up/down are mutually exclusive */
-    if (action === 'up' || action === 'down') {
-      var other = action === 'up' ? 'down' : 'up';
-      var otherBtn = row.querySelector('[data-action="' + other + '"]');
-      if (otherBtn) { otherBtn.classList.remove('sh-active-' + other); delete (_reactCache[hash] || {})[other]; }
-    }
+            function renderPinsPanel() {
+                var list = document.getElementById('sh-pins-list'); if (!list) return;
+                if (!_pins.length) {
+                    list.innerHTML = '<div class="sh-pins-empty">No pins yet.<br>Save Sheldon\'s best advice here.</div>';
+                    return;
+                }
+                list.innerHTML = _pins.map(function (p, i) {
+                    var d = new Date(p.created_at);
+                    var dateStr2 = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+                    var preview = (p.message_content || '').replace(/<[^>]+>/g, '').slice(0, 180);
+                    return '<div class="sh-pin-item">' +
+                        preview + (p.message_content.length > 180 ? '…' : '') +
+                        '<div class="sh-pin-date">' + dateStr2 + '</div>' +
+                        '<button class="sh-pin-del" data-idx="' + i + '" title="Unpin" aria-label="Unpin"><i class="ti ti-x"></i></button>' +
+                        '</div>';
+                }).join('');
 
-    if (isActive) {
-      btn.classList.remove(activeClass);
-      delete (_reactCache[hash] || {})[action];
-      await deleteReaction(content, action);
-      if (action === 'pin') { _pins = _pins.filter(function (p) { return p.message_content.slice(0,2000) !== content.slice(0,2000); }); updatePinsFab(); renderPinsPanel(); }
-    } else {
-      btn.classList.add(activeClass);
-      if (!_reactCache[hash]) _reactCache[hash] = {};
-      _reactCache[hash][action] = true;
-      row.classList.add('sh-reacted');
+                list.querySelectorAll('.sh-pin-del').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var idx = parseInt(this.getAttribute('data-idx'));
+                        var pin = _pins[idx];
+                        if (!pin) return;
+                        deleteReaction(pin.message_content, 'pin').then(function () {
+                            _pins.splice(idx, 1);
+                            updatePinsFab();
+                            renderPinsPanel();
+                            /* un-highlight any visible pin button for this message */
+                            document.querySelectorAll('.sh-react-btn[data-action="pin"]').forEach(function (b) {
+                                if (b.dataset.content === pin.message_content.slice(0, 2000)) {
+                                    b.classList.remove('sh-active-pin');
+                                }
+                            });
+                        });
+                    });
+                });
+            }
 
-      /* get current session id from the history module if available */
-      var sid = null;
-      try { sid = window.currentSessionId || null; } catch(e) {}
+            /* ── React buttons ── */
+            function getContent(msgEl) {
+                return (msgEl.innerText || msgEl.textContent || '').replace(/Copy$/, '').trim();
+            }
 
-      await saveReaction(content, action, sid);
+            function addReactRow(msgWrap) {
+                if (msgWrap.querySelector('.sh-react-row')) return;
+                var botMsg = msgWrap.querySelector('.sheldon-msg.bot');
+                if (!botMsg) return;
 
-      if (action === 'pin') {
-        _pins.unshift({ message_content: content, created_at: new Date().toISOString() });
-        updatePinsFab();
-        renderPinsPanel();
-        /* brief visual confirmation */
-        var orig = btn.innerHTML;
-        btn.innerHTML = '<i class="ti ti-check" style="font-size:12px" aria-hidden="true"></i> Saved!';
-        setTimeout(function () { btn.innerHTML = orig; }, 1800);
-      }
+                var content = getContent(botMsg);
+                var hash = msgHash(content);
+                var cached = _reactCache[hash] || {};
 
-      if (action === 'report') {
-        if (typeof scNotify === 'function') scNotify('Thanks — this response has been flagged for review.', 'info');
-      }
-    }
-  }
+                var row = document.createElement('div');
+                row.className = 'sh-react-row' + (Object.keys(cached).length ? ' sh-reacted' : '');
 
-  /* ── Observer — attach to every bot message ── */
-  function decorateAll() {
-    document.querySelectorAll('#sheldonMessages .sh-msg-wrap:not(.sh-user-wrap)').forEach(addReactRow);
-  }
+                function btn(action, icon, label, activeClass) {
+                    var b = document.createElement('button');
+                    b.className = 'sh-react-btn' + (cached[action] ? ' ' + activeClass : '');
+                    b.setAttribute('data-action', action);
+                    b.setAttribute('data-content', content.slice(0, 2000));
+                    b.setAttribute('aria-label', label);
+                    b.title = label;
+                    b.innerHTML = '<i class="ti ' + icon + '" style="font-size:12px" aria-hidden="true"></i> ' + label;
+                    b.addEventListener('click', function () { handleReact(b, action, content, hash, row); });
+                    return b;
+                }
 
-  function watchMessages() {
-    var container = document.getElementById('sheldonMessages'); if (!container) return;
-    var obs = new MutationObserver(function () {
-      clearTimeout(obs._t);
-      obs._t = setTimeout(decorateAll, 200);
-    });
-    obs.observe(container, { childList: true, subtree: true });
-  }
+                row.appendChild(btn('up', 'ti-thumb-up', 'Helpful', 'sh-active-up'));
+                row.appendChild(btn('down', 'ti-thumb-down', 'Not helpful', 'sh-active-down'));
+                var sep = document.createElement('div'); sep.className = 'sh-react-sep';
+                row.appendChild(sep);
+                row.appendChild(btn('pin', 'ti-bookmark', 'Save', 'sh-active-pin'));
+                row.appendChild(btn('report', 'ti-flag', 'Report', 'sh-active-report'));
 
-  /* ── Boot ── */
-  function boot() {
-    injectPinsFab();
-    decorateAll();
-    watchMessages();
-    loadPins();
-  }
+                msgWrap.appendChild(row);
+            }
 
-  var _origOpen = window.openSheldon;
-  window.openSheldon = function () {
-    if (typeof _origOpen === 'function') _origOpen.apply(this, arguments);
-    setTimeout(boot, 300);
-  };
+            async function handleReact(btn, action, content, hash, row) {
+                var activeClass = 'sh-active-' + action;
+                var isActive = btn.classList.contains(activeClass);
 
-  if (document.body) setTimeout(boot, 1000);
-  else document.addEventListener('DOMContentLoaded', boot);
+                /* up/down are mutually exclusive */
+                if (action === 'up' || action === 'down') {
+                    var other = action === 'up' ? 'down' : 'up';
+                    var otherBtn = row.querySelector('[data-action="' + other + '"]');
+                    if (otherBtn) { otherBtn.classList.remove('sh-active-' + other); delete (_reactCache[hash] || {})[other]; }
+                }
 
-  /* close pins panel on outside click */
-  document.addEventListener('click', function (e) {
-    var panel = document.getElementById('sh-pins-panel');
-    var fab = document.getElementById('sh-pins-fab');
-    if (panel && panel.classList.contains('open') && !panel.contains(e.target) && fab && !fab.contains(e.target)) {
-      panel.classList.remove('open');
-    }
-  });
+                if (isActive) {
+                    btn.classList.remove(activeClass);
+                    delete (_reactCache[hash] || {})[action];
+                    await deleteReaction(content, action);
+                    if (action === 'pin') { _pins = _pins.filter(function (p) { return p.message_content.slice(0, 2000) !== content.slice(0, 2000); }); updatePinsFab(); renderPinsPanel(); }
+                } else {
+                    btn.classList.add(activeClass);
+                    if (!_reactCache[hash]) _reactCache[hash] = {};
+                    _reactCache[hash][action] = true;
+                    row.classList.add('sh-reacted');
 
-})();
-</script>
+                    /* get current session id from the history module if available */
+                    var sid = null;
+                    try { sid = window.currentSessionId || null; } catch (e) { }
+
+                    await saveReaction(content, action, sid);
+
+                    if (action === 'pin') {
+                        _pins.unshift({ message_content: content, created_at: new Date().toISOString() });
+                        updatePinsFab();
+                        renderPinsPanel();
+                        /* brief visual confirmation */
+                        var orig = btn.innerHTML;
+                        btn.innerHTML = '<i class="ti ti-check" style="font-size:12px" aria-hidden="true"></i> Saved!';
+                        setTimeout(function () { btn.innerHTML = orig; }, 1800);
+                    }
+
+                    if (action === 'report') {
+                        if (typeof scNotify === 'function') scNotify('Thanks — this response has been flagged for review.', 'info');
+                    }
+                }
+            }
+
+            /* ── Observer — attach to every bot message ── */
+            function decorateAll() {
+                document.querySelectorAll('#sheldonMessages .sh-msg-wrap:not(.sh-user-wrap)').forEach(addReactRow);
+            }
+
+            function watchMessages() {
+                var container = document.getElementById('sheldonMessages'); if (!container) return;
+                var obs = new MutationObserver(function () {
+                    clearTimeout(obs._t);
+                    obs._t = setTimeout(decorateAll, 200);
+                });
+                obs.observe(container, { childList: true, subtree: true });
+            }
+
+            /* ── Boot ── */
+            function boot() {
+                injectPinsFab();
+                decorateAll();
+                watchMessages();
+                loadPins();
+            }
+
+            var _origOpen = window.openSheldon;
+            window.openSheldon = function () {
+                if (typeof _origOpen === 'function') _origOpen.apply(this, arguments);
+                setTimeout(boot, 300);
+            };
+
+            if (document.body) setTimeout(boot, 1000);
+            else document.addEventListener('DOMContentLoaded', boot);
+
+            /* close pins panel on outside click */
+            document.addEventListener('click', function (e) {
+                var panel = document.getElementById('sh-pins-panel');
+                var fab = document.getElementById('sh-pins-fab');
+                if (panel && panel.classList.contains('open') && !panel.contains(e.target) && fab && !fab.contains(e.target)) {
+                    panel.classList.remove('open');
+                }
+            });
+
+        })();
+    </script>
 
     <!-- ══ SHELDON VOICE INPUT ══ -->
-<style id="sheldon-voice-input-css">
-  #sh-voice-btn {
-    width: 46px;
-    height: 46px;
-    border-radius: 14px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: rgba(190,196,235,0.40);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 17px;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all 0.18s cubic-bezier(.34,1.56,.64,1);
-  }
-  #sh-voice-btn:hover {
-    background: rgba(135,141,255,0.10);
-    border-color: rgba(135,141,255,0.28);
-    color: #9aa0ff;
-    transform: translateY(-1px);
-  }
-  #sh-voice-btn.sh-listening {
-    background: rgba(251,113,133,0.14);
-    border-color: rgba(251,113,133,0.40);
-    color: #fb7185;
-    animation: shVoicePulse 1.2s ease-in-out infinite;
-  }
-  #sh-voice-btn.sh-processing {
-    background: rgba(240,189,106,0.12);
-    border-color: rgba(240,189,106,0.30);
-    color: #f0bd6a;
-    cursor: default;
-  }
-  @keyframes shVoicePulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(251,113,133,0); }
-    50% { box-shadow: 0 0 0 6px rgba(251,113,133,0.18); }
-  }
-
-  /* live transcript preview */
-  #sh-voice-preview {
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 0;
-    right: 0;
-    background: rgba(13,15,28,0.95);
-    border: 1px solid rgba(251,113,133,0.28);
-    border-radius: 12px;
-    padding: 9px 13px;
-    font-size: 12.5px;
-    line-height: 1.5;
-    color: rgba(218,222,248,0.75);
-    display: none;
-    pointer-events: none;
-    font-style: italic;
-  }
-  #sh-voice-preview.show { display: block; }
-  #sh-voice-preview .sh-vp-dot {
-    display: inline-block;
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: #fb7185;
-    margin-right: 7px;
-    animation: shVoiceDot 1s ease-in-out infinite;
-    vertical-align: middle;
-  }
-  @keyframes shVoiceDot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.7); }
-  }
-
-  /* no-support message */
-  #sh-voice-nosupport {
-    display: none;
-    position: absolute;
-    bottom: calc(100% + 8px);
-    right: 0;
-    background: rgba(13,15,28,0.97);
-    border: 1px solid rgba(251,113,133,0.25);
-    border-radius: 10px;
-    padding: 8px 12px;
-    font-size: 11.5px;
-    color: #fb7185;
-    white-space: nowrap;
-    pointer-events: none;
-  }
-
-  /* light theme */
-  html.sc-light #sh-voice-btn {
-    background: rgba(15,17,40,0.04);
-    border-color: rgba(15,17,40,0.09);
-    color: rgba(23,27,46,0.35);
-  }
-  html.sc-light #sh-voice-btn.sh-listening {
-    background: rgba(229,72,77,0.08);
-    border-color: rgba(229,72,77,0.30);
-    color: #e5484d;
-  }
-  html.sc-light #sh-voice-preview {
-    background: rgba(248,249,255,0.98);
-    border-color: rgba(229,72,77,0.22);
-    color: rgba(23,27,46,0.65);
-  }
-</style>
-
-<script id="sheldon-voice-input-js">
-(function () {
-
-  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  var recognition = null;
-  var listening = false;
-  var silenceTimer = null;
-  var SILENCE_MS = 1800; /* send after 1.8s of silence */
-
-  /* ── inject mic button into Sheldon input dock ── */
-  function injectVoiceBtn() {
-    var dock = document.querySelector('#sheldonPanel .sheldon-input');
-    if (!dock || document.getElementById('sh-voice-btn')) return;
-
-    var wrap = dock.querySelector('.sh-dock-field');
-    if (!wrap) return;
-
-    /* position wrapper for the preview bubble */
-    dock.style.position = 'relative';
-
-    /* preview bubble */
-    var preview = document.createElement('div');
-    preview.id = 'sh-voice-preview';
-    preview.innerHTML = '<span class="sh-vp-dot"></span><span id="sh-vp-text">Listening…</span>';
-    dock.insertBefore(preview, dock.firstChild);
-
-    /* no-support tooltip */
-    var noSupport = document.createElement('div');
-    noSupport.id = 'sh-voice-nosupport';
-    noSupport.textContent = 'Voice input not supported in this browser';
-    dock.appendChild(noSupport);
-
-    /* mic button */
-    var btn = document.createElement('button');
-    btn.id = 'sh-voice-btn';
-    btn.setAttribute('aria-label', 'Voice input');
-    btn.title = 'Click to speak';
-    btn.innerHTML = '<i class="ti ti-microphone" style="font-size:17px" aria-hidden="true"></i>';
-    btn.addEventListener('click', toggleVoice);
-
-    /* insert between dock-field and send button */
-    var send = dock.querySelector('.sheldon-send');
-    if (send) dock.insertBefore(btn, send);
-    else dock.appendChild(btn);
-  }
-
-  /* ── toggle ── */
-  function toggleVoice() {
-    if (!SpeechRecognition) {
-      showNoSupport();
-      return;
-    }
-    if (listening) {
-      stopListening(false);
-    } else {
-      startListening();
-    }
-  }
-
-  /* ── start ── */
-  function startListening() {
-    if (listening) return;
-
-    recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-
-    var finalTranscript = '';
-
-    recognition.onstart = function () {
-      listening = true;
-      setBtn('listening');
-      showPreview('Listening…');
-      /* clear textarea */
-      var ta = document.getElementById('sheldonInput');
-      if (ta) ta.value = '';
-    };
-
-    recognition.onresult = function (e) {
-      var interim = '';
-      finalTranscript = '';
-      for (var i = 0; i < e.results.length; i++) {
-        if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
-        else interim += e.results[i][0].transcript;
-      }
-      var display = (finalTranscript + interim).trim();
-      showPreview(display || 'Listening…');
-
-      /* put interim text in textarea so user can see */
-      var ta = document.getElementById('sheldonInput');
-      if (ta) { ta.value = display; if (typeof sheldonGrow === 'function') sheldonGrow(ta); }
-
-      /* reset silence timer on every result */
-      clearTimeout(silenceTimer);
-      if (finalTranscript.trim()) {
-        silenceTimer = setTimeout(function () {
-          stopListening(true);
-        }, SILENCE_MS);
-      }
-    };
-
-    recognition.onerror = function (e) {
-      if (e.error === 'not-allowed') {
-        if (typeof scNotify === 'function') scNotify('Microphone permission denied. Please allow mic access in your browser settings.', 'error');
-      }
-      stopListening(false);
-    };
-
-    recognition.onend = function () {
-      /* onend fires when recognition stops — if we still have a final transcript, send it */
-      if (listening) {
-        var ta = document.getElementById('sheldonInput');
-        var text = ta ? ta.value.trim() : '';
-        listening = false;
-        setBtn('idle');
-        hidePreview();
-        if (text && typeof sheldonSend === 'function') {
-          setTimeout(sheldonSend, 100);
+    <style id="sheldon-voice-input-css">
+        #sh-voice-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(190, 196, 235, 0.40);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.18s cubic-bezier(.34, 1.56, .64, 1);
         }
-      }
-    };
 
-    try {
-      recognition.start();
-    } catch (e) {
-      stopListening(false);
-    }
-  }
+        #sh-voice-btn:hover {
+            background: rgba(135, 141, 255, 0.10);
+            border-color: rgba(135, 141, 255, 0.28);
+            color: #9aa0ff;
+            transform: translateY(-1px);
+        }
 
-  /* ── stop ── */
-  function stopListening(andSend) {
-    clearTimeout(silenceTimer);
-    listening = false;
-    setBtn(andSend ? 'processing' : 'idle');
-    hidePreview();
-    if (recognition) {
-      try { recognition.stop(); } catch(e) {}
-    }
-    if (andSend) {
-      /* small delay to let onend fire and textarea settle */
-      setTimeout(function () {
-        var ta = document.getElementById('sheldonInput');
-        var text = ta ? ta.value.trim() : '';
-        setBtn('idle');
-        if (text && typeof sheldonSend === 'function') sheldonSend();
-      }, 300);
-    }
-  }
+        #sh-voice-btn.sh-listening {
+            background: rgba(251, 113, 133, 0.14);
+            border-color: rgba(251, 113, 133, 0.40);
+            color: #fb7185;
+            animation: shVoicePulse 1.2s ease-in-out infinite;
+        }
 
-  /* ── UI helpers ── */
-  function setBtn(state) {
-    var btn = document.getElementById('sh-voice-btn'); if (!btn) return;
-    btn.classList.remove('sh-listening', 'sh-processing');
-    var icon = btn.querySelector('i');
-    if (state === 'listening') {
-      btn.classList.add('sh-listening');
-      btn.title = 'Click to cancel';
-      if (icon) icon.className = 'ti ti-microphone';
-    } else if (state === 'processing') {
-      btn.classList.add('sh-processing');
-      btn.title = 'Processing…';
-      if (icon) icon.className = 'ti ti-loader-2';
-      icon && (icon.style.animation = 'spin 1s linear infinite');
-    } else {
-      btn.title = 'Click to speak';
-      if (icon) { icon.className = 'ti ti-microphone'; icon.style.animation = ''; }
-    }
-  }
+        #sh-voice-btn.sh-processing {
+            background: rgba(240, 189, 106, 0.12);
+            border-color: rgba(240, 189, 106, 0.30);
+            color: #f0bd6a;
+            cursor: default;
+        }
 
-  function showPreview(text) {
-    var p = document.getElementById('sh-voice-preview'); if (!p) return;
-    var t = document.getElementById('sh-vp-text'); if (t) t.textContent = text;
-    p.classList.add('show');
-  }
+        @keyframes shVoicePulse {
 
-  function hidePreview() {
-    var p = document.getElementById('sh-voice-preview'); if (!p) return;
-    p.classList.remove('show');
-  }
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(251, 113, 133, 0);
+            }
 
-  function showNoSupport() {
-    var el = document.getElementById('sh-voice-nosupport'); if (!el) return;
-    el.style.display = 'block';
-    setTimeout(function () { el.style.display = 'none'; }, 3000);
-  }
+            50% {
+                box-shadow: 0 0 0 6px rgba(251, 113, 133, 0.18);
+            }
+        }
 
-  /* ── boot ── */
-  function boot() { injectVoiceBtn(); }
+        /* live transcript preview */
+        #sh-voice-preview {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: rgba(13, 15, 28, 0.95);
+            border: 1px solid rgba(251, 113, 133, 0.28);
+            border-radius: 12px;
+            padding: 9px 13px;
+            font-size: 12.5px;
+            line-height: 1.5;
+            color: rgba(218, 222, 248, 0.75);
+            display: none;
+            pointer-events: none;
+            font-style: italic;
+        }
 
-  var _origOpen = window.openSheldon;
-  window.openSheldon = function () {
-    if (typeof _origOpen === 'function') _origOpen.apply(this, arguments);
-    setTimeout(boot, 200);
-  };
+        #sh-voice-preview.show {
+            display: block;
+        }
 
-  if (document.body) setTimeout(boot, 1000);
-  else document.addEventListener('DOMContentLoaded', boot);
+        #sh-voice-preview .sh-vp-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #fb7185;
+            margin-right: 7px;
+            animation: shVoiceDot 1s ease-in-out infinite;
+            vertical-align: middle;
+        }
 
-})();
-</script>
+        @keyframes shVoiceDot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(0.7);
+            }
+        }
+
+        /* no-support message */
+        #sh-voice-nosupport {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            right: 0;
+            background: rgba(13, 15, 28, 0.97);
+            border: 1px solid rgba(251, 113, 133, 0.25);
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 11.5px;
+            color: #fb7185;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        /* light theme */
+        html.sc-light #sh-voice-btn {
+            background: rgba(15, 17, 40, 0.04);
+            border-color: rgba(15, 17, 40, 0.09);
+            color: rgba(23, 27, 46, 0.35);
+        }
+
+        html.sc-light #sh-voice-btn.sh-listening {
+            background: rgba(229, 72, 77, 0.08);
+            border-color: rgba(229, 72, 77, 0.30);
+            color: #e5484d;
+        }
+
+        html.sc-light #sh-voice-preview {
+            background: rgba(248, 249, 255, 0.98);
+            border-color: rgba(229, 72, 77, 0.22);
+            color: rgba(23, 27, 46, 0.65);
+        }
+    </style>
+
+    <script id="sheldon-voice-input-js">
+        (function () {
+
+            var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            var recognition = null;
+            var listening = false;
+            var silenceTimer = null;
+            var SILENCE_MS = 1800; /* send after 1.8s of silence */
+
+            /* ── inject mic button into Sheldon input dock ── */
+            function injectVoiceBtn() {
+                var dock = document.querySelector('#sheldonPanel .sheldon-input');
+                if (!dock || document.getElementById('sh-voice-btn')) return;
+
+                var wrap = dock.querySelector('.sh-dock-field');
+                if (!wrap) return;
+
+                /* position wrapper for the preview bubble */
+                dock.style.position = 'relative';
+
+                /* preview bubble */
+                var preview = document.createElement('div');
+                preview.id = 'sh-voice-preview';
+                preview.innerHTML = '<span class="sh-vp-dot"></span><span id="sh-vp-text">Listening…</span>';
+                dock.insertBefore(preview, dock.firstChild);
+
+                /* no-support tooltip */
+                var noSupport = document.createElement('div');
+                noSupport.id = 'sh-voice-nosupport';
+                noSupport.textContent = 'Voice input not supported in this browser';
+                dock.appendChild(noSupport);
+
+                /* mic button */
+                var btn = document.createElement('button');
+                btn.id = 'sh-voice-btn';
+                btn.setAttribute('aria-label', 'Voice input');
+                btn.title = 'Click to speak';
+                btn.innerHTML = '<i class="ti ti-microphone" style="font-size:17px" aria-hidden="true"></i>';
+                btn.addEventListener('click', toggleVoice);
+
+                /* insert between dock-field and send button */
+                var send = dock.querySelector('.sheldon-send');
+                if (send) dock.insertBefore(btn, send);
+                else dock.appendChild(btn);
+            }
+
+            /* ── toggle ── */
+            function toggleVoice() {
+                if (!SpeechRecognition) {
+                    showNoSupport();
+                    return;
+                }
+                if (listening) {
+                    stopListening(false);
+                } else {
+                    startListening();
+                }
+            }
+
+            /* ── start ── */
+            function startListening() {
+                if (listening) return;
+
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+
+                var finalTranscript = '';
+
+                recognition.onstart = function () {
+                    listening = true;
+                    setBtn('listening');
+                    showPreview('Listening…');
+                    /* clear textarea */
+                    var ta = document.getElementById('sheldonInput');
+                    if (ta) ta.value = '';
+                };
+
+                recognition.onresult = function (e) {
+                    var interim = '';
+                    finalTranscript = '';
+                    for (var i = 0; i < e.results.length; i++) {
+                        if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
+                        else interim += e.results[i][0].transcript;
+                    }
+                    var display = (finalTranscript + interim).trim();
+                    showPreview(display || 'Listening…');
+
+                    /* put interim text in textarea so user can see */
+                    var ta = document.getElementById('sheldonInput');
+                    if (ta) { ta.value = display; if (typeof sheldonGrow === 'function') sheldonGrow(ta); }
+
+                    /* reset silence timer on every result */
+                    clearTimeout(silenceTimer);
+                    if (finalTranscript.trim()) {
+                        silenceTimer = setTimeout(function () {
+                            stopListening(true);
+                        }, SILENCE_MS);
+                    }
+                };
+
+                recognition.onerror = function (e) {
+                    if (e.error === 'not-allowed') {
+                        if (typeof scNotify === 'function') scNotify('Microphone permission denied. Please allow mic access in your browser settings.', 'error');
+                    }
+                    stopListening(false);
+                };
+
+                recognition.onend = function () {
+                    /* onend fires when recognition stops — if we still have a final transcript, send it */
+                    if (listening) {
+                        var ta = document.getElementById('sheldonInput');
+                        var text = ta ? ta.value.trim() : '';
+                        listening = false;
+                        setBtn('idle');
+                        hidePreview();
+                        if (text && typeof sheldonSend === 'function') {
+                            setTimeout(sheldonSend, 100);
+                        }
+                    }
+                };
+
+                try {
+                    recognition.start();
+                } catch (e) {
+                    stopListening(false);
+                }
+            }
+
+            /* ── stop ── */
+            function stopListening(andSend) {
+                clearTimeout(silenceTimer);
+                listening = false;
+                setBtn(andSend ? 'processing' : 'idle');
+                hidePreview();
+                if (recognition) {
+                    try { recognition.stop(); } catch (e) { }
+                }
+                if (andSend) {
+                    /* small delay to let onend fire and textarea settle */
+                    setTimeout(function () {
+                        var ta = document.getElementById('sheldonInput');
+                        var text = ta ? ta.value.trim() : '';
+                        setBtn('idle');
+                        if (text && typeof sheldonSend === 'function') sheldonSend();
+                    }, 300);
+                }
+            }
+
+            /* ── UI helpers ── */
+            function setBtn(state) {
+                var btn = document.getElementById('sh-voice-btn'); if (!btn) return;
+                btn.classList.remove('sh-listening', 'sh-processing');
+                var icon = btn.querySelector('i');
+                if (state === 'listening') {
+                    btn.classList.add('sh-listening');
+                    btn.title = 'Click to cancel';
+                    if (icon) icon.className = 'ti ti-microphone';
+                } else if (state === 'processing') {
+                    btn.classList.add('sh-processing');
+                    btn.title = 'Processing…';
+                    if (icon) icon.className = 'ti ti-loader-2';
+                    icon && (icon.style.animation = 'spin 1s linear infinite');
+                } else {
+                    btn.title = 'Click to speak';
+                    if (icon) { icon.className = 'ti ti-microphone'; icon.style.animation = ''; }
+                }
+            }
+
+            function showPreview(text) {
+                var p = document.getElementById('sh-voice-preview'); if (!p) return;
+                var t = document.getElementById('sh-vp-text'); if (t) t.textContent = text;
+                p.classList.add('show');
+            }
+
+            function hidePreview() {
+                var p = document.getElementById('sh-voice-preview'); if (!p) return;
+                p.classList.remove('show');
+            }
+
+            function showNoSupport() {
+                var el = document.getElementById('sh-voice-nosupport'); if (!el) return;
+                el.style.display = 'block';
+                setTimeout(function () { el.style.display = 'none'; }, 3000);
+            }
+
+            /* ── boot ── */
+            function boot() { injectVoiceBtn(); }
+
+            var _origOpen = window.openSheldon;
+            window.openSheldon = function () {
+                if (typeof _origOpen === 'function') _origOpen.apply(this, arguments);
+                setTimeout(boot, 200);
+            };
+
+            if (document.body) setTimeout(boot, 1000);
+            else document.addEventListener('DOMContentLoaded', boot);
+
+        })();
+    </script>
 
     <!-- ══ SHELDON MEMORY ══ -->
-<style id="sheldon-memory-css">
-  /* Memory panel */
-  #sh-mem-panel {
-    position: fixed;
-    bottom: 28px;
-    right: 108px;
-    z-index: 99999;
-    width: 340px;
-    max-height: 520px;
-    display: none;
-    flex-direction: column;
-    background: rgba(13,15,28,0.97);
-    border: 1px solid rgba(135,141,255,0.28);
-    border-radius: 20px;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.55);
-    overflow: hidden;
-    animation: fadeUp 0.3s cubic-bezier(.34,1.56,.64,1) both;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  }
-  #sh-mem-panel.open { display: flex; }
-  .sh-mem-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 16px 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
-    flex-shrink: 0;
-  }
-  .sh-mem-title {
-    font-family: 'Fraunces', serif;
-    font-size: 15px;
-    font-weight: 600;
-    color: #9aa0ff;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-  }
-  .sh-mem-close {
-    width: 26px; height: 26px;
-    border-radius: 7px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: rgba(190,196,235,0.40);
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px;
-    transition: all 0.12s;
-  }
-  .sh-mem-close:hover { color: #fb7185; background: rgba(251,113,133,0.10); border-color: rgba(251,113,133,0.25); }
-  .sh-mem-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .sh-mem-list::-webkit-scrollbar { width: 3px; }
-  .sh-mem-list::-webkit-scrollbar-thumb { background: rgba(135,141,255,0.22); border-radius: 2px; }
-  .sh-mem-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 9px;
-    padding: 9px 11px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.065);
-    transition: border-color 0.15s;
-  }
-  .sh-mem-item:hover { border-color: rgba(135,141,255,0.22); }
-  .sh-mem-ic {
-    font-size: 14px;
-    flex-shrink: 0;
-    margin-top: 1px;
-    line-height: 1;
-  }
-  .sh-mem-body { flex: 1; min-width: 0; }
-  .sh-mem-key {
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: 0.10em;
-    text-transform: uppercase;
-    color: rgba(190,196,235,0.35);
-    margin-bottom: 3px;
-  }
-  .sh-mem-val {
-    font-size: 12.5px;
-    line-height: 1.5;
-    color: rgba(218,222,248,0.80);
-  }
-  .sh-mem-del {
-    background: none; border: none;
-    cursor: pointer;
-    color: rgba(190,196,235,0.18);
-    font-size: 12px;
-    padding: 2px;
-    border-radius: 5px;
-    flex-shrink: 0;
-    margin-top: 1px;
-    transition: color 0.12s;
-    display: none;
-  }
-  .sh-mem-item:hover .sh-mem-del { display: block; }
-  .sh-mem-del:hover { color: #fb7185; }
-  .sh-mem-empty {
-    text-align: center;
-    padding: 32px 16px;
-    font-size: 12px;
-    color: rgba(190,196,235,0.28);
-    line-height: 1.6;
-  }
-  .sh-mem-footer {
-    padding: 10px 14px;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .sh-mem-count {
-    font-size: 10.5px;
-    color: rgba(190,196,235,0.30);
-  }
-  .sh-mem-clear {
-    font-size: 11px;
-    font-weight: 650;
-    font-family: 'Hanken Grotesk', sans-serif;
-    padding: 5px 11px;
-    border-radius: 8px;
-    cursor: pointer;
-    background: rgba(251,113,133,0.08);
-    border: 1px solid rgba(251,113,133,0.20);
-    color: #fb7185;
-    transition: all 0.15s;
-  }
-  .sh-mem-clear:hover { background: rgba(251,113,133,0.14); border-color: rgba(251,113,133,0.35); }
-
-  /* memory button in Sheldon header */
-  #sh-mem-btn {
-    width: 28px; height: 28px;
-    border-radius: 8px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: rgba(190,196,235,0.35);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all 0.15s;
-    position: relative;
-  }
-  #sh-mem-btn:hover {
-    background: rgba(135,141,255,0.12);
-    border-color: rgba(135,141,255,0.28);
-    color: #9aa0ff;
-  }
-  #sh-mem-btn.has-mem {
-    border-color: rgba(135,141,255,0.25);
-    color: #9aa0ff;
-  }
-  #sh-mem-badge {
-    position: absolute;
-    top: -4px; right: -4px;
-    width: 13px; height: 13px;
-    background: #878dff;
-    border-radius: 50%;
-    border: 2px solid #0d1018;
-    font-size: 8px;
-    font-weight: 700;
-    color: #fff;
-    display: none;
-    align-items: center;
-    justify-content: center;
-  }
-  #sh-mem-badge.show { display: flex; }
-
-  /* extracting indicator */
-  #sh-mem-extracting {
-    position: absolute;
-    bottom: 6px;
-    left: 18px;
-    font-size: 10.5px;
-    color: rgba(135,141,255,0.50);
-    display: none;
-    align-items: center;
-    gap: 5px;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-style: italic;
-  }
-  #sh-mem-extracting.show { display: flex; }
-
-  /* light theme */
-  html.sc-light #sh-mem-panel {
-    background: rgba(248,249,255,0.98);
-    border-color: rgba(88,94,230,0.22);
-  }
-  html.sc-light .sh-mem-item {
-    background: #fff;
-    border-color: rgba(15,17,40,0.08);
-    color: rgba(23,27,46,0.78);
-  }
-  html.sc-light .sh-mem-val { color: rgba(23,27,46,0.78); }
-  html.sc-light .sh-mem-key { color: rgba(23,27,46,0.35); }
-  html.sc-light #sh-mem-btn { background: rgba(15,17,40,0.04); border-color: rgba(15,17,40,0.09); color: rgba(23,27,46,0.35); }
-</style>
-
-<script id="sheldon-memory-js">
-(function () {
-
-  var _memories = []; /* [{key, value, updated_at}] */
-  var _extracting = false;
-
-  /* ── category icons ── */
-  var ICONS = {
-    'weak_area': '🎯',
-    'study_pattern': '📊',
-    'goal': '🏆',
-    'preference': '⚙️',
-    'insight': '💡',
-    'session': '📝',
-    'default': '🧠'
-  };
-
-  function iconFor(key) {
-    if (/weak|struggle|error|miss/i.test(key)) return ICONS.weak_area;
-    if (/pattern|habit|routine|time|session/i.test(key)) return ICONS.study_pattern;
-    if (/goal|target|score|exam|aim/i.test(key)) return ICONS.goal;
-    if (/prefer|like|style|mode/i.test(key)) return ICONS.preference;
-    if (/insight|note|observation/i.test(key)) return ICONS.insight;
-    if (/session|study|log/i.test(key)) return ICONS.session;
-    return ICONS.default;
-  }
-
-  /* ── Supabase helpers ── */
-  async function getUid() {
-    var r = await supa.auth.getUser();
-    return r && r.data && r.data.user && r.data.user.id;
-  }
-
-  async function loadMemories() {
-    var uid = await getUid(); if (!uid) return;
-    var r = await supa.from('sheldon_memory')
-      .select('key, value, updated_at')
-      .eq('user_id', uid)
-      .order('updated_at', { ascending: false })
-      .limit(30);
-    if (!r.error) {
-      _memories = r.data || [];
-      updateMemBtn();
-      renderMemPanel();
-    }
-  }
-
-  async function upsertMemory(key, value) {
-    var uid = await getUid(); if (!uid) return;
-    await supa.from('sheldon_memory').upsert(
-      { user_id: uid, key: key, value: value, updated_at: new Date().toISOString() },
-      { onConflict: 'user_id,key' }
-    );
-  }
-
-  async function deleteMemory(key) {
-    var uid = await getUid(); if (!uid) return;
-    await supa.from('sheldon_memory').delete().eq('user_id', uid).eq('key', key);
-    _memories = _memories.filter(function(m){ return m.key !== key; });
-    updateMemBtn();
-    renderMemPanel();
-  }
-
-  async function clearAllMemories() {
-    var uid = await getUid(); if (!uid) return;
-    await supa.from('sheldon_memory').delete().eq('user_id', uid);
-    _memories = [];
-    updateMemBtn();
-    renderMemPanel();
-  }
-
-  /* ── Build memory context string for injection ── */
-  window.buildSheldonMemoryContext = function () {
-    if (!_memories.length) return '';
-    var lines = _memories.slice(0, 20).map(function(m){ return '- ' + m.key + ': ' + m.value; });
-    return '[SHELDON MEMORY — facts you know about this student, use naturally in replies]\n'
-      + lines.join('\n')
-      + '\n[END MEMORY]\n\n';
-  };
-
-  /* ── Extract memories from conversation turn ── */
-  async function extractMemories(userMsg, botReply) {
-    if (_extracting) return;
-    if (!window._sessionsReady) return;
-    _extracting = true;
-    showExtracting(true);
-
-    var existingKeys = _memories.map(function(m){ return m.key; }).join(', ');
-
-    var prompt = 'You are a memory extraction system for a GMAT coaching AI called Sheldon.\n'
-      + 'Given a conversation turn, extract ONLY facts explicitly stated or clearly implied by what the USER said or what SHELDON observed about them.\n'
-      + 'Return ONLY valid JSON array (no markdown, no backticks) like:\n'
-      + '[{"key": "snake_case_key", "value": "concise fact about the student"}]\n'
-      + 'Return [] if nothing worth remembering.\n\n'
-      + 'Rules:\n'
-      + '- Keys must be snake_case, descriptive, max 40 chars\n'
-      + '- Values must be concise (max 120 chars), factual, third-person\n'
-      + '- Max 3 memories per extraction\n'
-      + '- ONLY extract from what was actually said in this conversation turn\n'
-      + '- DO NOT invent or assume facts not mentioned in the conversation\n'
-      + '- DO NOT extract numeric dashboard stats (hours, streak, scores) — those come from live data\n'
-      + '- Focus on: weak question types, study habits, preferences, specific struggles, goals mentioned by user\n'
-      + '- If a key already exists, only include if value has meaningfully changed\n\n'
-      + 'Existing memory keys: ' + (existingKeys || 'none') + '\n\n'
-      + 'User said: "' + userMsg.replace(/\[DASHBOARD CONTEXT[\s\S]*?\[END CONTEXT\]\n\n/g, '').slice(0, 500) + '"\n'
-      + 'Sheldon replied: "' + botReply.replace(/<[^>]+>/g,'').slice(0, 800) + '"';
-
-    try {
-      var res = await supa.functions.invoke('sheldon', {
-        body: { message: prompt, context: {}, history: [], jsonMode: true }
-      });
-      var raw = (res.data && res.data.reply) || '[]';
-      var clean = raw.replace(/```json|```/g,'').trim();
-      var extracted = JSON.parse(clean);
-      if (Array.isArray(extracted) && extracted.length) {
-        for (var i = 0; i < extracted.length; i++) {
-          var m = extracted[i];
-          if (m.key && m.value) {
-            await upsertMemory(m.key, m.value);
-            /* update local cache */
-            var existing = _memories.find(function(x){ return x.key === m.key; });
-            if (existing) existing.value = m.value;
-            else _memories.unshift({ key: m.key, value: m.value, updated_at: new Date().toISOString() });
-          }
+    <style id="sheldon-memory-css">
+        /* Memory panel */
+        #sh-mem-panel {
+            position: fixed;
+            bottom: 28px;
+            right: 108px;
+            z-index: 99999;
+            width: 340px;
+            max-height: 520px;
+            display: none;
+            flex-direction: column;
+            background: rgba(13, 15, 28, 0.97);
+            border: 1px solid rgba(135, 141, 255, 0.28);
+            border-radius: 20px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+            overflow: hidden;
+            animation: fadeUp 0.3s cubic-bezier(.34, 1.56, .64, 1) both;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
         }
-        updateMemBtn();
-        renderMemPanel();
-      }
-    } catch(e) {
-      console.warn('Memory extraction failed:', e);
-    } finally {
-      _extracting = false;
-      showExtracting(false);
-    }
-  }
 
-  /* ── Hook into sheldonSend to capture turns ── */
-  function hookSheldonSend() {
-    if (window._shMemHooked) return;
-    window._shMemHooked = true;
-
-    var _orig = window.sheldonSend;
-    if (typeof _orig !== 'function') return;
-
-    window.sheldonSend = function () {
-      var input = document.getElementById('sheldonInput');
-      var userMsg = input ? input.value.trim() : '';
-      _orig.apply(this, arguments);
-
-      if (!userMsg) return;
-
-      /* watch for bot reply to complete then extract */
-      var msgs = document.getElementById('sheldonMessages'); if (!msgs) return;
-      var attempts = 0;
-      var watcher = setInterval(function () {
-        attempts++;
-        if (attempts > 30) { clearInterval(watcher); return; } /* 15s timeout */
-        var allBot = msgs.querySelectorAll('.sheldon-msg.bot:not(.sheldon-typing)');
-        if (!allBot.length) return;
-        var lastBot = allBot[allBot.length - 1];
-        /* wait until it's stable (not still streaming) */
-        var text = (lastBot.innerText || lastBot.textContent || '').trim();
-        if (text.length < 20) return;
-        /* check if it's been stable for 1s */
-        if (!lastBot._memLen) { lastBot._memLen = text.length; return; }
-        if (Math.abs(lastBot._memLen - text.length) > 5) { lastBot._memLen = text.length; return; }
-        /* stable — extract */
-        clearInterval(watcher);
-        if (!lastBot._memExtracted) {
-          lastBot._memExtracted = true;
-          extractMemories(userMsg, text);
+        #sh-mem-panel.open {
+            display: flex;
         }
-      }, 500);
-    };
-  }
 
-  /* ── UI ── */
-  function injectMemBtn() {
-    var header = document.querySelector('#sh-chat-area .sheldon-header');
-    if (!header || document.getElementById('sh-mem-btn')) return;
+        .sh-mem-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            flex-shrink: 0;
+        }
 
-    var btn = document.createElement('button');
-    btn.id = 'sh-mem-btn';
-    btn.title = 'Sheldon\'s memory';
-    btn.setAttribute('aria-label', 'View Sheldon memory');
-    btn.innerHTML = '<i class="ti ti-brain" style="font-size:13px" aria-hidden="true"></i>'
-      + '<span id="sh-mem-badge"></span>';
-    btn.addEventListener('click', toggleMemPanel);
+        .sh-mem-title {
+            font-family: 'Fraunces', serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: #9aa0ff;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
 
-    /* insert before history button */
-    var histBtn = document.getElementById('sh-history-btn');
-    if (histBtn) header.insertBefore(btn, histBtn);
-    else header.appendChild(btn);
+        .sh-mem-close {
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(190, 196, 235, 0.40);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            transition: all 0.12s;
+        }
 
-    /* extracting indicator in input dock */
-    var dock = document.querySelector('#sh-chat-area .sheldon-input');
-    if (dock && !document.getElementById('sh-mem-extracting')) {
-      var ind = document.createElement('div');
-      ind.id = 'sh-mem-extracting';
-      ind.innerHTML = '<i class="ti ti-loader-2" style="font-size:11px;animation:spin 1s linear infinite" aria-hidden="true"></i> Updating memory…';
-      dock.insertBefore(ind, dock.firstChild);
-    }
-  }
+        .sh-mem-close:hover {
+            color: #fb7185;
+            background: rgba(251, 113, 133, 0.10);
+            border-color: rgba(251, 113, 133, 0.25);
+        }
 
-  function updateMemBtn() {
-    var btn = document.getElementById('sh-mem-btn');
-    var badge = document.getElementById('sh-mem-badge');
-    if (!btn) return;
-    if (_memories.length > 0) {
-      btn.classList.add('has-mem');
-      if (badge) {
-        badge.classList.add('show');
-        badge.textContent = _memories.length > 9 ? '9+' : _memories.length;
-      }
-    } else {
-      btn.classList.remove('has-mem');
-      if (badge) badge.classList.remove('show');
-    }
-  }
+        .sh-mem-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
 
-  window.toggleMemPanel = function () {
-    var panel = document.getElementById('sh-mem-panel');
-    if (!panel) { buildMemPanel(); panel = document.getElementById('sh-mem-panel'); }
-    if (!panel) return;
-    var isOpen = panel.classList.contains('open');
-    panel.classList.toggle('open', !isOpen);
-    if (!isOpen) { renderMemPanel(); loadMemories(); }
-  };
+        .sh-mem-list::-webkit-scrollbar {
+            width: 3px;
+        }
 
-  function buildMemPanel() {
-    if (document.getElementById('sh-mem-panel')) return;
-    var panel = document.createElement('div');
-    panel.id = 'sh-mem-panel';
-    panel.innerHTML =
-      '<div class="sh-mem-head">'
-        + '<div class="sh-mem-title"><i class="ti ti-brain" style="font-size:14px" aria-hidden="true"></i> Sheldon\'s memory</div>'
-        + '<button class="sh-mem-close" onclick="toggleMemPanel()" aria-label="Close"><i class="ti ti-x"></i></button>'
-      + '</div>'
-      + '<div class="sh-mem-list" id="sh-mem-list"><div class="sh-mem-empty">No memories yet.<br>Chat with Sheldon to build up context.</div></div>'
-      + '<div class="sh-mem-footer">'
-        + '<span class="sh-mem-count" id="sh-mem-count"></span>'
-        + '<button class="sh-mem-clear" onclick="shMemClearAll()">Clear all</button>'
-      + '</div>';
-    document.body.appendChild(panel);
+        .sh-mem-list::-webkit-scrollbar-thumb {
+            background: rgba(135, 141, 255, 0.22);
+            border-radius: 2px;
+        }
 
-    document.addEventListener('click', function(e) {
-      var p = document.getElementById('sh-mem-panel');
-      var b = document.getElementById('sh-mem-btn');
-      if (p && p.classList.contains('open') && !p.contains(e.target) && b && !b.contains(e.target)) {
-        p.classList.remove('open');
-      }
-    });
-      renderMemPanel();
-  }
+        .sh-mem-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            padding: 9px 11px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.065);
+            transition: border-color 0.15s;
+        }
 
-  function renderMemPanel() {
-    var list = document.getElementById('sh-mem-list'); if (!list) return;
-    var count = document.getElementById('sh-mem-count');
-    if (count) count.textContent = _memories.length + ' memor' + (_memories.length === 1 ? 'y' : 'ies');
-    if (!_memories.length) {
-      list.innerHTML = '<div class="sh-mem-empty">No memories yet.<br>Chat with Sheldon to build up context.</div>';
-      return;
-    }
-    list.innerHTML = _memories.map(function(m) {
-      var icon = iconFor(m.key);
-      var keyLabel = m.key.replace(/_/g,' ');
-      return '<div class="sh-mem-item">'
-        + '<span class="sh-mem-ic">' + icon + '</span>'
-        + '<div class="sh-mem-body">'
-          + '<div class="sh-mem-key">' + keyLabel + '</div>'
-          + '<div class="sh-mem-val">' + m.value + '</div>'
-        + '</div>'
-        + '<button class="sh-mem-del" data-key="' + m.key + '" title="Forget this" aria-label="Forget"><i class="ti ti-x"></i></button>'
-      + '</div>';
-    }).join('');
+        .sh-mem-item:hover {
+            border-color: rgba(135, 141, 255, 0.22);
+        }
 
-    list.querySelectorAll('.sh-mem-del').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var key = this.getAttribute('data-key');
-        if (typeof scConfirm === 'function') {
-          scConfirm({
-            title: 'Forget this?',
-            message: '"' + key.replace(/_/g,' ') + '" will be removed from Sheldon\'s memory.',
-            icon: '<i class="ti ti-brain" style="font-size:22px;color:var(--accent-bright)"></i>',
-            confirmLabel: 'Forget', cancelLabel: 'Keep', danger: false,
-            onConfirm: function() { deleteMemory(key); }
-          });
-        } else { deleteMemory(key); }
-      });
-    });
-  }
+        .sh-mem-ic {
+            font-size: 14px;
+            flex-shrink: 0;
+            margin-top: 1px;
+            line-height: 1;
+        }
 
-  window.shMemClearAll = function() {
-    if (typeof scConfirm === 'function') {
-      scConfirm({
-        title: 'Clear all memories?',
-        message: 'Sheldon will forget everything about you. This cannot be undone.',
-        icon: '<i class="ti ti-brain" style="font-size:22px;color:var(--red)"></i>',
-        confirmLabel: 'Clear all', cancelLabel: 'Cancel', danger: true,
-        onConfirm: clearAllMemories
-      });
-    } else { clearAllMemories(); }
-  };
+        .sh-mem-body {
+            flex: 1;
+            min-width: 0;
+        }
 
-  function showExtracting(on) {
-    var el = document.getElementById('sh-mem-extracting');
-    if (el) el.classList.toggle('show', on);
-  }
+        .sh-mem-key {
+            font-size: 9.5px;
+            font-weight: 700;
+            letter-spacing: 0.10em;
+            text-transform: uppercase;
+            color: rgba(190, 196, 235, 0.35);
+            margin-bottom: 3px;
+        }
 
-  /* ── Boot ── */
-  function boot() {
-    buildMemPanel();
-    injectMemBtn();
-    hookSheldonSend();
-    loadMemories();
-  }
+        .sh-mem-val {
+            font-size: 12.5px;
+            line-height: 1.5;
+            color: rgba(218, 222, 248, 0.80);
+        }
 
-  var _origOpen = window.openSheldon;
-  window.openSheldon = function() {
-    if (typeof _origOpen === 'function') _origOpen.apply(this, arguments);
-    setTimeout(boot, 250);
-  };
+        .sh-mem-del {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: rgba(190, 196, 235, 0.18);
+            font-size: 12px;
+            padding: 2px;
+            border-radius: 5px;
+            flex-shrink: 0;
+            margin-top: 1px;
+            transition: color 0.12s;
+            display: none;
+        }
 
-  if (document.body) setTimeout(boot, 1200);
-  else document.addEventListener('DOMContentLoaded', boot);
+        .sh-mem-item:hover .sh-mem-del {
+            display: block;
+        }
 
-})();
-</script>
+        .sh-mem-del:hover {
+            color: #fb7185;
+        }
+
+        .sh-mem-empty {
+            text-align: center;
+            padding: 32px 16px;
+            font-size: 12px;
+            color: rgba(190, 196, 235, 0.28);
+            line-height: 1.6;
+        }
+
+        .sh-mem-footer {
+            padding: 10px 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sh-mem-count {
+            font-size: 10.5px;
+            color: rgba(190, 196, 235, 0.30);
+        }
+
+        .sh-mem-clear {
+            font-size: 11px;
+            font-weight: 650;
+            font-family: 'Hanken Grotesk', sans-serif;
+            padding: 5px 11px;
+            border-radius: 8px;
+            cursor: pointer;
+            background: rgba(251, 113, 133, 0.08);
+            border: 1px solid rgba(251, 113, 133, 0.20);
+            color: #fb7185;
+            transition: all 0.15s;
+        }
+
+        .sh-mem-clear:hover {
+            background: rgba(251, 113, 133, 0.14);
+            border-color: rgba(251, 113, 133, 0.35);
+        }
+
+        /* memory button in Sheldon header */
+        #sh-mem-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(190, 196, 235, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        #sh-mem-btn:hover {
+            background: rgba(135, 141, 255, 0.12);
+            border-color: rgba(135, 141, 255, 0.28);
+            color: #9aa0ff;
+        }
+
+        #sh-mem-btn.has-mem {
+            border-color: rgba(135, 141, 255, 0.25);
+            color: #9aa0ff;
+        }
+
+        #sh-mem-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 13px;
+            height: 13px;
+            background: #878dff;
+            border-radius: 50%;
+            border: 2px solid #0d1018;
+            font-size: 8px;
+            font-weight: 700;
+            color: #fff;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #sh-mem-badge.show {
+            display: flex;
+        }
+
+        /* extracting indicator */
+        #sh-mem-extracting {
+            position: absolute;
+            bottom: 6px;
+            left: 18px;
+            font-size: 10.5px;
+            color: rgba(135, 141, 255, 0.50);
+            display: none;
+            align-items: center;
+            gap: 5px;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            font-style: italic;
+        }
+
+        #sh-mem-extracting.show {
+            display: flex;
+        }
+
+        /* light theme */
+        html.sc-light #sh-mem-panel {
+            background: rgba(248, 249, 255, 0.98);
+            border-color: rgba(88, 94, 230, 0.22);
+        }
+
+        html.sc-light .sh-mem-item {
+            background: #fff;
+            border-color: rgba(15, 17, 40, 0.08);
+            color: rgba(23, 27, 46, 0.78);
+        }
+
+        html.sc-light .sh-mem-val {
+            color: rgba(23, 27, 46, 0.78);
+        }
+
+        html.sc-light .sh-mem-key {
+            color: rgba(23, 27, 46, 0.35);
+        }
+
+        html.sc-light #sh-mem-btn {
+            background: rgba(15, 17, 40, 0.04);
+            border-color: rgba(15, 17, 40, 0.09);
+            color: rgba(23, 27, 46, 0.35);
+        }
+    </style>
+
+    <script id="sheldon-memory-js">
+        (function () {
+
+            var _memories = []; /* [{key, value, updated_at}] */
+            var _extracting = false;
+
+            /* ── category icons ── */
+            var ICONS = {
+                'weak_area': '🎯',
+                'study_pattern': '📊',
+                'goal': '🏆',
+                'preference': '⚙️',
+                'insight': '💡',
+                'session': '📝',
+                'default': '🧠'
+            };
+
+            function iconFor(key) {
+                if (/weak|struggle|error|miss/i.test(key)) return ICONS.weak_area;
+                if (/pattern|habit|routine|time|session/i.test(key)) return ICONS.study_pattern;
+                if (/goal|target|score|exam|aim/i.test(key)) return ICONS.goal;
+                if (/prefer|like|style|mode/i.test(key)) return ICONS.preference;
+                if (/insight|note|observation/i.test(key)) return ICONS.insight;
+                if (/session|study|log/i.test(key)) return ICONS.session;
+                return ICONS.default;
+            }
+
+            /* ── Supabase helpers ── */
+            async function getUid() {
+                var r = await supa.auth.getUser();
+                return r && r.data && r.data.user && r.data.user.id;
+            }
+
+            async function loadMemories() {
+                var uid = await getUid(); if (!uid) return;
+                var r = await supa.from('sheldon_memory')
+                    .select('key, value, updated_at')
+                    .eq('user_id', uid)
+                    .order('updated_at', { ascending: false })
+                    .limit(30);
+                if (!r.error) {
+                    _memories = r.data || [];
+                    updateMemBtn();
+                    renderMemPanel();
+                }
+            }
+
+            async function upsertMemory(key, value) {
+                var uid = await getUid(); if (!uid) return;
+                await supa.from('sheldon_memory').upsert(
+                    { user_id: uid, key: key, value: value, updated_at: new Date().toISOString() },
+                    { onConflict: 'user_id,key' }
+                );
+            }
+
+            async function deleteMemory(key) {
+                var uid = await getUid(); if (!uid) return;
+                await supa.from('sheldon_memory').delete().eq('user_id', uid).eq('key', key);
+                _memories = _memories.filter(function (m) { return m.key !== key; });
+                updateMemBtn();
+                renderMemPanel();
+            }
+
+            async function clearAllMemories() {
+                var uid = await getUid(); if (!uid) return;
+                await supa.from('sheldon_memory').delete().eq('user_id', uid);
+                _memories = [];
+                updateMemBtn();
+                renderMemPanel();
+            }
+
+            /* ── Build memory context string for injection ── */
+            window.buildSheldonMemoryContext = function () {
+                if (!_memories.length) return '';
+                var lines = _memories.slice(0, 20).map(function (m) { return '- ' + m.key + ': ' + m.value; });
+                return '[SHELDON MEMORY — facts you know about this student, use naturally in replies]\n'
+                    + lines.join('\n')
+                    + '\n[END MEMORY]\n\n';
+            };
+
+            /* ── Extract memories from conversation turn ── */
+            async function extractMemories(userMsg, botReply) {
+                if (_extracting) return;
+                if (!window._sessionsReady) return;
+                _extracting = true;
+                showExtracting(true);
+
+                var existingKeys = _memories.map(function (m) { return m.key; }).join(', ');
+
+                var prompt = 'You are a memory extraction system for a GMAT coaching AI called Sheldon.\n'
+                    + 'Given a conversation turn, extract ONLY facts explicitly stated or clearly implied by what the USER said or what SHELDON observed about them.\n'
+                    + 'Return ONLY valid JSON array (no markdown, no backticks) like:\n'
+                    + '[{"key": "snake_case_key", "value": "concise fact about the student"}]\n'
+                    + 'Return [] if nothing worth remembering.\n\n'
+                    + 'Rules:\n'
+                    + '- Keys must be snake_case, descriptive, max 40 chars\n'
+                    + '- Values must be concise (max 120 chars), factual, third-person\n'
+                    + '- Max 3 memories per extraction\n'
+                    + '- ONLY extract from what was actually said in this conversation turn\n'
+                    + '- DO NOT invent or assume facts not mentioned in the conversation\n'
+                    + '- DO NOT extract numeric dashboard stats (hours, streak, scores) — those come from live data\n'
+                    + '- Focus on: weak question types, study habits, preferences, specific struggles, goals mentioned by user\n'
+                    + '- If a key already exists, only include if value has meaningfully changed\n\n'
+                    + 'Existing memory keys: ' + (existingKeys || 'none') + '\n\n'
+                    + 'User said: "' + userMsg.replace(/\[DASHBOARD CONTEXT[\s\S]*?\[END CONTEXT\]\n\n/g, '').slice(0, 500) + '"\n'
+                    + 'Sheldon replied: "' + botReply.replace(/<[^>]+>/g, '').slice(0, 800) + '"';
+
+                try {
+                    var res = await supa.functions.invoke('sheldon', {
+                        body: { message: prompt, context: {}, history: [], jsonMode: true }
+                    });
+                    var raw = (res.data && res.data.reply) || '[]';
+                    var clean = raw.replace(/```json|```/g, '').trim();
+                    var extracted = JSON.parse(clean);
+                    if (Array.isArray(extracted) && extracted.length) {
+                        for (var i = 0; i < extracted.length; i++) {
+                            var m = extracted[i];
+                            if (m.key && m.value) {
+                                await upsertMemory(m.key, m.value);
+                                /* update local cache */
+                                var existing = _memories.find(function (x) { return x.key === m.key; });
+                                if (existing) existing.value = m.value;
+                                else _memories.unshift({ key: m.key, value: m.value, updated_at: new Date().toISOString() });
+                            }
+                        }
+                        updateMemBtn();
+                        renderMemPanel();
+                    }
+                } catch (e) {
+                    console.warn('Memory extraction failed:', e);
+                } finally {
+                    _extracting = false;
+                    showExtracting(false);
+                }
+            }
+
+            /* ── Hook into sheldonSend to capture turns ── */
+            function hookSheldonSend() {
+                if (window._shMemHooked) return;
+                window._shMemHooked = true;
+
+                var _orig = window.sheldonSend;
+                if (typeof _orig !== 'function') return;
+
+                window.sheldonSend = function () {
+                    var input = document.getElementById('sheldonInput');
+                    var userMsg = input ? input.value.trim() : '';
+                    _orig.apply(this, arguments);
+
+                    if (!userMsg) return;
+
+                    /* watch for bot reply to complete then extract */
+                    var msgs = document.getElementById('sheldonMessages'); if (!msgs) return;
+                    var attempts = 0;
+                    var watcher = setInterval(function () {
+                        attempts++;
+                        if (attempts > 30) { clearInterval(watcher); return; } /* 15s timeout */
+                        var allBot = msgs.querySelectorAll('.sheldon-msg.bot:not(.sheldon-typing)');
+                        if (!allBot.length) return;
+                        var lastBot = allBot[allBot.length - 1];
+                        /* wait until it's stable (not still streaming) */
+                        var text = (lastBot.innerText || lastBot.textContent || '').trim();
+                        if (text.length < 20) return;
+                        /* check if it's been stable for 1s */
+                        if (!lastBot._memLen) { lastBot._memLen = text.length; return; }
+                        if (Math.abs(lastBot._memLen - text.length) > 5) { lastBot._memLen = text.length; return; }
+                        /* stable — extract */
+                        clearInterval(watcher);
+                        if (!lastBot._memExtracted) {
+                            lastBot._memExtracted = true;
+                            extractMemories(userMsg, text);
+                        }
+                    }, 500);
+                };
+            }
+
+            /* ── UI ── */
+            function injectMemBtn() {
+                var header = document.querySelector('#sh-chat-area .sheldon-header');
+                if (!header || document.getElementById('sh-mem-btn')) return;
+
+                var btn = document.createElement('button');
+                btn.id = 'sh-mem-btn';
+                btn.title = 'Sheldon\'s memory';
+                btn.setAttribute('aria-label', 'View Sheldon memory');
+                btn.innerHTML = '<i class="ti ti-brain" style="font-size:13px" aria-hidden="true"></i>'
+                    + '<span id="sh-mem-badge"></span>';
+                btn.addEventListener('click', toggleMemPanel);
+
+                /* insert before history button */
+                var histBtn = document.getElementById('sh-history-btn');
+                if (histBtn) header.insertBefore(btn, histBtn);
+                else header.appendChild(btn);
+
+                /* extracting indicator in input dock */
+                var dock = document.querySelector('#sh-chat-area .sheldon-input');
+                if (dock && !document.getElementById('sh-mem-extracting')) {
+                    var ind = document.createElement('div');
+                    ind.id = 'sh-mem-extracting';
+                    ind.innerHTML = '<i class="ti ti-loader-2" style="font-size:11px;animation:spin 1s linear infinite" aria-hidden="true"></i> Updating memory…';
+                    dock.insertBefore(ind, dock.firstChild);
+                }
+            }
+
+            function updateMemBtn() {
+                var btn = document.getElementById('sh-mem-btn');
+                var badge = document.getElementById('sh-mem-badge');
+                if (!btn) return;
+                if (_memories.length > 0) {
+                    btn.classList.add('has-mem');
+                    if (badge) {
+                        badge.classList.add('show');
+                        badge.textContent = _memories.length > 9 ? '9+' : _memories.length;
+                    }
+                } else {
+                    btn.classList.remove('has-mem');
+                    if (badge) badge.classList.remove('show');
+                }
+            }
+
+            window.toggleMemPanel = function () {
+                var panel = document.getElementById('sh-mem-panel');
+                if (!panel) { buildMemPanel(); panel = document.getElementById('sh-mem-panel'); }
+                if (!panel) return;
+                var isOpen = panel.classList.contains('open');
+                panel.classList.toggle('open', !isOpen);
+                if (!isOpen) { renderMemPanel(); loadMemories(); }
+            };
+
+            function buildMemPanel() {
+                if (document.getElementById('sh-mem-panel')) return;
+                var panel = document.createElement('div');
+                panel.id = 'sh-mem-panel';
+                panel.innerHTML =
+                    '<div class="sh-mem-head">'
+                    + '<div class="sh-mem-title"><i class="ti ti-brain" style="font-size:14px" aria-hidden="true"></i> Sheldon\'s memory</div>'
+                    + '<button class="sh-mem-close" onclick="toggleMemPanel()" aria-label="Close"><i class="ti ti-x"></i></button>'
+                    + '</div>'
+                    + '<div class="sh-mem-list" id="sh-mem-list"><div class="sh-mem-empty">No memories yet.<br>Chat with Sheldon to build up context.</div></div>'
+                    + '<div class="sh-mem-footer">'
+                    + '<span class="sh-mem-count" id="sh-mem-count"></span>'
+                    + '<button class="sh-mem-clear" onclick="shMemClearAll()">Clear all</button>'
+                    + '</div>';
+                document.body.appendChild(panel);
+
+                document.addEventListener('click', function (e) {
+                    var p = document.getElementById('sh-mem-panel');
+                    var b = document.getElementById('sh-mem-btn');
+                    if (p && p.classList.contains('open') && !p.contains(e.target) && b && !b.contains(e.target)) {
+                        p.classList.remove('open');
+                    }
+                });
+                renderMemPanel();
+            }
+
+            function renderMemPanel() {
+                var list = document.getElementById('sh-mem-list'); if (!list) return;
+                var count = document.getElementById('sh-mem-count');
+                if (count) count.textContent = _memories.length + ' memor' + (_memories.length === 1 ? 'y' : 'ies');
+                if (!_memories.length) {
+                    list.innerHTML = '<div class="sh-mem-empty">No memories yet.<br>Chat with Sheldon to build up context.</div>';
+                    return;
+                }
+                list.innerHTML = _memories.map(function (m) {
+                    var icon = iconFor(m.key);
+                    var keyLabel = m.key.replace(/_/g, ' ');
+                    return '<div class="sh-mem-item">'
+                        + '<span class="sh-mem-ic">' + icon + '</span>'
+                        + '<div class="sh-mem-body">'
+                        + '<div class="sh-mem-key">' + keyLabel + '</div>'
+                        + '<div class="sh-mem-val">' + m.value + '</div>'
+                        + '</div>'
+                        + '<button class="sh-mem-del" data-key="' + m.key + '" title="Forget this" aria-label="Forget"><i class="ti ti-x"></i></button>'
+                        + '</div>';
+                }).join('');
+
+                list.querySelectorAll('.sh-mem-del').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var key = this.getAttribute('data-key');
+                        if (typeof scConfirm === 'function') {
+                            scConfirm({
+                                title: 'Forget this?',
+                                message: '"' + key.replace(/_/g, ' ') + '" will be removed from Sheldon\'s memory.',
+                                icon: '<i class="ti ti-brain" style="font-size:22px;color:var(--accent-bright)"></i>',
+                                confirmLabel: 'Forget', cancelLabel: 'Keep', danger: false,
+                                onConfirm: function () { deleteMemory(key); }
+                            });
+                        } else { deleteMemory(key); }
+                    });
+                });
+            }
+
+            window.shMemClearAll = function () {
+                if (typeof scConfirm === 'function') {
+                    scConfirm({
+                        title: 'Clear all memories?',
+                        message: 'Sheldon will forget everything about you. This cannot be undone.',
+                        icon: '<i class="ti ti-brain" style="font-size:22px;color:var(--red)"></i>',
+                        confirmLabel: 'Clear all', cancelLabel: 'Cancel', danger: true,
+                        onConfirm: clearAllMemories
+                    });
+                } else { clearAllMemories(); }
+            };
+
+            function showExtracting(on) {
+                var el = document.getElementById('sh-mem-extracting');
+                if (el) el.classList.toggle('show', on);
+            }
+
+            /* ── Boot ── */
+            function boot() {
+                buildMemPanel();
+                injectMemBtn();
+                hookSheldonSend();
+                loadMemories();
+            }
+
+            var _origOpen = window.openSheldon;
+            window.openSheldon = function () {
+                if (typeof _origOpen === 'function') _origOpen.apply(this, arguments);
+                setTimeout(boot, 250);
+            };
+
+            if (document.body) setTimeout(boot, 1200);
+            else document.addEventListener('DOMContentLoaded', boot);
+
+        })();
+    </script>
 
 </body>
 
