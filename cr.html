@@ -532,14 +532,33 @@ textarea.finput{resize:none;font-size:12px;line-height:1.5}
 .journey-empty i{font-size:40px;color:var(--text-muted);margin-bottom:14px;display:block}
 
 .milestone-strip{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.chart-legend-hint{
+  display:flex;align-items:center;gap:16px;
+  margin-bottom:10px;flex-wrap:wrap;
+  font-size:11px;color:var(--text-tertiary);font-weight:500;
+}
+.chart-legend-hint span{display:flex;align-items:center;gap:6px}
+.legend-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.legend-line{width:14px;height:0;border-top:1.5px dashed rgba(251,191,36,0.5);display:inline-block;flex-shrink:0}
+
 .milestone-chip{
   display:flex;align-items:center;gap:6px;
   font-size:11px;font-weight:600;padding:6px 12px;border-radius:20px;
   border:1px solid var(--border-subtle);background:rgba(255,255,255,0.03);
   color:var(--text-secondary);
 }
-.milestone-chip.peak{border-color:rgba(52,211,153,0.3);background:var(--green-soft);color:var(--green)}
-.milestone-chip.streak{border-color:var(--border-accent);background:var(--accent-soft);color:var(--accent-bright)}
+.milestone-chip.peak{
+  border-color:rgba(52,211,153,0.35);
+  background:linear-gradient(135deg,rgba(52,211,153,0.14),rgba(52,211,153,0.05));
+  color:var(--green);
+  box-shadow:0 0 16px rgba(52,211,153,0.12);
+}
+.milestone-chip.streak{
+  border-color:var(--border-accent);
+  background:linear-gradient(135deg,rgba(139,124,248,0.16),rgba(139,124,248,0.05));
+  color:var(--accent-bright);
+  box-shadow:0 0 16px rgba(139,124,248,0.14);
+}
 .milestone-chip i{font-size:13px}
 
 
@@ -792,6 +811,13 @@ textarea.finput{resize:none;font-size:12px;line-height:1.5}
     </div>
 
     <div class="journey-stat-row" id="journey-stats"></div>
+
+    <div class="chart-legend-hint">
+      <span><span class="legend-dot" style="background:#a78bfa"></span> Accuracy</span>
+      <span><span class="legend-dot" style="background:#34d399"></span> Peak session</span>
+      <span><span class="legend-dot" style="background:#fb7185"></span> Below 40%</span>
+      <span><span class="legend-line"></span> 70% target</span>
+    </div>
 
     <div class="journey-chart-wrap">
       <canvas id="journey-canvas"></canvas>
@@ -1276,7 +1302,7 @@ function renderJourneyChart() {
 
   // ── Milestones ──
   const peakIdx = values.indexOf(peak);
-  let milestoneHTML = `<div class="milestone-chip peak"><i class="ti ti-trophy"></i> Peak: ${peak}% on session #${scored[peakIdx].idx}</div>`;
+  let milestoneHTML = `<div class="milestone-chip peak">🏆 Peak: ${peak}% on session #${scored[peakIdx].idx}</div>`;
   // Find longest improving streak
   let curStreak = 1, bestStreak = 1, bestEnd = 0;
   for (let i = 1; i < values.length; i++) {
@@ -1284,10 +1310,10 @@ function renderJourneyChart() {
     else curStreak = 1;
   }
   if (bestStreak >= 3) {
-    milestoneHTML += `<div class="milestone-chip streak"><i class="ti ti-trending-up"></i> ${bestStreak}-session improving streak</div>`;
+    milestoneHTML += `<div class="milestone-chip streak">📈 ${bestStreak}-session improving streak</div>`;
   }
   if (delta > 0) {
-    milestoneHTML += `<div class="milestone-chip"><i class="ti ti-rocket"></i> Up ${delta}pp since your first scored session</div>`;
+    milestoneHTML += `<div class="milestone-chip">🚀 Up ${delta}pp since your first scored session</div>`;
   }
   document.getElementById('journey-milestones').innerHTML = milestoneHTML;
 
@@ -1295,68 +1321,108 @@ function renderJourneyChart() {
   if (_journeyChart) _journeyChart.destroy();
   const ctx = canvas.getContext('2d');
 
+  // Richer multi-stop gradient fill for real depth
   const gradient = ctx.createLinearGradient(0, 0, 0, 320);
-  gradient.addColorStop(0, 'rgba(139,124,248,0.35)');
+  gradient.addColorStop(0, 'rgba(167,139,250,0.42)');
+  gradient.addColorStop(0.45, 'rgba(139,124,248,0.16)');
   gradient.addColorStop(1, 'rgba(139,124,248,0.0)');
+
+  // Per-point styling: peak gets a green glow ring, dips below 40% get a soft red ring, rest are accent
+  const peakValIdx = values.indexOf(peak);
+  const pointColors = values.map((v, i) => {
+    if (i === peakValIdx) return '#34d399';
+    if (v < 40) return '#fb7185';
+    return '#a78bfa';
+  });
+  const pointRadii = values.map((v, i) => i === peakValIdx ? 6 : 4);
+  const pointBorderW = values.map((v, i) => i === peakValIdx ? 3 : 2);
 
   _journeyChart = new Chart(ctx, {
     type: 'line',
     data: {
       labels,
-      datasets: [{
-        label: 'CR Accuracy',
-        data: values,
-        borderColor: '#a78bfa',
-        borderWidth: 3,
-        backgroundColor: gradient,
-        fill: true,
-        tension: 0.35,
-        pointRadius: 4,
-        pointBackgroundColor: '#0f0c1a',
-        pointBorderColor: '#a78bfa',
-        pointBorderWidth: 2,
-        pointHoverRadius: 7,
-        pointHoverBackgroundColor: '#a78bfa',
-        pointHoverBorderColor: '#fff',
-        pointHoverBorderWidth: 2,
-      }]
+      datasets: [
+        // Target reference line (70% benchmark) — drawn first, sits behind main line
+        {
+          label: 'Target',
+          data: values.map(() => 70),
+          borderColor: 'rgba(251,191,36,0.28)',
+          borderWidth: 1.5,
+          borderDash: [6, 6],
+          pointRadius: 0,
+          fill: false,
+          tension: 0,
+          order: 2,
+        },
+        {
+          label: 'CR Accuracy',
+          data: values,
+          borderColor: '#a78bfa',
+          borderWidth: 3.5,
+          backgroundColor: gradient,
+          fill: true,
+          tension: 0.4,
+          cubicInterpolationMode: 'monotone',
+          pointRadius: pointRadii,
+          pointBackgroundColor: '#100c1d',
+          pointBorderColor: pointColors,
+          pointBorderWidth: pointBorderW,
+          pointHoverRadius: 8,
+          pointHoverBackgroundColor: (ctx) => pointColors[ctx.dataIndex],
+          pointHoverBorderColor: '#fff',
+          pointHoverBorderWidth: 2,
+          shadowColor: 'rgba(139,124,248,0.4)',
+          order: 1,
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: { duration: 1100, easing: 'easeOutQuart' },
+      animation: { duration: 1300, easing: 'easeOutQuart' },
       interaction: { intersect: false, mode: 'index' },
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: 'rgba(18,14,32,0.96)',
-          borderColor: 'rgba(139,124,248,0.3)',
-          borderWidth: 1,
-          padding: 12,
-          titleFont: { family: 'Satoshi', size: 12, weight: '700' },
-          bodyFont: { family: 'Satoshi', size: 12 },
+          enabled: true,
+          backgroundColor: 'rgba(20,15,36,0.97)',
+          borderColor: 'rgba(167,139,250,0.35)',
+          borderWidth: 1.5,
+          cornerRadius: 12,
+          padding: { top: 12, bottom: 12, left: 14, right: 14 },
+          titleFont: { family: 'Clash Display', size: 13, weight: '600' },
+          titleColor: '#fff',
+          titleMarginBottom: 6,
+          bodyFont: { family: 'Satoshi', size: 11.5, weight: '500' },
+          bodyColor: 'rgba(255,255,255,0.82)',
+          bodySpacing: 5,
+          displayColors: false,
+          caretSize: 7,
+          filter: (item) => item.datasetIndex === 1, // hide target-line tooltip entries
           callbacks: {
             title: (items) => {
               const i = items[0].dataIndex;
-              return _journeyXAxis === 'session' ? `Session #${scored[i].idx}` : scored[i].date;
+              return _journeyXAxis === 'session' ? `Session #${scored[i].idx}` : new Date(scored[i].date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
             },
             label: (item) => {
               const s = scored[item.dataIndex];
-              return [`Accuracy: ${s.acc.pct}% (${s.acc.correct}/${s.acc.total})`, s.notes.substring(0, 50)];
+              const lines = [`${s.acc.pct}% accuracy  ·  ${s.acc.correct}/${s.acc.total} correct`];
+              if (s.notes) lines.push(s.notes.length > 56 ? s.notes.substring(0,56) + '…' : s.notes);
+              return lines;
             }
           }
         }
       },
       scales: {
         x: {
-          grid: { color: 'rgba(255,255,255,0.05)', drawTicks: false },
-          ticks: { color: 'rgba(255,255,255,0.38)', font: { family: 'Satoshi', size: 10 } },
+          grid: { color: 'rgba(255,255,255,0.035)', drawTicks: false },
+          ticks: { color: 'rgba(255,255,255,0.34)', font: { family: 'Satoshi', size: 10, weight: '500' }, maxRotation: 0 },
           border: { display: false }
         },
         y: {
           min: 0, max: 100,
-          grid: { color: 'rgba(255,255,255,0.05)', drawTicks: false },
-          ticks: { color: 'rgba(255,255,255,0.38)', font: { family: 'Satoshi', size: 10 }, callback: v => v + '%' },
+          grid: { color: 'rgba(255,255,255,0.035)', drawTicks: false },
+          ticks: { color: 'rgba(255,255,255,0.34)', font: { family: 'Satoshi', size: 10, weight: '500' }, stepSize: 20, callback: v => v + '%' },
           border: { display: false }
         }
       }
