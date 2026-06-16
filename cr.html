@@ -567,6 +567,32 @@ body::before{
 .table-outer{overflow-x:auto}
 .table-inner{max-height:480px;overflow-y:auto}
 .log-table{width:100%;border-collapse:collapse;font-size:11.5px}
+.log-table{width:100%;border-collapse:collapse;font-size:12px}
+
+/* ── DIFFICULTY × ACCURACY MATRIX ── */
+.matrix-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.matrix-table th{
+  text-align:left;padding:10px 14px;
+  font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--text-muted);border-bottom:1px solid var(--border-subtle);
+}
+.matrix-table th.diff-col{text-align:center}
+.matrix-table td{padding:11px 14px;border-bottom:1px solid var(--border-subtle);vertical-align:middle}
+.matrix-table tbody tr:last-child td{border-bottom:none}
+.matrix-table tbody tr:hover td{background:var(--bg-card)}
+.matrix-table td.type-cell{font-weight:600;color:var(--text-secondary)}
+.matrix-cell{text-align:center;position:relative}
+.matrix-pill{
+  display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+  min-width:54px;padding:6px 10px;border-radius:9px;
+  font-family:'Fraunces',serif;font-weight:600;
+  transition:transform .15s;
+}
+.matrix-pill:hover{transform:scale(1.06)}
+.matrix-pill .mp-pct{font-size:15px;line-height:1}
+.matrix-pill .mp-n{font-family:'Satoshi',sans-serif;font-size:8.5px;font-weight:600;color:var(--text-muted);margin-top:2px}
+.matrix-pill.empty{background:rgba(255,255,255,0.02);color:var(--text-muted)}
+.matrix-pill.empty .mp-pct{font-size:12px;font-weight:500}
 .log-table th{
   text-align:left;padding:9px 12px;
   font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
@@ -935,6 +961,15 @@ textarea.finput{resize:none;font-size:11.5px;line-height:1.5}
         <div class="card">
           <div class="card-eyebrow">Medium vs Hard <i class="ti ti-chart-dots"></i></div>
           <div id="diff-breakdown"></div>
+        </div>
+      </div>
+
+      <div class="grid-full">
+        <div class="card">
+          <div class="card-eyebrow">Difficulty × Accuracy Matrix <i class="ti ti-grid-dots"></i></div>
+          <div class="table-outer">
+            <table class="matrix-table" id="diff-matrix-table"></table>
+          </div>
         </div>
       </div>
     </div>
@@ -1501,6 +1536,23 @@ function render(){
     </div>`;
   });
   document.getElementById('diff-breakdown').innerHTML=diffHTML;
+
+  // ── Difficulty × Accuracy Matrix ──
+  const DIFFS=['Easy','Medium','Hard'];
+  const matrixHead=`<thead><tr><th>Question Type</th>${DIFFS.map(d=>`<th class="diff-col">${d}</th>`).join('')}</tr></thead>`;
+  const matrixRows=TYPES.map(t=>{
+    const cells=DIFFS.map(d=>{
+      const cell=attempts.filter(a=>a.question_type===t && a.difficulty===d);
+      if(!cell.length) return `<td class="matrix-cell"><span class="matrix-pill empty"><span class="mp-pct">—</span></span></td>`;
+      const c=cell.filter(a=>a.correct).length;
+      const p=pct(c,cell.length);
+      const col=accCol(p);
+      const bg=p>=55?'rgba(52,211,153,0.13)':p>=30?'rgba(251,191,36,0.13)':'rgba(251,113,133,0.13)';
+      return `<td class="matrix-cell"><span class="matrix-pill" style="background:${bg};color:${col}"><span class="mp-pct">${p}%</span><span class="mp-n">${cell.length}q</span></span></td>`;
+    }).join('');
+    return `<tr><td class="type-cell">${t}</td>${cells}</tr>`;
+  }).join('');
+  document.getElementById('diff-matrix-table').innerHTML = matrixHead + `<tbody>${matrixRows}</tbody>`;
 
   document.getElementById('log-count').textContent=attempts.length;
   document.getElementById('log-tbody').innerHTML=[...attempts].reverse().map((a,i)=>{
