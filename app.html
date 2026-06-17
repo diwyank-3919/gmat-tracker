@@ -13934,12 +13934,12 @@
             }).then(function (_crBlock) {
                 if (_crBlock) _msgPayload = _crBlock + _msgPayload;
 
-                /* inject Sheldon Notices so Sheldon can mention them unprompted */
-                if (typeof computeSheldonNotices === 'function') {
+               /* inject Sheldon Notices so Sheldon can mention them unprompted */
+                if (typeof window.computeSheldonNotices === 'function') {
                     var _crSessForNotices = (typeof sessions !== 'undefined' && sessions) ? sessions.filter(function (s) { return s.topic === 'CR' && !s.deleted; }) : [];
                     var _attemptsForNotices = (typeof window._crAttemptsCache !== 'undefined') ? window._crAttemptsCache : [];
-                    var _notices = computeSheldonNotices(_attemptsForNotices, _crSessForNotices);
-                    var _noticesBlock = (typeof buildNoticesContextBlock === 'function') ? buildNoticesContextBlock(_notices) : '';
+                    var _notices = window.computeSheldonNotices(_attemptsForNotices, _crSessForNotices);
+                    var _noticesBlock = (typeof window.buildNoticesContextBlock === 'function') ? window.buildNoticesContextBlock(_notices) : '';
                     if (_noticesBlock) _msgPayload = _noticesBlock + _msgPayload;
                 }
 
@@ -22327,6 +22327,7 @@
                 notices.sort(function (a, b) { return (PRIORITY[a.id] || 99) - (PRIORITY[b.id] || 99); });
                 return notices.slice(0, 3);
             }
+            window.computeSheldonNotices = computeSheldonNotices;
             /* ── Fetch cr_attempts once, cache for notice rules ── */
             function fetchCRAttemptsCache() {
                 return window.getUid().then(function (uid) {
