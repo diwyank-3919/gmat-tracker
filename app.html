@@ -12233,6 +12233,44 @@
             [3, 7, 14, 30].forEach(function (s) { if (streak >= s && !_celebrated["s" + s]) { _celebrated["s" + s] = true; showToast("🔥", s + "-day streak!", "Consistent for " + s + " days in a row!"); } });
         }
 
+        /* ── CR Journey milestones — persisted across sessions via localStorage ── */
+        var CR_MILESTONE_KEY = 'sc_cr_milestones';
+        function getCelebratedCRMilestones() {
+            try { return JSON.parse(localStorage.getItem(CR_MILESTONE_KEY) || '{}'); } catch (e) { return {}; }
+        }
+        function markCRMilestoneCelebrated(id) {
+            try {
+                var done = getCelebratedCRMilestones();
+                done[id] = true;
+                localStorage.setItem(CR_MILESTONE_KEY, JSON.stringify(done));
+            } catch (e) { }
+        }
+        function checkCRMilestones(scoredSessions) {
+            if (!scoredSessions || scoredSessions.length < 3) return;
+            var done = getCelebratedCRMilestones();
+            var values = scoredSessions.map(function (s) { return s.acc.pct; });
+
+            var peak = Math.max.apply(null, values);
+            var peakKey = 'peak_' + peak;
+            if (peak >= 80 && !done[peakKey]) {
+                markCRMilestoneCelebrated(peakKey);
+                showToast('🎯', 'New CR peak: ' + peak + '%!', 'Your best CR accuracy yet — keep this momentum.');
+            }
+
+            var streak = 1, best = 1;
+            for (var i = 1; i < values.length; i++) {
+                if (values[i] >= values[i - 1]) { streak++; if (streak > best) best = streak; }
+                else streak = 1;
+            }
+            [3, 5, 7, 10].forEach(function (s) {
+                var key = 'streak_' + s;
+                if (best >= s && !done[key]) {
+                    markCRMilestoneCelebrated(key);
+                    showToast('🔥', s + '-session CR streak!', 'Improving accuracy across ' + s + ' sessions in a row.');
+                }
+            });
+        }
+
         function getViewDates() {
             var s, ref, days, all, s2, e, d, c;
             if (viewMode === "week") { s = startOfWeek(addDays(today, viewOffset * 7)); return Array.from({ length: 7 }, function (_, i) { return addDays(s, i); }); }
@@ -22615,6 +22653,19 @@
 
                 /* Sheldon Notices run every visit, independent of the once-per-day nudge gate */
                 fetchCRAttemptsCache().then(renderDashboardNotices);
+
+                /* CR Journey milestone toasts */
+                if (typeof checkCRMilestones === 'function') {
+                    var _crSessForMilestones = sessions.filter(function (s) { return s.topic === 'CR' && !s.deleted; });
+                    var _scoredForMilestones = _crSessForMilestones.map(function (s) {
+                        var m = (s.notes || '').match(/(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)\s*%/) || (s.notes || '').match(/accuracy[\s:-]*(\d+)\s*\/\s*(\d+)/i);
+                        if (!m) return null;
+                        var pct = m[3] ? parseInt(m[3], 10) : Math.round((parseInt(m[1], 10) / parseInt(m[2], 10)) * 100);
+                        return { date: s.date, acc: { pct: pct } };
+                    }).filter(function (s) { return s !== null; })
+                      .sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+                    checkCRMilestones(_scoredForMilestones);
+                }
 
                 /* nudge banner: only once per day */
                 try {
