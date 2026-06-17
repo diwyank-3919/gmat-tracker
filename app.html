@@ -12227,6 +12227,14 @@
 
         function _processToastQueue() {
             if (_toastShowing) return;
+
+            /* don't show a milestone toast while the Sheldon FAB speech bubble is visible — same screen corner */
+            var bubble = document.getElementById('sh-fab-bubble');
+            if (bubble && bubble.classList.contains('show')) {
+                setTimeout(_processToastQueue, 500);
+                return;
+            }
+
             if (!_toastQueue.length) return;
 
             var next = _toastQueue.shift();
