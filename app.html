@@ -12217,14 +12217,36 @@
 
         // ── MILESTONE TOAST ──
         var toastTimer = null;
+        var _toastQueue = [];
+        var _toastShowing = false;
+
         function showToast(icon, title, sub) {
+            _toastQueue.push({ icon: icon, title: title, sub: sub });
+            _processToastQueue();
+        }
+
+        function _processToastQueue() {
+            if (_toastShowing) return;
+            if (!_toastQueue.length) return;
+
+            var next = _toastQueue.shift();
+            _toastShowing = true;
+
             var t = document.getElementById("milestone-toast");
-            t.querySelector(".toast-icon").textContent = icon;
-            document.getElementById("toast-title").textContent = title;
-            document.getElementById("toast-sub").textContent = sub;
+            t.querySelector(".toast-icon").textContent = next.icon;
+            document.getElementById("toast-title").textContent = next.title;
+            document.getElementById("toast-sub").textContent = next.sub;
             t.classList.add("show");
+
             if (toastTimer) clearTimeout(toastTimer);
-            toastTimer = setTimeout(function () { t.classList.remove("show"); }, 4200);
+            toastTimer = setTimeout(function () {
+                t.classList.remove("show");
+                /* small gap so the slide-out animation finishes before the next slides in */
+                setTimeout(function () {
+                    _toastShowing = false;
+                    _processToastQueue();
+                }, 350);
+            }, 4200);
         }
         var _celebrated = {};
         function checkMilestones(totalMins, streak) {
