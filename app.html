@@ -12256,11 +12256,40 @@
                 }, 350);
             }, 4200);
         }
-        var _celebrated = {};
+        var CELEBRATED_KEY = 'sc_celebrated_milestones';
+        function getCelebrated() {
+            try { return JSON.parse(localStorage.getItem(CELEBRATED_KEY) || '{}'); } catch (e) { return {}; }
+        }
+        function markCelebrated(id) {
+            try {
+                var done = getCelebrated();
+                done[id] = true;
+                localStorage.setItem(CELEBRATED_KEY, JSON.stringify(done));
+            } catch (e) { }
+        }
         function checkMilestones(totalMins, streak) {
             var totalH = Math.floor(totalMins / 60);
-            [10, 25, 50, 75, 100, 150, 200].forEach(function (m) { if (totalH >= m && !_celebrated["h" + m]) { _celebrated["h" + m] = true; showToast("🎉", m + "h milestone unlocked!", "You've studied " + m + " total hours. Incredible!"); } });
-            [3, 7, 14, 30].forEach(function (s) { if (streak >= s && !_celebrated["s" + s]) { _celebrated["s" + s] = true; showToast("🔥", s + "-day streak!", "Consistent for " + s + " days in a row!"); } });
+            var celebrated = getCelebrated();
+
+            var hourThresholds = [10, 25, 50, 75, 100, 150, 200];
+            var highestNewHour = null;
+            hourThresholds.forEach(function (m) {
+                if (totalH >= m && !celebrated["h" + m]) highestNewHour = m;
+            });
+            if (highestNewHour !== null) {
+                hourThresholds.forEach(function (m) { if (m <= highestNewHour) markCelebrated("h" + m); });
+                showToast("🎉", highestNewHour + "h milestone unlocked!", "You've studied " + highestNewHour + " total hours. Incredible!");
+            }
+
+            var streakThresholds = [3, 7, 14, 30];
+            var highestNewStreak = null;
+            streakThresholds.forEach(function (s) {
+                if (streak >= s && !celebrated["s" + s]) highestNewStreak = s;
+            });
+            if (highestNewStreak !== null) {
+                streakThresholds.forEach(function (s) { if (s <= highestNewStreak) markCelebrated("s" + s); });
+                showToast("🔥", highestNewStreak + "-day streak!", "Consistent for " + highestNewStreak + " days in a row!");
+            }
         }
 
         /* ── CR Journey milestones — persisted across sessions via localStorage ── */
