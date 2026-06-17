@@ -385,29 +385,19 @@
             flex-shrink: 0
         }
 
-        .t-chip.green {
-            color: var(--green);
-            border-color: rgba(52, 211, 153, 0.18);
-            background: var(--green-soft)
-        }
-
-        .t-chip.indigo {
-            color: var(--indigo-bright);
-            border-color: var(--border-accent);
-            background: var(--indigo-soft)
-        }
-
-        .t-chip.amber {
-            color: var(--amber);
-            border-color: rgba(245, 158, 11, 0.18);
-            background: var(--amber-soft)
-        }
-
-        .t-chip.red {
-            color: var(--red);
-            border-color: rgba(248, 113, 113, 0.18);
-            background: var(--red-soft)
-        }
+        /* app.html discipline: uniform gray glass, hue only in the icon */
+.t-chip.green,
+.t-chip.indigo,
+.t-chip.amber,
+.t-chip.red {
+    color: var(--text-2);
+    border-color: var(--border-subtle);
+    background: var(--surface-1);
+}
+.t-chip.green i  { color: var(--green) }
+.t-chip.indigo i { color: var(--accent-bright) }
+.t-chip.amber i  { color: var(--amber) }
+.t-chip.red i    { color: var(--red) }
 
         /* Pulsing dot for live indicator */
         .chip-dot {
@@ -3911,12 +3901,12 @@ Keep total time between 40–60 minutes. 3–5 items max.`;
             document.getElementById('hero-cards').innerHTML = `
     <div class="card card-accent-indigo">
       <div class="card-eyebrow">Total Attempts <i class="ti ti-list-numbers"></i></div>
-      <div class="big-num indigo">${total}</div>
+      <div class="big-num white">${total}</div>
       <div class="card-sub">${attempts.filter(a => a.source === 'excel').length} from log · ${attempts.filter(a => a.source === 'manual').length} manual</div>
     </div>
     <div class="card card-accent-green">
       <div class="card-eyebrow">Overall Accuracy <i class="ti ti-target"></i></div>
-      <div class="big-num ${overall >= 50 ? 'green' : overall >= 25 ? 'amber' : 'red'}">${overall}%</div>
+      <div class="big-num white">${overall}%</div>
       <div class="card-sub">${correct} correct · ${total - correct} wrong</div>
     </div>
     <div class="card card-accent-green">
