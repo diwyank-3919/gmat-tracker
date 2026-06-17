@@ -620,6 +620,38 @@ body::before{
 .matrix-pill .mp-n{font-family:'Satoshi',sans-serif;font-size:8.5px;font-weight:600;color:var(--text-muted);margin-top:2px}
 .matrix-pill.empty{background:rgba(255,255,255,0.02);color:var(--text-muted)}
 .matrix-pill.empty .mp-pct{font-size:12px;font-weight:500}
+
+/* ── ERROR PATTERN AI ── */
+.ep-card{
+  display:grid;grid-template-columns:1fr auto;gap:14px;
+  align-items:start;padding:14px 0;
+  border-bottom:1px solid var(--border-subtle);
+}
+.ep-card:last-child{border-bottom:none}
+.ep-theme-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.ep-theme-name{font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--text-primary)}
+.ep-count-badge{
+  font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;
+  background:var(--accent-soft);color:var(--accent-bright);
+}
+.ep-acc-badge{
+  font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;
+}
+.ep-examples{font-size:11.5px;color:var(--text-tertiary);line-height:1.5}
+.ep-drill-box{
+  text-align:right;min-width:160px;
+}
+.ep-drill-label{font-size:8.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px}
+.ep-drill-text{font-size:12.5px;font-weight:600;color:var(--accent-bright)}
+.ep-drill-none{font-size:11px;color:var(--text-muted);font-style:italic}
+
+.ep-minor-strip{
+  border-top:1px solid var(--border-subtle);padding-top:12px;
+  display:flex;align-items:flex-start;gap:8px;
+}
+.ep-minor-strip i{font-size:13px;color:var(--text-muted);margin-top:1px;flex-shrink:0}
+.ep-minor-text{font-size:11px;color:var(--text-muted);line-height:1.5}
+.ep-minor-text strong{color:var(--text-tertiary)}
 .log-table th{
   text-align:left;padding:9px 12px;
   font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
@@ -999,6 +1031,14 @@ textarea.finput{resize:none;font-size:11.5px;line-height:1.5}
           <div class="table-outer">
             <table class="matrix-table" id="diff-matrix-table"></table>
           </div>
+        </div>
+      </div>
+
+      <div class="grid-full">
+        <div class="card">
+          <div class="card-eyebrow">Error Pattern AI — Themed Weaknesses <i class="ti ti-brain"></i></div>
+          <div id="error-pattern-list"></div>
+          <div id="error-pattern-minor" style="margin-top:14px"></div>
         </div>
       </div>
     </div>
@@ -1428,6 +1468,108 @@ async function renderNotices() {
 }
 
 // ── CONSTANTS ──
+// ══════════════════════════════════════════
+// ERROR PATTERN AI — themed weakness clustering
+// ══════════════════════════════════════════
+const THEME_RULES = [
+  { theme: 'Misread Conclusion', keywords: ['conclusion not addressed', 'stick to conclusion', 'intermediate vs main conclusion', 'strengthen conclusion of type causation', 'conclusion identification', 'not related to conclusion'] },
+  { theme: 'Scope Violation', keywords: ['not mentioned in the passage', 'out of scope', 'unrelated to conclusion', 'topic understanding', 'scope of the argument', 'scope of data'] },
+  { theme: 'Causal Reasoning Error', keywords: ['correlation vs cause', 'c causes b', 'b causes a', 'cause and effect'] },
+  { theme: 'Prethinking Skipped', keywords: ['prethinking missed', 'prethinking', 'memory instead of process'] },
+  { theme: 'Numeric/Data Misread', keywords: ['quant-based', 'numbers/avg trap', 'numbers avg trap', 'scope of data, total', 'table data for inference'] },
+  { theme: 'Question Stem / Detail Misread', keywords: ['question stem trap', 'missed keyword', 'missed contradictory word', "misunderstood the word's meaning", 'misunderstood word meaning', 'word missed', 'attention to details', 'relevant words misidentified'] },
+  { theme: 'Answer Choice Overreach', keywords: ['extreme choice', 'assumptions made in', 'generalization', 'mild weakener'] },
+  { theme: 'Existing System / Status Quo Confusion', keywords: ['existing system'] },
+  { theme: 'Timing / Rushed Judgment', keywords: ['negligence too quick', 'stress fear time pressure', 'rushed'] },
+  { theme: 'Evidence/Support Misjudged', keywords: ['supporting evidence study', 'cost-benefit analysis', 'disagreement identification', 'contradiction identification'] },
+  { theme: 'Comparison/Timeframe Confusion', keywords: ['short term vs long term', 'chronological discrepancy', 'hypothetical vs current situation', 'irrelevant comparison'] },
+];
+const EP_MIN_SAMPLE = 4;
+
+function classifyTrap(trapText) {
+  if (!trapText) return null;
+  const lower = trapText.toLowerCase();
+  for (const rule of THEME_RULES) {
+    if (rule.keywords.some(kw => lower.includes(kw))) return rule.theme;
+  }
+  return 'Other';
+}
+
+function computeErrorPatterns(attemptsArr) {
+  attemptsArr = attemptsArr || [];
+  const withTraps = attemptsArr.filter(a => a.trap);
+  const themes = {};
+  withTraps.forEach(a => {
+    const theme = classifyTrap(a.trap);
+    if (!theme) return;
+    if (!themes[theme]) themes[theme] = { count: 0, correct: 0, types: {}, traps: new Set() };
+    themes[theme].count++;
+    if (a.correct) themes[theme].correct++;
+    const t = a.question_type || 'Other';
+    themes[theme].types[t] = (themes[theme].types[t] || 0) + 1;
+    themes[theme].traps.add(a.trap);
+  });
+
+  const allThemes = Object.entries(themes).map(([theme, data]) => {
+    const accuracy = Math.round((data.correct / data.count) * 100);
+    const dominantTypeEntries = Object.entries(data.types).sort((a, b) => b[1] - a[1]);
+    const realDominant = dominantTypeEntries.find(([t]) => t !== 'Other') || dominantTypeEntries[0];
+    const wrongInDominantType = attemptsArr.filter(a => a.question_type === realDominant[0] && !a.correct).length;
+    const lowEnd = Math.max(5, Math.round(wrongInDominantType * 0.4));
+    const highEnd = Math.min(15, Math.max(lowEnd + 2, Math.round(wrongInDominantType * 0.7)));
+
+    return {
+      theme, occurrences: data.count, accuracy,
+      dominantType: realDominant[0], dominantTypeCount: realDominant[1],
+      exampleTraps: Array.from(data.traps).slice(0, 3),
+      lowConfidence: data.count < EP_MIN_SAMPLE,
+      recommendedDrill: (realDominant[0] === 'Other' || data.count < EP_MIN_SAMPLE) ? null : { type: realDominant[0], lowEnd, highEnd },
+    };
+  }).sort((a, b) => b.occurrences - a.occurrences);
+
+  return { confident: allThemes.filter(t => !t.lowConfidence), minor: allThemes.filter(t => t.lowConfidence) };
+}
+
+function renderErrorPatterns() {
+  const { confident, minor } = computeErrorPatterns(attempts);
+  const listEl = document.getElementById('error-pattern-list');
+  const minorEl = document.getElementById('error-pattern-minor');
+
+  if (!confident.length) {
+    listEl.innerHTML = `<div style="color:var(--text-muted);font-size:12px;padding:12px 0">Not enough trap data yet to detect themed patterns — log a few more attempts with trap notes.</div>`;
+    minorEl.innerHTML = '';
+    return;
+  }
+
+  listEl.innerHTML = confident.map(p => {
+    const accCol = p.accuracy >= 40 ? 'var(--green)' : p.accuracy >= 20 ? 'var(--amber)' : 'var(--red)';
+    const accBg = p.accuracy >= 40 ? 'rgba(52,211,153,0.13)' : p.accuracy >= 20 ? 'rgba(251,191,36,0.13)' : 'rgba(251,113,133,0.13)';
+    const drillHTML = p.recommendedDrill
+      ? `<div class="ep-drill-label">Suggested Drill</div><div class="ep-drill-text">~${p.recommendedDrill.lowEnd}–${p.recommendedDrill.highEnd} more ${p.recommendedDrill.type}</div>`
+      : `<div class="ep-drill-label">Suggested Drill</div><div class="ep-drill-none">No single clear type to target</div>`;
+    return `<div class="ep-card">
+      <div>
+        <div class="ep-theme-row">
+          <span class="ep-theme-name">${p.theme}</span>
+          <span class="ep-count-badge">${p.occurrences}×</span>
+          <span class="ep-acc-badge" style="background:${accBg};color:${accCol}">${p.accuracy}% acc when this trap hits</span>
+        </div>
+        <div class="ep-examples">e.g. ${p.exampleTraps.join(' · ')}</div>
+      </div>
+      <div class="ep-drill-box">${drillHTML}</div>
+    </div>`;
+  }).join('');
+
+  if (minor.length) {
+    minorEl.innerHTML = `<div class="ep-minor-strip">
+      <i class="ti ti-info-circle"></i>
+      <div class="ep-minor-text"><strong>Minor patterns (too few attempts to be confident yet):</strong> ${minor.map(m => m.theme + ' (' + m.occurrences + '×)').join(', ')}.</div>
+    </div>`;
+  } else {
+    minorEl.innerHTML = '';
+  }
+}
+
 const TYPES=['Assumption','Weaken','Strengthen','Inference','Evaluate','Bold Face','Other'];
 const PQO=['solid','partial','off-track'];
 const PQL={solid:'🟢 Solid',partial:'🟡 Partial','off-track':'🔴 Off-track'};
@@ -1724,6 +1866,8 @@ function render(){
     return `<tr><td class="type-cell">${t}</td>${cells}</tr>`;
   }).join('');
   document.getElementById('diff-matrix-table').innerHTML = matrixHead + `<tbody>${matrixRows}</tbody>`;
+
+  renderErrorPatterns();
 
   document.getElementById('log-count').textContent=attempts.length;
   document.getElementById('log-tbody').innerHTML=[...attempts].reverse().map((a,i)=>{
