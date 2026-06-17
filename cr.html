@@ -2855,6 +2855,123 @@
             color:var(--text-3);
         }
         .jc-empty i { font-size:32px; color:var(--text-4); margin-bottom:10px; display:block; }
+
+        /* trying to fix logo */
+
+
+        .sb-logo-icon,
+        .mob-logo-icon {
+            background: #13161f !important;
+            box-shadow: inset 0 0 0 1px rgba(135, 141, 255, 0.22), 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sb-logo-icon::after,
+        .mob-logo-icon::after {
+            display: none !important;
+        }
+
+        .sb-logo-icon i,
+        .mob-logo-icon i {
+            display: none !important;
+        }
+
+        .brand-ring {
+            display: block;
+        }
+
+        .sb-logo-icon .brand-ring {
+            width: 23px;
+            height: 23px;
+        }
+
+        .mob-logo-icon .brand-ring {
+            width: 19px;
+            height: 19px;
+        }
+
+        .brand-arc {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: brandDraw 1.05s cubic-bezier(.4, 0, .2, 1) 0.2s forwards;
+        }
+
+        .brand-dot {
+            opacity: 0;
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: brandDot 0.45s cubic-bezier(.34, 1.56, .64, 1) 1.2s forwards;
+        }
+
+        @keyframes brandDraw {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes brandDot {
+            from {
+                opacity: 0;
+                transform: scale(.3);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* ── BRAND WORDMARK — Satoshi Medium, solid brand white ── */
+        .sb-logo-name,
+        .mob-logo-name {
+            font-family: 'Satoshi', sans-serif !important;
+            font-weight: 500 !important;
+            font-size: 15px !important;
+            letter-spacing: -0.01em !important;
+            white-space: nowrap;
+            color: var(--text-primary) !important;
+        }
+
+        .sb-logo-sub {
+            letter-spacing: 0.05em;
+        }
+
+        /* ── "OS" TAG — premium wordmark accent ── */
+        .sb-logo-name,
+        .mob-logo-name {
+            font-size: 17px !important;
+        }
+
+        .os {
+            font-family: 'Hanken Grotesk', sans-serif;
+            font-size: 8.5px;
+            font-weight: 700;
+            letter-spacing: 0.13em;
+            color: var(--accent-bright);
+            background: rgba(139, 124, 248, 0.16);
+            border: 1px solid rgba(139, 124, 248, 0.32);
+            border-radius: 5px;
+            padding: 2px 4px 1px;
+            margin-left: 5px;
+            vertical-align: middle;
+            position: relative;
+            top: -1px;
+        }
+
+        /* ── THEME TRANSITION — all surfaces fade together ── */
+        *,
+        *::before,
+        *::after {
+            transition-property: background, background-color, border-color, color, box-shadow, opacity;
+            transition-duration: 280ms;
+            transition-timing-function: ease;
+        }
+
+        
     </style>
 </head>
 
