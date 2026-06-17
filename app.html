@@ -12225,13 +12225,14 @@
             _processToastQueue();
         }
 
+        var _bubbleWatcher = null;
+
         function _processToastQueue() {
             if (_toastShowing) return;
 
-            /* don't show a milestone toast while the Sheldon FAB speech bubble is visible — same screen corner */
             var bubble = document.getElementById('sh-fab-bubble');
             if (bubble && bubble.classList.contains('show')) {
-                setTimeout(_processToastQueue, 500);
+                setTimeout(_processToastQueue, 200);
                 return;
             }
 
@@ -12246,15 +12247,31 @@
             document.getElementById("toast-sub").textContent = next.sub;
             t.classList.add("show");
 
-            if (toastTimer) clearTimeout(toastTimer);
-            toastTimer = setTimeout(function () {
-                t.classList.remove("show");
-                /* small gap so the slide-out animation finishes before the next slides in */
-                setTimeout(function () {
+            var elapsed = 0;
+            if (_bubbleWatcher) clearInterval(_bubbleWatcher);
+            _bubbleWatcher = setInterval(function () {
+                elapsed += 100;
+                var bub = document.getElementById('sh-fab-bubble');
+
+                /* bubble appeared while toast was showing — hide toast immediately, retry this same message after */
+                if (bub && bub.classList.contains('show')) {
+                    clearInterval(_bubbleWatcher);
+                    t.classList.remove('show');
                     _toastShowing = false;
-                    _processToastQueue();
-                }, 350);
-            }, 4200);
+                    _toastQueue.unshift(next);
+                    setTimeout(_processToastQueue, 200);
+                    return;
+                }
+
+                if (elapsed >= 4200) {
+                    clearInterval(_bubbleWatcher);
+                    t.classList.remove('show');
+                    setTimeout(function () {
+                        _toastShowing = false;
+                        _processToastQueue();
+                    }, 350);
+                }
+            }, 100);
         }
         var CELEBRATED_KEY = 'sc_celebrated_milestones';
         function getCelebrated() {
