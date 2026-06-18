@@ -10432,6 +10432,23 @@
             transform: scale(1) !important;
             pointer-events: auto !important;
         }
+        /* ── Big-number type → Satoshi 900 (genuine heavy weight + tabular figures) ── */
+.kpi-value,
+.sb-today-val,
+.ring-text-val,
+.ring-card-val,
+.momentum-stat-val {
+  font-family: 'Satoshi', sans-serif;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* tracking re-tuned for Satoshi (its 900 sits tighter than Clash 700) */
+.kpi-value         { letter-spacing: -1px; }
+.sb-today-val      { letter-spacing: -0.6px; }
+.ring-card-val     { letter-spacing: -0.2px; }
+.momentum-stat-val { letter-spacing: -0.8px; }
     </style>
 
 </head>
