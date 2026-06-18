@@ -15952,15 +15952,16 @@
                     <span class="ph-typing-lbl">analyzing your data…</span>
                 </div>
             </div>
-            <div class="sheldon-input">
-            <div class="sh-dock-field" id="shDockField">
-                <textarea id="sheldonInput" rows="1" placeholder="Ask Sheldon anything…"
-                    onkeydown="sheldonKeydown(event)" oninput="sheldonGrow(this)"></textarea>
-            </div>
-            <button class="sheldon-send" id="sheldonSend" onclick="sheldonSend()" aria-label="Send">
-                <i class="ti ti-send"></i>
+            <button class="sheldon-tone" id="sheldonTone" onclick="sheldonToggleTone()">
+                <i class="ti ti-mood-smile"></i><span id="sheldonToneLabel">Playful</span>
             </button>
-        </div>
+            <button id="sheldonVoiceBtn" onclick="sheldonVoiceToggle()" title="Voice replies"
+                aria-label="Toggle voice replies">
+                <i class="ti ti-volume"></i>
+            </button>
+            <button class="sheldon-close" onclick="closeSheldon()" aria-label="Close">
+                <i class="ti ti-x"></i>
+            </button>
         </div>
         <div class="sheldon-messages" id="sheldonMessages"></div>
         <div class="sheldon-chips" id="sheldonChips">
@@ -15973,15 +15974,9 @@
                 <textarea id="sheldonInput" rows="1" placeholder="Ask Sheldon anything…"
                     onkeydown="sheldonKeydown(event)" oninput="sheldonGrow(this)"></textarea>
             </div>
-            <div class="sheldon-input-row">
-                <button id="sheldonVoiceBtn" onclick="sheldonVoiceToggle()" title="Voice replies"
-                    aria-label="Toggle voice replies" class="sheldon-icon-btn">
-                    <i class="ti ti-volume"></i>
-                </button>
-                <button class="sheldon-send" id="sheldonSend" onclick="sheldonSend()" aria-label="Send">
-                    <i class="ti ti-send"></i>
-                </button>
-            </div>
+            <button class="sheldon-send" id="sheldonSend" onclick="sheldonSend()" aria-label="Send">
+                <i class="ti ti-send"></i>
+            </button>
         </div>
     </div>
 
@@ -21857,108 +21852,79 @@ function injectSndChip() {
             display: none !important;
         }
 
-       /* ── INPUT DOCK — pill redesign ── */
-.sheldon-input {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 10px 12px 12px;
-    margin: 0 12px 12px;
-    position: relative;
-    z-index: 2;
-    border-radius: 20px;
-    background: #0f111e;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
-}
+        /* ── 8. INPUT DOCK ── */
+        .sheldon-input {
+            padding: 12px 14px 15px !important;
+            background: rgba(7, 8, 16, 0.75) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            flex-shrink: 0 !important;
+            position: relative;
+            z-index: 2;
+        }
 
-.sh-dock-field {
-    flex: none !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    padding: 0 !important;
-}
+        .sh-dock-field {
+            flex: 1 !important;
+            border-radius: 14px !important;
+            background: rgba(255, 255, 255, 0.06) !important;
+            padding: 1.5px !important;
+        }
 
-.sh-dock-field textarea {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
-    font-size: 13.5px !important;
-    font-weight: 400 !important;
-    line-height: 1.5 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    color: rgba(218, 222, 248, 0.88) !important;
-    padding: 4px 4px 2px !important;
-    display: block !important;
-    width: 100% !important;
-    border: none !important;
-    outline: none !important;
-    resize: none !important;
-    max-height: 110px !important;
-}
+        .sh-dock-field textarea {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+            font-size: 13.5px !important;
+            font-weight: 400 !important;
+            line-height: 1.5 !important;
+            border-radius: 12.5px !important;
+            background: #0f111e !important;
+            color: rgba(218, 222, 248, 0.88) !important;
+            padding: 11px 14px !important;
+            display: block !important;
+            width: 100% !important;
+            border: none !important;
+            outline: none !important;
+            resize: none !important;
+            max-height: 110px !important;
+        }
 
-.sh-dock-field textarea::placeholder {
-    color: rgba(190, 196, 235, 0.28) !important;
-    font-style: italic !important;
-}
+        .sh-dock-field textarea::placeholder {
+            color: rgba(190, 196, 235, 0.28) !important;
+            font-style: italic !important;
+        }
 
-.sheldon-input-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
+        .sheldon-send {
+            width: 46px !important;
+            height: 46px !important;
+            border-radius: 14px !important;
+            background: linear-gradient(145deg, #9aa0ff, #6d73e8) !important;
+            box-shadow: 0 6px 22px rgba(109, 115, 232, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.24) !important;
+            font-size: 17px !important;
+            color: #08090f !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important;
+            border: none !important;
+            cursor: pointer !important;
+            transition: all 0.22s cubic-bezier(.34, 1.56, .64, 1) !important;
+        }
 
-.sheldon-icon-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: transparent;
-    border: none;
-    color: rgba(190, 196, 235, 0.55);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    cursor: pointer;
-    transition: background .15s, color .15s;
-}
+        .sheldon-send:hover {
+            transform: translateY(-2px) scale(1.06) !important;
+            box-shadow: 0 10px 28px rgba(109, 115, 232, 0.55) !important;
+        }
 
-.sheldon-icon-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #9aa0ff;
-}
+        .sheldon-send:active {
+            transform: scale(0.93) !important;
+        }
 
-.sheldon-send {
-    width: 38px !important;
-    height: 38px !important;
-    border-radius: 50% !important;
-    background: linear-gradient(145deg, #9aa0ff, #6d73e8) !important;
-    box-shadow: 0 6px 22px rgba(109, 115, 232, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.24) !important;
-    font-size: 16px !important;
-    color: #08090f !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex-shrink: 0 !important;
-    border: none !important;
-    cursor: pointer !important;
-    transition: all 0.22s cubic-bezier(.34, 1.56, .64, 1) !important;
-    margin-left: auto !important;
-}
-
-.sheldon-send:hover {
-    transform: translateY(-2px) scale(1.06) !important;
-    box-shadow: 0 10px 28px rgba(109, 115, 232, 0.55) !important;
-}
-
-.sheldon-send:active {
-    transform: scale(0.93) !important;
-}
-
-.sheldon-send:disabled {
-    opacity: 0.35 !important;
-    transform: none !important;
-    box-shadow: none !important;
-}
+        .sheldon-send:disabled {
+            opacity: 0.35 !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
 
         /* ── 9. COPY BUTTON ── */
         .sh-copy-btn {
@@ -23970,31 +23936,35 @@ function injectSndChip() {
 
     <!-- ══ SHELDON VOICE INPUT ══ -->
     <style id="sheldon-voice-input-css">
-       #sh-voice-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: transparent;
-    border: none;
-    color: rgba(190, 196, 235, 0.55);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: background .15s, color .15s;
-}
+        #sh-voice-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(190, 196, 235, 0.40);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.18s cubic-bezier(.34, 1.56, .64, 1);
+        }
 
-#sh-voice-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #9aa0ff;
-}
+        #sh-voice-btn:hover {
+            background: rgba(135, 141, 255, 0.10);
+            border-color: rgba(135, 141, 255, 0.28);
+            color: #9aa0ff;
+            transform: translateY(-1px);
+        }
 
-#sh-voice-btn.sh-listening {
-    color: #46c98f;
-    background: rgba(70, 201, 143, 0.14);
-}
+        #sh-voice-btn.sh-listening {
+            background: rgba(251, 113, 133, 0.14);
+            border-color: rgba(251, 113, 133, 0.40);
+            color: #fb7185;
+            animation: shVoicePulse 1.2s ease-in-out infinite;
+        }
 
         #sh-voice-btn.sh-processing {
             background: rgba(240, 189, 106, 0.12);
