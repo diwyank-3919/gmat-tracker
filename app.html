@@ -10449,6 +10449,68 @@
 .sb-today-val      { letter-spacing: -0.6px; }
 .ring-card-val     { letter-spacing: -0.2px; }
 .momentum-stat-val { letter-spacing: -0.8px; }
+        .briefing-wrap { position: relative; }
+.briefing-bell {
+    width: 32px; height: 32px; border-radius: 8px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.05);
+    color: var(--text-secondary);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; position: relative;
+    transition: background .2s, color .2s;
+}
+.briefing-bell:hover { background: rgba(255,255,255,0.09); color: var(--text-primary, #fff); }
+.briefing-bell i { font-size: 15px; }
+.briefing-dot {
+    position: absolute; top: 4px; right: 4px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #8b7cf8; display: none;
+}
+.briefing-dot.show { display: block; animation: briefingPulse 1.8s ease-in-out infinite; }
+@keyframes briefingPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(139,124,248,0.55); }
+    50% { box-shadow: 0 0 0 6px rgba(139,124,248,0); }
+}
+.briefing-panel {
+    position: absolute; top: 42px; right: 0;
+    width: 320px; max-height: 480px; overflow-y: auto;
+    background: rgba(10,12,20,0.97);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+    padding: 16px;
+    z-index: 200;
+}
+.briefing-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.briefing-greeting { font-size: 14px; font-weight: 700; color: var(--text-primary, #fff); }
+.briefing-close {
+    width: 22px; height: 22px; border-radius: 6px; border: none;
+    background: rgba(255,255,255,0.06); color: var(--text-secondary);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.briefing-stats-row { display: flex; gap: 10px; margin-bottom: 14px; }
+.briefing-stat { flex: 1; text-align: center; padding: 8px; border: 1px solid var(--border); border-radius: 10px; background: rgba(255,255,255,0.03); }
+.briefing-stat-val { font-size: 18px; font-weight: 700; color: #8b7cf8; }
+.briefing-stat-lbl { font-size: 9.5px; color: var(--text-secondary); margin-top: 2px; }
+.briefing-section { margin-bottom: 14px; }
+.briefing-section:last-child { margin-bottom: 0; }
+.briefing-section-lbl { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; }
+.briefing-y-row { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-secondary); padding: 3px 0; }
+.briefing-y-row i { color: #34d399; font-size: 12px; }
+.briefing-y-empty { font-size: 11.5px; color: var(--text-secondary); opacity: .7; }
+.briefing-focus-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.briefing-focus-item:last-child { border-bottom: none; }
+.briefing-focus-item input[type="checkbox"] { accent-color: #8b7cf8; cursor: pointer; }
+.briefing-focus-text { flex: 1; font-size: 12.5px; color: var(--text-primary, #fff); }
+.briefing-focus-item.done .briefing-focus-text { text-decoration: line-through; opacity: .5; }
+.briefing-focus-del { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 12px; opacity: .5; }
+.briefing-focus-del:hover { opacity: 1; color: #fb7185; }
+.briefing-focus-empty { font-size: 11.5px; color: var(--text-secondary); opacity: .7; padding: 4px 0; }
+.briefing-focus-add { display: flex; gap: 6px; margin-top: 8px; }
+.briefing-focus-add input { flex: 1; font-size: 12px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.04); color: var(--text-primary, #fff); outline: none; }
+.briefing-focus-add input:focus { border-color: #8b7cf8; }
+.briefing-focus-add button { width: 32px; border-radius: 8px; border: none; background: #8b7cf8; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     </style>
 
 </head>
@@ -10750,6 +10812,43 @@
                     <div class="tb-chip green"><i class="ti ti-target"></i><span id="week-chip">0</span>% this week
                     </div>
                     <div class="tb-chip amber"><i class="ti ti-trophy"></i><span id="total-chip">0h</span> total</div>
+                    <div class="tb-chip amber"><i class="ti ti-trophy"></i><span id="total-chip">0h</span> total</div>
+
+                    <!-- Daily Briefing bell -->
+                    <div class="briefing-wrap" id="briefing-wrap">
+                        <button class="briefing-bell" id="briefing-bell-btn" onclick="toggleBriefingPanel()" title="Daily Briefing" aria-label="Daily Briefing">
+                            <i class="ti ti-bell"></i>
+                            <span class="briefing-dot" id="briefing-dot"></span>
+                        </button>
+                        <div class="briefing-panel" id="briefing-panel" style="display:none">
+                            <div class="briefing-panel-head">
+                                <div class="briefing-greeting" id="briefing-greeting">Good morning</div>
+                                <button class="briefing-close" id="briefing-close-btn" aria-label="Close"><i class="ti ti-x"></i></button>
+                            </div>
+                            <div class="briefing-stats-row">
+                                <div class="briefing-stat">
+                                    <div class="briefing-stat-val" id="briefing-days-left">--</div>
+                                    <div class="briefing-stat-lbl">days to GMAT</div>
+                                </div>
+                                <div class="briefing-stat">
+                                    <div class="briefing-stat-val" id="briefing-streak">--</div>
+                                    <div class="briefing-stat-lbl">day streak</div>
+                                </div>
+                            </div>
+                            <div class="briefing-section">
+                                <div class="briefing-section-lbl">Yesterday</div>
+                                <div id="briefing-yesterday-list"></div>
+                            </div>
+                            <div class="briefing-section">
+                                <div class="briefing-section-lbl">Today's Focus</div>
+                                <div id="briefing-focus-list"></div>
+                                <div class="briefing-focus-add">
+                                    <input type="text" id="briefing-focus-input" placeholder="Add a focus item…" maxlength="80">
+                                    <button id="briefing-focus-add-btn" aria-label="Add"><i class="ti ti-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div id="sync-status"
                         style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;color:var(--text-secondary);padding:5px 11px;border-radius:100px;border:1px solid var(--border);background:rgba(255,255,255,0.05);backdrop-filter:blur(12px)">
                         <i class="ti ti-cloud" style="font-size:12px"></i> Connecting…
@@ -22813,6 +22912,155 @@
 
         })();
     </script>
+
+    <script>
+(function () {
+    var FOCUS_KEY_PREFIX = 'sc_focus_';
+    var SEEN_KEY = 'sc_briefing_seen_date';
+
+    function focusKey() { return FOCUS_KEY_PREFIX + dateStr(today); }
+    function loadFocusItems() {
+        try { var raw = localStorage.getItem(focusKey()); return raw ? JSON.parse(raw) : []; }
+        catch (e) { return []; }
+    }
+    function saveFocusItems(items) {
+        try { localStorage.setItem(focusKey(), JSON.stringify(items)); } catch (e) { }
+    }
+    function escapeHtml(s) {
+        return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function renderFocusList() {
+        var items = loadFocusItems();
+        var el = document.getElementById('briefing-focus-list');
+        if (!el) return;
+        if (!items.length) {
+            el.innerHTML = '<div class="briefing-focus-empty">No focus items yet — add what you want to work on today.</div>';
+            return;
+        }
+        el.innerHTML = items.map(function (item, i) {
+            return '<div class="briefing-focus-item' + (item.done ? ' done' : '') + '">' +
+                '<input type="checkbox" ' + (item.done ? 'checked' : '') + ' onchange="window._briefingToggle(' + i + ')">' +
+                '<span class="briefing-focus-text">' + escapeHtml(item.text) + '</span>' +
+                '<button class="briefing-focus-del" onclick="window._briefingDelete(' + i + ')"><i class="ti ti-x"></i></button>' +
+                '</div>';
+        }).join('');
+    }
+
+    window._briefingToggle = function (i) {
+        var items = loadFocusItems();
+        if (items[i]) { items[i].done = !items[i].done; saveFocusItems(items); renderFocusList(); }
+    };
+    window._briefingDelete = function (i) {
+        var items = loadFocusItems();
+        items.splice(i, 1);
+        saveFocusItems(items);
+        renderFocusList();
+    };
+
+    function addFocusItem() {
+        var inp = document.getElementById('briefing-focus-input');
+        if (!inp) return;
+        var val = inp.value.trim();
+        if (!val) return;
+        var items = loadFocusItems();
+        if (items.length >= 5) return;
+        items.push({ text: val, done: false });
+        saveFocusItems(items);
+        inp.value = '';
+        renderFocusList();
+    }
+
+    function renderYesterday() {
+        var el = document.getElementById('briefing-yesterday-list');
+        if (!el) return;
+        if (typeof sessions === 'undefined' || !sessions) { el.innerHTML = ''; return; }
+        var ys = dateStr(addDays(today, -1));
+        var lines = [];
+        var yMins = minsOn(ys);
+        if (yMins > 0) {
+            lines.push('<div class="briefing-y-row"><i class="ti ti-check"></i> ' + fmtH(yMins) + ' studied</div>');
+            var byTopic = {};
+            sessions.filter(function (s) { return s.date === ys; }).forEach(function (s) {
+                byTopic[s.topic] = (byTopic[s.topic] || 0) + s.mins;
+            });
+            Object.keys(byTopic).forEach(function (t) {
+                lines.push('<div class="briefing-y-row"><i class="ti ti-check"></i> ' + t + ': ' + fmtH(byTopic[t]) + '</div>');
+            });
+        }
+        var crCache = window._crAttemptsCache || [];
+        var crYesterday = crCache.filter(function (a) { return a.logged_at && a.logged_at.slice(0, 10) === ys; });
+        if (crYesterday.length) {
+            lines.push('<div class="briefing-y-row"><i class="ti ti-check"></i> ' + crYesterday.length + ' CR question' + (crYesterday.length !== 1 ? 's' : '') + ' logged</div>');
+        }
+        if (!lines.length) lines.push('<div class="briefing-y-empty">No sessions logged yesterday.</div>');
+        el.innerHTML = lines.join('');
+    }
+
+    function renderHeader() {
+        var hr = new Date().getHours();
+        var greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+        var g = document.getElementById('briefing-greeting');
+        if (g) g.textContent = greet + ', Aditya';
+        var dl = document.getElementById('briefing-days-left');
+        if (dl) {
+            var src = document.getElementById('days-left');
+            dl.textContent = (src && src.textContent.trim()) || '--';
+        }
+        var sk = document.getElementById('briefing-streak');
+        if (sk) {
+            var sc = document.getElementById('streak-chip');
+            sk.textContent = sc ? sc.textContent.trim() : '--';
+        }
+    }
+
+    function renderBriefing() { renderHeader(); renderYesterday(); renderFocusList(); }
+
+    function setDotVisible(v) {
+        var dot = document.getElementById('briefing-dot');
+        if (dot) dot.classList.toggle('show', v);
+    }
+    function checkUnread() {
+        try { setDotVisible(localStorage.getItem(SEEN_KEY) !== dateStr(today)); }
+        catch (e) { setDotVisible(true); }
+    }
+    function markSeen() {
+        try { localStorage.setItem(SEEN_KEY, dateStr(today)); } catch (e) { }
+        setDotVisible(false);
+    }
+
+    window.toggleBriefingPanel = function () {
+        var panel = document.getElementById('briefing-panel');
+        if (!panel) return;
+        var willOpen = panel.style.display === 'none' || !panel.style.display;
+        if (willOpen) { renderBriefing(); panel.style.display = 'block'; markSeen(); }
+        else { panel.style.display = 'none'; }
+    };
+
+    var closeBtn = document.getElementById('briefing-close-btn');
+    if (closeBtn) closeBtn.addEventListener('click', function () { document.getElementById('briefing-panel').style.display = 'none'; });
+    var addBtn = document.getElementById('briefing-focus-add-btn');
+    if (addBtn) addBtn.addEventListener('click', addFocusItem);
+    var input = document.getElementById('briefing-focus-input');
+    if (input) input.addEventListener('keydown', function (e) { if (e.key === 'Enter') addFocusItem(); });
+
+    document.addEventListener('click', function (e) {
+        var wrap = document.getElementById('briefing-wrap');
+        var panel = document.getElementById('briefing-panel');
+        if (panel && panel.style.display === 'block' && wrap && !wrap.contains(e.target)) panel.style.display = 'none';
+    });
+
+    var _origLoad2 = window.loadChatSessions;
+    if (typeof _origLoad2 === 'function') {
+        window.loadChatSessions = function () {
+            var result = _origLoad2.apply(this, arguments);
+            setTimeout(checkUnread, 850);
+            return result;
+        };
+    }
+    setTimeout(checkUnread, 2000);
+})();
+</script>
 
     <!-- ══ SHELDON REACTION BUTTONS ══ -->
     <style id="sheldon-reactions-css">
