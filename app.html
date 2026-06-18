@@ -23001,8 +23001,8 @@
    function renderHeader() {
     var hr = new Date().getHours();
     var greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+    var g = document.getElementById('briefing-greeting');
     if (g) g.textContent = greet + ', ' + (window.scUserFirstName || 'there');
-    if (g) g.textContent = greet + ', Aditya';
 
     var dl = document.getElementById('briefing-days-left');
     if (dl) {
