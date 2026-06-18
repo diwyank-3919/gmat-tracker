@@ -14538,6 +14538,19 @@
             text-align: left
         }
 
+        .pf-settings-panel {
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    margin-top: 4px
+}
+.pf-settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 11px
+}
+.pf-settings-row > * { margin: 0 !important }
+
         .pf-item:hover {
             background: rgba(251, 113, 133, 0.10);
             color: var(--red)
@@ -14579,6 +14592,11 @@
                 var e = document.getElementById("pf-email"); if (e) e.textContent = user.email || "";
             }
             window.pfToggle = function (ev) { if (ev) ev.stopPropagation(); var m = document.getElementById("pf-menu"); if (m) m.classList.toggle("open"); };
+            window.pfSettingsToggle = function (ev) {
+    if (ev) ev.stopPropagation();
+    var p = document.getElementById("pf-settings-panel");
+    if (p) p.style.display = p.style.display === "none" ? "block" : "none";
+};
             document.addEventListener("click", function (e) {
                 var m = document.getElementById("pf-menu"), w = document.getElementById("pf-wrap");
                 if (m && m.classList.contains("open") && w && !w.contains(e.target)) m.classList.remove("open");
@@ -17071,15 +17089,44 @@
         (function () {
             function ready(fn) { if (document.body) fn(); else document.addEventListener("DOMContentLoaded", fn); }
             function build() {
-                var card = document.querySelector(".main-grid > .card:first-child"); if (!card) return;
-                card.style.display = "flex"; card.style.flexDirection = "column";
-                if (document.getElementById("sc-today-foot")) return;
-                var f = document.createElement("div"); f.id = "sc-today-foot";
-                f.innerHTML = '<div class="stf-top"><span class="stf-l">Today\u2019s progress</span><span class="stf-v" id="stf-val">\u2014</span></div>'
-                    + '<div class="stf-bar"><div class="stf-fill" id="stf-fill" style="width:0%"></div></div>'
-                    + '<div class="stf-sub"><span>All-time studied</span><b id="stf-total">\u2014</b></div>';
-                card.appendChild(f);
-            }
+    var bar = document.querySelector(".topbar-right");
+    if (bar && !document.getElementById("pf-wrap")) {
+        var w = document.createElement("div"); w.className = "pf-wrap"; w.id = "pf-wrap";
+        w.innerHTML = '<button class="pf-btn" id="pf-btn" onclick="pfToggle(event)"><span id="pf-btn-txt">?</span></button>' +
+            '<div class="pf-menu" id="pf-menu"><div class="pf-head"><div class="pf-head-av" id="pf-av"></div>' +
+            '<div class="pf-head-info"><div class="pf-name" id="pf-name">Loading…</div><div class="pf-email" id="pf-email"></div></div></div>' +
+            '<button class="pf-item" id="pf-settings-toggle" onclick="pfSettingsToggle(event)"><i class="ti ti-settings"></i> Settings</button>' +
+            '<div class="pf-settings-panel" id="pf-settings-panel" style="display:none">' +
+            '<div class="pf-settings-row" id="pf-sync-row"></div>' +
+            '<div class="pf-settings-row" id="pf-sound-row"></div>' +
+            '<div class="pf-settings-row" id="pf-theme-row"><span style="font-size:12px;color:var(--text-secondary)">Theme</span></div>' +
+            '<div class="pf-settings-row" id="pf-trash-row"></div>' +
+            '</div>' +
+            '<button class="pf-item" onclick="signOut()"><i class="ti ti-logout"></i> Sign out</button></div>';
+        bar.appendChild(w);
+
+        /* Relocate existing topbar widgets into Settings */
+        var sync = document.getElementById("sync-status");
+        var syncRow = document.getElementById("pf-sync-row");
+        if (sync && syncRow) syncRow.appendChild(sync);
+
+        var theme = document.querySelector(".sc-theme-toggle");
+        var themeRow = document.getElementById("pf-theme-row");
+        if (theme && themeRow) themeRow.appendChild(theme);
+
+        var trash = document.querySelector('button[onclick="openTrash()"]');
+        var trashRow = document.getElementById("pf-trash-row");
+        if (trash && trashRow) trashRow.appendChild(trash);
+    }
+    var mb = document.querySelector("#mob-drawer .sb-bottom");
+    if (mb && !document.getElementById("mob-signout")) {
+        var b = document.createElement("button"); b.id = "mob-signout"; b.className = "pf-item";
+        b.style.cssText = "margin-top:14px;width:100%;justify-content:flex-start";
+        b.innerHTML = '<i class="ti ti-logout"></i> Sign out';
+        b.onclick = function () { if (typeof signOut === "function") signOut(); };
+        mb.appendChild(b);
+    }
+}
             function refresh() {
                 try {
                     if (typeof sessions === "undefined" || typeof today === "undefined") return;
