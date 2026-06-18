@@ -15952,12 +15952,15 @@
                     <span class="ph-typing-lbl">analyzing your data…</span>
                 </div>
             </div>
-            <button class="sheldon-tone" id="sheldonTone" onclick="sheldonToggleTone()">
-                <i class="ti ti-mood-smile"></i><span id="sheldonToneLabel">Playful</span>
+            <div class="sheldon-input">
+            <div class="sh-dock-field" id="shDockField">
+                <textarea id="sheldonInput" rows="1" placeholder="Ask Sheldon anything…"
+                    onkeydown="sheldonKeydown(event)" oninput="sheldonGrow(this)"></textarea>
+            </div>
+            <button class="sheldon-send" id="sheldonSend" onclick="sheldonSend()" aria-label="Send">
+                <i class="ti ti-send"></i>
             </button>
-            <button class="sheldon-close" onclick="closeSheldon()" aria-label="Close">
-                <i class="ti ti-x"></i>
-            </button>
+        </div>
         </div>
         <div class="sheldon-messages" id="sheldonMessages"></div>
         <div class="sheldon-chips" id="sheldonChips">
@@ -23967,35 +23970,31 @@ function injectSndChip() {
 
     <!-- ══ SHELDON VOICE INPUT ══ -->
     <style id="sheldon-voice-input-css">
-        #sh-voice-btn {
-            width: 46px;
-            height: 46px;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: rgba(190, 196, 235, 0.40);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 17px;
-            cursor: pointer;
-            flex-shrink: 0;
-            transition: all 0.18s cubic-bezier(.34, 1.56, .64, 1);
-        }
+       #sh-voice-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: rgba(190, 196, 235, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .15s, color .15s;
+}
 
-        #sh-voice-btn:hover {
-            background: rgba(135, 141, 255, 0.10);
-            border-color: rgba(135, 141, 255, 0.28);
-            color: #9aa0ff;
-            transform: translateY(-1px);
-        }
+#sh-voice-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #9aa0ff;
+}
 
-        #sh-voice-btn.sh-listening {
-            background: rgba(251, 113, 133, 0.14);
-            border-color: rgba(251, 113, 133, 0.40);
-            color: #fb7185;
-            animation: shVoicePulse 1.2s ease-in-out infinite;
-        }
+#sh-voice-btn.sh-listening {
+    color: #46c98f;
+    background: rgba(70, 201, 143, 0.14);
+}
 
         #sh-voice-btn.sh-processing {
             background: rgba(240, 189, 106, 0.12);
