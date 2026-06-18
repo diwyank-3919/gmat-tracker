@@ -14824,6 +14824,10 @@
                 var themeRow = document.getElementById("pf-theme-row");
                 if (theme && themeRow) themeRow.appendChild(theme);
 
+                var snd = document.getElementById("sc-snd-chip");
+                var soundRow = document.getElementById("pf-sound-row");
+                if (snd && soundRow) soundRow.appendChild(snd);
+
                 var oldTrash = bar.querySelector('button[onclick="openTrash()"]');
                 if (oldTrash) oldTrash.style.display = "none";
             }
@@ -19008,24 +19012,26 @@
             }, true);
 
             /* sound toggle chip — injected into the topbar */
-            function injectSndChip() {
-                var bar = document.querySelector('.topbar-right');
-                if (!bar || document.getElementById('sc-snd-chip')) return;
-                var b = document.createElement('button');
-                b.id = 'sc-snd-chip'; b.title = 'Click sounds';
-                b.style.cssText = 'display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;color:var(--text-secondary);padding:5px 11px;border-radius:100px;border:1px solid var(--border);background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);cursor:pointer;font-family:inherit';
-                function paint() {
-                    b.innerHTML = '<i class="ti ' + (sndOn ? 'ti-volume' : 'ti-volume-off') + '" style="font-size:12px"></i>' + (sndOn ? ' Sound' : '');
-                    b.classList.toggle('snd-on', sndOn);
-                }
-                b.onclick = function () {
-                    sndOn = !sndOn; localStorage.setItem(SND_KEY, sndOn ? 'on' : 'off');
-                    paint(); if (sndOn) scSnd.success();
-                };
-                paint();
-                var sync = document.getElementById('sync-status');
-                if (sync) bar.insertBefore(b, sync); else bar.appendChild(b);
-            }
+            /* sound toggle chip — injected into the topbar, or directly into Settings if it's already built */
+function injectSndChip() {
+    var bar = document.querySelector('.topbar-right');
+    if (!bar || document.getElementById('sc-snd-chip')) return;
+    var b = document.createElement('button');
+    b.id = 'sc-snd-chip'; b.title = 'Click sounds';
+    b.style.cssText = 'display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;color:var(--text-secondary);padding:5px 11px;border-radius:100px;border:1px solid var(--border);background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);cursor:pointer;font-family:inherit';
+    function paint() {
+        b.innerHTML = '<i class="ti ' + (sndOn ? 'ti-volume' : 'ti-volume-off') + '" style="font-size:12px"></i>' + (sndOn ? ' Sound' : '');
+        b.classList.toggle('snd-on', sndOn);
+    }
+    b.onclick = function () {
+        sndOn = !sndOn; localStorage.setItem(SND_KEY, sndOn ? 'on' : 'off');
+        paint(); if (sndOn) scSnd.success();
+    };
+    paint();
+    var soundRow = document.getElementById('pf-sound-row');
+    if (soundRow) soundRow.appendChild(b);
+    else bar.appendChild(b);
+}
 
             /* ══ CLICK SOUND DELEGATION — one listener, all controls ══ */
             var CLICKY = '.log-btn,.timer-btn,.el-analyse-btn,.scd-primary,.sheldon-send,.sheldon-chip,.sc-dur-chip,.sc-mode-btn,.sess-tab,.fpill,.sb-item,.tb-chip,.cs-trigger,.cs-opt,.mob-burger,.sct-track,.kcap';
