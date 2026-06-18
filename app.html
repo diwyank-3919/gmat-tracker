@@ -14609,6 +14609,7 @@
                 var md = user.user_metadata || {};
                 fullName = (md.full_name || md.name || (user.email ? user.email.split("@")[0] : "")).trim();
                 firstName = fullName.split(/\s+/)[0] || "";
+                window.scUserFirstName = firstName;
                 applyTitle();
                 applyFooter();
             }
@@ -22997,22 +22998,29 @@
         el.innerHTML = lines.join('');
     }
 
-    function renderHeader() {
-        var hr = new Date().getHours();
-        var greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
-        var g = document.getElementById('briefing-greeting');
-        if (g) g.textContent = greet + ', Aditya';
-        var dl = document.getElementById('briefing-days-left');
-        if (dl) {
-            var src = document.getElementById('days-left');
-            dl.textContent = (src && src.textContent.trim()) || '--';
+   function renderHeader() {
+    var hr = new Date().getHours();
+    var greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+    if (g) g.textContent = greet + ', ' + (window.scUserFirstName || 'there');
+    if (g) g.textContent = greet + ', Aditya';
+
+    var dl = document.getElementById('briefing-days-left');
+    if (dl) {
+        var examDateVal = localStorage.getItem('gmat_exam_date');
+        var daysLeft = null;
+        if (examDateVal) {
+            var ep = examDateVal.split('-').map(Number);
+            daysLeft = Math.max(0, Math.ceil((new Date(ep[0], ep[1] - 1, ep[2]) - today) / 86400000));
         }
-        var sk = document.getElementById('briefing-streak');
-        if (sk) {
-            var sc = document.getElementById('streak-chip');
-            sk.textContent = sc ? sc.textContent.trim() : '--';
-        }
+        dl.textContent = daysLeft != null ? daysLeft : '--';
     }
+
+    var sk = document.getElementById('briefing-streak');
+    if (sk) {
+        var sc = document.getElementById('streak-chip');
+        sk.textContent = sc ? sc.textContent.trim() : '--';
+    }
+}
 
     function renderBriefing() { renderHeader(); renderYesterday(); renderFocusList(); }
 
