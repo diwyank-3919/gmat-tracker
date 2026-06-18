@@ -14570,8 +14570,27 @@
                     w.innerHTML = '<button class="pf-btn" id="pf-btn" onclick="pfToggle(event)"><span id="pf-btn-txt">?</span></button>' +
                         '<div class="pf-menu" id="pf-menu"><div class="pf-head"><div class="pf-head-av" id="pf-av"></div>' +
                         '<div class="pf-head-info"><div class="pf-name" id="pf-name">Loading…</div><div class="pf-email" id="pf-email"></div></div></div>' +
+                        '<button class="pf-item" id="pf-settings-toggle" onclick="pfSettingsToggle(event)"><i class="ti ti-settings"></i> Settings</button>' +
+                        '<div class="pf-settings-panel" id="pf-settings-panel" style="display:none">' +
+                        '<div class="pf-settings-row" id="pf-sync-row"></div>' +
+                        '<div class="pf-settings-row" id="pf-sound-row"></div>' +
+                        '<div class="pf-settings-row" id="pf-theme-row"><span style="font-size:12px;color:var(--text-secondary)">Theme</span></div>' +
+                        '<div class="pf-settings-row" id="pf-trash-row"></div>' +
+                        '</div>' +
                         '<button class="pf-item" onclick="signOut()"><i class="ti ti-logout"></i> Sign out</button></div>';
                     bar.appendChild(w);
+
+                    var sync = document.getElementById("sync-status");
+                    var syncRow = document.getElementById("pf-sync-row");
+                    if (sync && syncRow) syncRow.appendChild(sync);
+
+                    var theme = document.querySelector(".sc-theme-toggle");
+                    var themeRow = document.getElementById("pf-theme-row");
+                    if (theme && themeRow) themeRow.appendChild(theme);
+
+                    var trash = document.querySelector('button[onclick="openTrash()"]');
+                    var trashRow = document.getElementById("pf-trash-row");
+                    if (trash && trashRow) trashRow.appendChild(trash);
                 }
                 var mb = document.querySelector("#mob-drawer .sb-bottom");
                 if (mb && !document.getElementById("mob-signout")) {
