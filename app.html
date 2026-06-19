@@ -24911,9 +24911,8 @@ function injectSndChip() {
         })();
     </script>
 
-    <script id="sc-orb-insight-js">
+   <script id="sc-orb-insight-js">
 (function () {
-
     function getTopNotice() {
         if (typeof window.computeSheldonNotices !== 'function') return null;
         var crSessions = (typeof sessions !== 'undefined' && sessions)
@@ -24923,44 +24922,34 @@ function injectSndChip() {
         var notices = window.computeSheldonNotices(attempts, crSessions);
         return notices.length ? notices[0] : null;
     }
-
     function setOrbInsight(on) {
         var wrap = document.getElementById('sheldonCoreWrap');
         if (wrap) wrap.classList.toggle('has-insight', on);
     }
-
-    window.checkAndSetOrb = function() {
-    setOrbInsight(!!getTopNotice());
-};
-
+    window.checkAndSetOrb = function () {
+        setOrbInsight(!!getTopNotice());
+    };
     /* ── hook into data-ready moment ── */
     var _orig = window.loadChatSessions;
     if (typeof _orig === 'function') {
         window.loadChatSessions = function () {
             var result = _orig.apply(this, arguments);
-            setTimeout(checkAndSetOrb, 900);
+            setTimeout(window.checkAndSetOrb, 900);
             return result;
         };
     }
     /* fallback: check after boot delay */
-    setTimeout(checkAndSetOrb, 3000);
-
+    setTimeout(window.checkAndSetOrb, 3000);
     /* ── wrap openSheldon ── */
     var _origOpen = window.openSheldon;
     window.openSheldon = function () {
-        /* clear orb the moment panel opens */
         setOrbInsight(false);
-
-        /* run original — renders default greeting, sets sheldonGreeted */
         if (typeof _origOpen === 'function') _origOpen.apply(this, arguments);
-
-        /* inject proactive insight as follow-up on first open only */
         setTimeout(function () {
             var msgs = document.getElementById('sheldonMessages');
             if (!msgs) return;
-            var botMsgs = msgs.querySelectorAll('.sheldon-msg.bot, .sh-msg-wrap');
-            /* only fire if exactly one exchange exists (the default greeting) */
-            if (botMsgs.length !== 1) return;
+            var botMsgs = msgs.querySelectorAll('.sheldon-msg.bot');
+            if (botMsgs.length < 1) return;
             var notice = getTopNotice();
             if (!notice) return;
             var prefix = notice.severity === 'positive' ? '✨ ' : '⚠️ ';
@@ -24970,9 +24959,8 @@ function injectSndChip() {
                     ' Want me to dig into this?'
                 );
             }
-        }, 420);
+        }, 1200);
     };
-
 })();
 </script>
 
