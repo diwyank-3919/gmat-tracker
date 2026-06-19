@@ -19496,9 +19496,9 @@ function injectSndChip() {
         if (wrap) wrap.classList.toggle('has-insight', on);
     }
 
-    function checkAndSetOrb() {
-        setOrbInsight(!!getTopNotice());
-    }
+    window.checkAndSetOrb = function() {
+    setOrbInsight(!!getTopNotice());
+};
 
     /* ── hook into data-ready moment ── */
     var _orig = window.loadChatSessions;
@@ -23247,7 +23247,9 @@ function injectSndChip() {
                 if (typeof sessions === 'undefined' || !sessions) return;
 
                 /* Sheldon Notices run every visit, independent of the once-per-day nudge gate */
-                fetchCRAttemptsCache().then(renderDashboardNotices);
+                fetchCRAttemptsCache().then(renderDashboardNotices).then(function() {
+    if (typeof window.checkAndSetOrb === 'function') window.checkAndSetOrb();
+});
 
                 /* CR Journey milestone toasts */
                 if (typeof checkCRMilestones === 'function') {
