@@ -19349,6 +19349,33 @@ function injectSndChip() {
         #sheldonCoreWrap.away .sh-sparks {
             opacity: .3;
         }
+        /* ── Orb: has-insight state ── */
+#sheldonCoreWrap.has-insight .ar-out {
+    stroke: rgba(251, 191, 36, 0.90);
+    filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.55));
+}
+#sheldonCoreWrap.has-insight .ar-core {
+    stroke: #fbbf24;
+    filter: drop-shadow(0 0 5px #fbbf24) drop-shadow(0 0 14px rgba(251, 191, 36, 0.80));
+}
+#sheldonCoreWrap.has-insight .ar-nuc {
+    fill: rgba(251, 191, 36, 0.22);
+}
+@keyframes orbInsightGlow {
+    0%, 100% { filter: drop-shadow(0 0 0px rgba(251, 191, 36, 0.0)); }
+    50%       { filter: drop-shadow(0 0 14px rgba(251, 191, 36, 0.35)); }
+}
+#sheldonCoreWrap.has-insight {
+    animation: orbInsightGlow 2.8s ease-in-out infinite;
+}
+/* tooltip hint on the label */
+#sheldonCoreWrap.has-insight .core-label::after {
+    content: ' · insight ready';
+    color: #fbbf24;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
     </style>
     <script id="sc-arc-final-js">
         (function () {
@@ -19451,6 +19478,70 @@ function injectSndChip() {
             };
         })();
     </script>
+    <script id="sc-orb-insight-js">
+(function () {
+
+    function getTopNotice() {
+        if (typeof window.computeSheldonNotices !== 'function') return null;
+        var crSessions = (typeof sessions !== 'undefined' && sessions)
+            ? sessions.filter(function (s) { return s.topic === 'CR' && !s.deleted; })
+            : [];
+        var attempts = window._crAttemptsCache || [];
+        var notices = window.computeSheldonNotices(attempts, crSessions);
+        return notices.length ? notices[0] : null;
+    }
+
+    function setOrbInsight(on) {
+        var wrap = document.getElementById('sheldonCoreWrap');
+        if (wrap) wrap.classList.toggle('has-insight', on);
+    }
+
+    function checkAndSetOrb() {
+        setOrbInsight(!!getTopNotice());
+    }
+
+    /* ── hook into data-ready moment ── */
+    var _orig = window.loadChatSessions;
+    if (typeof _orig === 'function') {
+        window.loadChatSessions = function () {
+            var result = _orig.apply(this, arguments);
+            setTimeout(checkAndSetOrb, 900);
+            return result;
+        };
+    }
+    /* fallback: check after boot delay */
+    setTimeout(checkAndSetOrb, 3000);
+
+    /* ── wrap openSheldon ── */
+    var _origOpen = window.openSheldon;
+    window.openSheldon = function () {
+        /* clear orb the moment panel opens */
+        setOrbInsight(false);
+
+        /* run original — renders default greeting, sets sheldonGreeted */
+        if (typeof _origOpen === 'function') _origOpen.apply(this, arguments);
+
+        /* inject proactive insight as follow-up on first open only */
+        setTimeout(function () {
+            var msgs = document.getElementById('sheldonMessages');
+            if (!msgs) return;
+            var botMsgs = msgs.querySelectorAll('.sheldon-msg.bot, .sh-msg-wrap');
+            /* only fire if exactly one exchange exists (the default greeting) */
+            if (botMsgs.length !== 1) return;
+            var notice = getTopNotice();
+            if (!notice) return;
+            var prefix = notice.severity === 'positive' ? '✨ ' : '⚠️ ';
+            if (typeof sheldonRender === 'function') {
+                sheldonRender('bot',
+                    prefix + notice.text +
+                    ' Want me to dig into this?'
+                );
+            }
+        }, 420);
+    };
+
+})();
+</script>
     <style id="ecn-styles">
         #exam-command {
             padding: 0 !important;
