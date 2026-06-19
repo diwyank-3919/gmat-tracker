@@ -4079,73 +4079,52 @@
   `).join('');
         }
 
-        // ── GENERATE PLAN (Anthropic API) ──
         async function generatePlan() {
-            const gains = computeScoreGains(attempts);
-            if (!gains.length) return;
+    const gains = computeScoreGains(attempts);
+    if (!gains.length) return;
 
-            const btn = document.getElementById('generate-plan-btn');
-            const outputEl = document.getElementById('plan-output');
-            const emptyMsg = document.getElementById('plan-empty-msg');
+    const btn = document.getElementById('generate-plan-btn');
+    const outputEl = document.getElementById('plan-output');
+    const emptyMsg = document.getElementById('plan-empty-msg');
 
-            btn.disabled = true;
-            btn.innerHTML = `<span class="plan-spinner"></span> Generating…`;
-            emptyMsg.style.display = 'none';
-            outputEl.style.display = 'block';
-            outputEl.innerHTML = `<div class="plan-loading"><div class="plan-spinner"></div><span>Sheldon is building your plan…</span></div>`;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="plan-spinner"></span> Generating…`;
+    emptyMsg.style.display = 'none';
+    outputEl.style.display = 'block';
+    outputEl.innerHTML = `<div class="plan-loading"><div class="plan-spinner"></div><span>Sheldon is building your plan…</span></div>`;
 
-            // Build context summary for the AI
-            const total = attempts.length;
-            const overallAcc = pct(attempts.filter(a => a.correct).length, total);
-            const gainSummary = gains.map((g, i) => `#${i + 1}: ${g.title} — ${g.impact} potential. Reason: ${g.reason.replace(/<[^>]+>/g, '')}`).join('\n');
+    const total = attempts.length;
+    const overallAcc = pct(attempts.filter(a => a.correct).length, total);
 
-            const prompt = `You are Sheldon, a GMAT CR coach. Based on this student's top score gain opportunities, create a focused study session plan for today.
- 
-Student stats:
-- Total CR attempts: ${total}
-- Overall accuracy: ${overallAcc}%
- 
-Top gains identified:
-${gainSummary}
- 
-Create a realistic 45–60 minute study session plan as a JSON array. Each item should have:
-- "minutes": integer (time to spend)
-- "name": string (what to do, concise)
-- "why": string (1 sentence reason, specific to their data)
-- "tag": "drill" | "review" | "focus"
- 
-Return ONLY valid JSON array, no explanation, no markdown. Example format:
-[{"minutes":20,"name":"Evaluate Question Drill","why":"Your 0% Evaluate accuracy is your biggest gap.","tag":"drill"}]
- 
-Keep total time between 40–60 minutes. 3–5 items max.`;
+    // Strip HTML tags from reason before sending to Edge Function
+    const cleanGains = gains.map(g => ({
+        title: g.title,
+        impact: g.impact,
+        reason: g.reason.replace(/<[^>]+>/g, '')
+    }));
 
-            try {
-                const response = await fetch('https://api.anthropic.com/v1/messages', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: 'claude-sonnet-4-6',
-                        max_tokens: 1000,
-                        messages: [{ role: 'user', content: prompt }],
-                    }),
-                });
-
-                const data = await response.json();
-                const raw = (data.content || []).map(c => c.text || '').join('');
-                const clean = raw.replace(/```json|```/g, '').trim();
-                const plan = JSON.parse(clean);
-
-                renderPlan(plan);
-            } catch (err) {
-                console.error('Plan generation error:', err);
-                // Fallback: generate a deterministic plan from the gains
-                const fallback = generateFallbackPlan(gains);
-                renderPlan(fallback);
+    try {
+        const res = await supa.functions.invoke('cr-plan', {
+            body: {
+                totalAttempts: total,
+                overallAccuracy: overallAcc,
+                gains: cleanGains
             }
+        });
 
-            btn.disabled = false;
-            btn.innerHTML = `<i class="ti ti-sparkles"></i> Regenerate Plan`;
-        }
+        if (res.error) throw new Error(res.error.message);
+        const plan = res.data && res.data.plan;
+        if (!plan || !plan.length) throw new Error('Empty plan returned');
+        renderPlan(plan);
+
+    } catch (err) {
+        console.error('Plan generation error:', err);
+        renderPlan(generateFallbackPlan(gains));
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = `<i class="ti ti-sparkles"></i> Regenerate Plan`;
+}
 
         function generateFallbackPlan(gains) {
             // Deterministic fallback if API fails
