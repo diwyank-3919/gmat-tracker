@@ -2672,19 +2672,20 @@
 ══════════════════════════════════ */
         .journey-card {
             background: linear-gradient(160deg, rgba(255,255,255,0.052), rgba(255,255,255,0.026));
-            border: 1px solid rgba(124,108,246,0.22);
+            border: 1px solid rgba(255,255,255,0.10);
             border-radius: 16px;
             padding: 22px 24px 20px;
             position: relative;
             overflow: hidden;
             margin-bottom: 20px;
             animation: fadeInUp .45s cubic-bezier(0.16,1,0.3,1) both;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 8px 32px rgba(0,0,0,0.30);
         }
         .journey-card::before {
             content:'';
             position:absolute;
             top:0;left:0;right:0;height:120px;
-            background:radial-gradient(ellipse 70% 100% at 50% 0%, rgba(124,108,246,0.09) 0%, transparent 70%);
+            background:radial-gradient(ellipse 70% 100% at 50% 0%, rgba(124,108,246,0.045) 0%, transparent 70%);
             pointer-events:none;
         }
         .journey-card-header {
@@ -2700,7 +2701,7 @@
             font-size:18px;
             font-weight:600;
             letter-spacing:-0.3px;
-            background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(157,143,248,0.85));
+            background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,255,255,0.72));
             -webkit-background-clip:text;
             background-clip:text;
             -webkit-text-fill-color:transparent;
@@ -2753,6 +2754,7 @@
             line-height:1;
             margin-bottom:3px;
             transition:color .3s;
+            color: var(--text-primary);   /* white default; JS still overrides 90%→green, 59%→amber, etc. */
         }
         .jc-stat-label {
             font-size:9px;
@@ -4559,7 +4561,7 @@
             // Stat cards with count-up
             const deltaColor = delta >= 0 ? '#34d399' : '#f87171';
             document.getElementById('journey-stats').innerHTML = `
-                <div class="jc-stat"><div class="jc-stat-val" id="jcs-0" style="color:#9d8ff8">0</div><div class="jc-stat-label">Scored Sessions</div></div>
+                <div class="jc-stat"><div class="jc-stat-val" id="jcs-0" style="color:rgba(255,255,255,0.92)">0</div><div class="jc-stat-label">Scored Sessions</div></div>
                 <div class="jc-stat"><div class="jc-stat-val" id="jcs-1" style="color:#34d399">0%</div><div class="jc-stat-label">Peak Accuracy</div></div>
                 <div class="jc-stat"><div class="jc-stat-val" id="jcs-2" style="color:#f59e0b">0%</div><div class="jc-stat-label">Average</div></div>
                 <div class="jc-stat"><div class="jc-stat-val" id="jcs-3" style="color:${deltaColor}">—</div><div class="jc-stat-label">First → Last</div></div>
@@ -4599,12 +4601,12 @@
 
             // Premium area gradient
             const gradient = ctx.createLinearGradient(0, 0, 0, 260);
-            gradient.addColorStop(0,  'rgba(157,143,248,0.42)');
-            gradient.addColorStop(0.4,'rgba(124,108,246,0.18)');
-            gradient.addColorStop(1,  'rgba(124,108,246,0.00)');
+            gradient.addColorStop(0,  'rgba(139,124,248,0.16)');
+            gradient.addColorStop(0.5,'rgba(139,124,248,0.06)');
+            gradient.addColorStop(1,  'rgba(139,124,248,0.00)');
 
             const peakValIdx = values.indexOf(peak);
-            const pointColors = values.map((v,i) => i === peakValIdx ? '#34d399' : v < 40 ? '#f87171' : '#9d8ff8');
+            const pointColors = values.map((v,i) => i === peakValIdx ? '#34d399' : v < 40 ? '#f87171' : '#8b7cf8');
             const pointRadii  = values.map((v,i) => i === peakValIdx ? 7 : 4);
             const pointHoverR = values.map((v,i) => i === peakValIdx ? 9 : 6);
 
@@ -4616,8 +4618,8 @@
                     if (args.index !== 1) return;
                     const ctx2 = chart.ctx;
                     ctx2.save();
-                    ctx2.shadowColor = 'rgba(157,143,248,0.55)';
-                    ctx2.shadowBlur = 14;
+                    ctx2.shadowColor = 'rgba(139,124,248,0.30)';
+                    ctx2.shadowBlur = 7;
                 }
             };
             const glowPluginAfter = {
@@ -4680,7 +4682,7 @@
                         {
                             label: 'CR Accuracy',
                             data: values,
-                            borderColor: '#9d8ff8',
+                            borderColor: '#8b7cf8',
                             borderWidth: 2.5,
                             backgroundColor: gradient,
                             fill: true,
@@ -4724,7 +4726,7 @@
                         tooltip: {
                             enabled: true,
                             backgroundColor: 'rgba(8,12,22,0.97)',
-                            borderColor: 'rgba(157,143,248,0.32)',
+                            borderColor: 'rgba(255,255,255,0.12)',
                             borderWidth: 1.5,
                             cornerRadius: 10,
                             padding: { top:11, bottom:11, left:14, right:14 },
@@ -4792,6 +4794,55 @@
         }
         init();
     </script>
+    <style id="cr-premium-match">
+/* ── Match app.html premium feel: neutral surfaces, semantic color ── */
+:root{
+  --bg-base:#0f0c1a;
+  --bg-card:rgba(255,255,255,0.055);
+  --border:rgba(255,255,255,0.10);
+  --accent:#8b7cf8;            /* accent ONLY — never a surface wash */
+  --green-bright:#34d399;
+  --amber:#fbbf24;
+  --red:#fb7185;
+  --text-primary:rgba(255,255,255,0.92);
+  --text-secondary:rgba(255,255,255,0.62);
+  --text-tertiary:rgba(255,255,255,0.38);
+}
+
+/* 1. Neutralize all surfaces */
+body{ background:var(--bg-base); }
+.card, .panel, .cr-card, .stat-card, .analytics-card{
+  background:var(--bg-card) !important;
+  border:1px solid var(--border) !important;
+  box-shadow:0 1px 0 rgba(255,255,255,0.06) inset,
+             0 8px 32px rgba(0,0,0,0.30) !important;
+  border-radius:14px;
+}
+
+/* 2. Big numbers → Fraunces, white by default, colored only when semantic */
+.stat-card .stat-value, .stat-value, .hero-num{
+  font-family:'Fraunces',serif !important;
+  color:var(--text-primary);
+  font-weight:600;
+  letter-spacing:-0.01em;
+}
+.stat-value.is-good{ color:var(--green-bright); }   /* 90% peak, +31pp */
+.stat-value.is-warn{ color:var(--amber); }          /* 59% average */
+.stat-value.is-bad { color:var(--red); }
+
+/* 3. Sheldon banner: thin accent edge, not a purple fill */
+.sheldon-banner, .insight-banner, .cr-sheldon-card{
+  background:rgba(139,124,248,0.06) !important;
+  border:1px solid var(--border) !important;
+  border-left:2px solid var(--accent) !important;
+}
+
+/* 4. Sidebar to match app.html */
+.sidebar, nav.sidebar{
+  background:rgba(10,7,22,0.88);
+  backdrop-filter:blur(40px) saturate(180%);
+}
+</style>
 </body>
 
 </html>
