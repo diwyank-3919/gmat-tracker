@@ -10913,6 +10913,7 @@
                 <div class="sb-item" onclick="switchView('errors')" id="nav-errors"><i class="ti ti-microscope"></i>
                     Error log
                 </div>
+                <div class="sb-item" onclick="switchView('reads')" id="nav-reads"><i class="ti ti-book-2"></i> Daily Reads</div>
             </div>
 
             <div class="sb-section">
@@ -11076,6 +11077,82 @@
             </div>
 
             <div class="content">
+                <!-- ============ 2) VIEW MARKUP (place alongside #view-dashboard etc.) ============ -->
+<div id="view-reads" class="view" style="display:none">
+  <div id="sc-reader" data-theme="paper" data-face="lit">
+ 
+    <div class="sr-prog"><span id="sr-prog-fill"></span></div>
+ 
+    <div class="sr-bar">
+      <div class="grp">
+        <button class="sr-ico" id="sr-bm" aria-label="Save for revisit"><i class="ti ti-bookmark"></i></button>
+        <span class="sr-brand">Daily read</span>
+      </div>
+      <div class="grp">
+        <div class="grp" role="group" aria-label="Typeface">
+          <button class="sr-face" data-face="lit" aria-pressed="true" style="font-family:'Literata',serif" title="Literata">Aa</button>
+          <button class="sr-face" data-face="src" aria-pressed="false" style="font-family:'Source Serif 4',serif" title="Source Serif">Aa</button>
+          <button class="sr-face" data-face="sans" aria-pressed="false" style="font-family:'Inter',sans-serif" title="Inter">Aa</button>
+        </div>
+        <span class="sr-div"></span>
+        <div class="grp" role="group" aria-label="Text size">
+          <button class="sr-sz" id="sr-dec" aria-label="Smaller text" style="font-size:12px">A</button>
+          <button class="sr-sz" id="sr-inc" aria-label="Larger text" style="font-size:17px">A</button>
+        </div>
+        <span class="sr-div"></span>
+        <div class="grp" role="group" aria-label="Reading theme">
+          <button class="sr-dot" data-theme="paper" aria-pressed="true"  aria-label="Paper" style="background:#faf7ef"></button>
+          <button class="sr-dot" data-theme="sepia" aria-pressed="false" aria-label="Sepia" style="background:#f1e6cf"></button>
+          <button class="sr-dot" data-theme="night" aria-pressed="false" aria-label="Night" style="background:#1a1715"></button>
+        </div>
+      </div>
+    </div>
+ 
+    <article class="sr-wrap">
+      <div id="sr-empty" class="sr-empty" style="display:none">
+        <i class="ti ti-book-2"></i>
+        <div class="sr-empty-t">No read for today yet</div>
+        <div class="sr-empty-s">Today's article is still being prepared. Check back shortly.</div>
+      </div>
+ 
+      <div id="sr-article" style="display:none">
+        <div class="sr-eyebrow" id="a-eyebrow"></div>
+        <h1 class="sr-title" id="a-title"></h1>
+        <p class="sr-dek" id="a-dek"></p>
+        <div class="sr-meta" id="a-meta"></div>
+ 
+        <div class="sr-body" id="a-body"></div>
+ 
+        <div class="sr-tbar" id="sr-tbar">
+          <button class="b-hl"   data-a="hl"><i class="ti ti-highlight"></i> Highlight</button>
+          <button class="b-note" data-a="note"><i class="ti ti-note"></i> Note</button>
+          <button class="b-ask"  data-a="ask"><i class="ti ti-message-circle"></i> Ask Sheldon</button>
+        </div>
+ 
+        <div class="sr-gate">
+          <div class="sr-gate-hint">Read it cold first. What is the author actually claiming, and which assumption would you attack? Then reveal to check yourself.</div>
+          <button class="sr-reveal" id="sr-reveal"><i class="ti ti-eye"></i> Reveal the author's claim &amp; analysis</button>
+        </div>
+ 
+        <div class="sr-decode" id="sr-decode" hidden>
+          <div class="sr-claim">
+            <div class="lbl">The author's claim</div>
+            <p id="a-claim"></p>
+          </div>
+          <div class="sr-decode-hd">
+            <h3>Decode the argument</h3><span class="tag" id="a-tag"></span>
+          </div>
+          <div id="a-decode"></div>
+        </div>
+ 
+        <div class="sr-foot">
+          <button class="sr-act" id="sr-bm2"><i class="ti ti-bookmark"></i> Save for revisit</button>
+          <button class="sr-act accent" id="sr-ask"><i class="ti ti-message-circle"></i> Ask Sheldon about this</button>
+        </div>
+      </div>
+    </article>
+  </div>
+</div>
                 <div id="view-dashboard" class="view-enter">
                     <!-- EXAM COMMAND CENTER -->
                     <div class="card" id="exam-command" style="margin-bottom:14px">
@@ -13276,7 +13353,7 @@
         var dowChartInst = null, topicBarChartInst = null, monthlyChartInst = null;
 
         function switchView(view) {
-            var views = ["dashboard", "analytics", "calendar", "sessions", "mock", "errors"];
+            var views = ["dashboard", "analytics", "calendar", "sessions", "mock", "errors", "reads"];
             var current = document.querySelector(".view-enter");
             if (current) {
                 current.classList.remove("view-enter");
@@ -24961,6 +25038,234 @@ function injectSndChip() {
             }
         }, 1200);
     };
+})();
+</script>
+<!-- ============ 3) STYLES ============ -->
+<style id="reads-css">
+@import url('https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Inter:wght@400;500;600&display=swap');
+ 
+#sc-reader{
+  --paper:#faf7ef; --ink:#272320; --ink2:#6f685d; --ink3:rgba(40,35,30,.12);
+  --acc:#9c3d28; --hl:rgba(250,204,21,.40);
+  --face:'Literata',Georgia,serif; --fs:20px; --bar:rgba(250,247,239,.85);
+  min-height:80vh; background:var(--paper); color:var(--ink);
+  border-radius:14px; overflow:hidden; position:relative;
+  transition:background .35s ease, color .35s ease;
+}
+#sc-reader[data-theme="sepia"]{ --paper:#f1e6cf; --ink:#3b3221; --ink2:#766848; --ink3:rgba(60,50,30,.16); --acc:#8a531f; --hl:rgba(214,158,46,.42); --bar:rgba(241,230,207,.85); }
+#sc-reader[data-theme="night"]{ --paper:#1a1715; --ink:#ddd7cb; --ink2:#988f82; --ink3:rgba(255,255,255,.13); --acc:#d9a35a; --hl:rgba(217,163,90,.30); --bar:rgba(26,23,21,.85); }
+#sc-reader[data-face="src"]{ --face:'Source Serif 4',Georgia,serif; }
+#sc-reader[data-face="sans"]{ --face:'Inter',system-ui,sans-serif; }
+ 
+#sc-reader .sr-prog{ position:sticky; top:0; height:2px; background:var(--ink3); z-index:6; }
+#sc-reader .sr-prog>span{ display:block; height:100%; width:0; background:var(--acc); transition:width .1s linear; }
+ 
+#sc-reader .sr-bar{ position:sticky; top:2px; z-index:5; display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:11px max(18px,calc((100% - 640px)/2)); background:var(--bar); backdrop-filter:saturate(180%) blur(12px); border-bottom:.5px solid var(--ink3); }
+#sc-reader .grp{ display:flex; align-items:center; gap:6px; }
+#sc-reader .sr-brand{ font:500 13px/1 var(--face); letter-spacing:.03em; color:var(--ink2); }
+#sc-reader .sr-ico{ background:none; border:none; cursor:pointer; color:var(--ink2); font-size:18px; padding:5px; border-radius:7px; }
+#sc-reader .sr-ico:hover{ color:var(--ink); background:var(--ink3); }
+#sc-reader .sr-ico.on{ color:var(--acc); }
+#sc-reader .sr-face{ background:none; border:none; cursor:pointer; color:var(--ink2); font-size:15px; padding:5px 8px; border-radius:6px; }
+#sc-reader .sr-face:hover{ color:var(--ink); }
+#sc-reader .sr-face[aria-pressed="true"]{ color:var(--ink); background:var(--ink3); }
+#sc-reader .sr-sz{ background:none; border:none; cursor:pointer; color:var(--ink2); padding:4px 6px; border-radius:6px; font-family:var(--face); }
+#sc-reader .sr-sz:hover{ color:var(--ink); }
+#sc-reader .sr-dot{ width:18px; height:18px; border-radius:50%; border:1px solid var(--ink3); cursor:pointer; padding:0; }
+#sc-reader .sr-dot[aria-pressed="true"]{ border:1.5px solid var(--acc); }
+#sc-reader .sr-div{ width:1px; height:16px; background:var(--ink3); }
+ 
+#sc-reader .sr-wrap{ max-width:640px; margin:0 auto; padding:46px 26px 80px; position:relative; }
+#sc-reader .sr-eyebrow{ font:500 12px/1 var(--face); letter-spacing:.18em; text-transform:uppercase; color:var(--acc); margin-bottom:18px; }
+#sc-reader .sr-title{ font:500 clamp(28px,5vw,40px)/1.16 var(--face); letter-spacing:-.4px; margin:0 0 14px; color:var(--ink); }
+#sc-reader .sr-dek{ font:italic 400 clamp(18px,2.4vw,20px)/1.5 var(--face); color:var(--ink2); margin:0 0 22px; }
+#sc-reader .sr-meta{ display:flex; align-items:center; gap:9px; font:500 12px/1 var(--face); letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); padding-bottom:30px; margin-bottom:34px; border-bottom:.5px solid var(--ink3); }
+#sc-reader .sr-meta .d{ color:var(--ink3); }
+#sc-reader .sr-meta .gh{ color:var(--acc); }
+ 
+#sc-reader .sr-body p{ font-family:var(--face); font-size:var(--fs); line-height:1.8; color:var(--ink); margin:0 0 1.15em; letter-spacing:.002em; }
+#sc-reader .sr-body p:first-of-type::first-letter{ float:left; font-family:var(--face); font-size:3.5em; line-height:.78; padding:8px 11px 0 0; color:var(--acc); font-weight:500; }
+#sc-reader .sr-body mark{ background:var(--hl); color:inherit; padding:.05em 0; box-decoration-break:clone; -webkit-box-decoration-break:clone; }
+ 
+#sc-reader .sr-gate{ margin-top:34px; padding-top:26px; border-top:.5px solid var(--ink3); }
+#sc-reader .sr-gate-hint{ font:italic 400 15px/1.55 var(--face); color:var(--ink2); margin-bottom:16px; }
+#sc-reader .sr-reveal{ font:500 14px/1 var(--face); color:var(--acc); background:none; border:1px solid var(--ink3); border-radius:10px; padding:11px 16px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; }
+#sc-reader .sr-reveal:hover{ border-color:var(--acc); }
+ 
+#sc-reader .sr-decode .sr-claim{ border-left:2px solid var(--acc); padding:2px 0 2px 20px; margin:8px 0 26px; }
+#sc-reader .sr-decode .sr-claim .lbl{ font:500 11px/1 var(--face); letter-spacing:.18em; text-transform:uppercase; color:var(--acc); margin-bottom:7px; }
+#sc-reader .sr-decode .sr-claim p{ font:italic 400 18px/1.55 var(--face); color:var(--ink); margin:0; }
+#sc-reader .sr-decode-hd{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+#sc-reader .sr-decode-hd h3{ font:500 15px/1 var(--face); margin:0; color:var(--ink); }
+#sc-reader .sr-decode-hd .tag{ font:500 11px/1 var(--face); letter-spacing:.12em; text-transform:uppercase; color:var(--ink2); }
+#sc-reader .sr-row{ margin-bottom:16px; }
+#sc-reader .sr-row .lbl{ font:500 11px/1 var(--face); letter-spacing:.16em; text-transform:uppercase; color:var(--acc); margin-bottom:5px; }
+#sc-reader .sr-row p{ font:400 15px/1.55 var(--face); color:var(--ink); margin:0; }
+ 
+#sc-reader .sr-foot{ display:flex; align-items:center; gap:22px; margin-top:30px; padding-top:22px; border-top:.5px solid var(--ink3); }
+#sc-reader .sr-act{ background:none; border:none; cursor:pointer; font:500 14px/1 var(--face); color:var(--ink2); display:flex; align-items:center; gap:8px; padding:0; }
+#sc-reader .sr-act:hover{ color:var(--ink); }
+#sc-reader .sr-act.accent, #sc-reader .sr-act.on{ color:var(--acc); }
+ 
+#sc-reader .sr-tbar{ position:absolute; display:none; z-index:8; background:var(--ink); border-radius:9px; padding:3px; box-shadow:0 8px 24px rgba(0,0,0,.28); }
+#sc-reader .sr-tbar button{ background:none; border:none; cursor:pointer; font:500 12px/1 var(--face); padding:7px 9px; display:inline-flex; align-items:center; gap:5px; }
+#sc-reader .sr-tbar .b-hl{ color:#fde68a; }
+#sc-reader .sr-tbar .b-note{ color:var(--paper); }
+#sc-reader .sr-tbar .b-ask{ color:var(--acc); }
+ 
+#sc-reader .sr-empty{ text-align:center; padding:90px 20px; color:var(--ink2); }
+#sc-reader .sr-empty i{ font-size:34px; color:var(--ink2); display:block; margin-bottom:12px; }
+#sc-reader .sr-empty-t{ font:500 16px/1.3 var(--face); color:var(--ink); margin-bottom:5px; }
+#sc-reader .sr-empty-s{ font:400 13px/1.5 var(--face); }
+ 
+@media (prefers-reduced-motion:reduce){ #sc-reader *{ transition:none!important; } }
+</style>
+ 
+ 
+<!-- ============ 4) SCRIPT ============ -->
+<script id="reads-js">
+(function(){
+  "use strict";
+  if (window._readsInit) return; window._readsInit = true;
+ 
+  var SIZES = [17, 18.5, 20, 21.5, 23];
+  var K = { theme:'sc_read_theme', face:'sc_read_face', size:'sc_read_size', bm:'sc_read_bookmarks' };
+  var root, sizeIdx, currentRow = null, rendered = false;
+ 
+  function gp(k,d){ try{ var v=localStorage.getItem(k); return v===null?d:v; }catch(e){ return d; } }
+  function sp(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function istToday(){ return new Date(Date.now()+19800000).toISOString().slice(0,10); }
+  function $(id){ return document.getElementById(id); }
+ 
+  function applyTheme(t){ root.setAttribute('data-theme',t); sp(K.theme,t);
+    root.querySelectorAll('.sr-dot').forEach(function(d){ d.setAttribute('aria-pressed', String(d.dataset.theme===t)); }); }
+  function applyFace(f){ root.setAttribute('data-face',f); sp(K.face,f);
+    root.querySelectorAll('.sr-face').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.face===f)); }); }
+  function applySize(){ root.style.setProperty('--fs', SIZES[sizeIdx]+'px'); sp(K.size, String(sizeIdx)); }
+ 
+  function bmSet(){ try{ return new Set(JSON.parse(gp(K.bm,'[]'))); }catch(e){ return new Set(); } }
+  function paintBm(on){ var b1=$('sr-bm'), b2=$('sr-bm2');
+    if(b1) b1.classList.toggle('on',on);
+    if(b2){ b2.classList.toggle('on',on); b2.childNodes[b2.childNodes.length-1].nodeValue = on?' Saved':' Save for revisit'; } }
+  function toggleBm(){
+    if(!currentRow) return;
+    var s=bmSet(), on=!s.has(currentRow.id);
+    on ? s.add(currentRow.id) : s.delete(currentRow.id);
+    sp(K.bm, JSON.stringify([].concat.apply([],[Array.from(s)]))); paintBm(on);
+    try{ supa.from('read_state').upsert({ user_id: currentRow._uid, read_id: currentRow.id, bookmarked: on, last_opened_at: new Date().toISOString() }, { onConflict:'user_id,read_id' }); }catch(e){}
+  }
+ 
+  function askSheldon(q){
+    window._activeRead = currentRow;            // sheldonSend() should call buildDailyReadContext(window._activeRead)
+    if (typeof window.openSheldon === 'function') window.openSheldon(q);
+    else if (typeof showToast === 'function') showToast('Open Sheldon to ask about this read.');
+  }
+ 
+  function renderArticle(row){
+    currentRow = row;
+    $('sr-empty').style.display='none';
+    $('sr-article').style.display='block';
+    $('a-eyebrow').textContent = row.category + (row.subcategory ? '  -  ' + row.subcategory : '');
+    $('a-title').textContent   = row.title || '';
+    $('a-dek').textContent      = row.dek || '';
+    var mins = Math.max(2, Math.ceil((row.est_read_secs||180)/60));
+    $('a-meta').innerHTML = '<span>'+mins+' min read</span><span class="d">&bull;</span><span class="gh">'+(row.difficulty||'GMAT-hard')+'</span>';
+ 
+    var paras = String(row.body||'').split(/\n{2,}/).map(function(s){return s.trim();}).filter(Boolean);
+    var bodyEl = $('a-body'); bodyEl.innerHTML='';
+    paras.forEach(function(p){ var el=document.createElement('p'); el.textContent=p; bodyEl.appendChild(el); });
+ 
+    // hidden until reveal
+    $('a-claim').textContent = row.author_stance || '';
+    $('a-tag').textContent   = row.structure_tag || '';
+    var kp = Array.isArray(row.key_points) ? row.key_points : [];
+    var dec = $('a-decode'); dec.innerHTML='';
+    kp.forEach(function(k){
+      var row2=document.createElement('div'); row2.className='sr-row';
+      var lbl=document.createElement('div'); lbl.className='lbl'; lbl.textContent=k.label||'';
+      var p=document.createElement('p'); p.textContent=k.text||'';
+      row2.appendChild(lbl); row2.appendChild(p); dec.appendChild(row2);
+    });
+    $('sr-decode').hidden = true;
+    $('sr-reveal').style.display = '';
+ 
+    paintBm(bmSet().has(row.id));
+  }
+ 
+  async function loadReads(){
+    if (typeof supa === 'undefined') return;
+    var uid = null;
+    try { var u = await supa.auth.getUser(); uid = u && u.data && u.data.user ? u.data.user.id : null; } catch(e){}
+    var { data, error } = await supa.from('daily_reads').select('*').eq('publish_date', istToday()).maybeSingle();
+    if (error || !data){ $('sr-article').style.display='none'; $('sr-empty').style.display='block'; return; }
+    data._uid = uid;
+    renderArticle(data);
+  }
+ 
+  function wire(){
+    root = $('sc-reader'); if(!root) return;
+ 
+    // restore prefs
+    sizeIdx = Math.min(Math.max(parseInt(gp(K.size,'2'),10)||2, 0), SIZES.length-1);
+    applyTheme(gp(K.theme,'paper')); applyFace(gp(K.face,'lit')); applySize();
+ 
+    root.querySelectorAll('.sr-dot').forEach(function(d){ d.addEventListener('click',function(){ applyTheme(d.dataset.theme); }); });
+    root.querySelectorAll('.sr-face').forEach(function(b){ b.addEventListener('click',function(){ applyFace(b.dataset.face); }); });
+    $('sr-inc').addEventListener('click',function(){ sizeIdx=Math.min(sizeIdx+1,SIZES.length-1); applySize(); });
+    $('sr-dec').addEventListener('click',function(){ sizeIdx=Math.max(sizeIdx-1,0); applySize(); });
+ 
+    $('sr-bm').addEventListener('click', toggleBm);
+    $('sr-bm2').addEventListener('click', toggleBm);
+    $('sr-reveal').addEventListener('click', function(){ $('sr-decode').hidden=false; this.style.display='none'; });
+    $('sr-ask').addEventListener('click', function(){
+      askSheldon("In today's read, what is the author's central assumption, and how would a GMAT weaken question attack it?");
+    });
+ 
+    // reading progress (scroll inside the view container)
+    var scroller = root.closest('.view') || window;
+    var onScroll = function(){
+      var el = document.scrollingElement || document.documentElement;
+      var h = el.scrollHeight - el.clientHeight;
+      $('sr-prog-fill').style.width = (h>0 ? Math.min(100,(el.scrollTop/h)*100) : 0) + '%';
+    };
+    window.addEventListener('scroll', onScroll, { passive:true });
+ 
+    // selection toolbar
+    var bodyEl=$('a-body'), tbar=$('sr-tbar'), wrap=root.querySelector('.sr-wrap');
+    function hideT(){ tbar.style.display='none'; }
+    bodyEl.addEventListener('mouseup', function(){ setTimeout(function(){
+      var sel=window.getSelection();
+      if(!sel||sel.isCollapsed||!sel.rangeCount){ hideT(); return; }
+      var r=sel.getRangeAt(0); if(!bodyEl.contains(r.commonAncestorContainer)){ hideT(); return; }
+      var rr=r.getBoundingClientRect(), wr=wrap.getBoundingClientRect();
+      tbar.style.display='flex';
+      var left=rr.left-wr.left+rr.width/2-tbar.offsetWidth/2; left=Math.max(4,Math.min(left,wr.width-tbar.offsetWidth-4));
+      tbar.style.left=left+'px'; tbar.style.top=(rr.top-wr.top+wrap.scrollTop-tbar.offsetHeight-8)+'px';
+    },10); });
+    tbar.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('mousedown',function(e){ e.preventDefault(); });
+      b.addEventListener('click',function(){
+        var sel=window.getSelection(); if(!sel.rangeCount) return; var r=sel.getRangeAt(0), txt=sel.toString();
+        if(b.dataset.a==='hl'){ var m=document.createElement('mark'); try{ r.surroundContents(m); }catch(e){ m.appendChild(r.extractContents()); r.insertNode(m); }
+          /* persist to read_highlights with offsets if desired */ }
+        else if(b.dataset.a==='ask'){ askSheldon('About this line from today\u2019s read: "'+txt+'"'); }
+        hideT(); sel.removeAllRanges();
+      });
+    });
+    document.addEventListener('mousedown', function(e){ if(!tbar.contains(e.target)) hideT(); });
+  }
+ 
+  // lazy-load when the Daily Reads view is opened
+  var _origSwitch = window.switchView;
+  window.switchView = function(name){
+    if (typeof _origSwitch === 'function') _origSwitch.apply(this, arguments);
+    if (name === 'reads'){
+      if (!rendered){ wire(); rendered = true; }
+      loadReads();
+    }
+  };
+  window.openReads = function(){ window.switchView('reads'); };
 })();
 </script>
 
