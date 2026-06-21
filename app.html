@@ -11153,16 +11153,18 @@
             </div>
 
             <div class="content">
-                <!-- ============ 2) VIEW MARKUP (place alongside #view-dashboard etc.) ============ -->
-<div id="view-reads" class="view" style="display:none">
+                <!-- ============ 2) VIEW MARKUP  (replace your old #view-reads with this) ============ -->
+<div id="view-reads" style="display:none">
   <div id="sc-reader" data-theme="paper" data-face="lit">
  
-    <div class="sr-prog"><span id="sr-prog-fill"></span></div>
+    <div class="sr-prog" id="sr-prog"><span id="sr-prog-fill"></span></div>
  
     <div class="sr-bar">
       <div class="grp">
-        <button class="sr-ico" id="sr-bm" aria-label="Save for revisit"><i class="ti ti-bookmark"></i></button>
-        <span class="sr-brand">Daily read</span>
+        <div class="sr-seg" role="group" aria-label="Mode">
+          <button id="seg-today" class="on">Today</button>
+          <button id="seg-lib">Library</button>
+        </div>
       </div>
       <div class="grp">
         <div class="grp" role="group" aria-label="Typeface">
@@ -11184,49 +11186,64 @@
       </div>
     </div>
  
-    <article class="sr-wrap">
-      <div id="sr-empty" class="sr-empty" style="display:none">
-        <i class="ti ti-book-2"></i>
-        <div class="sr-empty-t">No read for today yet</div>
-        <div class="sr-empty-s">Today's article is still being prepared. Check back shortly.</div>
-      </div>
- 
-      <div id="sr-article" style="display:none">
-        <div class="sr-eyebrow" id="a-eyebrow"></div>
-        <h1 class="sr-title" id="a-title"></h1>
-        <p class="sr-dek" id="a-dek"></p>
-        <div class="sr-meta" id="a-meta"></div>
- 
-        <div class="sr-body" id="a-body"></div>
- 
-        <div class="sr-tbar" id="sr-tbar">
-          <button class="b-hl"   data-a="hl"><i class="ti ti-highlight"></i> Highlight</button>
-          <button class="b-note" data-a="note"><i class="ti ti-note"></i> Note</button>
-          <button class="b-ask"  data-a="ask"><i class="ti ti-message-circle"></i> Ask Sheldon</button>
+    <!-- ---- TODAY MODE ---- -->
+    <div id="sr-today-mode">
+      <article class="sr-wrap">
+        <div id="sr-empty" class="sr-empty" style="display:none">
+          <i class="ti ti-book-2"></i>
+          <div class="sr-empty-t">No read for today yet</div>
+          <div class="sr-empty-s">Today's article is still being prepared. Check back shortly.</div>
         </div>
  
-        <div class="sr-gate">
-          <div class="sr-gate-hint">Read it cold first. What is the author actually claiming, and which assumption would you attack? Then reveal to check yourself.</div>
-          <button class="sr-reveal" id="sr-reveal"><i class="ti ti-eye"></i> Reveal the author's claim &amp; analysis</button>
-        </div>
+        <div id="sr-article" style="display:none">
+          <div class="sr-eyebrow" id="a-eyebrow"></div>
+          <h1 class="sr-title" id="a-title"></h1>
+          <p class="sr-dek" id="a-dek"></p>
+          <div class="sr-meta" id="a-meta"></div>
  
-        <div class="sr-decode" id="sr-decode" hidden>
-          <div class="sr-claim">
-            <div class="lbl">The author's claim</div>
-            <p id="a-claim"></p>
+          <div class="sr-body" id="a-body"></div>
+ 
+          <div class="sr-tbar" id="sr-tbar">
+            <button class="b-hl"   data-a="hl"><i class="ti ti-highlight"></i> Highlight</button>
+            <button class="b-note" data-a="note"><i class="ti ti-note"></i> Note</button>
+            <button class="b-ask"  data-a="ask"><i class="ti ti-message-circle"></i> Ask Sheldon</button>
           </div>
-          <div class="sr-decode-hd">
-            <h3>Decode the argument</h3><span class="tag" id="a-tag"></span>
-          </div>
-          <div id="a-decode"></div>
-        </div>
  
-        <div class="sr-foot">
-          <button class="sr-act" id="sr-bm2"><i class="ti ti-bookmark"></i> Save for revisit</button>
-          <button class="sr-act accent" id="sr-ask"><i class="ti ti-message-circle"></i> Ask Sheldon about this</button>
+          <div class="sr-gate">
+            <div class="sr-gate-hint">Read it cold first. What is the author actually claiming, and which assumption would you attack? Then reveal to check yourself.</div>
+            <button class="sr-reveal" id="sr-reveal"><i class="ti ti-eye"></i> Reveal the author's claim &amp; analysis</button>
+          </div>
+ 
+          <div class="sr-decode" id="sr-decode" hidden>
+            <div class="sr-claim">
+              <div class="lbl">The author's claim</div>
+              <p id="a-claim"></p>
+            </div>
+            <div class="sr-decode-hd"><h3>Decode the argument</h3><span class="tag" id="a-tag"></span></div>
+            <div id="a-decode"></div>
+          </div>
+ 
+          <div class="sr-foot">
+            <button class="sr-act" id="sr-bm2"><i class="ti ti-bookmark"></i> Save for revisit</button>
+            <button class="sr-act accent" id="sr-ask"><i class="ti ti-message-circle"></i> Ask Sheldon about this</button>
+          </div>
+        </div>
+      </article>
+    </div>
+ 
+    <!-- ---- LIBRARY MODE ---- -->
+    <div id="sr-library-mode" style="display:none">
+      <div class="sr-libwrap">
+        <div class="sr-chips" id="sr-chips"></div>
+        <div class="sr-grid" id="sr-grid"></div>
+        <div id="sr-lib-empty" class="sr-empty" style="display:none">
+          <i class="ti ti-books"></i>
+          <div class="sr-empty-t">Nothing here yet</div>
+          <div class="sr-empty-s">Read and save articles to build your library.</div>
         </div>
       </div>
-    </article>
+    </div>
+ 
   </div>
 </div>
                 <div id="view-dashboard" class="view-enter">
@@ -25234,13 +25251,12 @@ function injectSndChip() {
 #sc-reader .sr-bar{ position:sticky; top:2px; z-index:5; display:flex; align-items:center; justify-content:space-between; gap:16px;
   padding:11px max(18px,calc((100% - 640px)/2)); background:var(--bar); backdrop-filter:saturate(180%) blur(12px); border-bottom:.5px solid var(--ink3); }
 #sc-reader .grp{ display:flex; align-items:center; gap:6px; }
-#sc-reader .sr-brand{ font:500 13px/1 var(--face); letter-spacing:.03em; color:var(--ink2); }
-#sc-reader .sr-ico{ background:none; border:none; cursor:pointer; color:var(--ink2); font-size:18px; padding:5px; border-radius:7px; }
-#sc-reader .sr-ico:hover{ color:var(--ink); background:var(--ink3); }
-#sc-reader .sr-ico.on{ color:var(--acc); }
+#sc-reader .sr-seg{ display:inline-flex; background:color-mix(in srgb,var(--ink) 5%,transparent); border:1px solid var(--ink3); border-radius:9px; padding:2px; }
+#sc-reader .sr-seg button{ font:500 13px/1 var(--face); color:var(--ink2); background:none; border:none; padding:6px 14px; border-radius:7px; cursor:pointer; }
+#sc-reader .sr-seg button.on{ color:var(--ink); background:var(--paper); }
 #sc-reader .sr-face{ background:none; border:none; cursor:pointer; color:var(--ink2); font-size:15px; padding:5px 8px; border-radius:6px; }
 #sc-reader .sr-face:hover{ color:var(--ink); }
-#sc-reader .sr-face[aria-pressed="true"]{ color:var(--ink); background:var(--ink3); }
+#sc-reader .sr-face[aria-pressed="true"]{ color:var(--ink); background:color-mix(in srgb,var(--ink) 8%,transparent); }
 #sc-reader .sr-sz{ background:none; border:none; cursor:pointer; color:var(--ink2); padding:4px 6px; border-radius:6px; font-family:var(--face); }
 #sc-reader .sr-sz:hover{ color:var(--ink); }
 #sc-reader .sr-dot{ width:18px; height:18px; border-radius:50%; border:1px solid var(--ink3); cursor:pointer; padding:0; }
@@ -25290,11 +25306,29 @@ function injectSndChip() {
 #sc-reader .sr-empty-t{ font:500 16px/1.3 var(--face); color:var(--ink); margin-bottom:5px; }
 #sc-reader .sr-empty-s{ font:400 13px/1.5 var(--face); }
  
+/* ---- Library ---- */
+#sc-reader .sr-libwrap{ max-width:760px; margin:0 auto; padding:24px 22px 60px; }
+#sc-reader .sr-chips{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+#sc-reader .sr-chip{ font:500 12px/1 var(--face); color:var(--ink2); background:none; border:1px solid var(--ink3); border-radius:20px; padding:7px 13px; cursor:pointer; white-space:nowrap; }
+#sc-reader .sr-chip:hover{ color:var(--ink); }
+#sc-reader .sr-chip.on{ color:var(--paper); background:var(--acc); border-color:var(--acc); }
+#sc-reader .sr-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+#sc-reader .sr-card{ background:color-mix(in srgb,var(--ink) 4%,transparent); border:1px solid var(--ink3); border-radius:12px; padding:16px 17px; cursor:pointer; transition:transform .15s,border-color .15s,box-shadow .15s; }
+#sc-reader .sr-card:hover{ transform:translateY(-2px); border-color:color-mix(in srgb,var(--ink) 22%,transparent); box-shadow:0 8px 22px rgba(0,0,0,.10); }
+#sc-reader .sr-card .lc-top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:9px; }
+#sc-reader .sr-card .lc-eyebrow{ font:500 10.5px/1 var(--face); letter-spacing:.16em; text-transform:uppercase; color:var(--acc); }
+#sc-reader .sr-card .lc-title{ font:500 17px/1.25 var(--face); color:var(--ink); margin-bottom:6px; }
+#sc-reader .sr-card .lc-dek{ font:italic 400 13.5px/1.45 var(--face); color:var(--ink2); margin-bottom:14px; }
+#sc-reader .sr-card .lc-meta{ display:flex; align-items:center; gap:9px; }
+#sc-reader .sr-card .lc-meta span{ font:500 11px/1 var(--face); letter-spacing:.06em; text-transform:uppercase; color:var(--ink2); }
+#sc-reader .sr-card .lc-meta .dot{ color:var(--ink3); }
+#sc-reader .sr-card .lc-state.new{ color:var(--acc); }
+@media (max-width:680px){ #sc-reader .sr-grid{ grid-template-columns:1fr; } }
 @media (prefers-reduced-motion:reduce){ #sc-reader *{ transition:none!important; } }
 </style>
  
  
-<!-- ============ 4) SCRIPT ============ -->
+<!-- ============ 4) SCRIPT  (replace your old <script id="reads-js">) ============ -->
 <script id="reads-js">
 (function(){
   "use strict";
@@ -25302,12 +25336,16 @@ function injectSndChip() {
  
   var SIZES = [17, 18.5, 20, 21.5, 23];
   var K = { theme:'sc_read_theme', face:'sc_read_face', size:'sc_read_size', bm:'sc_read_bookmarks' };
-  var root, sizeIdx, currentRow = null, rendered = false;
+  var root, sizeIdx, currentRow = null, currentUid = null, libRows = null, curFilter = 'all', wired = false;
  
   function gp(k,d){ try{ var v=localStorage.getItem(k); return v===null?d:v; }catch(e){ return d; } }
   function sp(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
   function istToday(){ return new Date(Date.now()+19800000).toISOString().slice(0,10); }
   function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+ 
+  var BM_ON  = '<span style="color:var(--acc)"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h12a1 1 0 0 1 1 1v18l-7-4-7 4V3a1 1 0 0 1 1-1z"/></svg></span>';
+  var BM_OFF = '<span style="color:var(--ink3)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg></span>';
  
   function applyTheme(t){ root.setAttribute('data-theme',t); sp(K.theme,t);
     root.querySelectorAll('.sr-dot').forEach(function(d){ d.setAttribute('aria-pressed', String(d.dataset.theme===t)); }); }
@@ -25316,21 +25354,28 @@ function injectSndChip() {
   function applySize(){ root.style.setProperty('--fs', SIZES[sizeIdx]+'px'); sp(K.size, String(sizeIdx)); }
  
   function bmSet(){ try{ return new Set(JSON.parse(gp(K.bm,'[]'))); }catch(e){ return new Set(); } }
-  function paintBm(on){ var b1=$('sr-bm'), b2=$('sr-bm2');
-    if(b1) b1.classList.toggle('on',on);
+  function paintBm(on){ var b2=$('sr-bm2');
     if(b2){ b2.classList.toggle('on',on); b2.childNodes[b2.childNodes.length-1].nodeValue = on?' Saved':' Save for revisit'; } }
   function toggleBm(){
     if(!currentRow) return;
     var s=bmSet(), on=!s.has(currentRow.id);
     on ? s.add(currentRow.id) : s.delete(currentRow.id);
-    sp(K.bm, JSON.stringify([].concat.apply([],[Array.from(s)]))); paintBm(on);
-    try{ supa.from('read_state').upsert({ user_id: currentRow._uid, read_id: currentRow.id, bookmarked: on, last_opened_at: new Date().toISOString() }, { onConflict:'user_id,read_id' }); }catch(e){}
+    sp(K.bm, JSON.stringify(Array.from(s))); paintBm(on);
+    currentRow._saved = on;
+    try{ supa.from('read_state').upsert({ user_id: currentUid, read_id: currentRow.id, bookmarked: on, last_opened_at: new Date().toISOString() }, { onConflict:'user_id,read_id' }); }catch(e){}
   }
  
   function askSheldon(q){
-    window._activeRead = currentRow;            // sheldonSend() should call buildDailyReadContext(window._activeRead)
+    window._activeRead = currentRow;
     if (typeof window.openSheldon === 'function') window.openSheldon(q);
-    else if (typeof showToast === 'function') showToast('Open Sheldon to ask about this read.');
+  }
+ 
+  function setMode(m){
+    $('sr-today-mode').style.display   = (m==='today') ? 'block' : 'none';
+    $('sr-library-mode').style.display = (m==='library') ? 'block' : 'none';
+    $('sr-prog').style.display = (m==='today') ? '' : 'none';
+    $('seg-today').classList.toggle('on', m==='today');
+    $('seg-lib').classList.toggle('on', m==='library');
   }
  
   function renderArticle(row){
@@ -25339,45 +25384,96 @@ function injectSndChip() {
     $('sr-article').style.display='block';
     $('a-eyebrow').textContent = row.category + (row.subcategory ? '  -  ' + row.subcategory : '');
     $('a-title').textContent   = row.title || '';
-    $('a-dek').textContent      = row.dek || '';
+    $('a-dek').textContent     = row.dek || '';
     var mins = Math.max(2, Math.ceil((row.est_read_secs||180)/60));
-    $('a-meta').innerHTML = '<span>'+mins+' min read</span><span class="d">&bull;</span><span class="gh">'+(row.difficulty||'GMAT-hard')+'</span>';
+    $('a-meta').innerHTML = '<span>'+mins+' min read</span><span class="d">&bull;</span><span class="gh">'+esc(row.difficulty||'GMAT-hard')+'</span>';
  
     var paras = String(row.body||'').split(/\n{2,}/).map(function(s){return s.trim();}).filter(Boolean);
     var bodyEl = $('a-body'); bodyEl.innerHTML='';
     paras.forEach(function(p){ var el=document.createElement('p'); el.textContent=p; bodyEl.appendChild(el); });
  
-    // hidden until reveal
     $('a-claim').textContent = row.author_stance || '';
     $('a-tag').textContent   = row.structure_tag || '';
     var kp = Array.isArray(row.key_points) ? row.key_points : [];
     var dec = $('a-decode'); dec.innerHTML='';
     kp.forEach(function(k){
-      var row2=document.createElement('div'); row2.className='sr-row';
-      var lbl=document.createElement('div'); lbl.className='lbl'; lbl.textContent=k.label||'';
+      var r=document.createElement('div'); r.className='sr-row';
+      var l=document.createElement('div'); l.className='lbl'; l.textContent=k.label||'';
       var p=document.createElement('p'); p.textContent=k.text||'';
-      row2.appendChild(lbl); row2.appendChild(p); dec.appendChild(row2);
+      r.appendChild(l); r.appendChild(p); dec.appendChild(r);
     });
     $('sr-decode').hidden = true;
     $('sr-reveal').style.display = '';
- 
-    paintBm(bmSet().has(row.id));
+    paintBm(row._saved || bmSet().has(row.id));
   }
  
-  async function loadReads(){
+  function openRead(row){
+    renderArticle(row); setMode('today');
+    try{ supa.from('read_state').upsert({ user_id: currentUid, read_id: row.id, last_opened_at: new Date().toISOString(), completed_at: new Date().toISOString() }, { onConflict:'user_id,read_id' }); }catch(e){}
+    row._read = true;
+  }
+ 
+  async function resolveUid(){
+    if (currentUid) return currentUid;
+    try { var u = await supa.auth.getUser(); currentUid = u && u.data && u.data.user ? u.data.user.id : null; } catch(e){}
+    return currentUid;
+  }
+ 
+  async function loadToday(){
     if (typeof supa === 'undefined') return;
-    var uid = null;
-    try { var u = await supa.auth.getUser(); uid = u && u.data && u.data.user ? u.data.user.id : null; } catch(e){}
-    var { data, error } = await supa.from('daily_reads').select('*').eq('publish_date', istToday()).maybeSingle();
-    if (error || !data){ $('sr-article').style.display='none'; $('sr-empty').style.display='block'; return; }
-    data._uid = uid;
-    renderArticle(data);
+    await resolveUid();
+    var res = await supa.from('daily_reads').select('*').eq('publish_date', istToday()).maybeSingle();
+    if (res.error || !res.data){ $('sr-article').style.display='none'; $('sr-empty').style.display='block'; currentRow=null; setMode('today'); return; }
+    res.data._saved = bmSet().has(res.data.id);
+    openRead(res.data);
+  }
+ 
+  async function loadLibrary(){
+    setMode('library');
+    if (libRows){ renderChips(); renderCards(curFilter); return; }
+    await resolveUid();
+    var res = await supa.from('daily_reads').select('*').lte('publish_date', istToday()).order('publish_date',{ascending:false}).limit(60);
+    var rows = res.data || [];
+    var stateMap = {};
+    try{
+      var st = await supa.from('read_state').select('read_id,bookmarked,completed_at,last_opened_at').eq('user_id', currentUid);
+      (st.data||[]).forEach(function(s){ stateMap[s.read_id]=s; });
+    }catch(e){}
+    rows.forEach(function(r){ var s=stateMap[r.id]||{}; r._saved=!!s.bookmarked; r._read=!!(s.completed_at||s.last_opened_at); });
+    libRows = rows;
+    renderChips(); renderCards('all');
+  }
+ 
+  function renderChips(){
+    var cats = [];
+    libRows.forEach(function(r){ if(cats.indexOf(r.category)<0) cats.push(r.category); });
+    var chips = [['all','All'],['saved','\u2605 Saved']].concat(cats.map(function(c){return [c,c];}));
+    $('sr-chips').innerHTML = chips.map(function(c){
+      return '<button class="sr-chip'+(c[0]===curFilter?' on':'')+'" data-f="'+esc(c[0])+'">'+esc(c[1])+'</button>';
+    }).join('');
+  }
+ 
+  function renderCards(f){
+    curFilter = f;
+    var rows = libRows.filter(function(r){ return f==='all' ? true : f==='saved' ? r._saved : r.category===f; });
+    var grid = $('sr-grid'), empty = $('sr-lib-empty');
+    if (!rows.length){ grid.innerHTML=''; empty.style.display='block'; return; }
+    empty.style.display='none';
+    grid.innerHTML = rows.map(function(r){
+      var dt = new Date(r.publish_date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      var mins = Math.max(2, Math.ceil((r.est_read_secs||180)/60));
+      var state = r._read ? '<span class="lc-state">Read</span>' : '<span class="lc-state new">New</span>';
+      return '<div class="sr-card" data-id="'+esc(r.id)+'">'
+        +'<div class="lc-top"><span class="lc-eyebrow">'+esc(r.category)+'</span>'+(r._saved?BM_ON:BM_OFF)+'</div>'
+        +'<div class="lc-title">'+esc(r.title)+'</div>'
+        +(r.dek?'<div class="lc-dek">'+esc(r.dek)+'</div>':'')
+        +'<div class="lc-meta"><span>'+dt+'</span><span class="dot">&bull;</span><span>'+mins+' min</span>'
+        +'<span style="margin-left:auto">'+state+'</span></div></div>';
+    }).join('');
   }
  
   function wire(){
     root = $('sc-reader'); if(!root) return;
- 
-    // restore prefs
     sizeIdx = Math.min(Math.max(parseInt(gp(K.size,'2'),10)||2, 0), SIZES.length-1);
     applyTheme(gp(K.theme,'paper')); applyFace(gp(K.face,'lit')); applySize();
  
@@ -25386,23 +25482,22 @@ function injectSndChip() {
     $('sr-inc').addEventListener('click',function(){ sizeIdx=Math.min(sizeIdx+1,SIZES.length-1); applySize(); });
     $('sr-dec').addEventListener('click',function(){ sizeIdx=Math.max(sizeIdx-1,0); applySize(); });
  
-    $('sr-bm').addEventListener('click', toggleBm);
+    $('seg-today').addEventListener('click', function(){ setMode('today'); if(!currentRow) loadToday(); });
+    $('seg-lib').addEventListener('click', loadLibrary);
+ 
+    $('sr-chips').addEventListener('click', function(e){ var c=e.target.closest('.sr-chip'); if(!c) return;
+      document.querySelectorAll('#sr-chips .sr-chip').forEach(function(x){x.classList.remove('on');}); c.classList.add('on'); renderCards(c.dataset.f); });
+    $('sr-grid').addEventListener('click', function(e){ var card=e.target.closest('.sr-card'); if(!card) return;
+      var row = libRows.filter(function(r){ return r.id===card.dataset.id; })[0]; if(row) openRead(row); });
+ 
     $('sr-bm2').addEventListener('click', toggleBm);
     $('sr-reveal').addEventListener('click', function(){ $('sr-decode').hidden=false; this.style.display='none'; });
-    $('sr-ask').addEventListener('click', function(){
-      askSheldon("In today's read, what is the author's central assumption, and how would a GMAT weaken question attack it?");
-    });
+    $('sr-ask').addEventListener('click', function(){ askSheldon("In today's read, what is the author's central assumption, and how would a GMAT weaken question attack it?"); });
  
-    // reading progress (scroll inside the view container)
-    var scroller = root.closest('.view') || window;
-    var onScroll = function(){
-      var el = document.scrollingElement || document.documentElement;
-      var h = el.scrollHeight - el.clientHeight;
-      $('sr-prog-fill').style.width = (h>0 ? Math.min(100,(el.scrollTop/h)*100) : 0) + '%';
-    };
+    var onScroll = function(){ var el=document.scrollingElement||document.documentElement; var h=el.scrollHeight-el.clientHeight;
+      $('sr-prog-fill').style.width = (h>0 ? Math.min(100,(el.scrollTop/h)*100) : 0) + '%'; };
     window.addEventListener('scroll', onScroll, { passive:true });
  
-    // selection toolbar
     var bodyEl=$('a-body'), tbar=$('sr-tbar'), wrap=root.querySelector('.sr-wrap');
     function hideT(){ tbar.style.display='none'; }
     bodyEl.addEventListener('mouseup', function(){ setTimeout(function(){
@@ -25418,8 +25513,7 @@ function injectSndChip() {
       b.addEventListener('mousedown',function(e){ e.preventDefault(); });
       b.addEventListener('click',function(){
         var sel=window.getSelection(); if(!sel.rangeCount) return; var r=sel.getRangeAt(0), txt=sel.toString();
-        if(b.dataset.a==='hl'){ var m=document.createElement('mark'); try{ r.surroundContents(m); }catch(e){ m.appendChild(r.extractContents()); r.insertNode(m); }
-          /* persist to read_highlights with offsets if desired */ }
+        if(b.dataset.a==='hl'){ var m=document.createElement('mark'); try{ r.surroundContents(m); }catch(e){ m.appendChild(r.extractContents()); r.insertNode(m); } }
         else if(b.dataset.a==='ask'){ askSheldon('About this line from today\u2019s read: "'+txt+'"'); }
         hideT(); sel.removeAllRanges();
       });
@@ -25427,13 +25521,12 @@ function injectSndChip() {
     document.addEventListener('mousedown', function(e){ if(!tbar.contains(e.target)) hideT(); });
   }
  
-  // lazy-load when the Daily Reads view is opened
   var _origSwitch = window.switchView;
   window.switchView = function(name){
     if (typeof _origSwitch === 'function') _origSwitch.apply(this, arguments);
     if (name === 'reads'){
-      if (!rendered){ wire(); rendered = true; }
-      loadReads();
+      if (!wired){ wire(); wired = true; }
+      setMode('today'); loadToday();
     }
   };
   window.openReads = function(){ window.switchView('reads'); };
