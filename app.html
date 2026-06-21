@@ -25391,6 +25391,7 @@ function injectSndChip() {
   function wrapRange(range){ var m=document.createElement('mark'); try{ range.surroundContents(m); }catch(e){ try{ m.appendChild(range.extractContents()); range.insertNode(m); }catch(e2){} } }
   function wrapByOffsets(start,end){ var r=rangeFromOffsets($('a-body'),start,end); if(r) wrapRange(r); }
   async function loadHighlights(row){
+    await resolveUid();
     if(!currentUid || typeof supa==='undefined') return;
     try{
       var res=await supa.from('read_highlights').select('start_offset,end_offset').eq('user_id',currentUid).eq('read_id',row.id).order('start_offset',{ascending:false});
@@ -25442,8 +25443,9 @@ function injectSndChip() {
   }
 
   async function resolveUid(){
-    if (currentUid) return currentUid;
-    try { var u = await supa.auth.getUser(); currentUid = u && u.data && u.data.user ? u.data.user.id : null; } catch(e){}
+    if (currentUid && typeof currentUid === 'string') return currentUid;
+    try{ var u = await supa.auth.getUser(); if (u && u.data && u.data.user){ currentUid = u.data.user.id; return currentUid; } }catch(e){}
+    try{ if (typeof window.getUid === 'function'){ var g = await window.getUid(); if (g){ currentUid = g; return currentUid; } } }catch(e){}
     return currentUid;
   }
 
