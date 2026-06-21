@@ -25560,7 +25560,11 @@ function injectSndChip() {
           var en=offsetOf(be, r.endContainer, r.endOffset);
           if(en<s){ var t=s; s=en; en=t; }
           wrapRange(r);
-          if(currentRow && currentUid){ try{ supa.from('read_highlights').insert({ user_id:currentUid, read_id:currentRow.id, start_offset:s, end_offset:en, quote:txt.slice(0,500), color:'amber' }); }catch(err){} }
+          resolveUid().then(function(){
+            if(!currentRow || !currentUid){ console.log('HL skip → row?', !!currentRow, '| uid:', currentUid); return; }
+            supa.from('read_highlights').insert({ user_id:currentUid, read_id:currentRow.id, start_offset:s, end_offset:en, quote:txt.slice(0,500), color:'amber' })
+              .then(function(res){ console.log('HL SAVE → status:', res.status, '| error:', res.error); });
+          });
         }
         else if(b.dataset.a==='ask'){ askSheldon('About this line from today\u2019s read: "'+txt+'"'); }
         hideT(); sel.removeAllRanges();
