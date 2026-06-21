@@ -10705,6 +10705,50 @@
             align-items: center;
             justify-content: center;
         }
+        #scn-topic-row {
+    position: relative; /* anchor for the dropdown */
+}
+
+.scn-topic-dd {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 54px; /* aligns under the chip, past the label */
+    background: #1e1b38;
+    border: 0.5px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 6px 0;
+    min-width: 160px;
+    z-index: 999;
+    list-style: none;
+    margin: 0;
+}
+
+.scn-topic-opt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #ccc;
+    border-radius: 0;
+}
+
+.scn-topic-opt:hover,
+.scn-topic-opt.scn-opt-active {
+    color: #a78bfa;
+}
+
+.scn-opt-check {
+    font-size: 14px;
+    color: #a78bfa;
+}
+
+.scn-chev {
+    font-size: 13px;
+    color: #888;
+    margin-left: 4px;
+}
     </style>
 
 </head>
@@ -19254,62 +19298,155 @@ function injectSndChip() {
     </script>
 
     <script>
-        /* SC: edit session date — extends the note editor, fully additive */
-        (function () {
-            function ready(fn) { if (document.body) fn(); else document.addEventListener('DOMContentLoaded', fn); }
-            ready(function () {
-                if (typeof window.openNoteEditor !== 'function') return;
-                var _open = window.openNoteEditor, curId = null;
+(function () {
+    function ready(fn) { if (document.body) fn(); else document.addEventListener('DOMContentLoaded', fn); }
+    ready(function () {
+        if (typeof window.openNoteEditor !== 'function') return;
+        var _open = window.openNoteEditor, curId = null;
 
-                function sessById(id) {
-                    var list = (typeof sessions !== 'undefined') ? sessions : [];
-                    for (var i = 0; i < list.length; i++) { if (String(list[i].id) === String(id)) return list[i]; }
-                    return null;
-                }
-                function ensureRow() {
-                    var card = document.querySelector('#sc-note-modal .scn-card'); if (!card) return;
-                    if (document.getElementById('scn-date-row')) return;
-                    var head = card.querySelector('.scn-head');
-                    var row = document.createElement('div'); row.id = 'scn-date-row';
-                    row.innerHTML = '<span class="scn-dr-label">Date</span>'
-                        + '<input type="hidden" id="scn-date-inp">'
-                        + '<div id="scn-date-chip"><i class="ti ti-calendar"></i><span id="scn-date-text">—</span><i class="ti ti-pencil scn-edit-ic"></i></div>';
-                    if (head && head.nextSibling) card.insertBefore(row, head.nextSibling); else card.appendChild(row);
-                    document.getElementById('scn-date-chip').addEventListener('click', function (e) {
-                        e.stopPropagation();
-                        if (typeof openPicker === 'function')
-                            openPicker({ inputId: 'scn-date-inp', textId: 'scn-date-text', displayId: 'scn-date-chip', onSelect: applyDate });
-                    });
-                }
-                function applyDate() {
-                    var inp = document.getElementById('scn-date-inp'); if (!inp || !curId) return;
-                    var ds = inp.value; if (!ds) return;
-                    if (ds > dateStr(today)) ds = dateStr(today); /* no future-dating, matches the rest of the app */
-                    var s = sessById(curId);
-                    if (s && ds === s.date) return;
-                    if (typeof setStatus === 'function') setStatus('saving');
-                    supa.from('sessions').update({ date: ds }).eq('id', curId)
-                        .then(function (res) {
-                            if (res.error) { if (typeof setStatus === 'function') setStatus('error'); if (typeof scNotify === 'function') scNotify("Couldn't move session — " + (res.error.message || 'try again'), 'error'); return; }
-                            if (typeof setDateDisplay === 'function') setDateDisplay('scn-date-inp', 'scn-date-text');
-                            if (s) s.date = ds;
-                            var sub = document.getElementById('scn-sub');
-                            if (sub && s) { var dl = (ds === dateStr(today)) ? 'Today' : parseLocal(ds).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' }); sub.textContent = s.topic + ' · ' + dl + ' · ' + fmtH(s.mins); }
-                            if (typeof loadSessions === 'function') loadSessions();
-                            if (typeof showToast === 'function') showToast('📅', 'Session moved', 'Date updated to ' + ((document.getElementById('scn-date-text') || {}).textContent || ds) + '.');
-                        })
-                        .catch(function (err) { if (typeof setStatus === 'function') setStatus('error'); if (typeof scNotify === 'function') scNotify("Couldn't move session — " + (err.message || 'try again'), 'error'); });
-                }
+        var TOPICS = ['Quant', 'RC', 'CR', 'DI', 'Mock test', 'Review'];
 
-                window.openNoteEditor = function (id) {
-                    _open.apply(this, arguments);
-                    curId = id; ensureRow();
-                    var s = sessById(id), inp = document.getElementById('scn-date-inp');
-                    if (inp && s) { inp.value = s.date; if (typeof setDateDisplay === 'function') setDateDisplay('scn-date-inp', 'scn-date-text'); }
-                };
+        function sessById(id) {
+            var list = (typeof sessions !== 'undefined') ? sessions : [];
+            for (var i = 0; i < list.length; i++) { if (String(list[i].id) === String(id)) return list[i]; }
+            return null;
+        }
+
+        function ensureRows() {
+            var card = document.querySelector('#sc-note-modal .scn-card'); if (!card) return;
+            var head = card.querySelector('.scn-head');
+
+            /* ── TOPIC ROW ── */
+            if (!document.getElementById('scn-topic-row')) {
+                var topicRow = document.createElement('div'); topicRow.id = 'scn-topic-row';
+                topicRow.innerHTML = '<span class="scn-dr-label">Topic</span>'
+                    + '<div id="scn-topic-chip" class="scn-chip">'
+                    +   '<span id="scn-topic-text">—</span>'
+                    +   '<i class="ti ti-chevron-up scn-chev" id="scn-topic-chev"></i>'
+                    + '</div>'
+                    + '<ul id="scn-topic-dd" class="scn-topic-dd" style="display:none"></ul>';
+                if (head && head.nextSibling) card.insertBefore(topicRow, head.nextSibling);
+                else card.appendChild(topicRow);
+
+                /* build dropdown items */
+                var dd = document.getElementById('scn-topic-dd');
+                TOPICS.forEach(function (t) {
+                    var li = document.createElement('li');
+                    li.className = 'scn-topic-opt';
+                    li.dataset.val = t;
+                    li.innerHTML = '<span class="scn-opt-label">' + t + '</span>'
+                        + '<i class="ti ti-check scn-opt-check" style="display:none"></i>';
+                    li.addEventListener('click', function () { applyTopic(t); });
+                    dd.appendChild(li);
+                });
+
+                document.getElementById('scn-topic-chip').addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    var dd = document.getElementById('scn-topic-dd');
+                    var open = dd.style.display !== 'none';
+                    dd.style.display = open ? 'none' : 'block';
+                    document.getElementById('scn-topic-chev').className = open
+                        ? 'ti ti-chevron-up scn-chev' : 'ti ti-chevron-down scn-chev';
+                });
+
+                document.addEventListener('click', function () {
+                    var dd = document.getElementById('scn-topic-dd');
+                    if (dd) {
+                        dd.style.display = 'none';
+                        var chev = document.getElementById('scn-topic-chev');
+                        if (chev) chev.className = 'ti ti-chevron-up scn-chev';
+                    }
+                });
+            }
+
+            /* ── DATE ROW ── */
+            if (!document.getElementById('scn-date-row')) {
+                var dateRow = document.createElement('div'); dateRow.id = 'scn-date-row';
+                dateRow.innerHTML = '<span class="scn-dr-label">Date</span>'
+                    + '<input type="hidden" id="scn-date-inp">'
+                    + '<div id="scn-date-chip" class="scn-chip"><i class="ti ti-calendar"></i><span id="scn-date-text">—</span><i class="ti ti-pencil scn-edit-ic"></i></div>';
+                var topicRowEl = document.getElementById('scn-topic-row');
+                if (topicRowEl && topicRowEl.nextSibling) card.insertBefore(dateRow, topicRowEl.nextSibling);
+                else card.appendChild(dateRow);
+
+                document.getElementById('scn-date-chip').addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    if (typeof openPicker === 'function')
+                        openPicker({ inputId: 'scn-date-inp', textId: 'scn-date-text', displayId: 'scn-date-chip', onSelect: applyDate });
+                });
+            }
+        }
+
+        function setTopicActive(val) {
+            var textEl = document.getElementById('scn-topic-text');
+            if (textEl) { textEl.textContent = val || '—'; textEl.style.color = val ? 'var(--accent, #a78bfa)' : ''; }
+            document.querySelectorAll('.scn-topic-opt').forEach(function (li) {
+                var isActive = li.dataset.val === val;
+                li.classList.toggle('scn-opt-active', isActive);
+                var chk = li.querySelector('.scn-opt-check');
+                if (chk) chk.style.display = isActive ? 'inline' : 'none';
             });
-        })();
-    </script>
+        }
+
+        function closeTopicDd() {
+            var dd = document.getElementById('scn-topic-dd');
+            if (dd) dd.style.display = 'none';
+            var chev = document.getElementById('scn-topic-chev');
+            if (chev) chev.className = 'ti ti-chevron-up scn-chev';
+        }
+
+        function applyTopic(newTopic) {
+            closeTopicDd();
+            if (!curId) return;
+            var s = sessById(curId);
+            if (s && newTopic === s.topic) return;
+            setTopicActive(newTopic);
+            if (typeof setStatus === 'function') setStatus('saving');
+            supa.from('sessions').update({ topic: newTopic }).eq('id', curId)
+                .then(function (res) {
+                    if (res.error) { if (typeof setStatus === 'function') setStatus('error'); if (typeof scNotify === 'function') scNotify("Couldn't update topic — " + (res.error.message || 'try again'), 'error'); return; }
+                    if (s) s.topic = newTopic;
+                    var head = document.getElementById('scn-head');
+                    if (head) head.textContent = newTopic;
+                    var sub = document.getElementById('scn-sub');
+                    if (sub && s) { var dl = (s.date === dateStr(today)) ? 'Today' : parseLocal(s.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' }); sub.textContent = newTopic + ' · ' + dl + ' · ' + fmtH(s.mins); }
+                    if (typeof loadSessions === 'function') loadSessions();
+                    if (typeof showToast === 'function') showToast('✏️', 'Topic updated', 'Session renamed to "' + newTopic + '".');
+                })
+                .catch(function (err) { if (typeof setStatus === 'function') setStatus('error'); if (typeof scNotify === 'function') scNotify("Couldn't update topic — " + (err.message || 'try again'), 'error'); });
+        }
+
+        function applyDate() {
+            var inp = document.getElementById('scn-date-inp'); if (!inp || !curId) return;
+            var ds = inp.value; if (!ds) return;
+            if (ds > dateStr(today)) ds = dateStr(today);
+            var s = sessById(curId);
+            if (s && ds === s.date) return;
+            if (typeof setStatus === 'function') setStatus('saving');
+            supa.from('sessions').update({ date: ds }).eq('id', curId)
+                .then(function (res) {
+                    if (res.error) { if (typeof setStatus === 'function') setStatus('error'); if (typeof scNotify === 'function') scNotify("Couldn't move session — " + (res.error.message || 'try again'), 'error'); return; }
+                    if (typeof setDateDisplay === 'function') setDateDisplay('scn-date-inp', 'scn-date-text');
+                    if (s) s.date = ds;
+                    var sub = document.getElementById('scn-sub');
+                    if (sub && s) { var dl = (ds === dateStr(today)) ? 'Today' : parseLocal(ds).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' }); sub.textContent = s.topic + ' · ' + dl + ' · ' + fmtH(s.mins); }
+                    if (typeof loadSessions === 'function') loadSessions();
+                    if (typeof showToast === 'function') showToast('📅', 'Session moved', 'Date updated to ' + ((document.getElementById('scn-date-text') || {}).textContent || ds) + '.');
+                })
+                .catch(function (err) { if (typeof setStatus === 'function') setStatus('error'); if (typeof scNotify === 'function') scNotify("Couldn't move session — " + (err.message || 'try again'), 'error'); });
+        }
+
+        window.openNoteEditor = function (id) {
+            _open.apply(this, arguments);
+            curId = id; ensureRows();
+            var s = sessById(id);
+            setTopicActive(s ? s.topic : null);
+            var dateInp = document.getElementById('scn-date-inp');
+            if (dateInp && s) { dateInp.value = s.date; if (typeof setDateDisplay === 'function') setDateDisplay('scn-date-inp', 'scn-date-text'); }
+        };
+    });
+})();
+</script>
 
     <style id="sc-arc-final">
         #sheldonCore .sh-spark {
