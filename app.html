@@ -25358,12 +25358,16 @@ function injectSndChip() {
   function paintBm(on){ var b2=$('sr-bm2');
     if(b2){ b2.classList.toggle('on',on); b2.childNodes[b2.childNodes.length-1].nodeValue = on?' Saved':' Save for revisit'; } }
   function toggleBm(){
-    if(!currentRow) return;
+    if(!currentRow){ console.log('BM: no currentRow'); return; }
     var s=bmSet(), on=!s.has(currentRow.id);
     on ? s.add(currentRow.id) : s.delete(currentRow.id);
     sp(K.bm, JSON.stringify(Array.from(s))); paintBm(on);
     currentRow._saved = on;
-    try{ supa.from('read_state').upsert({ user_id: currentUid, read_id: currentRow.id, bookmarked: on, last_opened_at: new Date().toISOString() }, { onConflict:'user_id,read_id' }); }catch(e){}
+    console.log('BM writing as uid =', currentUid, '| read =', currentRow.id, '| on =', on);
+    supa.from('read_state').upsert(
+      { user_id: currentUid, read_id: currentRow.id, bookmarked: on, last_opened_at: new Date().toISOString() },
+      { onConflict:'user_id,read_id' }
+    ).then(function(r){ console.log('BM RESULT status', r.status, '| error', r.error); });
   }
 
   function askSheldon(q){ window._activeRead = currentRow; if (typeof window.openSheldon === 'function') window.openSheldon(q); }
