@@ -25358,16 +25358,12 @@ function injectSndChip() {
   function paintBm(on){ var b2=$('sr-bm2');
     if(b2){ b2.classList.toggle('on',on); b2.childNodes[b2.childNodes.length-1].nodeValue = on?' Saved':' Save for revisit'; } }
   function toggleBm(){
-    if(!currentRow){ console.log('BM: no currentRow'); return; }
+    if(!currentRow) return;
     var s=bmSet(), on=!s.has(currentRow.id);
     on ? s.add(currentRow.id) : s.delete(currentRow.id);
     sp(K.bm, JSON.stringify(Array.from(s))); paintBm(on);
     currentRow._saved = on;
-    console.log('BM writing as uid =', currentUid, '| read =', currentRow.id, '| on =', on);
-    supa.from('read_state').upsert(
-      { user_id: currentUid, read_id: currentRow.id, bookmarked: on, last_opened_at: new Date().toISOString() },
-      { onConflict:'user_id,read_id' }
-    ).then(function(r){ console.log('BM RESULT status', r.status, '| error', r.error); });
+    try{ supa.from('read_state').upsert({ user_id: currentUid, read_id: currentRow.id, bookmarked: on, last_opened_at: new Date().toISOString() }, { onConflict:'user_id,read_id' }); }catch(e){}
   }
 
   function askSheldon(q){ window._activeRead = currentRow; if (typeof window.openSheldon === 'function') window.openSheldon(q); }
@@ -25382,7 +25378,15 @@ function injectSndChip() {
 
   // ---- highlight offset helpers (text-node based; survive re-render) ----
   function textNodes(el){ var w=document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), n, a=[]; while(n=w.nextNode()) a.push(n); return a; }
-  function offsetOf(el, node, off){ var ns=textNodes(el), acc=0; for(var i=0;i<ns.length;i++){ if(ns[i]===node) return acc+off; acc+=ns[i].length; } return acc; }
+  function offsetOf(el, node, off){
+    if (node && node.nodeType===1){
+      if (off>=node.childNodes.length){ node=node.lastChild; off=(node&&node.nodeType===3)?node.length:0; }
+      else { node=node.childNodes[off]; off=0; }
+      while (node && node.nodeType===1){ node=node.firstChild; off=0; }
+    }
+    if (!node) return 0;
+    var ns=textNodes(el), acc=0; for(var i=0;i<ns.length;i++){ if(ns[i]===node) return acc+off; acc+=ns[i].length; } return acc;
+  }
   function rangeFromOffsets(el, start, end){
     var ns=textNodes(el), acc=0, range=document.createRange(), sset=false;
     for(var i=0;i<ns.length;i++){ var len=ns[i].length;
