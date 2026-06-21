@@ -10705,17 +10705,53 @@
             align-items: center;
             justify-content: center;
         }
-        #scn-topic-row {
-    position: relative; /* anchor for the dropdown */
+       /* ── topic row ── */
+#scn-topic-row {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 12px;
 }
 
+.scn-dr-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: #555570;
+    text-transform: uppercase;
+}
+
+/* trigger: just "CR ˅" as styled text, no box */
+#scn-topic-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    width: fit-content;
+}
+
+#scn-topic-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #a78bfa;
+}
+
+#scn-topic-chev {
+    font-size: 13px;
+    color: #a78bfa;
+    transition: transform .15s;
+}
+#scn-topic-chev.flipped { transform: rotate(180deg); }
+
+/* ── dropdown ── */
 .scn-topic-dd {
     position: absolute;
     top: calc(100% + 4px);
-    left: 54px; /* aligns under the chip, past the label */
+    left: 0;
     background: #1e1b38;
-    border: 0.5px solid rgba(255,255,255,0.12);
-    border-radius: 10px;
+    border: 0.5px solid rgba(120,100,200,0.25);
+    border-radius: 12px;
     padding: 6px 0;
     min-width: 160px;
     z-index: 999;
@@ -10727,14 +10763,16 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 14px;
+    padding: 10px 16px;
     cursor: pointer;
-    font-size: 13px;
-    color: #ccc;
-    border-radius: 0;
+    font-size: 14px;
+    color: #cccae0;
 }
 
-.scn-topic-opt:hover,
+.scn-topic-opt:hover {
+    background: rgba(167,139,250,0.08);
+}
+
 .scn-topic-opt.scn-opt-active {
     color: #a78bfa;
 }
@@ -10742,12 +10780,6 @@
 .scn-opt-check {
     font-size: 14px;
     color: #a78bfa;
-}
-
-.scn-chev {
-    font-size: 13px;
-    color: #888;
-    margin-left: 4px;
 }
     </style>
 
@@ -19340,14 +19372,16 @@ function injectSndChip() {
                     dd.appendChild(li);
                 });
 
-                document.getElementById('scn-topic-chip').addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    var dd = document.getElementById('scn-topic-dd');
-                    var open = dd.style.display !== 'none';
-                    dd.style.display = open ? 'none' : 'block';
-                    document.getElementById('scn-topic-chev').className = open
-                        ? 'ti ti-chevron-up scn-chev' : 'ti ti-chevron-down scn-chev';
-                });
+                document.getElementById('scn-topic-chip').addEventListener('click', function(e) {
+    e.stopPropagation();
+    var dd = document.getElementById('scn-topic-dd');
+    var chev = document.getElementById('scn-topic-chev');
+    var chip = document.getElementById('scn-topic-chip');
+    var isOpen = dd.style.display !== 'none';
+    dd.style.display = isOpen ? 'none' : 'block';
+    chip.classList.toggle('open', !isOpen);
+    chev.className = 'ti ti-chevron-down scn-chev' + (isOpen ? '' : ' flipped');
+});
 
                 document.addEventListener('click', function () {
                     var dd = document.getElementById('scn-topic-dd');
