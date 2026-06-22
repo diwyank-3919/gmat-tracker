@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aditya's CR Error Log — GMAT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --surface2: #f2f0ec;
+    --border: #e4e1da;
+    --border-strong: #c8c4bb;
+    --text: #1a1917;
+    --text-2: #6b6760;
+    --text-3: #9e9b96;
+    --accent: #2a5c8a;
+    --accent-light: #eaf2fb;
+    --accent-mid: #6eaadf;
+    --red: #c0392b;
+    --red-light: #fdf0ee;
+    --red-mid: #e08070;
+    --green: #1a6b45;
+    --green-light: #eef7f2;
+    --green-mid: #5aab82;
+    --amber: #8a5e00;
+    --amber-light: #fdf5e6;
+    --amber-mid: #d4a020;
+    --purple: #5b3e8a;
+    --purple-light: #f3effe;
+    --teal: #1a6b6b;
+    --teal-light: #eaf6f6;
+    --coral: #8a3a2a;
+    --coral-light: #fef0ee;
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-serif: 'Lora', Georgia, serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    height: 56px;
+  }
+
+  .header-logo {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    font-style: italic;
+    color: var(--accent);
+    white-space: nowrap;
+    letter-spacing: -0.3px;
+  }
+
+  .header-divider { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
+
+  .header-stats {
+    display: flex;
+    gap: 16px;
+    flex: 1;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .header-stats::-webkit-scrollbar { display: none; }
+
+  .stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .stat-pill .val { font-weight: 600; }
+  .stat-pill.red .val { color: var(--red); }
+  .stat-pill.green .val { color: var(--green); }
+  .stat-pill.amber .val { color: var(--amber); }
+
+  /* SIDEBAR + MAIN */
+  .layout {
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px 16px;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 72px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .sidebar-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .sidebar-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-3);
+    padding: 10px 14px 6px;
+  }
+
+  .filter-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-2);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    transition: background 0.1s;
+    gap: 8px;
+  }
+  .filter-btn:hover { background: var(--surface2); }
+  .filter-btn.active { background: var(--accent-light); color: var(--accent); font-weight: 500; }
+  .filter-btn .badge {
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-3);
+    font-weight: 400;
+    margin-left: auto;
+  }
+  .filter-btn.active .badge { color: var(--accent-mid); }
+
+  .type-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* TRAP CLOUD */
+  .trap-cloud {
+    padding: 10px 12px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .trap-tag {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+  .trap-tag:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+  .trap-tag.active { border-color: currentColor; font-weight: 500; }
+
+  /* MAIN CONTENT */
+  .main { flex: 1; min-width: 0; }
+
+  /* SEARCH + SORT BAR */
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    align-items: center;
+  }
+
+  .search-wrap {
+    flex: 1;
+    position: relative;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-3);
+    pointer-events: none;
+  }
+  .search-input {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px 0 38px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: var(--accent-mid); }
+  .search-input::placeholder { color: var(--text-3); }
+
+  .sort-select {
+    height: 38px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    padding-right: 28px;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%239e9b96' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+
+  .results-count {
+    font-size: 12px;
+    color: var(--text-3);
+    white-space: nowrap;
+  }
+
+  /* CARDS GRID */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 12px;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--card-accent, transparent);
+    transition: width 0.2s;
+  }
+  .card:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .card:hover::before { width: 4px; }
+  .card.wrong { --card-accent: #e08070; }
+  .card.correct { --card-accent: #5aab82; }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .card-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-3);
+    margin-top: 2px;
+    min-width: 22px;
+  }
+
+  .card-meta { flex: 1; min-width: 0; }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-badges {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  .badge-type {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .badge-diff {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+
+  .diff-H { background: #fdf0ee; color: #c0392b; }
+  .diff-M { background: #fdf5e6; color: #8a5e00; }
+  .diff-E { background: #eef7f2; color: #1a6b45; }
+
+  .card-answer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: var(--text-2);
+  }
+
+  .ans-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .ans-chip.correct { background: var(--green-light); color: var(--green); }
+  .ans-chip.wrong { background: var(--red-light); color: var(--red); }
+  .ans-chip.got-right { background: var(--accent-light); color: var(--accent); }
+
+  .time-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-3);
+    margin-left: auto;
+  }
+
+  /* TRAP HIGHLIGHT */
+  .trap-banner {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--amber-light);
+    border: 1px solid #f0d080;
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    font-size: 12px;
+    color: var(--amber);
+    font-weight: 500;
+    margin-bottom: 10px;
+    animation: trapPulse 3s ease-in-out infinite;
+  }
+  .trap-banner svg { flex-shrink: 0; }
+
+  @keyframes trapPulse {
+    0%, 100% { border-color: #f0d080; }
+    50% { border-color: #d4a020; }
+  }
+
+  .card-corrective {
+    font-size: 12px;
+    color: var(--text-2);
+    border-left: 2px solid var(--accent-mid);
+    padding-left: 10px;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* EXPANDED MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 25, 23, 0.5);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    backdrop-filter: blur(2px);
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--surface);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    transform: translateY(12px) scale(0.98);
+    transition: transform 0.2s;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+  .modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 1;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: var(--surface2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-2);
+    transition: background 0.1s;
+  }
+  .modal-close:hover { background: var(--border); }
+
+  .modal-title {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    line-height: 1.3;
+    margin-bottom: 8px;
+    padding-right: 32px;
+  }
+
+  .modal-body { padding: 20px 24px 24px; }
+
+  .modal-section {
+    margin-bottom: 20px;
+  }
+
+  .modal-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .modal-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .insights-list {
+    list-style: none;
+    counter-reset: insight;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .insights-list li {
+    counter-increment: insight;
+    display: flex;
+    gap: 10px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .insights-list li::before {
+    content: counter(insight);
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    background: var(--accent-light);
+    color: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 2px;
+    font-family: var(--font-mono);
+  }
+
+  .corrective-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .corrective-list li {
+    display: flex;
+    gap: 8px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text);
+    padding: 8px 12px;
+    background: var(--accent-light);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--accent-mid);
+  }
+
+  .modal-trap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--amber-light);
+    border: 1.5px solid #e0c060;
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--amber);
+    margin-bottom: 20px;
+  }
+  .modal-trap .trap-emoji { font-size: 20px; }
+
+  .skill-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .skill-item {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .skill-label { font-size: 10px; color: var(--text-3); margin-bottom: 4px; line-height: 1.3; }
+  .skill-val {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .skill-val.dw { background: var(--green-light); color: var(--green); }
+  .skill-val.tried { background: var(--amber-light); color: var(--amber); }
+  .skill-val.dnt { background: var(--red-light); color: var(--red); }
+  .skill-val.empty { background: var(--surface); color: var(--text-3); border: 1px dashed var(--border); }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--red) 0%, var(--amber-mid) 50%, var(--green-mid) 100%);
+    background-size: 200% 100%;
+    transition: width 0.5s ease;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-3);
+  }
+  .empty-state p { font-size: 14px; margin-top: 8px; }
+
+  /* QUIZ DIVIDER */
+  .quiz-divider {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+    margin-top: 4px;
+  }
+  .quiz-divider-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-3);
+    white-space: nowrap;
+    background: var(--accent-light);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .quiz-divider-line { flex: 1; height: 1px; background: var(--border); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* FLASH animation for trap */
+  @keyframes flashIn {
+    0% { transform: scale(0.95); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .card { animation: flashIn 0.15s ease; }
+
+  /* Keyboard hint */
+  .kbd-hint {
+    font-size: 11px;
+    color: var(--text-3);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .kbd {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+  }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .layout { padding: 12px; }
+    .cards-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">CR Error Log</div>
+  <div class="header-divider"></div>
+  <div class="header-stats" id="headerStats"></div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Result</div>
+      <button class="filter-btn active" data-filter="result" data-value="all" onclick="setFilter('result','all')">
+        All questions <span class="badge" id="cnt-all">—</span>
+      </button>
+      <button class="filter-btn" data-filter="result" data-value="wrong" onclick="setFilter('result','wrong')">
+        <span style="width:8px;height:8px;border-radius:50%;background:#e08070;flex-shrink:0;"></span>
+        Wrong <span class="badge" id="cnt-wrong">—</span>
+      </button>
+      <button class="filter-btn" data-filter="result" data-value="correct" onclick="setFilter('result','correct')">
+        <span style="width:8px;height:8px;border-radius:50%;background:#5aab82;flex-shrink:0;"></span>
+        Correct <span class="badge" id="cnt-correct">—</span>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Difficulty</div>
+      <button class="filter-btn" data-filter="diff" data-value="all" onclick="setFilter('diff','all')">All <span class="badge">—</span></button>
+      <button class="filter-btn" data-filter="diff" data-value="H" onclick="setFilter('diff','H')">
+        <span class="badge-diff diff-H">HARD</span> <span class="badge" id="cnt-H">—</span>
+      </button>
+      <button class="filter-btn" data-filter="diff" data-value="M" onclick="setFilter('diff','M')">
+        <span class="badge-diff diff-M">MEDIUM</span> <span class="badge" id="cnt-M">—</span>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Question Type</div>
+      <button class="filter-btn" data-filter="type" data-value="all" onclick="setFilter('type','all')">All types <span class="badge" id="cnt-type-all">—</span></button>
+      <div id="typeFilters"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Top Traps</div>
+      <div class="trap-cloud" id="trapCloud"></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="controls">
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="search-input" type="text" id="searchInput" placeholder="Search questions, traps, notes…" oninput="applyFilters()">
+      </div>
+      <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+        <option value="default">Sort: Default</option>
+        <option value="wrong-first">Wrong first</option>
+        <option value="hard-first">Hard first</option>
+        <option value="type">By type</option>
+        <option value="trap">By trap</option>
+      </select>
+      <div class="results-count" id="resultsCount"></div>
+    </div>
+
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:91%"></div></div>
+
+    <div class="cards-grid" id="cardsGrid"></div>
+    <div class="empty-state" id="emptyState" style="display:none">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <p>No questions match your filters.</p>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div id="modalBadges" style="display:flex;gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap;"></div>
+      <div class="modal-title" id="modalTitle"></div>
+      <button class="modal-close" onclick="closeModalDirect()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const DATA = [[1,"Strengthen","Marlandia Reptiles","M","E","E","0:00",1,"Not found -> does not exist","1. An anwer choice can be related to our\nprethought idea, but still worded in an \nincorrect way\n2. No fossil have been found does not mean that fossil does not exist","1. has not been found doesn't mean it does not exist","CR Medium Cementing  Prep OG questions","Not able to \napply framewrok quickly"],[2,"Weaken","Earthlike Worlds","M","C","A","0:00",0,"Not attempted -> Different  Results","Something astromers does not attempt to \nstudy  does not mean that it will lead to different result.\nHence it does not weaken the authors conculsion from sample data","1. something has'nt been tried is open for interpretation - it can be aligned to the authors finding and cannot, always question such choices","CR Medium Cementing  Prep OG questions","Answer Choice Analysis"],[3,"Inference","Ground Water Scarcity","M","B","C","13:00",0,"Existing System Fails","1. Passage has given that only way\nto meet water demand is rainwater harvesting\n2. I should have thought on those lines only\n3. I couldn't think that maybe rainwater \nharvesting is currently not very efficient and can be improved then the people shouldn't have to reduce their water consumption severly\n4. I was confuse between B and C, and rejected B as it starts with Unless it figures out a way.., Unless word put me off,It seemed to me as a must be true, what if other options are available but in the passage it was clearly mentioned that rainwater harvesting is the only other option available.","1. Words like only/all/most can be a great clue to select/reject an answer choice, never ever ignore such words, they turn the meaning upside down, on the brighter side they are helpful in narrowing the scope of the argument and hence rejecting/selecting an option choice becomes easy\n2. If a process already exist or used by people, you can always question it if it is getting used in an efficient w","Medium Cementing  Quiz 1",""],[4,"Assumption","Tranquilizer Spray  Vs Injection","M","B","B","33:00",1,"Correlation Vs  Cause and Effect","1. I was unable to come up with an assumption scenario\n2. Two factors were there delivery time and time to tranquilize.\n3. Author concluded since time to tranquilize is less for injection, injection is more effective than sprays\n4. I couldn't think that to arrive at such a conclusion, there must be some relationship exiist between time to tranquilize and effectiveness\n5. And if it does not exist the concluion will break and hence that connection must be our assumption","1. When an author relates two qualities always question the basis of such conclusion","Medium Cementing  Quiz 1",""],[5,"Bold Face","Traditional Lecture  Based Teaching Methods","M","A","E","14:00",0,"Reference Change","1. Correct option choice A looked okay to me at first glance but when I comapared with E, that choice seemed attaractive but couldn't find the trap\n2. Rejected A just because it used a word older to refer traditional methods\n3. And chose E as I found no issues there\n4. But the rationale provided by consultant was wrong, I didn't cross check, It was the university that provided the rationale not the consultant\n5. The second part of the bold face was also wrong as I couldn't catch the issue with the first boldface , in 2nd boldface it mentioned that rationale which was of the univeristy and not ","1. Don't fall for the attractive option choices trap, reject/select options on solid grounds\n2. Option choices may not use the exact same words given in the passage, even different words can tell the same meaning, never reject on the basis of different vocab\n3. Read carefully the option choices and always verify each word from the passage, sometimes even a small refernce change can make you fall i","Medium Cementing  Quiz 1",""],[6,"Other","CyberSecurity Breaches","M","C","C","10:00",1,"Direct vs Indirect  Explaination","1. This question has a very subtle difference in the correct and incorrect choice\n2. Companies with updated tech infra reduced their investment in employee security training\nprograms, this is giving indirect explanation by suggesting reduced training makes employees more vulnerable to social engineering \n3. I rejected this option because of the word employee security, the passage was about cyber security, I am not sure if that logic is correct\n4. On the other hand, Companies maintaing outdated tech invest heavily in the employee cybersecuirty awareness and training programs directly explains h","1. keep in mind the concept of direct and indirect explaination offered by the choices while analyzing them","Medium Cementing  Quiz 1",""],[7,"Evaluate","VRK and VRX","M","A","E","19:00",0,"Existing System Fails","1. This question was similar to AWS data analytics question, in which a company who uses data analytics service from AWS starts his own data analytics service, and the answer was what if AWS stop providing services to this company because it sees it as its competitor\n2. Same logic here VRK starts his own brand VRX, but he also endorses other brands and overall revenue will increase only if these companies do not hire some competitor actor to endorse their brand , in that case we can not say for sure that revenue will increase","1. In questions like where additional revenue/sales can be generated, always prethink scenarios in which current source of revenue may get impacted","Medium Cementing  Quiz 1",""],[8,"Other","BellaVista fell from 1 to 12 in ranking","M","D","B","25:00",0,"Entities  Missing","1. Great trap, I chose the incorrect option which mentioned that BellaVista reduced its operating capacity by 15% due to increasing ingredient prices but this situation can be a general trend for the industry, hence couldn't explain why only BellaVista ranking fell from 1 to 12\n2. Correct answer choice gave a solid reason of outdoor seating spaces provided by BellaVista. So in pleasant weather its ranking was one, and in bad weather ranking fell.\n3. Note the correct option clearly compares between BellaVista and other restaurants saying they focused on indoor sittings\n4. Learning- When two ent","1. Never choose an answer which does not give complete picture of the various entities discussed in the passage","Medium Cementing  Quiz 1",""],[9,"Weaken","MixIt Smoothie Makers","M","C","C","37:00",1,"Prethinking","1. I was able to mark the correct answer with my line of prethinking\n2. But I was not able to come up with more than 1 prethinking scenario\n3. MixIt should no longer continue making spare parts, why? One of the possibilty can be MixIt can outsource the spare making parts at a cheaper price and hence generate costs savings","1. Think harder to come up with more than 1 prethinking scenario","Medium Cementing  Quiz 1",""],[10,"Inference","Fizz- 1l and 1/2l variant","M","E","E","16:00",1,"Table Data for inference","1. My weak area - Quant based CR questions\n2. I picked random data and was able to come up with the right answer\n3. But that approach took time and I was not very confident with my selection\n4. Didn't prethink or try to infer what the data is trying to tell\n5. If the answer choice doesn't match with our representative data then reject that choice, inference must be true at all cost\n6. Beware of the timeline of the data, there traps in choices, for ex- data is about last year and choice is comparing last year and this year","1. Always try to prethink in ineference questions as well\n2. In quant based questions try to come up table if the data seems like a set\n3. Try to fill in the table with easy numbers in the set, so you can visualize\nfor ex- 1l variant -100, 1/2l variant - 100, total 200\n4. Dont fall for the timeline trap","Medium Cementing  Quiz 1",""],[11,"Strengthen","Rent Stablization","M","E","E","20:00",1,"Strengthen  with Similarity","1. Rent - These type of questions seems hard to me\n2. Here the author mentions two groups tenants of apartments and owners of mobile homes(tenants of mobile home parks)\n3. The owner of mobile home parks says the rent stabilization law does not apply to owners of mobile homes\n4.The author says no RS laws are applicable for owners of mobile homes as well\n5. To strengthen this we need a statement that says that RS laws are are based on the consideration of similar factors that must be applicable to both tenants and owners of mobile homes","1. Keep in mind strengtheners like this- something which can show similarity","Medium Cementing  Quiz 1",""],[12,"Evaluate","Govt School Teachers 7th pay  commission","M","A","B","44:00",0,"Disagreement Identification","1. Few of the govt teachers has given up the job- I don't know for some reason in mind it sounded like There are a number of teachers who are switching from govt to private jobs\n2. But few means very few or none, so it was strengthenin the conclusion that the teachers are going to stay for 5 years to reap the benefits from 7th pay commission.\n3. The first conclusion was whether qualified candidates will be attracted to the govt jobs\n4. To evaluate this doubt the correct answer choice must address this","1. When two people are arguing, try to find the goal and disagreement \nand stick only to those answer choices that addresses that","Medium Cementing  Quiz 1",""],[13,"Weaken","Targania Exports","M","E","D","41:00",0,"Unrelated to Conclusion","1. This was a repeated question so I solved it using my previous logic instead of reading the question more carefully , writing the conclusion\n2. The conclusion was to not hurt local manufacturers profit margib, Targania should shelve the plan of increasing exports\n3. The answer choice contain both of these aspects exports and local manufactures\n4. I chose option which says local manufacturers can increase their profit from selling aggressively other products, but the conclusion is about exports\n5. So the correct weakener should address increasing exports will not result in decrease of the pro","1. Id the conlucion carefully\n2. The weakener must address the conclusion reasoning not anything unrelated","Medium Cementing  Quiz 1",""],[14,"Inference","STEM curriculum in Riverside school","M","B","A","11:00",0,"Out of scope","1. I chose an answer which was clearly not mentioned in the passage \n2. It talked about a survey which was not mentioned by either critics or district spokesperson\n3. While in hurry \"Most\" word in the correct answer choice made me question the answer choice\n4. The whole disagreement was whether the new curriculum is good for students or will the students will find the new curriculum beneficial","1. While analyzing choices, make sure its mentioned or related to the passage, don't fall for out of scope trap choices","Medium Cementing  Quiz 1",""],[15,"Strengthen","Digital Infrastructure and local companies","M","B","A","7:00",0,"Generalization","1. I marked the correct choice first but changed it to incorrect one\n2. What generated the doubt in my mind is that in the passage it was mentioned that connectivity and technological tools must reach majority of the population for digital economies to advance\n3. In the correct choice only connectivity was mentioned, I thoght it is a weak strengthener as only one aspect was mentioned\n4. The answer could be in lines with both whether the rural areas have the ability to contribute to growth if connectivity/technological tools are provided and secondly the local companies have some kind of advant","1. While analyzing between choices always cross check which choice better serve the concluion directly, a generalization choice is a trap, always question such types of choices","Medium Cementing  Quiz 1",""],[16,"Strengthen","Watching Sports- Temporary Escape","M","B","A","14:00",0,"Irrelevant Comparison","1. The correct and incorrect choice both introduces a comparision\n2. The skillset required to identify relevant comparision\n3. Conclusion was temporray escape can increase performance in work related activites\n4. Correct choice which strengthens the conclusion neurological energy increases when the brain alternates between different types of activities\n5. Incorrect choice- Work related activities consumes more neurological energy than other activities not related to work- Consumes more neurological energy does not mean while doing other activites will improve performance in work","1. While analyzing choices if a comparison is made always make sure it is a valid comparison","Medium Cementing  Quiz 1",""],[17,"Evaluate","Stars into Supernova","M","C","B","57:00",0,"Correlation Vs  Cause and Effect","1. I rejected the correct answer choice as I thought it was already mentioned in the passage\n2. But in thepassage it only mentions two activities happening\n3. And in the answer choices it was pointing to cause and effect, answer to which will increase or decrease our belief in the author's conclusion\n4. Always try to find if author is trying cause and effect to come up with the conclusion when two events are simply correlated","1. Look for unwarranted cause and effect when correlation is given in the passage","Medium Cementing  Quiz 1",""],[18,"Inference","Riverside School District New teaching method","M","A","D","55:00",0,"Scope of Data, Total, Avg and Number","1. In my mind aggregate meant average, noooo, aggregate means total\n2. Total aggregated score = test scores per student * number of students\n3. According to passage test scores per student doubled in 5 years\n4. Valid Ineference- If number of students remained same then according to the above formula, total aggregate scores would also have doubled in five years\n5. Incorrect answer choice was making assumptions about individual schools when only district wide data is mentioned in the passage","1. In quant CR questions having avgs and totals always come up with a formula and then check which entities are changing or constant then move to answer choices and validate\n2. Always try to find scope of data, if data is broader, wecannot make assumptions about individual values\n3. Hence, only inference can be drawn for entities which are part of the formula","Medium Cementing  Quiz 1",""],[19,"Other","MeloStream- daily active users","M","B","E","29:00",0,"Question Stem Trap","1. MeloStreaming -> New Feature to Share Playlist -> Daily Active increases increase\n2. I didn't read the question carefully-it said despite a surge in playlist creation MeloStream's daily active users did not increase\n3. So the answer choice must address both of the aspects - 1. Increase in playlist creation 2. But no increase in daily active users\n4. Incorrect Choice -It talked about niche users similar features for genres that MeloStream does not cover- This choice explains why active user did not increase but it does not explain why there was surge in playlist in the first place\n5. Correct","1. Carefully read question also, sometimes the conclusion part is presented in the question stem","Medium Cementing  Quiz 1",""],[20,"Inference","Health Conditions in US Peopl who exercise daily  vs who don","M","E","C","52:00",0,"Correlation Vs  Cause and Effect","1. I forgot that Inference can be a restatement of the information given in the passage\n2. People who exercise consume lesser carbs than people who don't exercise\n3. Valid Inference- People who don't exercise consume more carbs than people who exercise\n4. Incorrect Option - Consuming lesser carbs and Execising daily can help in maintaining optimal weight\n5. Can- felt same , but this option introduces causality, but only correlations are mentioned in the passage , hence I should have rejected it right away\n6. Correct Answer was simply restatement which I rejected as it feels like already given ","1. Any restatement of a info mentioned in the passage can be an inference, never reject such answer choices","Medium Cementing  Quiz 1",""],[21,"Other","Speed Limits in Bravia","M","B","A","43:00",0,"Unclear Paradox Resolution","1. The passage was about after introducing speed limit in Bravia in 2005, no of fatalities significantly decreased but proportion of high speed drivers didn't change\n2. Prethinking- i.may there was some other factor that resulted in significant reduction in fatalities\n      ii. Or total number of drivers significantly reduced\n3. I rejected the correct answer which was aligned with 1st prethinking just because it mentioned post 2004.\n4. Post 2004 is noting but from 2005\n5. Incorrect choice - It says proportion of car being driven post 2005 is not same as prior to 2005\n6. Not Same means it could","1. Chose only those answers choices in a paradox question that clearly explains the paradox","Medium Cementing  Quiz 1",""],[22,"Evaluate","Virulent Microbes - WHO","M","D","E","27:00",0,"Not Related to conclusion","1. The passage only talked about reduction in \nmicrobial orgranism and hence diseases caused by it\n2. Incorrect- This choice was irrelavant to the argument as it talked about presence of other contaminant in water\n3. Conclusion- The number of fatalities can be reduced if water is treated with anti-microbial agaents before supplying to customers\n4. The argument assumes that treating water before supply will reduce contamination\n5. If contamination happens during or after the delivery , treating water beforehand wont help\n6. So if water is contaminated in at processing plants- it will help\n7. Bu","1. Timing of a proposed solution also plays a role, hence it should be a part of your pre-thinking\n2. Don't choose irrelevant choices which have new bearing on the conclusion","Medium Cementing  Quiz 1",""],[23,"Strengthen","Pressure Flaking- Early Men","M","A","C","36:00",0,"Chronological discrepancy","1. Whenever there is question related related to\ntime period, and author is making concluion, oh this tool was found in some region, and similar evidence found in some another region at an earlier date, so first party did not pioneer that tool\n2. Ask questions what if second party learn from first party in some way\n3. Incorrect Answer- I chose an incorrect answer that was talking about some new technique 'Stone Filing', this should have been rejected as it is out of scope","1. Possibility of learning from each other at different times","Medium Cementing  Quiz 1",""],[24,"Inference","Discounted Fare Program  Funding Issue","M","B","C","48:00",0,"Safe Choice  Conundrum","1. Govt Subsidies-> Restricted Scope->\nNo funding for discounted programs\n2. I rejected the answer choice because I\nthought its too extreme to conclude that If transit systems do not find ways of raising additional revenues for discounted programs they must either reduce these service or face financial loss\n3. Again chose a same choice starting with Some","1. The safe choice conundrum should be solved with solid thinking with logic","Medium Cementing  Quiz 1",""],[25,"Weaken","BurgerMan- Egg Vs Veg Sandwich","M","C","A","33:00",0,"Assumed Worldly Logic","1. When Non veg numbers are 2/3rd and veg are only 1/3rd, if veg order value is 10% more than non veg, It is not a significant number which will weaken the conlusion that introducing new non veg burger will not increase the revenues\n2. I rejected correct choice because it says non veg can eat veg sandwiches, seems far fetched\nBut it was a correct weakener, since non veg eaters can switch to veg burger but veg burger cannot , hence BurgerMan is catering to a bigger veg customer base , and introduction of new non veg burger will not increase the revenue\n3. Choosing new veg burger - 100% can buy\n","1. Take some numbers and check whether the increase is significant or not\n2. Don't reject choices as per your assumption, take it as true and analyze logically","Medium Cementing  Quiz 1",""],[26,"Bold Face","Dramatic Elevation  of academic standards","M","E","A","47:00",0,"Intermediate conclusion vs main conclsuion","1. ABC test wrongly applied","1. Do more practise on ABC test","Medium Cementing  Quiz 1",""],[27,"Other","Investment Firm Vs Financial Regulator","M","A","C","52:00",0,"Contradiction Identification","1. Everyone knows toys guns are fake, so there's \nno harm if I walk into a bank carrying gun . Let me do it\n2. Counter argument - If everyone knows toys guns are fake and serves no real purpose, why you need to carry a toy gun at all in a bank, just go normally.\n3. The same logic was used in diffult words in the passage\n4. Investment firm says the audience are able to identify that the person in the advertisement is not just an actor and not a real Financial Advisor,\nThen it still asks to ease restriction, allowing their own commercial.\n5. Finance regulator responded by the same logic as menti","1. Method of reasoning\n2. Pointing out contradictions\n3. Accepting a premise and showing it leads to a different conclusion\n4. Questioning Assumptions\n5. Providing Counter Examples","Medium Cementing  Quiz 1",""],[28,"Assumption","Britains Car Industry  and Jaguar","M","D","B","15:00",0,"Question Stem Trap","1. I didn't understand the type of question\n2. Best Explains the doubt - Assumption\n3. The author concludes that even though Jaguar \ncan solve the problem of manufaturing output and export the problem of new jobs being created will not be solved\n4. What best explains author doubt?\n5. If more automation , less number of jobs\n6. If current productivity increases, no\nneed to hire new people, less number of jobs\n7. Outsource cheap labor from outside the country, less number of jobs in Britain","1. Always try to understand the question stem, best supports- Assumption","Medium Cementing  Quiz 1",""],[29,"Inference","Sniper using vibrations of heartbeat","M","E","D","28:00",0,"Improved version of existing  trap","1. Sniper using common software, underlying\nprinciples- faceial features, biometric data\n2. New tool, underlying principle- vibrations of heartbeat\n3. Incorrect Choice- the new tool is improved version of old tool, NOOOOO, they are different, underlying principles are different so we cannont say that this is an improved version of the older one\n4. The conclusion was heatbeat is unique so sniper using this tool will be able to eliminate the possibility of mistaken identity\n5. If this info is true , then we can infer that the minute observations induced in clothing by a person's heartbeat cannot","1. This was purely a time pressure mistake, I know in one min I anwered this question \nand fell right into the trap\n2. But still learning - You cannot say new tool is an improved version of the old one if the underlying principles are different","Medium Cementing  Quiz 1",""],[30,"Inference","Business Major Popularity vs Psycho and CS  with increasing ","M","C","E","11:00",0,"Numbers/ Avg Trap","1. Business Major was the most popular, students \nfrom all age group\n2. Psych and CS major are at 2nd and 3rd place\nthey have slightler higher aged students\n3. Now the passage mentions that avg age is \ngoing to increase\n4. What we can say about the popularity\nof these majors in 2035\n5. We can say that Psych and CS popularity\nmight increase as they enroll higher aged \nstudents\n6. We can also say avg age of students enrolled\nin Business major will also increase \nsince they enroll from each age group \nequally, and avg age of all college\nstudents is going to increase\n7. I reject this answer choice","1. If you are 100% sure that the answer you chose is incorrect, then guess some other answer","Medium Cementing  Quiz 1",""],[31,"Other","WestView Academy-  Specialized Interactice Software","M","C","B","27:00",0,"Question Stem Trap","1. Question Statement - The information given,\nif accurate, supports which of the following\npositions\n2. So basically it was a conclusion identification\nquestion\n3. For these type of question all those choices\ncan be rejected which brings new info not \nmentioned in the passage\n4. Incorrect- I chose that choice whic brings new \ninfo- training required for new software which\nwas not at all mentioned in the passage\n5. Despite this limited application, all\nstudent would see improvement, I was not able \ncompletely understand this line\n6. This line meant though all students could be\nbenefitted from ","1. When conclusion is asked the correct choice should be in line with the info given in the \npassage\n2. Any choice which brings new data, or historical prediction will be eliminated as we cant\ncomment on such info","Medium Cementing  Quiz 1",""],[32,"Weaken","Searton- RDV Players and RDV Disks","M","A","B","30:00",0,"Existing System","1. Searton- sole manufacturer of RDV disks,\nRDV disks can run only on RDV players\n500 new kioks were open to sell RDV disks\n2. Conslusion- RDV playes sales did not \nincrease so RDV disks sales also will not\nincrease\n3. What if the significant number of people\nwho only own RDV players go access to RDV\ndisks through opening of new kiosks\n4. This means that even though RDV Players\nsales did not increase, the RDV disk sales will\nincrease and existing RDV Player owners \nwill buy them\n5. Learning- Whenever author predicts\nsomething about the future always think\nwhat can be changed in existing scenar","1. Look for existing scenarios which can be changed to weaken the conclusion","Medium Cementing  Quiz 1",""],[33,"Weaken","GM vs Toyota, Volt vs Prius","M","D","C","43:00",0,"C causes B","1. GM spend less on Marketing Volt that Toyota\nspend on Prius, so despite Volt winning the \nCar of the Year award, Totoyta sold Prius 4\ntimes as Volt\n2. So seems author is citing marketing the \nreason behind higher sales\n3. Causal argument- More marketing -> Higher\nSales\n4. To find a flaw we can say that what if other \nfactors than marketing are responsible for\nmore sales for Toyota Prius","1. A causes B , flaw-> C causes B","Medium Cementing  Quiz 1",""],[34,"Inference","Decline in Manufacturing leads ultimately to no longer devel","M","A","B","16:00",0,"Short Term Vs Long Term","1. Decline in Manufaturing leads to -> Process\nEngineering expertise can't be maintained \nwhich leads to-> Difficulty in conducting advance\nreasearch which leads to ->no longer develop\nnew products\n2. Great Question - This was a timing question\nOutsourcing manufacturing in the long term\n3. Short term we can cut manufacturing with \nno drawbacks\n4. Incorrect answer- To develop new products\na company must never cut down its\nmanufacturing\n5. Here the problem is never word, companies can cut down for the short term\n6. Correct Ans- I rejected this answer because it was talking about losing ability t","1. To innovate is to develop new products\n2. Timing also matters in questions like this where manufacturing, \nindustrialization or economy concepts are involved","Medium Cementing  Quiz 1",""],[35,"Evaluate","Sarah's assignment to TechFlow","M","C","E","55:00",0,"Cost-Benefit Amalysis","1. Cost- Benefit Analysis\n2. The directior said overall output of the company\nwill decline if we reassign Sarah to TechFlow\nassignment as the project will take 2X time\nthan app development project, given \nTechflow project will give an automation\nsuite which will imporve code quality and \nreduce product development lifecycle\n3. SO the director is basically questioning\nwhether reassignment of sarah and \nthe benefits of automation testing suite\nwill outweigh the production output lost\ndue to trading sarah, since she is our most\nproductive developer\n4. Incorrect Choice- Whether TechFlow\nor project","1. Whenever cost-benefit/output analysis comes always question whether the new\narrangement will outweigh the benefits from old arrangement","Medium Cementing  Quiz 1",""],[36,"Evaluate","Two year degree Vs Four year degree","M","B","E","26:00",0,"Negligence Too quick","1. I was in too much hurry while solving this ques\n2. I saw the averages and immediately presumed\nthe something related to numbers will help\nin evaluate the argument\n3. But I was wrong , the whole argument was\nabout whether two year degree is \neconomically better for students\nthan a four year degree given avg salaries\nof graduates from a two-year degree\nis 1000 dollars more than avg salaries\nof four yr degree and they two extra years\nto earn\n4. I should have asked one pertinent ques-\nwht if in the long term 4-year degree\ngraduates' total salaries is more than\ngraduates from 2-year degree?\n5. W","1. Don't hurry and presume before reading the complete argument and ans choices\n2. Never try to solve to fast, always give due diligence to the question, take time,\nanalyze and mark confidently","Medium Cementing  Quiz 1",""],[37,"Other","Schools- conforming to  dress code","M","E","B","43:00",0,"Attention To Details","1. This was a clear attention to detail error\n2. The argument concludes by saying students\ncan show their individuality and express themselves\nin schools , activities like_____________\n3. In school, this I missed while selecting ans\nchoices\n4. Incorrect choice - Various out of school volunteer work activities that showcase individual interests, \n5. I got attracted to the word individual  and chose this choice\n6. Correct choice- Mediums such as schoolwork\ninvolving creative writing, debates etc.","1. Keep keen eye about the places and time , suggested in the conclusion and reject choices \nwhich don't align with that","Medium Cementing  Quiz 1",""],[38,"Strengthen","Country X- Fish and Fish Oil Exports?","M","A","B","42:00",0,"Existing System","1. People are consuming more fish oil\n2. Huge amount of fish is required to produce\nfish oil\n. 3. Fish production cannot be increased\n4. So import either fish or fish oil\n5. Import question that can be asked is- Is\nthere a way to reduce fish consumption?\n6. If people consume less, then no need to \nimport\n7. So to strengthen that we need to import,\nwe need an answer choice which tells\nthat fish consumption is not going to decrease\nanytime sooner\n8. Correct Ans - I rejected this ans choice \nbecause it was talking about veganism and people are not opting for plant based diet\n9. But this option te","Dont get distracted by the solutions that address production capacity \nwhen the core issue about the raw material availability","Medium Cementing  Quiz 1",""],[39,"Bold Face","Local Healthcare System","M","D","E","15:00",0,"Missed Contradictory Word","1. I missed the very important word WHILE\n2.This word suggests that the author is going to suggest opposite of the claim mentioned after the while word\n3. And that changes the role of the bold face statements","1. Always look for contradictory words like \"While\" etc which changes the role of the boldface\nstatements","Medium Cementing  Quiz 1",""],[40,"Other","Colonial Quilting-  Wealthy Women","M","C","E","12:00",0,"STICK TO CONCLUSION","1. The author makes a logical jump from quilt \nmaking as hobby to most wealthy women must have engaged in colonial style of quilt making\n2. Logically complete sentence question started with because_________\n3. The answer choice must strengthen our belief on the conclusion that yes, most wealthy women could have involved in colonial style of quilt making\n4. I rejected the correct choice as it mentions that the wealthy women have more leisure time to engage in activities that were not a part of daily schedule\n5. This gives a reason to believe that most wealthy women in their leisure time could h","1. STICK TO THE CONCLUSION\n2. Reject all choices that does not serve the conclusion while strenghthening/Weakening","Medium Cementing  Quiz 1",""],[41,"Other","Riverside School District- AI tutoring system","M","C","A","32:00",0,"Good Completion Vs Bad Completion","1. Very important learning for logically complete\nquestions\n2. AI tutoring system benefits are unlikely to\ncompensate for the concers raised by the teachers union, concern 1. AI will resuce the meaningful human interaction 2. AI will diminish the personalized attention that student receive\n3. Incorrect choice- Improvements in feedback consistency typically decrease student engagement unless personalized attention is maintained. (Bad Completion)\n4. This answer choice brings a specific causality which is not present or implied in the passage\nHence these type of choices should be rejected\n5. Corr","1. In logically completes the argument question, reject those choices which brings unwarranted\ncausality not mentioned/implied by the passage","Medium Cementing  Quiz 1",""],[42,"Strengthen","Cleanville- Process for recyclable vs  non-recyclable waste","M","C","B","19:00",0,"STICK TO CONCLUSION","1. Same issue not sticking to the conclusion\n2. How the new method of submerging waste into oil will save lot of costs\n3. Correct - If extract oil before disposing non recyclable waste does not add up to significant extra cost then the conclusion will be strengthened\n4. Incorrect - This choice only talks about additional cost of existing existing methods, this doesn't strengthen that the new method will save up significant cost","1. STICK TO THE CONCLUSION\n2. If any choice talks about the existing system and the conlusion is about the new system that\nchoice should be eliminated","Medium Cementing  Quiz 1",""],[43,"Other","Wississipi- Solar Power","M","E","D","28:00",0,"Negligence Too quick","1. Great trap, Paradox question\n2. So govt is giving subsidy to use solar plates\n25% people took advantage of it, so it is expected that the overall demand of electricity would reduce, but on the contrary overall demand increased. Why this happened, resolve the paradox\n3. Incorrect Option - Many people wasted most of the energy they got from solar generators in unwanted uses they might have avoided if solar energy had not been available at the first place\n4. By reading this option it looks correct - many people wasted most of their electricity and hence overall the electricity demand increased","1. Poor Analysis of choices\n2. Unable to prethink more than 1 scenario","Medium Cementing  Quiz 1",""],[44,"Other","FlightStats- United Airlines","M","A","B","0:00",0,"Quant -Based CR(Averages)","1. Average on-time arrival of all the US Airlines declined from 80% to 70%\n2. Only United Airlines showed an improvement from 75% to 80%\n3. What can we say about other AirLines?\n4. Note - 80% overall us airlines last year is equal to united airlines 80% this year\n5. This means United Airlines only match up to the overall percent this year\n6. Other lines should have been more than 80% and since united airlines is at 75% , then only average can some to  value of 80%\n7. So last year average on arrival time of other lines(>80%) must be more than that of United Airlines this year(80%)\n8. Incorrect ","1. I will learn more on Quant based CR questions","Medium Cementing  Quiz 1",""],[45,"Strengthen","DuoChemicals- Chemical for roads","M","A","E","0:00",0,"Quant -Based","1. DuoChemicals ha developed a chemical that can increase the time between repairs of the highwys to 20 years\n2. Currently Governemnt need to repair the highways every 5 years\n3. The cost to apply chemical once 20 years is less than the cost of single repair made every 5 years\n4. The company claims the govt must use this chemical to minimize its overall costs involving highway repairs, We need to weaken this\n5. Lets create equations\nCa - Cost of applying chemical\nCr - Cost of repair after 20 years\nX - Cost of repair every 5 years\n4X - Total cost of repair for 20 years\nGiven , Ca < X\nConclusion","1. I will learn more on Quant based CR questions","Medium Cementing  Quiz 1",""],[46,"Inference","Shipping Clerk Truax Construction","H","E","D","11:00",0,"Word Missed","While Reading missed one important word\nThursday, 5 special order shipments sent\non Thursday","Concentrate on each word of the passage","Neuron OG 7  questions on Inference",""],[47,"Inference","Medieval Manuscripts Euripides","H","E","C","32:00",0,"Out of scope","1. The passage was talking about only medieval\nmanuscripts\n2. Incorrect Choice - No commentaries were written about Euripides'Electra in ancient times\n3. This we cant infer about the entire ancient times since passage only talks about the medieval times\n4. Correct Answer choice- Euripide's Electra does not appear by a commentary in any extant medieval manuscript","Always keep in mind the scope of the argument","Neuron OG 7  questions on Inference",""],[48,"Inference","Travel Expenses People who travel for leisure, Airplanes vs ","H","D","C","18:00",0,"Not Mentioned in the passage","1. Transportation expenses are larger proportion of dollars spent on trips by people who travle for leisure\n2. And people who travel through airplanes accounted for 1/2 of the total transportation costs\n3. But majority of the people chose other means of transport than airplanes\n4. Imp question that can be asked- What can we say about the avg amount spent on transportation by people who travelled by airplanes and who did not?\n5. Lets say $1000 for entire trip, larger proportion on transportation lets say $900, half of it will be airplane fare- $450\nFor people who dont travel by airplanes their ","Don't choose any answer for inference which is not mentioned in the passage","Neuron OG 7  questions on Inference",""],[49,"Other","Transmission of sealice in Broughton Archipelago","H","C","A","4:00",0,"Misunderstood the word's meaning","1. The biologist never discusses a condition that is necessary for sea-lice survival -- he/she only talks about a condition (low salinity) that is unfavorable to sea-life survival\n2. We can only infer that high salinity may be favorable to survial , not necessary\n3. Correct Ans- By mentioning the study data that the sea lice can survive in low salinity 25-30 parts million under cooler springs, The author is claiming that one of the premises of the marine biologists is not true","Favorable/Unfavorable does not translate to necessay/not necessary","Neuron OG 7  questions on Inference",""],[50,"Other","Banks to revitalize local  impoverished communities","H","E","C","7:00",0,"Prethinking Missed","1. I didn't prethink in this question\n2. Laws require every bank to invest in local\ncommunities. Goal is to revitalize impoverished communities.\n3. But there are many banks going online so intended goal will not be met\n4. What could be the assumptios the author is making? \n5. One could be, physical banks cease to exist and hence the goals cannot be met\n6. Another could be, what if online banks are also covered by the law.\n7. So these two can be the flaws that the author failed to consider\n8. Correct Answer- It fails to adequately address the possibility that an increase in the number of banks ","1. In flaw question to best answer the failed to consider …., come up with as my assumptions \nas possible while prethinking and then attack answer choices","Neuron OG 7  questions on Inference",""],[51,"Other","Films Submitted to the  Barbizon Film Festival","H","E","E","47:00",1,"SIMPSONS PARADOX","SIMPSONS PARADOX\nIt is a statistical phenomenon in which a trend or relationship that appears within several separate groups reverses or disappears when the groups are combined.\n\nWithin every category: domestic films and foreign films had the same acceptance rate.\nOverall: domestic films had a much higher acceptance rate.\n\nAt first, this seems impossible.\nHow can they be equal in every category, but different overall?\n\nThe trick is that the number of films submitted in each category was different","What a cool concept, keep in mind if some choice with data in each category vs overall data\n\n\n\"Acceptance rates were equal in every category\"\n\ndoes NOT imply the overall acceptance rates must also be equal.\n\nOverall rates depend on:\n\nhow many applicants/items are in each subgroup.\n\nThat's the entire paradox.","Neuron OG 7  questions on Inference",""],[52,"Other","MorganVille Downtown Shopping stores VS new SaveMart discoun","H","A","C","41:00",0,"Conclusion not  Addressed","1. Why the downtown shopping stores will not \nrebound this time when the SaveMart opened?\n2. Whats different in the past when they rebounded than now?\n3. The answer choice address the past and present situation to explain the conclusion.\n4. Correct Ans- The stores which will go out of business will be anchor stores on whose ability to  draw shoppers, many downtown stores were dependent\n5. Incorrect Ans - when the downtown shopping district has rebounded before, the business premises of a failed business were typically taken over by a business of same kind as had been there before\n\n6. This simp","1. Spot choices and reject them that does not address the conclusion properly","Neuron OG 7  questions on Inference",""],[53,"Inference","Forests in Thailand Evergreen Vs Deciduous","H","B","D","23:00",0,"Not Mentioned in the passage","1. Deciduous Forests- Annual fires\n2. Evergreen Forests - Heaviest Rainfall, most\neconomically important, rubber trees are abundant\n3. Incorrect Ans- Forest Fires that cause most damage to property occurs in deciduous forests\n4. No where it is mentioned about the damage to property, how could you choose this answer choice???\n5. Correct Ans- A thai forest is more apt for rubber trees, if it gets more rain than other forests\n6. Absolutely correct, Since Tropical Evergreen forests receives the heaviest rainfall, heaviest meaning more than other forests, and rubber trees are abundant there, so we ","Don't choose any answer for inference which is not mentioned in the passage","Neuron OG 7  questions on Inference",""],[54,"Inference","Advik- Stores owned by  Women Most, ALL, Every","H","A","D","56:00",0,"Table Data for inference","1. I need to solve more questions on Most, few \nthis question completely threw me off","Solve more question inference relatated to MOST,ALL, SOME,FEW","Neuron OG 7  questions on Inference",""],[55,"Inference","Careful Pricing, Voter approval of govt projects","H","C","E","40:00",0,"Not Mentioned in the passage","1. I rejected the correct answer just because of the word should, can should be inferable, Yes it can be \n2. Voter approval of government projects that benefit the public does not vary with small differences in estimates of their projected cost.\n3. Correct Ans- Anyone wishing to increase or decrease voter support for projects that benefit the public should not focus on small cost differences.\n4. Incorrect Ans- The purchase of consumer products such as televisions can be postponed more easily than can expenditures for projects that benefit the public.\u00ad\n5. The passage presents only a contrast be","Don't choose any answer for inference which is not mentioned in the passage","Neuron OG 7  questions on Inference",""],[56,"Inference","Lyme Disease Deer Ticks","H","B","D","46:00",0,"Not Mentioned in the passage","1. First mistake - In logically complete question\nI didn't identify the type of question and stick to the process of solving the question according to that type\n2. In this question the type was ineference and I chose an incorrect option that was not mentioned in the passage \n3. What was given in the passage, Lyme disease is caused by bacterium transmitted to people by deer ticks\n4. The deer ticks are not born infected with the bacterium but they get infected in one of their development stage while feed on infected host\n5. Three stages of development -> Larvae->Nymph-> Adult\n6. If infected in o","Don't choose any answer for inference which is not mentioned in the passage","Neuron OG 7  questions on Logically complete",""],[57,"Weaken","Suriland Farmers selling wheat","H","B","E","24:00",0,"Hypothetical VS Current Situation","1. Govt pays 1 dollar per bushel less than the world market price for wheat to farmers\n2. If farmer sells their wheat in the world market they will get 1 dollar more per bushel. Less any additional transportation and brokerage costs they would have to pay\n3. they would earn $1 more per bushel than they currently do — but they would also have to pay extra costs themselves, such as:transportation costs brokerage/trading fees\nSo their actual extra profit would be:\n$1\u2212(transportation + brokerage costs)\n4. Correct Ans- Sales of substantial portion of wheat crop in the world market would probably de","1. Try to find the nature of the concluion, if the conclusion if hypotheical, any option which talks \nabout the current/real situation can be eliminated","OG Practise Hard Cementing",""],[58,"Other","Identify Strategy used Question  Digit Electronics BillBoard","H","A","E","10:00",0,"Structure  Identification","1. Identify the structure of the argument used by\nthe author\n2. In this question he used a test and further claim to support its final conclsion\n3. I missed the structure, I should have pin pointed claims, facts and the conclusion and then should have attacked the question\n4. The correct answer choice may partially follow the structure and can still be the right answer","1. Identify Structure in Parallel Reasoning Question, then analyze choice against that \nrequired structure","OG Practise Hard Cementing",""],[59,"Weaken","Transportation Analyst Parking Facilities Public Transit Vs ","H","E","E","16:00",1,"Quant -Based CR(Averages)","1. Parking Facilities = 2 x Public Transit stations\n2. Author concludes that, \nPrivate Vehilce Usage = 2 x Public Transit Users\n3. What can we say about total public and private users?\n4. Total Public Transit Users = avg. no of user per public transit stations x number of public transit stations\n5. Total Private users = avg. no of user per parking space x number of parking space\n6. Lets say number of public transit stations are 100, then number of parking facilities will be 200\n7. Let say avg number of users per public transit stations are 500, and avg number of users per parking space are 50\n","Incorrectly assumes that quantity of facilities = quantity of users, without considering that\ndifferent facilities types can have different user rates","Hard Cementing Quiz  1",""],[60,"Bold Face","US and NewZealand DTC advertisements","H","A","D","20:00",0,"Missed Keyword in Boldface","1. Two opinion were presented\n2. The author presents his main conclusion by\nsaying the data recently published supports the latter one\n3. BF1(Fact)-  avg number of prescriptions drugs with dtc ads is 9 times the avg number of prescription drugs without dtc ads(this fact supports the main conclusion of the argument)\n4. BF2(Claim) - Only the most relaible companies pusue the dtc ads(against the main conclusion)\n5. Correct answer- The first is the evidence that supports the judgement given in the argument and the second forms the basis of an objection to that support\n6. Incorrect Answer - The fir","Missed the very crucial word challenged, make sure each part of the answer choice \ncorrectly categorize each part of bf statements\nIn this boldface I was not able to identify the main conclusion correctly, first identify\nmain conclusion, intermediate conclusion and premises before analyzing the answer choices","Hard Cementing Quiz  1",""],[61,"Strengthen","Two Month Workplace Study group Multiple projects vs Single ","H","D","E","57:00",0,"Supporting Evidence/ Study","1. Before the study majority of the employees\nsaid they prefer multiple projects simultaneously as they like the variety of the work\n2. But Greater job satisfaction came from the single project, it was the result of the study\n3. The author concluded that the beliefs of most of the people was mistaken that they prefer multiple projects than a single project\n4. Which evidence can increase our belief in the author's conclusion?\n5. Correct Ans- A separate study confirmed that most of the people found mulitasking less appealing than any kind of other projects\n6. This clearly supports the conclusion","1. To strengthen , a separate study which shows the same results can be a good candidate\nfor a strengthener, don't reject this type of studies as irrelevant","Hard Cementing Quiz  1",""],[62,"Weaken","Pharmaceutical Company Executive No FDA reg. required","H","A","B","57:00",0,"Conclusion not  Addressed","1. This question I attempted in a hurry, long passage\n2. The govt FDA regulations main goal is to provide consumer protection and maintain drug safety standards\n3. Pharmaceutical executive says that, the market competition's fundamental mechanism is consumer protection, So no FDA is required to provide consumer protection\n4. Incorrect Answer- fail to consider that absence of additional regulation will lead to unsafe products entering the market\n5. Note- the conclusion is about consumer protection not the unsafe products hence this could have been eliminated\n6. Correct Answer- Pharmaceutical Ex","1. Spot choices and reject them that does not address the conclusion properly","Hard Cementing Quiz  1",""],[63,"Inference","Performance Mertrics Objectivity VS Subjectivity","H","B","E","2:00",0,"Not Mentioned in the passage","1. Performance metrics typically includes quantifiable outputs like sales figure and productivity excluding mentorship activities, team collaboration and cultural leadership\n2. The HR professional says that these other contributions are subjective and performance metrics should be measured objectively only\n3. The author presents his contradictory opinion that by excluding these contributions you are already passing a value judgement whose value is assigned 0\n4. Correct Ans. - The HR professionals are inconsistent in excluding subjective contibutions on the grounds that including them would not","I rejected the correct answer just because of the word inconsistent, any argument can present\nan inconsistency which an author can refute","Hard Cementing Quiz  1",""],[64,"Weaken","Climatologist, Alps and human activity","H","A","E","4:00",0,"Misunderstood  the word's meaning","1. Climatolgist says the glacier retreat cannot be\nattributed to human activity\n2. Regional temperature variation under 2 degree celcius does not lead to significatnt ice loss\n3. He cites evidence that in Alps summer critical melting season ,the temparture fuctuates between 1.5 to 1.8 degrees\n4. The author cites another evidence that in temperature fluctuation of precisely 1.5-1.8 combined with Alps summer reduced summer precipitation patterns create ideal conditions of glacial retreat\n5. The author does not say the climatologists conclusion is inconsistent with the evidence provided, he cites","Logical Inconsistency- When conclusion contradicts the premise\nKey Takeaway: In GMAT Critical Reasoning, undermining an argument often means showing that the evidence doesn't support the conclusion as strongly as claimed, not necessarily proving the opposite conclusion.","Hard Cementing Quiz  1",""],[65,"Strengthen","Computer Science Students examining programming findamentals","H","A","B","21:00",0,"Extreme Choice","1. In programming fundamental books cs students found that the languages and frameworks from last decade have minimum coverage\n2. He concluded that it must be the case that the authors believed that the most fundamental knowledge predates last decade\n3. What could be the assumption abouth the belief here\n4. Less Covergae because Belief fundamental knowledge predates\n5. Valid assumption would be The author also intends to give coverage in proportion to how much of programmings's fundamental knowledge developed in that era\n6. Because if this was not author intention and some other reason may be ","With time pressure unable to apply the process properly\nUnable to find the connection between less coverage and belief in the fundamental knowledge\nFell for the extreme ans choice\nThe least I could do is to reject extreme choices, even if I am guessing dont guess extreme choices","Hard Cementing Quiz  1",""],[66,"Strengthen","Social Learning Academic Misconduct","H","C","E","10:00","","1. Social Learning- primary mechanism through\nwhich some students acquire academic misconduct\n2. Duration of formative years students acquire this practice by observing their peers who engages in such activity\n3. There is alternate group which remains honest and dont acquire such practises\n4. The author concludes that increase in such integrity focussed groups would result in greater exposure to honest academic influences likely leading to decline in the number of students who acquire dishonest practises\n5. Possible Assumptions- The studenst gets more influenced by the honest groups than disho","On strengthen question - Beware of options:\n1. That elminate potential objects and concerns\n2. Defend the argument from criticism\n3. Show that something isn't bad\n\nInstead look for options that:\n1. provide positive evidence for the conclusion\n2. Strengthen the causal link or assumption\n3. Show that something \"will work\" or \"is effective\"","Hard Cementing Quiz  1",""],[67,"Inference","COVID Customers lost by  Hospitality and  Real State Sector","H","E","D","17:00",0,"Table Data for inference","1. The Hospitality Sector is the highest in which\ncompanies lost more than 30% of its customers\n2. The real state sector is the highest in which companies lost more than 50% of its customers\n3. I was not able to create a table and make cases for the data  \n4. If you look at three cases, in all the cases whether general or extreme there are atleast some companies in the hospitality sector which lost 30-50% of their customers\n5. Also to note that the number of companies that lost 30-50% of their customers in the real state sector can be 0","","Hard Cementing Quiz  1",""],[68,"Weaken","Conservation Easement of a land","H","D","A","1:00",0,"Topic  Understanding","1. I couldn't understand the argument fully- it was talking about a legal concept- conservation easement an agreement that restricts use of land\n2. If someone giveup its right and sell that easement he can avail tax benefits equal to the difference in the land's market value - cost of land undereasement\n3. Many landowners who have farmed or unused land are under pressure to sell their lands to the developers who can offer much more than renting the property\n4.The author concludes with saying the owners could use the easement to prevent unwanted development\n5. Here the author assumes that the f","Weak understanding due to novelty of the topic\nI face difficulty while handling legal based argument","Hard Cementing Quiz  1",""],[69,"Strengthen","Native American Camp New Dumaw Creek","H","B","C","28:00",0,"Relevant Words Misidentified","1. Radio carbon dating says the Native American \nCamp dates between 1605 and 1755\n2. But the author says the camp probably dates \nto no later than 1630, since no Eurpoean goods were found at that site and European traders were active in the region from 1620s in the region  \n3. Correct Ans- At all the camps in the region that have been reliably dated to late 1620s, remains of the Europeans have been found\n4. Incorrect Ans- The first European trade goods to reach the area would have been considered especially valuable and preserved as much as possible from loss or destruction.\nEven if goods were","","Hard Cementing Quiz  1",""],[70,"Weaken","Recycling of municipal solid waste","H","B","D","3:00",0,"Mild  Weakener","1. Recycling is good for environment and\n profitable also\n2. So the proposal is implement recycling of 50%\nof solid waste within 5 years\n3. We have to weaken this- One concept if we find something in current recycling scenario which will not be suitable for recycling of 50% of solid waste\n4. Existing recycling programs have been restricted to that 20 percent of solid waste that, when reprocessed, can match processed raw materials in quality and price. \n5. It reveals a critical limitation of current recycling programs - they only handle 20% of solid waste, and specifically the 20% that can matc","I have chosen a mild weakener, look for strong weakers","Hard Cementing Quiz  1",""],[71,"Weaken","Bicycle paths and lanes to encourage the commuters","H","A","C","17:00",0,"B  causes A","1. Survey- more bicycle paths and more bicycle\nlanes per capita more people commute to their work on bicycle\n2. Conclusion - We should create more bicycle paths and lanes to encourage citizens of our country to go to work on bike\n3. Prethink- What if Since more people commute by bicycles it put pressure on politicians to build bicycle paths and lanes, hence reverse causality is possible and it will weaken the conclusion\nand that was our correct answer\n4. Incorrect ans- There are many peopel in the cities where extensive bicycle paths are there still choose to drive to work due to danger of bic","Chose an option that does not affect the argument","Hard Cementing Quiz  1",""],[72,"Weaken","School District citing evidence against the online tutoring ","H","C","E","49:00",0,"Understanding","1. Many school districts are against the online \ntutoring platform in improving students' academic underperformance\n2. Evidence supporting the opponents of online tutoring is given - In one of the school district despite increase in 12000 new enrollments recorded a decline of 4.2 points in standardized test scores among students who participated in three comprehensive online tutoring programs\n3. The officials who supports the online tutoring programs counter this by saying standardized tests are mere 30% of the comprehensive student assessment\n4. See, what the officials are doing here , they o","Didn't comprehend the argument properly","Hard Cementing Quiz  1",""],[73,"Strengthen","Evaluation of Student Essays by Computer Program Vs Teachers","H","A","B","37:00",0,"Conclusion not  Addressed","1. Automatic Scoring of student essays is provided by computer programs\n2. They draw their evaluations from measurable elements including grammar accuracy, sentence structure and vocabulary complexity\n3. Then the author proceed on saying however when it comes to assessing true qualities of essay, teacher who are familiar with both student writing and academic development achieve far greater accuracy than any automated grading program \n4. The intagible creative factors within essays elements such as originality and authentic voice are aspects that teacher incontrast with computer programs have ","Does not address the conclusion\nWhile analyzing choices for strengthen question always ask , does this chooice address the\nconclusion or not. In this case it should have address the comparison that the author did \nbetween teachers and computer program\n\nIn this question I didn't find the conclusion properly","Hard Cementing Quiz  1",""],[74,"Other","Mandatory Standardized  Testing leading to  curriculum narro","H","B","E","40:00",0,"Strengthen Conclusion of type Causation","1. A statement is given that mandatory testing is\nsolution for region's Y school district who intends to adotpt academic performance tracking and educational accountability assurance  \n2. But the author says that this plan will further increase the curriculum narrowing issue given how test taking requirements continues to outpace the growth of comprehensive learning opportunities.\n3. The supports his conclusion by saying the tendency of mandatory testing to diminish instructional flexibility avaiable to teachers explain this outcome, along with the fact that .......\n4. Correct Ans - teachers w","I think I was overwhelmed by this question, and not able to undersatnd fully the logic of\ncurriculum narrowing\nThe best way would have simply id the conclusion and look for answer choice that supports it\nHere in the question the author was establishing a causality between mandatory test requirements and curriculum narrowing issue, any choice which strengthens that quality whoud have been the corre","Hard Cementing Quiz  1",""],[75,"Other","Posthumous Publications","H","C","A","39:00",0,"Conclusion not  Addressed","1. The author says posthumous publications are \nproblematic, since the write is not present to attest some facts\n2. Then he continues, the problem arises when writer forgot to date the drafts of their manuscripts\n3. The author concludes that to eliminate this problem the author should not only date their scripts but also specify which previous version the new scripts replaces\n4. Dates + Version = Problem Eliminated\n5. Prethinking- Since writer is dead and no there to attest, what if the scripts with version and dates is not the latest version written by the writers, maybe the editors dont have","Same issue, chose an answer which does not address the conclusion\nEven in flaw question keep that in mind, reject answer choices which does not address the \nconclusion","Hard Cementing Quiz  1",""],[76,"Other","Advanced Diagnostice Imaging System forced Shutdown","H","D","C","5:00",0,"Conclusion not  Addressed","1. Medical Imaging systems can be forced offline\nwhen patient data misuse causes harm \n2. Visualization - Patient A's scan data accessed\nby B, -> Pateint A suffers harm -> System vulnerable to shutdown\n3. If investigators show tampering prevention is needed because system is part of an incident scene , authorities will definitely shut it down\n4. Why?? they will definitely shut, we need to find a reason for that \n5. Prethinking- Correct Ans- any continued operation of the imaging system could constitute tampering\n6. Incorrect Ans- The imaging system may provide investigators with evidence valua","1. One thing I noticed that whenever the argument is very tough I give my full energy in \nunderstanding each and every word, instead if I focus on the structure and stick to conclusion\nthe correct option will automatically crack open\n\n2. Here I chose an option again which doesn't address the conclusion and i failed to do so\nbecause I deviated from the structure","Hard Cementing Quiz  1",""],[77,"Other","Obesity in US- FastFood and Soft drinks Companies were criti","H","E","B","30:00",0,"Missed Contradictory Word","A recent survey indicates that over 50% of the US population is struggling with obesity. Outraged by this information, certain activist groups have organized protests against fast food and soft drink chains in the US as they believe that these companies are directly responsible for the obesity problem. Such thinking is inaccurate, to say the least. While it is true that the fast food and soft drink companies have done their best to sell their products, which are no doubt harmful, they cannot be blamed for the choices we as individuals make in buying these products, and so, they cannot be consi","1. I thought since author is going against the belief , any line after is conclusion will be in\nsupport of that conclusion\n2. But here I missed the contrast word WHILE,which means the author is going to acknowledge a consideration against his main conclusion","Hard Cementing Quiz  1",""],[78,"Weaken","Businesses need  development loans Govt plans to change tax ","H","A","E","52:00",0,"Assumptions Made in the Answer Choice","1. Banks are suffering because lack of money \navailable for development loans\n2. The govt plans to change the tax structure so that more people will keep their money in the retirement funds\n3. Assumption- More money in retirement funds-> more money available for developement loans-> Banks will not suffer\n4. What if more money in retirement doesn't translate to more money for development loans?\n5. Consumer Loans-  What if people who increase their retirement savings also corresponingly increase borrowing money for their perosnal use maybe - mortage, education etc.\n6. In that case more in retire","This was a great question and many questions can be made on this type\nGovt plans to help by doing something and assumes their plan will work \nBut we have to find an alternate cause that can destroy their plan\n\nIn this question I chose the incorrect option, because I assumed if high earners are not motivated\nto put thier money in savings account then less money will be available for development\nloa","Hard Cementing Quiz  1",""],[79,"Inference","High Resolution Satelite Imagery in Nordic region","H","D","A","25:00",0,"Not Mentioned in the passage","1. Missed the meaning for this sentence- Since 1982, when attempting to predict ice loss rates over subsequent five-year periods, the Center had significantly underestimated the actual melt rates that would later be recorded in the region.\n\n2. Valid Inference- The center had evidence that some of its five year projections were incaccurate\n3. Ice rate loss varied significantly between 1982  and 2018, this information is not mentioned in the passage and we have to make an assumption","For inference questions, do choose any answer which is not mentioned in the passage","Hard Cementing Quiz  1",""],[80,"Inference","University Book Store Manager, Engineering programs 5 shipme","H","C","D","31:00",0,"Stress/ Fear Lost Connection Time Pressure","1. This was a similar question which I have already solved\n2. No science shipments on Wednesday\n3. All rush ordered shipements from last week  were on Tuesday and all are science ones\n4. English department sent shipments, none of them were of science.\n5. Valid Inference - None of the shipments from English department were rush ordered, because all rush hour shipment from last week were on tuesday and all were science, hence English cannot be one of rush ordered\n6.Invalid Inference- None of the shipments were sent on Tuesday\nInvalid Logic Applied- Since all rush hour shipments were on tuesday a","Less Confidence in solving such type of questons, Idea is to read very carefully\neach and every word becomes important which can alter the meaning\n\nBest way is to prethink even in such questions to get to the questions easily","Hard Cementing Quiz  1",""],[81,"Other","Attention Deficit Order James Morrison","H","E","D","30:00",0,"Memory  instead  of process used","1. Attention Deficit Disorder impaires linear information processing and the emergence of fragmented thinking pattern\n2. Literary scholars confronted James Morrison unconventional use of non-chronological and scattered narrative structures throughout his novels , so they said James Morrison had ADD which he himself never recognized\n3. Wow, how conveniently they assume that since James morrison writing style is unique he must had ADD, what if he choses to write in that way, what if more creative writers process information differently than non-writers, and that is our answer\n4. Incorrect - They","I solved this type of question earlier and for that question answer was perception and \nused my memory to solve this question and ignored the subtle differences\n\nBasically I took the shortcut, I should keep In that always solve the CR question with the \nprocess and technique learned instead of using shortcuts, no learning\ngained and an incorrect answer","Hard Cementing Quiz  1",""],[82,"Evaluate","Chimpazee's Grape  Altruism Experiment","H","C","A","4:00",0,"Memory  instead  of process used","1. Species of Chimpanzees exchange tokens for \nrewards\n2. Grey Token - 1 token for the chimpanzee\n3. Red Token - 1 token for the chimpanzee + \n1 token for an unfamiliar chimpanzee whom he \ncan see through a visible window\n4. The experiment found that the chimpazees\npredominantly chose red token over grey token, this data suggests that the chimpazees have altruist nature since they want to help other unfamiliar chimapzees as well \n5. What other experiment can verify this conclusion?\n6. Incorrect- Whether chimpanzees generally preferred red color?\n7. This cannot strengther or weaken the conclusi","Basically I took the shortcut, I should keep In that always solve the CR question with the \nprocess and technique learned instead of using shortcuts, no learning\ngained and an incorrect answer","Hard Cementing Quiz  1",""],[83,"Other","Maplewood Library New System for Book Reservations","H","D","C","56:00",0,"Scope of the  Argument","1. Maplewood implemented a new system for book reservations giving priority to local school teachers \n2. Expectations- Increase community enagagement and local memberships\n3. But despite showing great interest by the school teachers its memberships didn't increase \n4. Why?\n5. Incorrect Answer- A global popular e-reader was launched which solved many potential needs of the local teachers , This might change how people across the county access reading materials, But this doesnot address the issue of not increase membership in Maplewood library despite local teachers showing interest\n6. Correct A","Global vs local, I didn't attack the context or scope of the conlusion properly","Hard Cementing Quiz  1",""],[84,"Inference","Enrolled Students in] Advanced Mathematics  Course","H","E","A","16:00",0,"Table Data for inference","1. This question was similar to subscription \nmagazines question but I was not able to figure\nout under time pressure\n2. The part most timing take was understanding the argument and come up with the data table with correct categories\n3. What made this question tricky is the language it used\n4. Data Collected from enrolled students in a advanced mathematics course shows that students from public school backgrounds accounted for 25% of the total successful completions that enrolled students achieved last semester\n5. Imference - Talking about only enrolled students successful completions from las","All these data are about successful completions, I was making categories for \nsuccessful vs not successful and got lost\n\nFrom the data we can clearly see that many students who did the successful\ncompletions are not enrolled in the course. And that is our answer\n\nAnswer choices talking about something other than last semester or not successful\ncompletions can be eliminated","Hard Cementing Quiz  1",""],[85,"Bold Face","Tradinational Classroom Vs Online Education","H","A","E","31:00",0,"Acknowledge a Consideration Trap","One Mistake - Compared to traditional classroom learning, the elimination of geographical barriers and significant cost reduction are achieved through online education.\nThe argument started with this statement \n\nIf we look at the tone of this statement- it acknowledges a consideration why online eduction is good\n\nAnything that acknowledges a conclusion is not a conclusion in itself , its a premise supporting the conclusion\n\nCorrect Ans- The first makes a concession to a position that the argument disputes\nIncorrect Ans- The first reports a conclusion that the author disputes\n\nMakes a concessio","In boldface Always check whether the statement is acknowledging a consideration or \nnot , if it is doing so its not a conclusion, it's a premise supporting the conclusion","Hard Cementing Quiz  1",""],[86,"Assumption","Alaska Vaccine  Administration","H","A","A","6:00",1,"Quant Based CR","1. Alaska one of 50 states of united states, has\nfully vaccinated 16% of its population, the highest rate in the country\n2. The state rank 46th in vaccine administration having used 69% of the supply\n3. Hence Alaska has vaccinated more people than any other state\n4. N(Vaccinated) = %Vaccinated x Population\n5. Also , N(Vaccinated) = %Supply Used x Total Supply\n6.If we want to conclude that N(Vaccinated) is more for Alaska than any other state give %Supply used is almost at the lower end for Alaska\nWe have to assume that More supply/vaccines have been delivered to Alaska than to most other state","Unable to form equations on time, solve more quant based CR","Hard Cementing Quiz  1",""],[87,"Inference","Tech Industry Analyst Tech Professionals relocating to remot","H","A","B","55:00",0,"Specific to  Generalization","1. Explosive growth in tech hubs -> Housing\ncosts increased\n2. Remote work along with relocation to more affordable areas represented what appeared to be the highly skilled tech professioanls as the sole viable path towards home ownership and the financial ability\n3. Notice the language - The author is talking only about highy skilled tech professionals,\nand speculating the only option\n4. Correct Ans- Highly Skilled tech professionals from expensive housing markets were strongly represented among those who relocated to pursue remote work opportunities\n5. \"Strongly represented\" doesn't mean tec","1. I identified the type of question as conclusion but it was inference","Hard Cementing Quiz  1",""],[88,"Weaken","Burnout Syndrome  Diagnosis","H","A","C","5:00",0,"Structure  Identification","1. It was plain argument structure mapping\nquestion , while structuring his argument he \nassumes something and that is our weakner","Sometimes a weakner is simple restatement of the assumption, the author takes \nsomethingfor granted","Hard Cementing Quiz  1",""],[89,"Inference","Students struggling with Maths due to increased  difficulty","H","E","B","40:00",0,"Conclusion not  Addressed","1. Proportion of students struggling in maths\nhas increased\n2. Instructors believe that this due to increased difficulty solely due to more focused Arithmetic questions\n3. Increased difficulty is not the core issue because ……\n4. Potential answer- Alternative or more logical explaination for this or could give a reason why \"testing rigor\" is not the indicator or cause of students struggling with mathematics\n5. Correct Answer- Performance Issues were observed in both easy arithmetic and hard algebra questions, this option clearly indicates that increased difficulty is not the sole reason since","I couldn't think that top performers may perform despite the test diffculty\nThough I was able to figure out what kind of answer choices to look for \nI missed the option that directly address the conclusion","Hard Cementing Quiz  1",""],[90,"Inference","Medical Practitioner, Han Dynasty, MRI technology","H","D","C","58:00",0,"Conclusion not  Addressed","1. Hans Dynasty, traditional Chinese Medicine, 2000 years old, these ancient healing form foundation of Harmony Wellness Clinic's practices\n2. Head Practitioner Assertion - Modern Medical settings impose certain constraints\n3. Then the author supports the assertion by saying its true that MRI tech resembles western diagnostic medicine , modern imaging technology actually continue the diagnostic observation tradition whose origins trace back to chinese medicine\n4. Correct Ans- The use MRI at Harmony Wellness does not undermine the Head practioner assertion\n5. Incorrect answer was talking about ","1. Somehow I complete missed the words- According to head practioner assertion\n2. Because of which I couldn't find the conclusion\n3. Whole argument was structured arounf to support that assertion\n4. Also I couldn't identify the question type \n5. The considerations best serve as part of an argument that - Inference\nmust be tru","Hard Cementing Quiz  1",""],[91,"Inference","Choice between hand written notes or digital note taking","H","D","C","34:00",0,"Follow  Elimination","1. In their coursework, majority of students\npreferred hand written notes over digital note taking\n2. Controlled academic studies reveals the persistence of this preference including in students who openly recognize the organizational , searchablity and backup advantages that digital note-taking provides over hand-written notes\n3. Why students are preferring handwritten notes despite the advantages of digit note taking?\n4. To explain this paradox - 1. Either some additional important advantage of hand written notes\n2. Some hidden disadvantage of digital note taking\n5. Correct Ans- Even student","I never thought that answer choice like this which display overconfidence will be the right\nanswer, I rejected it right away and also eliminated all other , and guessed the wrong answer","Hard Cementing Quiz  1",""],[92,"Strengthen","Muggings in Denver  and pasadena","H","A","E","25:00",0,"Follow  Elimination","1. The number muggings reported is approxima-\ntely equal in Denver and Pasadena\n2. But the amount reported in Denver is 20% less than in Pasadena \n3. Denver is home for much more affluent people than pasadena , conclusion- wealthier people on average are less likely to carry cash on person while travelling the road\n4. Note- Reported Amount Stolen is not same as Actual Amount Stolen\n5. What if wealthier person reports higher amount as robbed\n6. Then In Denver actual money stolen will be less and it will strengthen the conclusion that wealthier people carry less cash on person\n7. Incorrect ans -","Great Learning- I was skeptical about my chocie, I knew it doesn't address the conclusion\nBut couldn't mark the right answer because I didn't understand it at all\n\nStrategy to follow- When you are down to two choices and sure that one of the choices\ncant be correct, dont wait or try to understand the correct answer why \ncorrect? just mark and move on","Hard Cementing Quiz  1",""],[93,"Weaken","Ratings given to  Study Materials Vs Classroom Instructions","H","A","E","29:00",0,"Assumption  Identification","1. Survey- students numerically rated\nStudy Materials and Classroom Instructions\n2. Survey revealed students expressed less satisfaction with Study Materials compared to Classroom Instructions\n3. Conclusion - Upgrading Study materials would be more effective strategy for our school to improve overall academic performance \n4. This is a huge leap, less rating -> upgrade on that category-> improved academic performance\n5. What if ratings does not actually affect the academic performance \n6. The connection between satisfaction ratings and academic impact is assumed and not established\n7. Correct A","Incorrect answer- I should I have asked even if we consider this, the flaw is resolved or still\nexists\nIn flaw question idea is to identify the funcamental flaw\n\nAlso in this question I didn't identify the leap the author took, the correct answer should have\naddressed the impact on academic performance\n\nEven if something is rated higher, still we should put efforts towards that because its imapct ","Hard Cementing Quiz  1",""],[94,"Weaken","Riverside School District Distributed Tabs","H","A","E","2:00",0,"Direct vs Indirect  Explaination","1.Riverside School has distributed tabs to its\nstudents but Performance didn't improve\n2. I was able to prethink that maybe they used \nfor entertainment purpose more than their studies\n3. And that was our ans, but I thought how could the answer be so easy, there must be trap \n4. Ans I chose a option that was not directly expalining the conclusion\n5. Incorrect Ans - Teachers typically adjust their intruction intensity based on available resources and reduced direct teaching time\nWhile this could theoritically impact performance its too indirect and doesn't specify why tablet access itself didn'","I created a trap for myself and fell into that\nI should have been confident with my prethinking","Hard Cementing Quiz  1",""],[95,"Other","Public Funding  Scientific Research","H","C","E","14:00",0,"Understanding","1. Sarah - Public Funding of scientific research stems form technical breakthroughs, draw high tech companies and skills to our shores , with the result enhanced economic growth and global competitiveness \n2. Marcus - This has fundamental flaw. The expansion of human knowledge and our comprehension of nature's working should be the purpose. Reducing research support to mere tool for economic advancement , we diminish our science\n3. Question- They most clearly disagree abouth whether\n4. Correct Ans- a sufficient rationale for public funding of scientific research is the potential effects on eco","I couldn't unserstand the meaning of the correct choice,\nEven though I was able to prethink that they are agreeing on the basis of public research\nfunding, but the wording of the correct ans tricked me\n\nI need to solve more questions on where two people speaking- agree/disagree types","Hard Cementing Quiz  1",""],[96,"Weaken","State University's  implementation of a comprehensive online","H","E","D","59:00",0,"Conclusion not  Addressed","1. State University implemented a comprehensive online learning platform, with enhanced capabalities resulted in attracting prospective students with enrollment figure showing 15000 students last semester vs 12500 in the preceding semester\n2. Despite this enrollment the system's development and maintenance costs exceeded additional tuition revenue by a substantial margin\n3. Conclusion- The University's financial interests as a result gained no benefit from implementing the platform\n\n4. Incorrect Ans- State University earned positive revenue from student tuition payments last semester. This add","Total Revenue vs Net Revenue\nI marked correctly with my first intuition but changed later to incorrect one \nNow, new problem- question the intuition, should I don't secong guess myself\nonce I marked the answer?","Hard Cementing Quiz  1",""],[97,"Other","Environmental Education and purchase of  environment friendl","H","A","E","20:00",0,"Prethinking Missed","1. Environment Education increases the \nlikelihood that consumers will select eco-friendly products during their shopping activites\n2. Urban population have higher proportion of educated people than rural population\n3. Yet rate of people buying eco-friendly products are similar in both urban and rural poulation\n4. What can explain this paradox?\n5. Possible lines of thinking could have in terms of market availability urban vs rural , consumers' priroity urban vs rural, is there any factor that can override their decision to buy environment friendly products despite having that education\n6. Corr","Prethink harder on paradox questions","Hard Cementing Quiz  1",""],[98,"Bold Face","Economic Impact of Second Wave of Covid19 Wave","H","D","C","23:00",0,"Intermediate conclusion vs main conclsuion","1. This was great Boldface question, must revisit\n2. BF1 was a fact supporting intermediate\nconclusion\n3. That IC supported the main conclusion\n4. I was able to correctly identify both the statements, but got trapped in the wordings\n5. Correct Ans- The first introduces a consideration made while reaching a conclusion that supports the main conclusion. The second is a claim that is supported by that conclusion\n6. I got confused by the word claim and was trying to find which option says BF2 as main conclusion\n7. But main conlusion is itself a claim which is rightly said in the correct ans","Next time while solving BoldFace questions identfy all of them -Premises, Intermeidate\nconclusios and the main conclusion\nWhile writing role of the BFs write explicitly what it is supporting and what it is being\nsupported by","Hard Cementing Quiz  1",""],[99,"Weaken","Significant Hearing  Impairment in Valdonian industry worker","H","C","A","41:00",0,"Correlation Vs  Cause and Effect","1. 8% of the Valdonian industry\n workers aged under 40 who suffered serious workplace accidents are diagnosed with Significant Hearing Impairment \n2. Occupational Health Record shows that 4% of the under-40 industrial workforce are diagnosed with significant hearing impairment\n3. Conclusion - The presence of hearing impairment in Valdonian indurstrial workers under age 40 creates a significant elevation in their probability of experiencing serious workplace accidents\n4. If we look closely, what author is doing- Statistical Correlation to Causal relationship \n5. Serious accidents = 2x overall\n6","Incorrect Answer- Workers with severe hearing impairment are generally reassigned to \npositions that do not involve operating dangerous equipment\nThis strengthens the argument, despite being in safer positions, hearing-impaired workers\nstill have higher accident rates, making their condition even more problematic\n\nOpposite could have been a weakner - Workers with severe hearing impairment are gene","Hard Cementing Quiz  1",""],[100,"Inference","Price, Demand , Consumer Confidence Income, relationships","H","E","B","18:00",0,"Specific to  Generalization","1. Given Price Increase-> Demand Decrease->\nCorresponding Decrease in Consumer Confidence\n2. Income Increase -> It opposes the reduction in Demand\n3. We have to infer  from these two statements\n4. Correct Answer- Consumer confidence in product likely decreases more without an income increase than with it\n5. Absolutely Correct- Income Increase- > Reduction in demand decrease-> Reduction in Confidence decrease\n6. Incorrect Ans- Consumer Income affects demand which affects consumer confidence - affects is neutral word and it turns two statements to broad causal principles","Fell into classic specific to generalization trap\ndecrease not same as affect","Hard Cementing Quiz  1",""],[101,"Other","Clean Air Act prohibition","H","C","D","36:00",0,"Similar Reasoning/Flaw","1. Clean Air Act implemented in 1990 prohibits\nthe operation of post-1985 vehicles on public \nroads unless emission standards are met. \n2. Conclusion- Vehicles lacking compliance while operating on roads since 1990 are necessarily from 1985 or earlier manufacturing years \n3. Assumption- Since Law is implemented then it will enforced perfectly and everybody will comply\n4. We have to find similar flaw in the option choices\n5. Correct Ans- Workplace safety rules prohibits under 21 from operating heavy machinery, so any employee operating heavy machinery must be atleast 21 years old\n6. Same flaw, ","Similar reasoning type of questions\nI have not practised much on these types and guessed the answer and moved on","Hard Cementing Quiz  1",""],[102,"Strengthen","Participants Perfroamce Moderate Excercises before creative ","H","E","A","43:00",0,"Conclusion not  Addressed","1. While assessing participants performance on\ncreative problem-solving tasks, a study had them first complete moderate exercise sessions.\n2. Substantial Improvements in both creative output and the generation of novel solutions emerged from the performance data \n3. Conclusion- This improvements, however likely stem from temporary physiological arousal rather than representing an indispensible component of creative reasoning processes \n4. I should have read thoroughly the word temporary\n5. Prethinking should be in line of something that could show that the creative performance are not permanen","Does not address the conclusion\nWhile analyzing choices for strengthen question always ask , does this chooice address the\nconclusion or not. In this case it should have showed how excerise is temporary or not an\nindispensible part of the creative problem solving process","Hard Cementing Quiz  1",""],[103,"Other","Pupper Town, Feeding chocolates to dogs Veterinary clinics","H","C","D","29:00",0,"Not able to Prethink","1. People frequently feed their dogs with chocolates then rush to veterinary clinics\n2. However, past three years number of such cases have gone down drastically in Pupper town\n3. Conclusion - Clearly, petowners in this place must have become more aware of the fact that chocolate must not be fed to the dogs, since____\n4. In what scenario, number of cases when people rush to the veterinary has gone down and still fed chocolates to their dogs ?\n5. If dog can be treated at home after being fed with chocolates, then we can say that though no of cases has gone down but people are still unaware\n6. A","This method was good, first find the scenario in which that situation can exist and negate it\nthat becomes our strengthner","Hard Cementing Quiz  1",""],[104,"Bold Face","AI diagnostic systems","H","B","C","17:00",0,"Intermediate conclusion vs Fact","1. Wrongly identified evidence as intermediate\nconclusion\n2.Intermediate Conlusion or any conclusion is a derived statement\n3. Any standlone statement not dervice which supports a conclusion should be considered as an evidence or fact","","Hard Cementing Quiz  1",""],[105,"Strengthen","Pig Farmers in Bravia antibiotic laden feeds","H","D","A","26:00",0,"Conclusion not  Addressed","1. Some(Not ALL) pig farmer give antibiotic laden feed to their animals \n2. Many restaurants(Not ALL) are major buyers\n3. Health concern raised over consumption of pork derived from such antibiotic-fed animals \n4. As a result, Restaurants(All of the restaurants) are losing customer who mostly ordered pork\n5. Restaurant Association decided to enforce requirement restaurants using pork from such antibiotic fed animals mention that fact in the menu\n6. Despite such actions, restaurants(all restaurants) will continue to lose business since______\n7. Prethinking- What if consumers are not aware of th","Incorrect Ans - The full impact of consuming pork raised from anti-biotic fed animals\nhas not conclusively established but is enough to scare the customers\n\nThis is offering the reason why customers will be scared, that is already give in the passage\nHealth concerns raised , all restaurants are losing customers, that means customers are avoiding ordering pork , they are scared\nThis choice does not","Hard Cementing Quiz  1",""],[106,"Weaken","Region Y, avoid dairy products and contrarian approcah","H","E","B","31:00",0,"Already Considered","1. Due to week's health report that shows \npotential health issues from dairy consumption, some indiviudals have removed dairy products from their diet\n2. However when it comes to affordable nutrition consumers should take a contrarian approach -specifically targeting foods at the exact moment health media outlets are urging the public to avoid them\n3. Why? Price reductions result from mass anxiety generated by sensationalist health reporting \n4. Incorrect Ans - assumes, without providing justification, that consumers' dietary choices are primarily influenced by the cost considerations rather ","one word exact moment defined what author is assuming, so while reading conclusion\nit is extremely necessary that focus on each word very carefully and draw the assumptions","Hard Cementing Quiz  1",""],[107,"Strengthen","MovieMania propping  popcorn- Canola Oil VS coconut oil","H","A","D","53:00",0,"mathematical  precision Vs Logical Relationships","1. Moviemania decided to switch from less \nhealthier coconut oil to more healthier canola\noil used for propping popcorn\n2. But they decided to switch back to the coconut oil claiming sales declined\n3. Author refuted this claim saying looking at their own sales figure popcorn sales are up by 5% last year compared to previous year\n4. We have to strengthen this claim\n5. Correct Ans- Total sales of all refreshments at MovieMania's movie theaters increased by less that 5% \n6. This choice suggests that the popcorn sales relatively did well than other refreshments hence supporting the authors conclus","In Critical Reasoning strengthen questions, focus on what makes an argument more logically convincing rather than mathematical precision. \nLook for evidence that supports the conclusion through logical relationships - in this case, comparative performance data that contradicts Moviemania's claim about poor sales.","Hard Cementing Quiz  1",""],[108,"Strengthen","Moderately Large Cities Redesigning downtown area","H","C","D","21:00",0,"Word By  Word Matching","1. A moderately large city is redesigning its \ncentral downtown area and considering a plan\nthat would reduce the number of lanes for\nautomobiles and trucks and increse those for bicycles\n2. The intent is to attract more workers and shoppers to downtown business by making downtown easier to reach and more pleasant to move around\n3. Correct Ans- In other moderately sized cities where measures were taken to make downtowns more accessible for walkers and cyclists, downtown businesses began to thrive.\n4. I rejected this answer choice as it mentions moderately sized cities but in the argument menti","When evaluating answer choices, ask yourself: 'Does this choice logically strengthen/weaken the argument?' \nrather than 'Does this choice use exactly the same words as the passage?' Choice C provides strong precedent evidence that the plan will work, making it the best strengthener regardless of the minor terminology variation.\nDon't automatically reject all \"other city\" options! Here's when they'","Hard Cementing Quiz  1",""],[109,"Weaken","Ulmia's blockade against Crinica's ships","H","D","E","10:00",0,"Valid Inference","1. Ulmia's navy sought to capture merhcant shipping entering and leaving Crinica's ports for four years until the dispute was resolved in Ulmia's favour \n2. It has been assumed that this blockade was crucial to the outcome\n3. But Analysis of shipping records shows that over the course of blockade, only 1/6 merchant ships attempting to enter or leave Crinica's ports were actually captured by Ulmia\n4. To weaken this we need a scenario showing that even with low capture rate the blockade is still highly effective and decisive \n5. Correct Ans- The number of ships captured each month increased shar","","Hard Cementing Quiz  1",""],[110,"Assumption","Farmers in GreenVille Pesticides vs GM seeds","H","A","D","41:00",0,"Assumption Vs Strengthen Statement","1. Farmers in GreenVille use pesticides, which is \neffective for problem of locust attack and increase yields as well\n2. Also pesticides are the cheapest way to achieve all those things\n3. But the chemicals in the pesticides cause health hazards to the consumers of the produce\n4. Then the author started talking about Genetically Modified seeds\n5. He says GM seeds are also helpful in prevention of locust attacks, increase yields and available at the comparable price as pesticides\n6. Conclusion- Hence, using GM seeds is the best way to increase yields in the next sowing season\n7. If we look care","While Analyzing choices for assumption questions always negate to check if the statement\nis a must be true condition or not, there are chances the choice is just a weakner and not\nan assumption reuqired to hold the conclusion true.\n\nIn this question we are looking for an answer choice which gives us some advantage of \nusing GM seeds over pesticides, since the author conludes that they are the best","Hard Cementing Quiz  1",""],[111,"Inference","Alaska Vaccine  Administration","H","D","E","38:00",0,"Percentages Given Numbers Chosen","1. Alaska one of 50 states of united states, has\nfully vaccinated 16% of its population, the highest rate in the country\n2. The state rank 46th in vaccine administration having used 69% of the supply\n3. Inference 1- Alaska do not have enough \nsupplies to vaccinate 100% of its population\nWhy? with 69% of used supply they able to\nvaccinate only 16% of the population\n4. Inference 2- A majority of the states have not vaccinated most of their population\nWhy?, they used more than 69% of their supply but able to vaccinate less than 16% of their population\n5. Ineference 3- If Alaska had used more than","Incorrect Ans - Alaska received more vaccines than did most other states\nIn the passage only percentages are given we cannot conculude anything about numbers","Hard Cementing Quiz  1",""],[112,"Strengthen","Haysfield Biodegradable Waste to Energy Technology","H","C","B","56:00",0,"Answer  Hidden in Double  Negatives","1. Hayfield plas to revise the disposal method\nfor residual waste\n2. Residual Waste contains a mixture of biodegradable materials and hazardous toxins \n3. Haysfield plans to use the latest biodegradable waste to energy technology to convert the biodegradable materials from the residual waste to energy , thereby making the most efficient use of such products.\n4. But what if these two - biodegradable materials and hazardous toxins are inseparable, then, Will be able to say Haysfeild is making the best use such products, NO\n5. Assumption Required- Toxins and Biodegarable materials can be separate","GMAT playes with words\nIn this question the correct answer was worded in double negatives\n\nToxins found in waste products are not indistinguishable from non toxic materials\nwhich essentially means Toxins found in waste products are distinguishable from the non\ntoxic materials, our required assumption which is also an strengthner in this case\n\nI rejected this answer choice in the first go, as in my","Hard Cementing Quiz  1",""],[113,"Other","Finance Advisors Actively Managed Mutual Funds VS Index Fund","H","D","D","18:00",1,"","1. Majority of individual investors show\nstrong preference for picking their own\nstocks or investing in actively managed\nmutual funds rather than opting for lost cost\ndiversified index funds\n2. Surprisingly this inclination remains prevalant\neven among those who are well-aware of the\nhistorical data showing that index funds typically \noutperform actively managed portfoilio\n3. What can explain this paradox","Overconfidence bias: Investors believe they are exceptions to the rule, capable of consistently beating the market despite evidence to the contrary.\nSocial influence: Scenario: Investors are highly influenced by peers, media, or financial advisors who promote active investing strategies.\nRecency bias: Investors place too much weight on recent, highly publicized success stories of individual stocks","Hard Cementing Quiz  1",""],[114,"Inference","High Stress Level, Sleeplessness, Migranes","H","E","A","28:00",0,"Combined Inference","1. High Stress Level can be accompanied by\nSleeplessness\n2. Sleeplessness leads to migrains\n3. Migraines have been found to be linked with\na strong likelihood of poor performance at work\n4. Inference- We can't say High stress level always accompanied by Sleeplessness\n\"accompanied by\" indicates co-incidental at best \n5. Valid Inference- A person with high stress level, who also suffers from sleeplessness has a high likelyhood of performing poorly at work\n6. Incorrect Ans- Someone with an increased stress level will likely perform poorly at work\nNo, thats not necessary , we need high stress leve","Combining multiple statements in an inference is the skill required in this question\naccompanied by- correlation\nleads to - causal","Hard Cementing Quiz  1",""],[115,"Weaken","GreenPower VS SolarWind","H","D","C","36:00",0,"","1. GreenPower holds leading position with 17 \nfarms\n2. SolarWind acquired WindForce network \n3. The state's env regulations presents a challenge as they prohibit any single owner from operating multiple wind farms within the same watershed \n4. Due to these restrictions, SolarWind must divest 5 wind farms to finalize the WIndForce acquisistion\n5. After this, SolarWind with its 20 wind farms will position it as the state's dominant operator\n6. Weakner- What if GreenPower already operates wind farms in most of the states watersheds\n7. This suggests that GreenPower is the only viable buyer of the ","Tough One","Hard Cementing Quiz  1",""]];
+
+const TYPE_COLORS = {
+  'Strengthen': {bg:'#eef4ff',color:'#1a4fa0',dot:'#5580d4'},
+  'Weaken':     {bg:'#fff0f0',color:'#a01a1a',dot:'#d45555'},
+  'Inference':  {bg:'#f0faf4',color:'#1a6b45',dot:'#55a477'},
+  'Assumption': {bg:'#f7f0ff',color:'#5b3e8a',dot:'#9070cc'},
+  'Bold Face':  {bg:'#fff7e6',color:'#7a4a00',dot:'#cc9530'},
+  'Evaluate':   {bg:'#eef7fb',color:'#1a5a7a',dot:'#4a9ac0'},
+  'Other':      {bg:'#f2f2f2',color:'#555',dot:'#888'}
+};
+
+let activeFilters = { result:'all', diff:'all', type:'all', trap:'' };
+let activeSearch = '';
+let activeSort = 'default';
+
+function init() {
+  const total = DATA.length;
+  const wrong = DATA.filter(d=>!d[7]).length;
+  const correct = total - wrong;
+  const hardCount = DATA.filter(d=>d[3]==='H').length;
+  const medCount = DATA.filter(d=>d[3]==='M').length;
+
+  document.getElementById('cnt-all').textContent = total;
+  document.getElementById('cnt-wrong').textContent = wrong;
+  document.getElementById('cnt-correct').textContent = correct;
+  document.getElementById('cnt-H').textContent = hardCount;
+  document.getElementById('cnt-M').textContent = medCount;
+  document.getElementById('cnt-type-all').textContent = total;
+
+  // Header stats
+  const hStats = document.getElementById('headerStats');
+  hStats.innerHTML = `
+    <div class="stat-pill red"><span class="val">${wrong}</span> wrong of ${total}</div>
+    <div class="stat-pill amber"><span class="val">${hardCount}</span> hard</div>
+    <div class="stat-pill"><span class="val">${medCount}</span> medium</div>
+    <div class="stat-pill green"><span class="val">${correct}</span> correct</div>
+    <div class="stat-pill"><span class="val">${Math.round(wrong/total*100)}%</span> error rate</div>
+  `;
+
+  // Type filters
+  const typeCounts = {};
+  DATA.forEach(d=>{ typeCounts[d[1]] = (typeCounts[d[1]]||0)+1; });
+  const tf = document.getElementById('typeFilters');
+  Object.entries(typeCounts).sort((a,b)=>b[1]-a[1]).forEach(([type,cnt])=>{
+    const col = TYPE_COLORS[type]||TYPE_COLORS['Other'];
+    tf.innerHTML += `<button class="filter-btn" data-filter="type" data-value="${type}" onclick="setFilter('type','${type}')">
+      <span style="width:8px;height:8px;border-radius:50%;background:${col.dot};flex-shrink:0;"></span>
+      ${type} <span class="badge">${cnt}</span></button>`;
+  });
+
+  // Trap cloud
+  const trapCounts = {};
+  DATA.forEach(d=>{ if(d[8]&&d[8].trim()) { const t=d[8].trim(); trapCounts[t]=(trapCounts[t]||0)+1; } });
+  const topTraps = Object.entries(trapCounts).sort((a,b)=>b[1]-a[1]).slice(0,20);
+  const maxCnt = topTraps[0]?.[1]||1;
+  const trapColors = ['#d4a020','#c05030','#5b3e8a','#1a6b45','#1a5a7a','#c03060'];
+  const tc = document.getElementById('trapCloud');
+  topTraps.forEach(([trap,cnt],i)=>{
+    const sz = 10 + Math.round((cnt/maxCnt)*3);
+    const col = trapColors[i%trapColors.length];
+    tc.innerHTML += `<span class="trap-tag" style="background:${col}18;color:${col};font-size:${sz}px;" data-trap="${trap}" onclick="setTrap('${trap.replace(/'/g,"\\'")}')">
+      ${trap.replace(/ +/g,' ')} <sup style="font-size:9px;opacity:0.7">${cnt}</sup>
+    </span>`;
+  });
+
+  applyFilters();
+}
+
+function setFilter(key, val) {
+  activeFilters[key] = val;
+  document.querySelectorAll(`[data-filter="${key}"]`).forEach(b=>b.classList.remove('active'));
+  const btn = document.querySelector(`[data-filter="${key}"][data-value="${val}"]`);
+  if(btn) btn.classList.add('active');
+  applyFilters();
+}
+
+function setTrap(trap) {
+  if(activeFilters.trap === trap) {
+    activeFilters.trap = '';
+    document.querySelectorAll('.trap-tag').forEach(t=>t.classList.remove('active'));
+  } else {
+    activeFilters.trap = trap;
+    document.querySelectorAll('.trap-tag').forEach(t=>{
+      t.classList.toggle('active', t.dataset.trap===trap);
+    });
+  }
+  applyFilters();
+}
+
+function applyFilters() {
+  activeSearch = document.getElementById('searchInput').value.toLowerCase();
+  activeSort = document.getElementById('sortSelect').value;
+
+  let filtered = DATA.filter(d=>{
+    if(activeFilters.result==='wrong' && d[7]) return false;
+    if(activeFilters.result==='correct' && !d[7]) return false;
+    if(activeFilters.diff!=='all' && d[3]!==activeFilters.diff) return false;
+    if(activeFilters.type!=='all' && d[1]!==activeFilters.type) return false;
+    if(activeFilters.trap && (!d[8]||!d[8].toLowerCase().includes(activeFilters.trap.toLowerCase()))) return false;
+    if(activeSearch) {
+      const hay = (d[2]+' '+d[1]+' '+d[8]+' '+d[9]+' '+d[10]+' '+d[11]).toLowerCase();
+      if(!hay.includes(activeSearch)) return false;
+    }
+    return true;
+  });
+
+  // Sort
+  if(activeSort==='wrong-first') filtered.sort((a,b)=>a[7]-b[7]);
+  else if(activeSort==='hard-first') filtered.sort((a,b)=>(a[3]==='H'?0:1)-(b[3]==='H'?0:1));
+  else if(activeSort==='type') filtered.sort((a,b)=>a[1].localeCompare(b[1]));
+  else if(activeSort==='trap') filtered.sort((a,b)=>(a[8]||'').localeCompare(b[8]||''));
+
+  const wrongPct = filtered.length ? Math.round(filtered.filter(d=>!d[7]).length/filtered.length*100) : 0;
+  document.getElementById('progressFill').style.width = wrongPct+'%';
+  document.getElementById('resultsCount').textContent = filtered.length + ' questions';
+
+  renderCards(filtered);
+}
+
+function renderCards(list) {
+  const grid = document.getElementById('cardsGrid');
+  const empty = document.getElementById('emptyState');
+
+  if(!list.length) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  let lastQuiz = null;
+  let html = '';
+
+  list.forEach(d=>{
+    const [id,type,name,diff,correct,selected,time,ok,trap,comments,corrective,quiz] = d;
+    const col = TYPE_COLORS[type]||TYPE_COLORS['Other'];
+    const isCorrect = ok===1;
+    const wrongClass = isCorrect ? 'correct' : 'wrong';
+
+    if(quiz !== lastQuiz && activeSort==='default') {
+      lastQuiz = quiz;
+      html += `<div class="quiz-divider"><div class="quiz-divider-line"></div><div class="quiz-divider-label">${quiz.replace(/ +/g,' ')}</div><div class="quiz-divider-line"></div></div>`;
+    }
+
+    const trapHtml = trap ? `<div class="trap-banner">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      ${trap.trim().replace(/\n/g,' ')}
+    </div>` : '';
+
+    const shortFix = corrective ? corrective.split('\n').filter(l=>l.trim())[0]||'' : '';
+    const fixHtml = shortFix ? `<div class="card-corrective">${shortFix.replace(/^[\d]+\.\s*/,'').trim()}</div>` : '';
+
+    html += `<div class="card ${wrongClass}" onclick="openModal(${id-1})" style="animation-delay:${(list.indexOf(d)%10)*0.03}s">
+      <div class="card-header">
+        <span class="card-num">#${id}</span>
+        <div class="card-meta">
+          <div class="card-title" title="${name}">${name}</div>
+          <div class="card-badges">
+            <span class="badge-type" style="background:${col.bg};color:${col.color}">${type}</span>
+            <span class="badge-diff diff-${diff}">${diff==='H'?'HARD':diff==='M'?'MED':'EASY'}</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-answer">
+        <span style="font-size:11px;color:var(--text-3)">Expected</span>
+        <span class="ans-chip correct">${correct}</span>
+        ${!isCorrect ? `<span style="font-size:11px;color:var(--text-3)">Got</span><span class="ans-chip wrong">${selected}</span>` : `<span class="ans-chip got-right">✓ correct</span>`}
+        <span class="time-chip">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ${time}
+        </span>
+      </div>
+      ${trapHtml}
+      ${fixHtml}
+    </div>`;
+  });
+
+  grid.innerHTML = html;
+}
+
+function openModal(idx) {
+  const d = DATA[idx];
+  const [id,type,name,diff,correct,selected,time,ok,trap,comments,corrective,quiz,gaps] = d;
+  const col = TYPE_COLORS[type]||TYPE_COLORS['Other'];
+  const isCorrect = ok===1;
+
+  // Badges
+  document.getElementById('modalBadges').innerHTML = `
+    <span class="badge-type" style="background:${col.bg};color:${col.color};font-size:12px;padding:3px 10px;">${type}</span>
+    <span class="badge-diff diff-${diff}" style="font-size:11px;">${diff==='H'?'HARD':diff==='M'?'MEDIUM':'EASY'}</span>
+    ${isCorrect ? '<span style="background:#eef7f2;color:#1a6b45;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;">✓ Correct</span>' : '<span style="background:#fdf0ee;color:#c0392b;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;">✗ Wrong</span>'}
+    <span style="font-size:11px;color:var(--text-3);margin-left:4px;">#${id} · ${quiz.trim()}</span>
+  `;
+
+  document.getElementById('modalTitle').textContent = name;
+
+  let bodyHtml = '';
+
+  // Answer row
+  bodyHtml += `<div style="display:flex;gap:16px;align-items:center;margin-bottom:20px;padding:12px 16px;background:var(--surface2);border-radius:var(--radius-sm);">
+    <div><div style="font-size:10px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Correct answer</div>
+    <span class="ans-chip correct" style="font-size:15px;padding:4px 14px;">${correct}</span></div>
+    ${!isCorrect ? `<div><div style="font-size:10px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">You chose</div>
+    <span class="ans-chip wrong" style="font-size:15px;padding:4px 14px;">${selected}</span></div>` : ''}
+    <div style="margin-left:auto;text-align:right;">
+      <div style="font-size:10px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Time</div>
+      <div style="font-family:var(--font-mono);font-size:16px;color:var(--text)">${time}</div>
+    </div>
+  </div>`;
+
+  // Trap
+  if(trap) {
+    bodyHtml += `<div class="modal-trap">
+      <span class="trap-emoji">⚠️</span>
+      <div>
+        <div style="font-size:10px;font-weight:400;color:#9a7020;margin-bottom:2px;text-transform:uppercase;letter-spacing:0.5px;">Trap identified</div>
+        <div>${trap.trim().replace(/\n/g,' ')}</div>
+      </div>
+    </div>`;
+  }
+
+  // Analysis
+  if(comments && comments.trim()) {
+    const lines = comments.split('\n').map(l=>l.trim()).filter(l=>l&&!l.match(/^[\s\*\-]+$/));
+    const numbered = lines.filter(l=>l.match(/^\d+\./));
+    if(numbered.length > 0) {
+      bodyHtml += `<div class="modal-section">
+        <div class="modal-section-label">What happened</div>
+        <ul class="insights-list">
+          ${numbered.map(l=>`<li>${l.replace(/^\d+\.\s*/,'')}</li>`).join('')}
+        </ul>
+      </div>`;
+    } else {
+      bodyHtml += `<div class="modal-section">
+        <div class="modal-section-label">What happened</div>
+        <div style="font-size:13.5px;line-height:1.7;color:var(--text);">${lines.join('<br>')}</div>
+      </div>`;
+    }
+  }
+
+  // Corrective actions
+  if(corrective && corrective.trim()) {
+    const lines = corrective.split('\n').map(l=>l.trim()).filter(l=>l&&!l.match(/^[\s\*\-]+$/));
+    bodyHtml += `<div class="modal-section">
+      <div class="modal-section-label">Corrective actions</div>
+      <ul class="corrective-list">
+        ${lines.map(l=>`<li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;color:var(--accent);margin-top:3px"><polyline points="20 6 9 17 4 12"/></svg>${l.replace(/^\d+\.\s*/,'').trim()}</li>`).join('')}
+      </ul>
+    </div>`;
+  }
+
+  // Conceptual gaps
+  if(gaps && gaps.trim() && gaps!=='nan') {
+    bodyHtml += `<div class="modal-section">
+      <div class="modal-section-label">Conceptual gap</div>
+      <div style="font-size:13px;color:var(--text-2);background:var(--surface2);padding:10px 14px;border-radius:var(--radius-sm);border-left:3px solid var(--amber-mid);">${gaps.replace(/\n/g,' ')}</div>
+    </div>`;
+  }
+
+  document.getElementById('modalBody').innerHTML = bodyHtml;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if(e.target===document.getElementById('modalOverlay')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape') closeModalDirect();
+});
+
+init();
+</script>
+</body>
+</html>
