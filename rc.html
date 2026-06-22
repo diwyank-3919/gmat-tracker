@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RC Drill Tracker — ScoreConsole</title>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='r' x1='6' y1='26' x2='26' y2='6' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%238b7cf8'/%3E%3Cstop offset='1' stop-color='%235fd9a8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%230a0e1a'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='rgba(255,255,255,0.10)' stroke-width='3'/%3E%3Cpath d='M21.2 8.4 A 9 9 0 1 1 10.8 8.4' fill='none' stroke='url(%23r)' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='21.2' cy='8.4' r='2' fill='%235fd9a8'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+    <style>
+        *,
+        *::before,
+        *::after { box-sizing: border-box; margin: 0; padding: 0 }
+        html { font-size: 16px; height: 100% }
+
+        :root {
+            --navy-900: #070b14; --navy-800: #0a0e1a; --navy-700: #0d1220; --navy-600: #111828;
+            --navy-500: #162033; --navy-400: #1c2a40; --navy-300: #243350;
+            --indigo: #7c6cf6; --indigo-bright: #9d8ff8; --indigo-soft: rgba(124, 108, 246, 0.14); --indigo-glow: rgba(124, 108, 246, 0.28);
+            --green: #34d399; --green-dim: #2db584; --green-soft: rgba(52, 211, 153, 0.12); --green-glow: rgba(52, 211, 153, 0.25);
+            --amber: #f59e0b; --amber-soft: rgba(245, 158, 11, 0.12);
+            --red: #f87171; --red-soft: rgba(248, 113, 113, 0.12);
+            --blue: #60a5fa; --blue-soft: rgba(96, 165, 250, 0.12);
+            --surface-0: rgba(255, 255, 255, 0.000); --surface-1: rgba(255, 255, 255, 0.032); --surface-2: rgba(255, 255, 255, 0.055);
+            --surface-3: rgba(255, 255, 255, 0.085); --surface-hover: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.08); --border-subtle: rgba(255, 255, 255, 0.05); --border-accent: rgba(124, 108, 246, 0.35);
+            --text-1: rgba(255, 255, 255, 0.92); --text-2: rgba(255, 255, 255, 0.62); --text-3: rgba(255, 255, 255, 0.38); --text-4: rgba(255, 255, 255, 0.20);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3); --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35); --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.45);
+            --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 4px 20px rgba(0, 0, 0, 0.30);
+            --ease-out: .22s cubic-bezier(0.16, 1, 0.3, 1); --ease-spring: .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif; background: var(--navy-800); color: var(--text-1);
+            min-height: 100vh; line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+        }
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 55% 40% at 78% 5%, rgba(100, 80, 220, 0.09) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 35% at 10% 90%, rgba(30, 160, 110, 0.05) 0%, transparent 55%),
+                linear-gradient(175deg, #07091280 0%, #0a0e1a 40%, #080c18 100%);
+        }
+        .shell { display: grid; grid-template-columns: 188px 1fr; height: 100vh; position: relative; z-index: 1; overflow: hidden; }
+
+        .sidebar {
+            background: rgba(7, 9, 18, 0.90); backdrop-filter: blur(24px) saturate(160%);
+            border-right: 1px solid var(--border-subtle); display: flex; flex-direction: column;
+            height: 100vh; overflow-y: auto; position: relative;
+            box-shadow: 1px 0 0 rgba(255, 255, 255, 0.05), inset -1px 0 30px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+        .sidebar::after { content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 1px; background: linear-gradient(180deg, transparent 0%, rgba(124, 108, 246, 0.20) 30%, rgba(52, 211, 153, 0.12) 70%, transparent 100%); }
+        .sb-logo { display: flex; align-items: center; gap: 10px; padding: 18px 14px 15px; border-bottom: 1px solid var(--border-subtle); }
+        .sb-logo-icon { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, rgba(124, 108, 246, 0.20), rgba(52, 211, 153, 0.10)); border: 1px solid rgba(124, 108, 246, 0.30); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 16px rgba(124, 108, 246, 0.18); transition: box-shadow var(--ease-out); }
+        .sb-logo-icon:hover { box-shadow: 0 0 28px rgba(124, 108, 246, 0.35) }
+        .sb-logo-name { font-size: 13.5px; }
+        .sb-logo-sub { font-size: 9px; color: var(--text-4); font-weight: 500; margin-top: 1px; letter-spacing: 0.06em; text-transform: uppercase }
+        .sb-section { padding: 12px 10px 4px; }
+        .sb-section-label { opacity: 0.55; font-size: 8px; }
+        .sb-nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border-radius: 9px; font-size: 12.5px; font-weight: 500; color: var(--text-2); cursor: pointer; transition: all 0.18s; margin-bottom: 2px; border: 1px solid transparent; position: relative; text-decoration: none; }
+        .sb-nav-item i { font-size: 14px; flex-shrink: 0 }
+        .sb-nav-item:hover { background: rgba(255, 255, 255, 0.06); color: var(--text-1); border-color: rgba(255, 255, 255, 0.07); transform: translateX(2px); }
+        .sb-nav-item.active { background: linear-gradient(135deg, rgba(139, 124, 248, 0.22) 0%, rgba(139, 124, 248, 0.10) 100%); color: var(--indigo-bright); font-weight: 650; border: 1px solid rgba(139, 124, 248, 0.30); box-shadow: 0 2px 14px rgba(139, 124, 248, 0.18), inset 0 1px 0 rgba(139, 124, 248, 0.15); }
+        .sb-nav-item.active::before { content: ''; position: absolute; left: -1px; top: 25%; bottom: 25%; width: 2.5px; background: var(--indigo-bright); border-radius: 0 2px 2px 0; box-shadow: 0 0 10px var(--indigo-bright); }
+        .sb-nav-item .ti { font-size: 15px; opacity: 0.8; transition: opacity 0.18s; }
+        .sb-nav-item.active .ti, .sb-nav-item:hover .ti { opacity: 1 }
+        .sb-topic-item { padding: 7px 9px; border-radius: 8px; cursor: pointer; transition: background var(--ease-out), transform var(--ease-out); }
+        .sb-topic-item:hover { background: var(--surface-1); transform: translateX(2px) }
+        .sb-topic-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px }
+        .sb-topic-name { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; color: var(--text-2) }
+        .sb-topic-name i { font-size: 12px }
+        .sb-topic-badge { font-size: 10px; font-weight: 600; color: var(--text-3); background: var(--surface-2); padding: 1px 7px; border-radius: 4px }
+        .sb-topic-track { height: 2px; background: rgba(255, 255, 255, 0.05); border-radius: 2px; overflow: hidden }
+        .sb-topic-fill { height: 100%; border-radius: 2px; transition: width .8s cubic-bezier(0.16, 1, 0.3, 1) }
+        .sb-divider { height: 1px; background: var(--border-subtle); margin: 8px 12px }
+        .main { display: flex; flex-direction: column; height: 100vh; overflow: hidden }
+        .topbar { display: flex; align-items: center; gap: 12px; padding: 12px 24px; border-bottom: 1px solid var(--border-subtle); background: rgba(7, 9, 18, 0.70); backdrop-filter: blur(16px); flex-shrink: 0; }
+        .topbar-left { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex-shrink: 0 }
+        .topbar-title { font-size: 18px; font-weight: 700; letter-spacing: -0.4px; color: var(--text-1) }
+        .topbar-sub { font-size: 10.5px; color: var(--text-3); font-weight: 400 }
+        .topbar-chips { display: flex; align-items: center; gap: 5px; flex: 1; flex-wrap: nowrap; overflow: hidden }
+        .t-chip { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-subtle); background: var(--surface-1); color: var(--text-2); white-space: nowrap; transition: all var(--ease-out); }
+        .t-chip:hover { background: var(--surface-2); border-color: var(--border) }
+        .t-chip i { font-size: 11px; flex-shrink: 0 }
+        .t-chip.green, .t-chip.indigo, .t-chip.amber, .t-chip.red { color: var(--text-2); border-color: var(--border-subtle); background: var(--surface-1); }
+        .t-chip.green i { color: var(--green) } .t-chip.indigo i { color: var(--indigo-bright) } .t-chip.amber i { color: var(--amber) } .t-chip.red i { color: var(--red) }
+        .chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: inline-block; box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); animation: pulse-dot 2.4s ease-in-out infinite; }
+        @keyframes pulse-dot { 0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5) } 50% { box-shadow: 0 0 0 5px rgba(52, 211, 153, 0) } }
+        .topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0 }
+        .btn-icon { width: 32px; height: 32px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-3); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all var(--ease-out); }
+        .btn-icon:hover { background: var(--surface-2); color: var(--text-1); border-color: var(--border) }
+        .btn-primary { font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600; padding: 7px 14px; border-radius: 7px; border: none; cursor: pointer; background: linear-gradient(135deg, #7c6cf6, #6056d4); color: #fff; letter-spacing: 0.01em; box-shadow: 0 2px 12px rgba(124, 108, 246, 0.35), 0 1px 0 rgba(255, 255, 255, 0.12) inset; transition: all var(--ease-out); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+        .btn-primary:hover { background: linear-gradient(135deg, #8d7ef8, #6e60e2); box-shadow: 0 4px 20px rgba(124, 108, 246, 0.50), 0 1px 0 rgba(255, 255, 255, 0.15) inset; transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0) }
+        .btn-primary i { font-size: 13px }
+        .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--indigo), #5fd9a8); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; border: 2px solid rgba(124, 108, 246, 0.30); cursor: pointer; transition: box-shadow var(--ease-out); box-shadow: 0 0 0 0 rgba(124, 108, 246, 0); }
+        .avatar:hover { box-shadow: 0 0 0 3px rgba(124, 108, 246, 0.25) }
+        .tabs-row { display: flex; align-items: center; gap: 0; border-bottom: 1px solid var(--border-subtle); padding: 0 24px; flex-shrink: 0; background: rgba(7, 9, 18, 0.50); }
+        .tab-btn { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; padding: 12px 14px; border: none; background: none; color: var(--text-3); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all var(--ease-out); position: relative; }
+        .tab-btn:hover { color: var(--text-2) }
+        .tab-btn.active { color: var(--indigo-bright); border-bottom-color: var(--indigo) }
+        .tab-btn.action-tab { color: var(--amber) }
+        .tab-btn.action-tab:hover { color: #fbbf24 }
+        .tab-btn.action-tab.active { color: var(--amber); border-bottom-color: var(--amber) }
+        .content-area { flex: 1; overflow-y: auto; padding: 22px 24px 48px; scroll-behavior: smooth; }
+        .content-area::-webkit-scrollbar { width: 3px } .content-area::-webkit-scrollbar-track { background: transparent }
+        .content-area::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.07); border-radius: 2px }
+        .content-area::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.12) }
+        .eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-4); margin-bottom: 12px; }
+        .notices-wrap { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px }
+        .sheldon-notice { display: flex; align-items: center; gap: 10px; padding: 10px 13px; border-radius: 10px; border: 1px solid var(--border-subtle); background: rgba(255, 255, 255, 0.025); font-size: 11.5px; color: var(--text-2); animation: fadeInUp .35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .sheldon-notice.warning { border-color: rgba(245, 158, 11, 0.22); background: var(--amber-soft) }
+        .sheldon-notice.positive { border-color: rgba(52, 211, 153, 0.22); background: var(--green-soft) }
+        .notice-icon { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+        .sheldon-notice.warning .notice-icon { background: rgba(245, 158, 11, 0.18); color: var(--amber) }
+        .sheldon-notice.positive .notice-icon { background: rgba(52, 211, 153, 0.18); color: var(--green) }
+        .notice-text { flex: 1; line-height: 1.4 }
+        .notice-dismiss { width: 18px; height: 18px; border-radius: 5px; border: none; background: none; color: var(--text-4); cursor: pointer; font-size: 14px; line-height: 1; flex-shrink: 0; transition: all var(--ease-out); }
+        .notice-dismiss:hover { background: rgba(255, 255, 255, 0.08); color: var(--text-2) }
+        .sheldon-banner { display: flex; align-items: flex-start; gap: 14px; background: linear-gradient(135deg, rgba(18, 24, 44, 0.80), rgba(12, 17, 34, 0.90)); border: 1px solid var(--border); border-left: 3px solid var(--indigo); border-radius: 12px; padding: 14px 16px; margin-bottom: 18px; position: relative; overflow: hidden; animation: slideDown .45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px) } to { opacity: 1; transform: translateY(0) } }
+        .sheldon-banner::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 50% 100% at 0% 50%, rgba(124, 108, 246, 0.07) 0%, transparent 65%); pointer-events: none; }
+        .sheldon-orb { width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; background: var(--indigo-soft); border: 1px solid var(--border-accent); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+        .sheldon-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--indigo-bright); margin-bottom: 3px; }
+        .sheldon-text { font-size: 12px; color: var(--text-2); line-height: 1.55 }
+        .sheldon-text strong { color: var(--text-1) }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px }
+        .grid-full { margin-bottom: 16px }
+        .card { background: linear-gradient(160deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.028)); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-card); padding: 18px; position: relative; overflow: hidden; transition: all var(--ease-out); animation: fadeInUp .4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: translateY(0) } }
+        .grid-4 .card:nth-child(1) { animation-delay: .05s } .grid-4 .card:nth-child(2) { animation-delay: .10s } .grid-4 .card:nth-child(3) { animation-delay: .15s } .grid-4 .card:nth-child(4) { animation-delay: .20s }
+        .grid-2 .card:nth-child(1) { animation-delay: .25s } .grid-2 .card:nth-child(2) { animation-delay: .30s }
+        .card:hover { background: linear-gradient(160deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.045)); border-color: rgba(255, 255, 255, 0.11); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 12px 40px rgba(0, 0, 0, 0.40); transform: translateY(-1px); }
+        .card-accent-green { border-top: 2px solid rgba(52, 211, 153, 0.35) } .card-accent-indigo { border-top: 2px solid rgba(124, 108, 246, 0.35) } .card-accent-amber { border-top: 2px solid rgba(245, 158, 11, 0.35) }
+        .card-eyebrow { font-size: 9px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+        .card-eyebrow i { font-size: 13px; color: var(--text-4) }
+        .big-num { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; margin-bottom: 4px; }
+        .big-num.green { color: var(--green); text-shadow: 0 0 28px rgba(52, 211, 153, 0.30) }
+        .big-num.indigo { color: var(--indigo-bright); text-shadow: 0 0 28px rgba(124, 108, 246, 0.30) }
+        .big-num.amber { color: var(--amber); text-shadow: 0 0 28px rgba(245, 158, 11, 0.25) }
+        .big-num.red { color: var(--red); text-shadow: 0 0 28px rgba(248, 113, 113, 0.25) }
+        .big-num.white { color: var(--text-1) }
+        .card-sub { font-size: 10.5px; color: var(--text-3); font-weight: 400 }
+        .mini-stat-card { background: linear-gradient(160deg, rgba(255, 255, 255, 0.048), rgba(255, 255, 255, 0.025)); border: 1px solid var(--border); border-radius: 12px; padding: 18px 18px 14px; position: relative; overflow: hidden; transition: all var(--ease-out); animation: fadeInUp .4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .mini-stat-card:hover { border-color: rgba(255, 255, 255, 0.11); transform: translateY(-1px); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); }
+        .mini-stat-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+        .mini-stat-eyebrow i { font-size: 13px; color: var(--text-4) }
+        .mini-stat-num { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; color: var(--text-1); margin-bottom: 3px; }
+        .mini-stat-sub { font-size: 10.5px; color: var(--text-3); margin-bottom: 12px }
+        .sparkline-wrap { height: 52px; position: relative; margin-top: 4px }
+        .acc-list { display: flex; flex-direction: column }
+        .acc-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border-subtle); transition: background var(--ease-out); border-radius: 4px; }
+        .acc-row:last-child { border-bottom: none } .acc-row:hover { background: rgba(255, 255, 255, 0.02) }
+        .acc-label { font-size: 11.5px; font-weight: 500; color: var(--text-2); width: 110px; flex-shrink: 0 }
+        .acc-track { flex: 1; height: 3px; background: rgba(255, 255, 255, 0.05); border-radius: 2px; overflow: hidden }
+        .acc-fill { height: 100%; border-radius: 2px; transition: width .9s cubic-bezier(0.16, 1, 0.3, 1); position: relative; }
+        .acc-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.22) 50%, transparent 100%); transform: translateX(-100%); animation: shimmer 2.5s ease-in-out infinite; }
+        @keyframes shimmer { 0% { transform: translateX(-100%); opacity: 0 } 30% { opacity: 1 } 100% { transform: translateX(100%); opacity: 0 } }
+        .acc-pct { font-size: 10.5px; font-weight: 700; width: 30px; text-align: right; flex-shrink: 0 }
+        .acc-n { font-size: 9.5px; color: var(--text-4); width: 24px; text-align: right; flex-shrink: 0 }
+        .matrix-list { display: flex; flex-direction: column }
+        .matrix-row { display: grid; grid-template-columns: 110px 1fr 44px 52px; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border-subtle); }
+        .matrix-row:last-child { border-bottom: none }
+        .matrix-label { font-size: 11.5px; font-weight: 500; color: var(--text-2) }
+        .matrix-track { height: 3px; background: rgba(255, 255, 255, 0.05); border-radius: 2px; overflow: hidden }
+        .matrix-fill { height: 100%; border-radius: 2px; transition: width .8s cubic-bezier(0.16, 1, 0.3, 1) }
+        .matrix-pct { font-size: 10.5px; font-weight: 700; text-align: right }
+        .matrix-n { font-size: 9.5px; color: var(--text-4); text-align: right }
+        .stack-row { margin-bottom: 8px }
+        .stack-header { display: flex; justify-content: space-between; margin-bottom: 4px }
+        .stack-label { font-size: 11px; font-weight: 500; color: var(--text-2) }
+        .stack-count { font-size: 10px; color: var(--text-4) }
+        .stack-bar { height: 3px; border-radius: 2px; overflow: hidden; display: flex }
+        .trap-list { display: flex; flex-direction: column }
+        .trap-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border-subtle); transition: background var(--ease-out); border-radius: 4px; }
+        .trap-row:last-child { border-bottom: none } .trap-row:hover { background: rgba(255, 255, 255, 0.02) }
+        .trap-rank { font-family: 'Fraunces', serif; font-size: 12px; font-weight: 600; color: var(--text-4); width: 16px; flex-shrink: 0 }
+        .trap-name { flex: 1; font-size: 11.5px; color: var(--text-2) }
+        .trap-bar { height: 2px; border-radius: 2px; background: var(--indigo); opacity: .6; transition: width var(--ease-out) }
+        .trap-n { font-size: 10.5px; font-weight: 700; color: var(--indigo-bright); width: 16px; text-align: right; flex-shrink: 0 }
+        .diff-block { padding-bottom: 14px }
+        .diff-block+.diff-block { padding-top: 14px; border-top: 1px solid var(--border-subtle); padding-bottom: 0 }
+        .tag { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; }
+        .tag-correct { background: var(--green-soft); color: var(--green); border: 1px solid rgba(52, 211, 153, 0.20) }
+        .tag-wrong { background: var(--red-soft); color: var(--red); border: 1px solid rgba(248, 113, 113, 0.20) }
+        .tag-type { background: var(--indigo-soft); color: var(--indigo-bright); border: 1px solid rgba(124, 108, 246, 0.20) }
+        .tag-passage { background: var(--blue-soft); color: var(--blue); border: 1px solid rgba(96, 165, 250, 0.20) }
+        .tag-solid { background: var(--green-soft); color: var(--green) }
+        .tag-partial { background: var(--amber-soft); color: var(--amber) }
+        .tag-off { background: var(--red-soft); color: var(--red) }
+        .diff-badge { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; }
+        .diff-badge.Hard { background: var(--red-soft); color: var(--red); border: 1px solid rgba(248, 113, 113, 0.20) }
+        .diff-badge.Medium { background: var(--amber-soft); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.20) }
+        .diff-badge.Easy { background: var(--green-soft); color: var(--green); border: 1px solid rgba(52, 211, 153, 0.20) }
+        .table-outer { overflow-x: auto }
+        .table-inner { max-height: 480px; overflow-y: auto }
+        .log-table { width: 100%; border-collapse: collapse; font-size: 12px }
+        .matrix-table { width: 100%; border-collapse: collapse; font-size: 12.5px }
+        .matrix-table th { text-align: left; padding: 10px 14px; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); border-bottom: 1px solid var(--border-subtle); }
+        .matrix-table th.diff-col { text-align: center }
+        .matrix-table td { padding: 11px 14px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle }
+        .matrix-table tbody tr:last-child td { border-bottom: none }
+        .matrix-table tbody tr:hover td { background: var(--surface-1) }
+        .matrix-table td.type-cell { font-weight: 600; color: var(--text-2) }
+        .matrix-cell { text-align: center; position: relative }
+        .matrix-pill { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-width: 54px; padding: 6px 10px; border-radius: 9px; font-family: 'Fraunces', serif; font-weight: 600; transition: transform .15s; }
+        .matrix-pill:hover { transform: scale(1.06) }
+        .matrix-pill .mp-pct { font-size: 15px; line-height: 1 }
+        .matrix-pill .mp-n { font-family: 'Inter', sans-serif; font-size: 8.5px; font-weight: 600; color: var(--text-4); margin-top: 2px }
+        .matrix-pill.empty { background: rgba(255, 255, 255, 0.02); color: var(--text-4) }
+        .matrix-pill.empty .mp-pct { font-size: 12px; font-weight: 500 }
+        .ep-card { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: start; padding: 14px 0; border-bottom: 1px solid var(--border-subtle); }
+        .ep-card:last-child { border-bottom: none }
+        .ep-theme-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap }
+        .ep-theme-name { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; color: var(--text-1) }
+        .ep-count-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: var(--indigo-soft); color: var(--indigo-bright); }
+        .ep-acc-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+        .ep-examples { font-size: 11.5px; color: var(--text-3); line-height: 1.5 }
+        .ep-drill-box { text-align: right; min-width: 160px; }
+        .ep-drill-label { font-size: 8.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); margin-bottom: 4px }
+        .ep-drill-text { font-size: 12.5px; font-weight: 600; color: var(--indigo-bright) }
+        .ep-drill-none { font-size: 11px; color: var(--text-4); font-style: italic }
+        .ep-minor-strip { border-top: 1px solid var(--border-subtle); padding-top: 12px; display: flex; align-items: flex-start; gap: 8px; }
+        .ep-minor-strip i { font-size: 13px; color: var(--text-4); margin-top: 1px; flex-shrink: 0 }
+        .ep-minor-text { font-size: 11px; color: var(--text-4); line-height: 1.5 }
+        .ep-minor-text strong { color: var(--text-3) }
+        .log-table th { text-align: left; padding: 9px 12px; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); border-bottom: 1px solid var(--border-subtle); white-space: nowrap; position: sticky; top: 0; background: rgba(7, 9, 18, 0.97); backdrop-filter: blur(8px); }
+        .log-table td { padding: 9px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle }
+        .log-table tbody tr { transition: background var(--ease-out) }
+        .log-table tbody tr:hover td { background: rgba(255, 255, 255, 0.025) }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px }
+        .form-group { margin-bottom: 14px } .form-group:last-of-type { margin-bottom: 0 }
+        .form-label { display: block; font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4); margin-bottom: 7px; }
+        .chip-row { display: flex; flex-wrap: wrap; gap: 5px }
+        .fchip { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; padding: 5px 11px; border-radius: 6px; border: 1px solid var(--border-subtle); background: var(--surface-1); color: var(--text-3); cursor: pointer; transition: all var(--ease-out); }
+        .fchip:hover { border-color: var(--border); color: var(--text-2); background: var(--surface-2) }
+        .fchip.active { background: var(--indigo-soft); border-color: var(--border-accent); color: var(--indigo-bright) }
+        .fchip.c-active { background: var(--green-soft); border-color: rgba(52, 211, 153, 0.25); color: var(--green) }
+        .fchip.w-active { background: var(--red-soft); border-color: rgba(248, 113, 113, 0.25); color: var(--red) }
+        .fchip.pqs-active { background: var(--green-soft); border-color: rgba(52, 211, 153, 0.25); color: var(--green) }
+        .fchip.pqp-active { background: var(--amber-soft); border-color: rgba(245, 158, 11, 0.25); color: var(--amber) }
+        .fchip.pqo-active { background: var(--red-soft); border-color: rgba(248, 113, 113, 0.25); color: var(--red) }
+        .finput { font-family: 'Inter', sans-serif; font-size: 12.5px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-subtle); color: var(--text-1); padding: 9px 12px; border-radius: 8px; outline: none; transition: all var(--ease-out); width: 100%; }
+        .finput:focus { border-color: var(--border-accent); background: rgba(255, 255, 255, 0.08); box-shadow: 0 0 0 3px rgba(124, 108, 246, 0.12); }
+        .finput::placeholder { color: var(--text-4) }
+        textarea.finput { resize: none; font-size: 11.5px; line-height: 1.5 }
+        .timer-num { font-family: 'Fraunces', serif; font-size: 50px; font-weight: 600; color: var(--indigo-bright); text-align: center; letter-spacing: -2px; line-height: 1; margin: 10px 0 12px; text-shadow: 0 0 30px rgba(124, 108, 246, 0.35); transition: color var(--ease-out), text-shadow var(--ease-out); }
+        .timer-num.running { color: var(--green); text-shadow: 0 0 30px rgba(52, 211, 153, 0.40); animation: timerPulse 1s ease-in-out infinite; }
+        @keyframes timerPulse { 0%, 100% { opacity: 1 } 50% { opacity: .85 } }
+        .timer-btns { display: flex; gap: 6px; justify-content: center }
+        .tbtn { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; padding: 6px 12px; border-radius: 7px; border: 1px solid var(--border-subtle); background: var(--surface-1); color: var(--text-3); cursor: pointer; transition: all var(--ease-out); display: flex; align-items: center; gap: 5px; }
+        .tbtn:hover { color: var(--text-2); border-color: var(--border); background: var(--surface-2); transform: translateY(-1px) }
+        .tbtn i { font-size: 12px }
+        .btn-submit { font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; padding: 11px; border-radius: 9px; border: none; cursor: pointer; background: linear-gradient(135deg, #7c6cf6, #6056d4); color: #fff; width: 100%; margin-top: 14px; box-shadow: 0 4px 16px rgba(124, 108, 246, 0.30), 0 1px 0 rgba(255, 255, 255, 0.10) inset; transition: all var(--ease-out); position: relative; overflow: hidden; }
+        .btn-submit::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent); transform: translateX(-100%); transition: transform .5s ease; }
+        .btn-submit:hover:not(:disabled)::before { transform: translateX(100%) }
+        .btn-submit:hover:not(:disabled) { background: linear-gradient(135deg, #8d7ef8, #6e60e2); box-shadow: 0 6px 24px rgba(124, 108, 246, 0.45), 0 1px 0 rgba(255, 255, 255, 0.12) inset; transform: translateY(-1px); }
+        .btn-submit:disabled { opacity: .30; cursor: not-allowed; transform: none }
+        .ac-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+        .ac-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber); margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+        .ac-eyebrow::before { content: ''; display: inline-block; width: 16px; height: 1px; background: var(--amber); opacity: .5 }
+        .ac-main-title { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; letter-spacing: -0.4px; color: var(--text-1); line-height: 1.15; margin-bottom: 4px; }
+        .ac-sub { font-size: 12px; color: var(--text-3); line-height: 1.5 }
+        .gain-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px }
+        .gain-card { display: grid; grid-template-columns: 56px 1fr auto; gap: 0; border-radius: 14px; border: 1px solid var(--border); background: linear-gradient(145deg, rgba(255, 255, 255, 0.050), rgba(255, 255, 255, 0.024)); overflow: hidden; transition: all var(--ease-out); animation: fadeInUp .45s cubic-bezier(0.16, 1, 0.3, 1) both; box-shadow: var(--shadow-card); }
+        .gain-card:nth-child(1) { animation-delay: .05s; border-left: 3px solid var(--amber) }
+        .gain-card:nth-child(2) { animation-delay: .12s; border-left: 3px solid rgba(245, 158, 11, 0.55) }
+        .gain-card:nth-child(3) { animation-delay: .19s; border-left: 3px solid rgba(245, 158, 11, 0.28) }
+        .gain-card:nth-child(4) { animation-delay: .26s; border-left: 3px solid rgba(245, 158, 11, 0.15) }
+        .gain-card:hover { background: linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.040)); border-color: rgba(255, 255, 255, 0.11); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.40); }
+        .gain-rank-col { display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.18); border-right: 1px solid var(--border-subtle); padding: 22px 0; flex-direction: column; gap: 4px; }
+        .gain-rank-num { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: var(--amber); line-height: 1; }
+        .gain-rank-label { font-size: 8px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: var(--text-4) }
+        .gain-body { padding: 18px 20px }
+        .gain-type-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px }
+        .gain-icon { width: 24px; height: 24px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+        .gain-type-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4) }
+        .gain-title { font-size: 15px; font-weight: 700; color: var(--text-1); letter-spacing: -0.2px; margin-bottom: 5px; line-height: 1.3; }
+        .gain-reason { font-size: 11.5px; color: var(--text-3); line-height: 1.55; margin-bottom: 12px }
+        .gain-reason strong { color: var(--text-2) }
+        .gain-meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+        .gain-stat-chip { display: flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 5px; background: var(--surface-2); color: var(--text-3); border: 1px solid var(--border-subtle); }
+        .gain-stat-chip i { font-size: 10px }
+        .gain-stat-chip.highlight { background: var(--amber-soft); color: var(--amber); border-color: rgba(245, 158, 11, 0.22) }
+        .gain-stat-chip.green { background: var(--green-soft); color: var(--green); border-color: rgba(52, 211, 153, 0.22) }
+        .gain-stat-chip.red { background: var(--red-soft); color: var(--red); border-color: rgba(248, 113, 113, 0.22) }
+        .gain-impact-col { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 18px 20px; min-width: 100px; border-left: 1px solid var(--border-subtle); background: rgba(0, 0, 0, 0.10); gap: 3px; }
+        .impact-label { font-size: 8px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4) }
+        .impact-value { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; }
+        .impact-value.amber { color: var(--amber); text-shadow: 0 0 20px rgba(245, 158, 11, 0.30) }
+        .impact-value.green { color: var(--green); text-shadow: 0 0 20px rgba(52, 211, 153, 0.30) }
+        .impact-value.red { color: var(--red); text-shadow: 0 0 20px rgba(248, 113, 113, 0.30) }
+        .impact-unit { font-size: 9px; color: var(--text-4); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase }
+        .gain-action-btn { display: flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif; font-size: 10.5px; font-weight: 600; padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.30); background: rgba(245, 158, 11, 0.08); color: var(--amber); cursor: pointer; transition: all var(--ease-out); white-space: nowrap; }
+        .gain-action-btn:hover { background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.50); transform: translateY(-1px) }
+        .gain-action-btn i { font-size: 11px }
+        .ac-empty { text-align: center; padding: 48px 20px; border: 1px dashed var(--border); border-radius: 14px; color: var(--text-4); }
+        .ac-empty i { font-size: 36px; margin-bottom: 12px; display: block; opacity: .4 }
+        .ac-empty-title { font-size: 14px; font-weight: 600; color: var(--text-3); margin-bottom: 6px }
+        .ac-empty-sub { font-size: 11.5px; line-height: 1.5 }
+        .ac-plan-section { border-radius: 14px; border: 1px solid var(--border-accent); background: linear-gradient(135deg, rgba(124, 108, 246, 0.08), rgba(52, 211, 153, 0.04)); overflow: hidden; }
+        .ac-plan-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--border-subtle); flex-wrap: wrap; gap: 10px; }
+        .ac-plan-title { font-size: 13px; font-weight: 700; color: var(--text-1); display: flex; align-items: center; gap: 8px }
+        .ac-plan-title i { color: var(--indigo-bright); font-size: 15px }
+        .ac-plan-sub { font-size: 11px; color: var(--text-3); margin-top: 2px }
+        .btn-generate { font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 700; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; background: linear-gradient(135deg, #7c6cf6, #5fd9a8); color: #fff; box-shadow: 0 2px 14px rgba(124, 108, 246, 0.35); transition: all var(--ease-out); display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+        .btn-generate:hover:not(:disabled) { box-shadow: 0 4px 20px rgba(124, 108, 246, 0.55); transform: translateY(-1px); }
+        .btn-generate:disabled { opacity: .45; cursor: not-allowed; transform: none }
+        .btn-generate i { font-size: 13px }
+        .ac-plan-output { padding: 20px }
+        .plan-empty { font-size: 12px; color: var(--text-4); text-align: center; padding: 10px; line-height: 1.6; }
+        .plan-loading { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text-3); padding: 8px 0; }
+        .plan-spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(124, 108, 246, 0.20); border-top-color: var(--indigo); animation: spin .7s linear infinite; flex-shrink: 0; }
+        @keyframes spin { to { transform: rotate(360deg) } }
+        .plan-day { display: flex; flex-direction: column; gap: 8px }
+        .plan-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 9px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); transition: background var(--ease-out); }
+        .plan-item:hover { background: rgba(255, 255, 255, 0.05) }
+        .plan-item-time { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; color: var(--indigo-bright); flex-shrink: 0; width: 36px; text-align: right; line-height: 1.1; }
+        .plan-item-min { font-size: 8px; color: var(--text-4); font-weight: 600; letter-spacing: 0.06em }
+        .plan-item-body { flex: 1 }
+        .plan-item-name { font-size: 12.5px; font-weight: 700; color: var(--text-1); margin-bottom: 2px }
+        .plan-item-why { font-size: 11px; color: var(--text-3); line-height: 1.5 }
+        .plan-item-badge { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 4px; margin-left: 6px; display: inline-block; }
+        .plan-item-badge.focus { background: var(--indigo-soft); color: var(--indigo-bright) }
+        .plan-item-badge.review { background: var(--amber-soft); color: var(--amber) }
+        .plan-item-badge.drill { background: var(--green-soft); color: var(--green) }
+        .plan-total-row { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; margin-top: 4px; border-top: 1px solid var(--border-subtle); font-size: 11px; color: var(--text-3); }
+        .plan-total-num { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; color: var(--text-1) }
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px); background: rgba(10, 14, 22, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(52, 211, 153, 0.28); color: var(--green); font-size: 11.5px; font-weight: 600; padding: 9px 18px; border-radius: 9px; opacity: 0; pointer-events: none; transition: opacity .22s, transform .3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 999; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.50), 0 0 20px rgba(52, 211, 153, 0.10); display: flex; align-items: center; gap: 7px; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0) }
+        .toast i { font-size: 14px }
+        .sidebar::-webkit-scrollbar { width: 3px } .sidebar::-webkit-scrollbar-track { background: transparent }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.06); border-radius: 2px }
+        .journey-card { background: linear-gradient(160deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.026)); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 16px; padding: 22px 24px 20px; position: relative; overflow: hidden; margin-bottom: 20px; animation: fadeInUp .45s cubic-bezier(0.16, 1, 0.3, 1) both; box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 8px 32px rgba(0, 0, 0, 0.30); }
+        .journey-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 120px; background: radial-gradient(ellipse 70% 100% at 50% 0%, rgba(124, 108, 246, 0.045) 0%, transparent 70%); pointer-events: none; }
+        .journey-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+        .journey-card-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; letter-spacing: -0.3px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.72)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2px; }
+        .journey-card-sub { font-size: 10.5px; color: var(--text-3); }
+        .journey-card-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .jc-stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+        .jc-stat { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 11px 14px; text-align: center; transition: all var(--ease-out); position: relative; overflow: hidden; }
+        .jc-stat::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, currentColor, transparent); opacity: 0; transition: opacity .3s; }
+        .jc-stat:hover { transform: translateY(-2px); border-color: var(--border); }
+        .jc-stat:hover::after { opacity: .25; }
+        .jc-stat-val { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; line-height: 1; margin-bottom: 3px; transition: color .3s; color: var(--text-1); }
+        .jc-stat-label { font-size: 9px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-4); }
+        .jc-chart-wrap { position: relative; height: 260px; background: rgba(255, 255, 255, 0.015); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px 10px 8px; overflow: hidden; }
+        .peak-pulse-ring { position: absolute; border-radius: 50%; pointer-events: none; z-index: 10; transform: translate(-50%, -50%); }
+        .peak-pulse-ring::before, .peak-pulse-ring::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 1.5px solid rgba(52, 211, 153, 0.55); animation: peakPing 2.2s cubic-bezier(0, 0, .2, 1) infinite; }
+        .peak-pulse-ring::after { animation-delay: 1.1s; }
+        @keyframes peakPing { 0% { transform: scale(1); opacity: .7; } 70% { transform: scale(2.4); opacity: 0; } 100% { transform: scale(2.4); opacity: 0; } }
+        .jc-legend { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; font-size: 10.5px; color: var(--text-3); font-weight: 500; }
+        .jc-legend span { display: flex; align-items: center; gap: 5px; }
+        .jc-ld { width: 6px; height: 6px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+        .jc-ll { width: 12px; height: 0; border-top: 1.5px dashed rgba(245, 158, 11, 0.45); display: inline-block; flex-shrink: 0; }
+        .jc-milestones { display: flex; gap: 7px; margin-top: 14px; flex-wrap: wrap; }
+        .jc-chip { display: flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 600; padding: 5px 11px; border-radius: 20px; border: 1px solid var(--border-subtle); background: rgba(255, 255, 255, 0.02); color: var(--text-2); opacity: 0; transform: translateY(6px); animation: chipIn .5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .jc-chip.peak { border-color: rgba(52, 211, 153, 0.30); background: linear-gradient(135deg, rgba(52, 211, 153, 0.12), rgba(52, 211, 153, 0.04)); color: var(--green); }
+        .jc-chip.streak { border-color: var(--border-accent); background: linear-gradient(135deg, rgba(124, 108, 246, 0.14), rgba(124, 108, 246, 0.04)); color: var(--indigo-bright); }
+        @keyframes chipIn { to { opacity: 1; transform: translateY(0); } }
+        .jc-empty { text-align: center; padding: 50px 20px; color: var(--text-3); }
+        .jc-empty i { font-size: 32px; color: var(--text-4); margin-bottom: 10px; display: block; }
+        .seg-control { display: flex; background: var(--surface-1); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 3px; gap: 2px; }
+        .seg-btn { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 6px; border: none; background: none; color: var(--text-3); cursor: pointer; transition: all var(--ease-out); }
+        .seg-btn.active { background: var(--indigo-soft); color: var(--indigo-bright); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset; }
+        .type-select { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; background: var(--surface-1); border: 1px solid var(--border-subtle); color: var(--text-2); padding: 6px 12px; border-radius: 7px; outline: none; cursor: pointer; transition: border-color var(--ease-out); }
+        .type-select:focus { border-color: var(--border-accent) }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <aside class="sidebar">
+            <div class="sb-logo">
+                <div class="sb-logo-icon"><svg class="brand-ring" viewBox="0 0 32 32" width="23" height="23" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="brandGradMain" x1="6" y1="26" x2="26" y2="6" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#8b7cf8" /><stop offset="0.55" stop-color="#7e9bf0" /><stop offset="1" stop-color="#5fd9a8" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="16" cy="16" r="11" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="3.4" />
+                        <path d="M22.3 7 A 11 11 0 1 1 9.7 7" fill="none" stroke="url(#brandGradMain)" stroke-width="3.4" stroke-linecap="round" />
+                        <circle cx="22.3" cy="7" r="2.4" fill="#6fe7b6" />
+                    </svg></div>
+                <div><div class="sb-logo-name">Score<span style="font-weight:700">Console</span></div></div>
+            </div>
+
+            <div class="sb-section">
+                <div class="sb-section-label">Navigation</div>
+                <a href="https://scoreconsole.com/app.html" class="sb-nav-item"><i class="ti ti-layout-dashboard"></i>Dashboard</a>
+                <a href="https://scoreconsole.com/cr.html" class="sb-nav-item"><i class="ti ti-activity"></i>CR Tracker</a>
+                <div class="sb-nav-item active"><i class="ti ti-book"></i>RC Tracker</div>
+                <div class="sb-nav-item" onclick="showTab('analytics')"><i class="ti ti-chart-bar"></i>Analytics</div>
+                <div class="sb-nav-item" onclick="showTab('log')"><i class="ti ti-list-check"></i>Attempt Log</div>
+                <div class="sb-nav-item" onclick="showTab('action')" style="color:var(--amber)"><i class="ti ti-bolt"></i>Action Center</div>
+            </div>
+
+            <div class="sb-divider"></div>
+            <div class="sb-section"><div class="sb-section-label">Question Types</div><div id="sb-types"></div></div>
+            <div class="sb-divider"></div>
+            <div class="sb-section"><div class="sb-section-label">Passage Types</div><div id="sb-passages"></div></div>
+            <div class="sb-divider"></div>
+            <div class="sb-section"><div class="sb-section-label">Difficulty</div><div id="sb-diff"></div></div>
+
+            <div style="flex:1"></div>
+            <div style="padding:14px;border-top:1px solid var(--border-subtle)">
+                <div style="font-size:9.5px;color:var(--text-4);text-align:center" id="sb-attempt-count">RC attempts</div>
+            </div>
+        </aside>
+
+        <div class="main">
+            <div class="topbar">
+                <div class="topbar-left">
+                    <div class="topbar-title">RC Drill Tracker</div>
+                    <div class="topbar-sub" id="tb-date"></div>
+                </div>
+                <div class="topbar-chips" id="tb-chips"></div>
+                <div class="topbar-right">
+                    <button class="btn-icon" title="Sound"><i class="ti ti-volume"></i></button>
+                    <button class="btn-icon" title="Sync" onclick="init()"><i class="ti ti-refresh"></i></button>
+                    <button class="btn-primary" onclick="showTab('entry')"><i class="ti ti-plus"></i> Log Attempt</button>
+                    <div class="avatar" title="Profile">S</div>
+                </div>
+            </div>
+
+            <div class="tabs-row">
+                <button class="tab-btn active" onclick="showTab('analytics')">Analytics</button>
+                <button class="tab-btn" onclick="showTab('log')">Attempt Log</button>
+                <button class="tab-btn" onclick="showTab('entry')">Log Attempt</button>
+                <button class="tab-btn action-tab" onclick="showTab('action')">⚡ Action Center</button>
+            </div>
+
+            <div id="tab-analytics" class="content-area">
+                <div id="notices-wrap" class="notices-wrap"></div>
+                <div id="insight-banner" class="sheldon-banner"></div>
+
+                <div class="journey-card">
+                    <div class="journey-card-header">
+                        <div>
+                            <div class="journey-card-title">Your RC Journey</div>
+                            <div class="journey-card-sub" id="journey-sub">Tracking accuracy across logged RC study sessions</div>
+                        </div>
+                        <div class="journey-card-controls">
+                            <div class="seg-control" id="journey-xaxis-toggle">
+                                <button class="seg-btn active" onclick="setJourneyXAxis('session',this)">By Session</button>
+                                <button class="seg-btn" onclick="setJourneyXAxis('date',this)">By Date</button>
+                            </div>
+                            <select class="type-select" id="journey-type-filter" onchange="renderJourneyChart()">
+                                <option value="all">All RC Sessions</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="jc-stat-row" id="journey-stats"></div>
+                    <div class="jc-legend">
+                        <span><span class="jc-ld" style="background:#9d8ff8"></span>Accuracy</span>
+                        <span><span class="jc-ld" style="background:#34d399"></span>Peak session</span>
+                        <span><span class="jc-ld" style="background:#f87171"></span>Below 40%</span>
+                        <span><span class="jc-ll"></span>75% target</span>
+                    </div>
+                    <div class="jc-chart-wrap" id="jc-chart-wrap">
+                        <canvas id="journey-canvas" role="img" aria-label="RC accuracy over time line chart"></canvas>
+                        <div id="journey-empty-state" class="jc-empty" style="display:none">
+                            <i class="ti ti-chart-line"></i>
+                            <div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:4px">No scored RC sessions yet</div>
+                            <div style="font-size:11px">Log a session under topic RC with an accuracy note (e.g. "6/8=75%") to start your journey graph.</div>
+                        </div>
+                        <div class="peak-pulse-ring" id="peak-pulse-ring" style="display:none;width:10px;height:10px;"></div>
+                    </div>
+                    <div class="jc-milestones" id="journey-milestones"></div>
+                </div>
+
+                <div class="eyebrow">Overview</div>
+                <div class="grid-4" id="hero-cards"></div>
+                <div class="grid-3" id="period-cards"></div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-eyebrow">Accuracy by Question Type <i class="ti ti-chart-bar"></i></div>
+                        <div class="acc-list" id="type-bars"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-eyebrow">Passage Map Quality &rarr; Accuracy <i class="ti ti-map-2"></i></div>
+                        <div class="matrix-list" id="prethink-matrix"></div>
+                        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border-subtle)">
+                            <div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-4);margin-bottom:8px">Passage Map Rate by Type</div>
+                            <div id="prethink-stacked"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-full">
+                    <div class="card">
+                        <div class="card-eyebrow">Accuracy by Passage Type <i class="ti ti-books"></i></div>
+                        <div class="acc-list" id="passage-bars"></div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-eyebrow">Top Error Traps <i class="ti ti-alert-triangle"></i></div>
+                        <div class="trap-list" id="trap-list"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-eyebrow">Medium vs Hard <i class="ti ti-chart-dots"></i></div>
+                        <div id="diff-breakdown"></div>
+                    </div>
+                </div>
+
+                <div class="grid-full">
+                    <div class="card">
+                        <div class="card-eyebrow">Difficulty &times; Accuracy Matrix <i class="ti ti-grid-dots"></i></div>
+                        <div class="table-outer"><table class="matrix-table" id="diff-matrix-table"></table></div>
+                    </div>
+                </div>
+
+                <div class="grid-full">
+                    <div class="card">
+                        <div class="card-eyebrow">Error Pattern AI &mdash; Themed Weaknesses <i class="ti ti-brain"></i></div>
+                        <div id="error-pattern-list"></div>
+                        <div id="error-pattern-minor" style="margin-top:14px"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-log" class="content-area" style="display:none">
+                <div class="eyebrow">All Attempts &mdash; <span id="log-count">0</span> total</div>
+                <div class="card" style="padding:0">
+                    <div class="table-outer"><div class="table-inner">
+                        <table class="log-table">
+                            <thead><tr>
+                                <th>#</th><th>Passage</th><th>P-Type</th><th>Q-Type</th><th>Diff</th><th>Result</th><th>Time</th><th>Map</th><th>Trap</th>
+                            </tr></thead>
+                            <tbody id="log-tbody"></tbody>
+                        </table>
+                    </div></div>
+                </div>
+            </div>
+
+            <div id="tab-entry" class="content-area" style="display:none">
+                <div class="eyebrow">Log an RC Attempt</div>
+                <div class="form-grid">
+                    <div class="card">
+                        <div class="form-group">
+                            <label class="form-label">Question Type</label>
+                            <div class="chip-row" id="type-chips">
+                                <div class="fchip" onclick="selType(this,'Main Idea')">Main Idea</div>
+                                <div class="fchip" onclick="selType(this,'Detail')">Detail</div>
+                                <div class="fchip" onclick="selType(this,'Inference')">Inference</div>
+                                <div class="fchip" onclick="selType(this,'Function')">Function</div>
+                                <div class="fchip" onclick="selType(this,'Structure')">Structure</div>
+                                <div class="fchip" onclick="selType(this,'Tone')">Tone</div>
+                                <div class="fchip" onclick="selType(this,'Application')">Application</div>
+                                <div class="fchip" onclick="selType(this,'Other')">Other</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Passage Type</label>
+                            <div class="chip-row" id="passage-chips">
+                                <div class="fchip" onclick="selPassage(this,'Science')">Science</div>
+                                <div class="fchip" onclick="selPassage(this,'Business')">Business</div>
+                                <div class="fchip" onclick="selPassage(this,'Humanities')">Humanities</div>
+                                <div class="fchip" onclick="selPassage(this,'Social Science')">Social Science</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Difficulty</label>
+                            <div class="chip-row" id="diff-chips">
+                                <div class="fchip" onclick="selDiff(this,'Easy')">Easy</div>
+                                <div class="fchip" onclick="selDiff(this,'Medium')">Medium</div>
+                                <div class="fchip" onclick="selDiff(this,'Hard')">Hard</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Result</label>
+                            <div class="chip-row" id="res-chips">
+                                <div class="fchip" onclick="selRes(this,'correct')">&#10003; Correct</div>
+                                <div class="fchip" onclick="selRes(this,'wrong')">&#10007; Wrong</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Passage Map Quality</label>
+                            <div class="chip-row" id="pq-chips">
+                                <div class="fchip pqs" onclick="selPQ(this,'solid','pqs-active')">🟢 Strong map</div>
+                                <div class="fchip pqp" onclick="selPQ(this,'partial','pqp-active')">🟡 Partial map</div>
+                                <div class="fchip pqo" onclick="selPQ(this,'off-track','pqo-active')">🔴 Weak map</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Passage Name (optional)</label>
+                            <input class="finput" id="qname" type="text" placeholder="e.g. Coral Reef Symbiosis">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Trap / Error Pattern (optional)</label>
+                            <input class="finput" id="qtrap" type="text" placeholder="e.g. Out-of-scope inference">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Notes</label>
+                            <textarea class="finput" id="qnotes" rows="3" placeholder="What went wrong? Corrective action?"></textarea>
+                        </div>
+                        <button class="btn-submit" id="submit-btn" onclick="submitAttempt()" disabled>Save Attempt</button>
+                    </div>
+
+                    <div class="card">
+                        <div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-4);margin-bottom:8px">Timer</div>
+                        <div class="timer-num" id="timer-display">0:00</div>
+                        <div class="timer-btns">
+                            <button class="tbtn" onclick="timerStart()"><i class="ti ti-player-play"></i> Start</button>
+                            <button class="tbtn" onclick="timerPause()"><i class="ti ti-player-pause"></i> Pause</button>
+                            <button class="tbtn" onclick="timerReset()"><i class="ti ti-refresh"></i> Reset</button>
+                        </div>
+                        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-subtle)">
+                            <div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-4);margin-bottom:10px">Your Stats at a Glance</div>
+                            <div id="quick-stats"></div>
+                        </div>
+                        <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border-subtle)">
+                            <div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-4);margin-bottom:10px">GMAT RC Benchmark</div>
+                            <div style="font-size:11px;color:var(--text-3);line-height:1.7">
+                                Target: <span style="color:var(--text-2);font-weight:600">&ge;75% overall</span><br>
+                                Time per Q: <span style="color:var(--text-2);font-weight:600">&lt;1:30</span><br>
+                                Strong map rate: <span style="color:var(--text-2);font-weight:600">&ge;65%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-action" class="content-area" style="display:none">
+                <div class="ac-header">
+                    <div class="ac-title-block">
+                        <div class="ac-eyebrow">Sheldon Intelligence</div>
+                        <div class="ac-main-title">Your Biggest Score Gains</div>
+                        <div class="ac-sub">Ranked by estimated RC score impact, computed from your actual attempts.</div>
+                    </div>
+                    <button class="btn-primary" onclick="render();renderActionCenter()" style="flex-shrink:0"><i class="ti ti-refresh"></i> Recalculate</button>
+                </div>
+                <div id="ac-gain-list" class="gain-list"></div>
+                <div class="ac-plan-section">
+                    <div class="ac-plan-header">
+                        <div>
+                            <div class="ac-plan-title"><i class="ti ti-calendar-event"></i> Generate Today's Study Plan</div>
+                            <div class="ac-plan-sub">Sheldon will build a focused RC session targeting your top gains.</div>
+                        </div>
+                        <button class="btn-generate" id="generate-plan-btn" onclick="generatePlan()"><i class="ti ti-sparkles"></i> Generate Plan</button>
+                    </div>
+                    <div class="ac-plan-output">
+                        <div class="plan-empty" id="plan-empty-msg">Hit <strong>Generate Plan</strong> and Sheldon will create a focused RC study session from your top gains above.</div>
+                        <div id="plan-output" style="display:none"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"><i class="ti ti-check"></i> Attempt saved</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ── SUPABASE ──
+        const SUPA_URL = 'https://zglxfaarezgyibewtmbh.supabase.co';
+        const SUPA_KEY = 'sb_publishable_24bSL5sfl-tRgRLtik1qNA_NdexORqM';
+        const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+        let attempts = [];
+        let _uid = null;
+
+        // ── CONSTANTS ──
+        const TYPES = ['Main Idea', 'Detail', 'Inference', 'Function', 'Structure', 'Tone', 'Application', 'Other'];
+        const PASSAGE_TYPES = ['Science', 'Business', 'Humanities', 'Social Science'];
+        const PQO = ['solid', 'partial', 'off-track'];
+        const PQL = { solid: '🟢 Strong map', partial: '🟡 Partial map', 'off-track': '🔴 Weak map' };
+        const TYPE_ICONS = {
+            'Main Idea': ['ti-bulb', '#7c6cf6'],
+            'Detail': ['ti-list-search', '#60a5fa'],
+            'Inference': ['ti-arrow-ramp-right-3', '#34d399'],
+            'Function': ['ti-puzzle', '#f59e0b'],
+            'Structure': ['ti-layout-list', '#f472b6'],
+            'Tone': ['ti-mood-smile', '#a78bfa'],
+            'Application': ['ti-arrows-shuffle', '#fb923c'],
+            'Other': ['ti-dots', '#fb923c'],
+        };
+        const PASSAGE_ICONS = {
+            'Science': ['ti-flask', '#34d399'],
+            'Business': ['ti-briefcase', '#f59e0b'],
+            'Humanities': ['ti-palette', '#f472b6'],
+            'Social Science': ['ti-users', '#60a5fa'],
+        };
+
+        // ── AUTH ──
+        async function init() {
+            try {
+                const { data: { session }, error: sessErr } = await supa.auth.getSession();
+                if (sessErr) { showFatalError('Auth error: ' + sessErr.message); return; }
+                if (!session) {
+                    showFatalError('Not signed in — redirecting to dashboard…');
+                    setTimeout(() => { window.location.href = '/app.html'; }, 1200);
+                    return;
+                }
+                _uid = session.user.id;
+                await loadAttempts();
+                await loadJourneySessions();
+                renderJourneyChart();
+            } catch (e) {
+                showFatalError('Unexpected error: ' + (e?.message || e));
+            }
+        }
+
+        function showFatalError(msg) {
+            const el = document.getElementById('insight-banner');
+            el.innerHTML = `<div class="sheldon-orb">⚠️</div><div><div class="sheldon-label" style="color:var(--red)">Couldn't Load</div><div class="sheldon-text">${msg}</div></div>`;
+        }
+
+        let _rcSessions = [];
+
+        async function loadAttempts() {
+            showLoading(true);
+            try {
+                const { data, error } = await supa
+                    .from('rc_attempts')
+                    .select('*')
+                    .eq('user_id', _uid)
+                    .order('logged_at', { ascending: true })
+                    .limit(2000);
+                if (error) { showFatalError('Database error: ' + error.message + ' — make sure the rc_attempts table exists.'); return; }
+                attempts = data || [];
+
+                const { data: sessData } = await supa
+                    .from('sessions')
+                    .select('date, notes, topic, deleted')
+                    .eq('user_id', _uid)
+                    .eq('topic', 'RC')
+                    .eq('deleted', false)
+                    .limit(500);
+                _rcSessions = sessData || [];
+
+                render();
+                renderNotices();
+            } catch (e) {
+                showFatalError('Network error loading attempts: ' + (e?.message || e));
+            }
+        }
+
+        function showLoading(on) {
+            const el = document.getElementById('insight-banner');
+            if (on) el.innerHTML = `<div class="sheldon-orb">⏳</div><div><div class="sheldon-label">Loading</div><div class="sheldon-text">Fetching your RC attempts…</div></div>`;
+        }
+
+        // ── FORM STATE ──
+        let _type = null, _passage = null, _diff = null, _res = null, _pq = null;
+        let _tSecs = 0, _tRun = false, _tInt = null;
+
+        function selType(el, v) { document.querySelectorAll('#type-chips .fchip').forEach(c => c.classList.remove('active')); el.classList.add('active'); _type = v; chkForm() }
+        function selPassage(el, v) { document.querySelectorAll('#passage-chips .fchip').forEach(c => c.classList.remove('active')); el.classList.add('active'); _passage = v; chkForm() }
+        function selDiff(el, v) { document.querySelectorAll('#diff-chips .fchip').forEach(c => c.classList.remove('active')); el.classList.add('active'); _diff = v; chkForm() }
+        function selRes(el, v) {
+            document.querySelectorAll('#res-chips .fchip').forEach(c => c.classList.remove('active', 'c-active', 'w-active'));
+            el.classList.add('active', v === 'correct' ? 'c-active' : 'w-active'); _res = v; chkForm();
+        }
+        function selPQ(el, v, cls) {
+            document.querySelectorAll('#pq-chips .fchip').forEach(c => c.classList.remove('active', 'pqs-active', 'pqp-active', 'pqo-active'));
+            el.classList.add('active', cls); _pq = v;
+        }
+        function chkForm() { document.getElementById('submit-btn').disabled = !(_type && _diff && _res) }
+
+        function timerStart() { if (_tRun) return; _tRun = true; document.getElementById('timer-display').classList.add('running'); _tInt = setInterval(() => { _tSecs++; updTimer() }, 1000); }
+        function timerPause() { _tRun = false; document.getElementById('timer-display').classList.remove('running'); clearInterval(_tInt); }
+        function timerReset() { timerPause(); _tSecs = 0; updTimer(); }
+        function updTimer() { document.getElementById('timer-display').textContent = Math.floor(_tSecs / 60) + ':' + String(_tSecs % 60).padStart(2, '0') }
+
+        // ── SUBMIT ──
+        async function submitAttempt() {
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Saving…';
+
+            const row = {
+                user_id: _uid,
+                source: 'manual',
+                question_type: _type,
+                passage_type: _passage || null,
+                difficulty: _diff,
+                correct: _res === 'correct',
+                time_secs: _tSecs || null,
+                passage_map_quality: _pq || null,
+                question_name: document.getElementById('qname').value.trim() || null,
+                trap: document.getElementById('qtrap').value.trim() || null,
+                comments: document.getElementById('qnotes').value.trim() || null,
+            };
+
+            const { data, error } = await supa.from('rc_attempts').insert(row).select().single();
+            if (error) { console.error('insert error', error); btn.textContent = 'Error — retry'; btn.disabled = false; return; }
+
+            attempts.push(data);
+            timerReset();
+            _type = _passage = _diff = _res = _pq = null;
+            document.querySelectorAll('.fchip').forEach(c => c.classList.remove('active', 'c-active', 'w-active', 'pqs-active', 'pqp-active', 'pqo-active'));
+            ['qname', 'qtrap', 'qnotes'].forEach(id => document.getElementById(id).value = '');
+            btn.textContent = 'Save Attempt';
+
+            const t = document.getElementById('toast');
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2200);
+            render();
+            renderNotices();
+        }
+
+        // ── TABS ──
+        function showTab(name) {
+            ['analytics', 'log', 'entry', 'action'].forEach(t => { document.getElementById('tab-' + t).style.display = t === name ? 'block' : 'none' });
+            document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', ['analytics', 'log', 'entry', 'action'][i] === name));
+            if (name === 'action') renderActionCenter();
+        }
+        function filterByType(t) { showTab('log') }
+
+        // ══════════════════════════════════════════
+        // SHELDON NOTICES — proactive pattern detection
+        // ══════════════════════════════════════════
+        function computeSheldonNotices(attemptsArr, sessionsArr) {
+            const notices = [];
+            attemptsArr = attemptsArr || [];
+            sessionsArr = sessionsArr || [];
+            function _pct(c, n) { return n === 0 ? 0 : Math.round((c / n) * 100); }
+
+            const solid = attemptsArr.filter(a => a.passage_map_quality === 'solid');
+            const weak = attemptsArr.filter(a => !a.passage_map_quality || a.passage_map_quality === 'off-track');
+            if (solid.length >= 5 && weak.length >= 5) {
+                const solidAcc = _pct(solid.filter(a => a.correct).length, solid.length);
+                const weakAcc = _pct(weak.filter(a => a.correct).length, weak.length);
+                const lift = solidAcc - weakAcc;
+                if (lift >= 15) notices.push({ id: 'prethink_lift', severity: 'positive', text: `A strong passage map gives you +${lift}pp accuracy (${solidAcc}% vs ${weakAcc}%) — your single biggest lever right now.` });
+            }
+
+            const byType = {};
+            attemptsArr.forEach(a => { const t = a.question_type || 'Other'; if (!byType[t]) byType[t] = { c: 0, n: 0 }; byType[t].n++; if (a.correct) byType[t].c++; });
+            const eligible = Object.entries(byType).filter(([, v]) => v.n >= 5);
+            if (eligible.length) {
+                const worst = eligible.sort((a, b) => _pct(a[1].c, a[1].n) - _pct(b[1].c, b[1].n))[0];
+                const wAcc = _pct(worst[1].c, worst[1].n);
+                if (wAcc < 40) notices.push({ id: 'worst_type', severity: 'warning', text: `${worst[0]} accuracy is ${wAcc}% across ${worst[1].n} attempts — your weakest RC question type right now.` });
+            }
+
+            const byPassage = {};
+            attemptsArr.forEach(a => { if (!a.passage_type) return; if (!byPassage[a.passage_type]) byPassage[a.passage_type] = { c: 0, n: 0 }; byPassage[a.passage_type].n++; if (a.correct) byPassage[a.passage_type].c++; });
+            const eligibleP = Object.entries(byPassage).filter(([, v]) => v.n >= 5);
+            if (eligibleP.length) {
+                const worstP = eligibleP.sort((a, b) => _pct(a[1].c, a[1].n) - _pct(b[1].c, b[1].n))[0];
+                const wpAcc = _pct(worstP[1].c, worstP[1].n);
+                if (wpAcc < 40) notices.push({ id: 'worst_passage', severity: 'warning', text: `${worstP[0]} passages are hitting only ${wpAcc}% across ${worstP[1].n} attempts — this passage genre needs targeted reading practice.` });
+            }
+
+            const sortedA = [...attemptsArr].sort((a, b) => new Date(a.logged_at) - new Date(b.logged_at));
+            if (sortedA.length >= 10) {
+                const last5 = sortedA.slice(-5), prior5 = sortedA.slice(-10, -5);
+                const lastAcc = _pct(last5.filter(a => a.correct).length, 5);
+                const priorAcc = _pct(prior5.filter(a => a.correct).length, 5);
+                const delta = lastAcc - priorAcc;
+                if (delta <= -20) notices.push({ id: 'recent_decline', severity: 'warning', text: `Your last 5 attempts dropped to ${lastAcc}% accuracy, down from ${priorAcc}% in the previous 5 — worth a quick reset before pushing more volume.` });
+                else if (delta >= 20) notices.push({ id: 'recent_improvement', severity: 'positive', text: `Your last 5 attempts jumped to ${lastAcc}% accuracy, up from ${priorAcc}% — whatever you just changed is working.` });
+            }
+
+            if (sessionsArr.length) {
+                const mostRecent = sessionsArr.reduce((latest, s) => new Date(s.date) > new Date(latest.date) ? s : latest);
+                const daysSince = Math.floor((Date.now() - new Date(mostRecent.date)) / 86400000);
+                if (daysSince >= 3) notices.push({ id: 'stale_topic', severity: 'warning', text: `RC hasn't been touched in ${daysSince} days — a short focused passage set would close the gap.` });
+            }
+
+            function _parseAcc(noteText) {
+                if (!noteText) return null;
+                const m = noteText.match(/(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)\s*%/) || noteText.match(/accuracy[\s:-]*(\d+)\s*\/\s*(\d+)/i);
+                if (!m) return null;
+                const correct = parseInt(m[1], 10), total = parseInt(m[2], 10);
+                const p = m[3] ? parseInt(m[3], 10) : Math.round((correct / total) * 100);
+                return total > 0 ? p : null;
+            }
+            const scoredSessions = sessionsArr.map(s => ({ date: s.date, acc: _parseAcc(s.notes) })).filter(s => s.acc !== null).sort((a, b) => new Date(a.date) - new Date(b.date));
+            if (scoredSessions.length >= 3) {
+                let streak = 1, best = 1;
+                for (let i = 1; i < scoredSessions.length; i++) { if (scoredSessions[i].acc >= scoredSessions[i - 1].acc) { streak++; best = Math.max(best, streak); } else streak = 1; }
+                if (best >= 3) notices.push({ id: 'improving_streak', severity: 'positive', text: `You're on a ${best}-session improving streak in RC accuracy — keep the momentum going.` });
+            }
+
+            const PRIORITY = { stale_topic: 1, recent_decline: 2, worst_type: 3, worst_passage: 4, prethink_lift: 5, recent_improvement: 6, improving_streak: 7 };
+            notices.sort((a, b) => (PRIORITY[a.id] || 99) - (PRIORITY[b.id] || 99));
+            return notices.slice(0, 3);
+        }
+
+        async function getActiveDismissals() {
+            const { data, error } = await supa.from('sheldon_notice_dismissals').select('notice_id, dismissed_until').eq('user_id', _uid).gt('dismissed_until', new Date().toISOString());
+            if (error || !data) return [];
+            return data.map(d => d.notice_id);
+        }
+
+        async function dismissNotice(noticeId) {
+            const until = new Date(Date.now() + 7 * 86400000).toISOString();
+            await supa.from('sheldon_notice_dismissals').upsert(
+                { user_id: _uid, notice_id: 'rc_' + noticeId, dismissed_at: new Date().toISOString(), dismissed_until: until },
+                { onConflict: 'user_id,notice_id' }
+            );
+            const el = document.querySelector(`[data-notice-id="${noticeId}"]`);
+            if (el) { el.style.opacity = '0'; el.style.transform = 'translateY(-6px)'; setTimeout(() => el.remove(), 200); }
+        }
+
+        async function renderNotices() {
+            const notices = computeSheldonNotices(attempts, _rcSessions);
+            const dismissedRaw = await getActiveDismissals();
+            const dismissed = dismissedRaw.map(id => id.replace(/^rc_/, ''));
+            const visible = notices.filter(n => !dismissed.includes(n.id));
+            const wrap = document.getElementById('notices-wrap');
+            if (!visible.length) { wrap.innerHTML = ''; return; }
+            wrap.innerHTML = visible.map(n => `
+    <div class="sheldon-notice ${n.severity}" data-notice-id="${n.id}">
+      <span class="notice-icon">${n.severity === 'positive' ? '✓' : '⚠'}</span>
+      <span class="notice-text">${n.text}</span>
+      <button class="notice-dismiss" onclick="dismissNotice('${n.id}')">&times;</button>
+    </div>`).join('');
+        }
+
+        // ══════════════════════════════════════════
+        // ERROR PATTERN AI — themed weakness clustering
+        // ══════════════════════════════════════════
+        const THEME_RULES = [
+            { theme: 'Misread Main Idea', keywords: ['main idea', 'primary purpose', 'central point', 'misread conclusion', 'main point', 'overall purpose'] },
+            { theme: 'Out-of-Scope Inference', keywords: ['out of scope', 'not stated', 'beyond passage', 'unsupported inference', 'too far', 'not mentioned'] },
+            { theme: 'Detail Mislocation', keywords: ['detail', 'wrong line', 'misread detail', 'supporting idea', 'located wrong', 'specific detail'] },
+            { theme: 'Author Tone / View Distorted', keywords: ['tone', 'attitude', 'author view', 'author opinion', 'distorted view', 'author stance'] },
+            { theme: 'Answer Choice Overreach', keywords: ['extreme choice', 'too strong', 'generalization', 'absolute language', 'overreach', 'extreme'] },
+            { theme: 'Passage Map Skipped', keywords: ['passage map', 'no map', 'skipped map', 'structure missed', 'rushed reading', 'didnt map'] },
+            { theme: 'Function Confusion', keywords: ['function', 'purpose of paragraph', 'role of', 'why mentioned', 'purpose of sentence'] },
+            { theme: 'Half-right / Distortion Trap', keywords: ['half right', 'distortion', 'partially correct', 'one word off', 'half correct'] },
+            { theme: 'Comparison / Timeframe Confusion', keywords: ['comparison', 'timeframe', 'chronology', 'before after', 'contrast confused', 'irrelevant comparison'] },
+            { theme: 'Inference Logic Error', keywords: ['must be true', 'logical inference', 'cannot conclude', 'inference logic', 'invalid inference'] },
+        ];
+        const EP_MIN_SAMPLE = 4;
+
+        function classifyTrap(trapText) {
+            if (!trapText) return null;
+            const lower = trapText.toLowerCase();
+            for (const rule of THEME_RULES) { if (rule.keywords.some(kw => lower.includes(kw))) return rule.theme; }
+            return 'Other';
+        }
+
+        function computeErrorPatterns(attemptsArr) {
+            attemptsArr = attemptsArr || [];
+            const withTraps = attemptsArr.filter(a => a.trap);
+            const themes = {};
+            withTraps.forEach(a => {
+                const theme = classifyTrap(a.trap);
+                if (!theme) return;
+                if (!themes[theme]) themes[theme] = { count: 0, correct: 0, types: {}, traps: new Set() };
+                themes[theme].count++;
+                if (a.correct) themes[theme].correct++;
+                const t = a.question_type || 'Other';
+                themes[theme].types[t] = (themes[theme].types[t] || 0) + 1;
+                themes[theme].traps.add(a.trap);
+            });
+            const allThemes = Object.entries(themes).map(([theme, data]) => {
+                const accuracy = Math.round((data.correct / data.count) * 100);
+                const dominantTypeEntries = Object.entries(data.types).sort((a, b) => b[1] - a[1]);
+                const realDominant = dominantTypeEntries.find(([t]) => t !== 'Other') || dominantTypeEntries[0];
+                const wrongInDominantType = attemptsArr.filter(a => a.question_type === realDominant[0] && !a.correct).length;
+                const lowEnd = Math.max(5, Math.round(wrongInDominantType * 0.4));
+                const highEnd = Math.min(15, Math.max(lowEnd + 2, Math.round(wrongInDominantType * 0.7)));
+                return {
+                    theme, occurrences: data.count, accuracy,
+                    dominantType: realDominant[0], dominantTypeCount: realDominant[1],
+                    exampleTraps: Array.from(data.traps).slice(0, 3),
+                    lowConfidence: data.count < EP_MIN_SAMPLE,
+                    recommendedDrill: (realDominant[0] === 'Other' || data.count < EP_MIN_SAMPLE) ? null : { type: realDominant[0], lowEnd, highEnd },
+                };
+            }).sort((a, b) => b.occurrences - a.occurrences);
+            return { confident: allThemes.filter(t => !t.lowConfidence), minor: allThemes.filter(t => t.lowConfidence) };
+        }
+
+        function renderErrorPatterns() {
+            const { confident, minor } = computeErrorPatterns(attempts);
+            const listEl = document.getElementById('error-pattern-list');
+            const minorEl = document.getElementById('error-pattern-minor');
+            if (!confident.length) {
+                listEl.innerHTML = `<div style="color:var(--text-4);font-size:12px;padding:12px 0">Not enough trap data yet to detect themed patterns — log a few more attempts with trap notes.</div>`;
+                minorEl.innerHTML = '';
+                return;
+            }
+            listEl.innerHTML = confident.map(p => {
+                const accColor = p.accuracy >= 40 ? 'var(--green)' : p.accuracy >= 20 ? 'var(--amber)' : 'var(--red)';
+                const accBg = p.accuracy >= 40 ? 'rgba(52,211,153,0.13)' : p.accuracy >= 20 ? 'rgba(251,191,36,0.13)' : 'rgba(251,113,133,0.13)';
+                const drillHTML = p.recommendedDrill
+                    ? `<div class="ep-drill-label">Suggested Drill</div><div class="ep-drill-text">~${p.recommendedDrill.lowEnd}–${p.recommendedDrill.highEnd} more ${p.recommendedDrill.type}</div>`
+                    : `<div class="ep-drill-label">Suggested Drill</div><div class="ep-drill-none">No single clear type to target</div>`;
+                return `<div class="ep-card">
+      <div>
+        <div class="ep-theme-row">
+          <span class="ep-theme-name">${p.theme}</span>
+          <span class="ep-count-badge">${p.occurrences}×</span>
+          <span class="ep-acc-badge" style="background:${accBg};color:${accColor}">${p.accuracy}% acc when this trap hits</span>
+        </div>
+        <div class="ep-examples">e.g. ${p.exampleTraps.join(' · ')}</div>
+      </div>
+      <div class="ep-drill-box">${drillHTML}</div>
+    </div>`;
+            }).join('');
+            if (minor.length) {
+                minorEl.innerHTML = `<div class="ep-minor-strip"><i class="ti ti-info-circle"></i><div class="ep-minor-text"><strong>Minor patterns (too few attempts to be confident yet):</strong> ${minor.map(m => m.theme + ' (' + m.occurrences + '×)').join(', ')}.</div></div>`;
+            } else { minorEl.innerHTML = ''; }
+        }
+
+        function pct(c, n) { return n === 0 ? 0 : Math.round(c / n * 100) }
+        function accCol(p) { return p >= 55 ? 'var(--green)' : p >= 30 ? 'var(--amber)' : 'var(--red)' }
+        function fmtT(s) { if (!s && s !== 0) return '—'; return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') }
+
+        function drawSparkline(canvasId, values, color) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas || !values.length) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.offsetWidth || canvas.width;
+            const h = canvas.offsetHeight || canvas.height;
+            canvas.width = w; canvas.height = h;
+            const min = Math.min(...values), max = Math.max(...values);
+            const range = max - min || 1;
+            const pts = values.map((v, i) => ([Math.round(i / (values.length - 1 || 1) * w), Math.round(h - (v - min) / range * (h * 0.75) - h * 0.12)]));
+            const grad = ctx.createLinearGradient(0, 0, 0, h);
+            grad.addColorStop(0, color.replace(')', ',0.28)').replace('rgb', 'rgba'));
+            grad.addColorStop(1, color.replace(')', ',0.0)').replace('rgb', 'rgba'));
+            ctx.beginPath();
+            ctx.moveTo(pts[0][0], h);
+            pts.forEach(([x, y]) => ctx.lineTo(x, y));
+            ctx.lineTo(pts[pts.length - 1][0], h);
+            ctx.closePath();
+            ctx.fillStyle = grad;
+            ctx.fill();
+            ctx.beginPath();
+            pts.forEach(([x, y], i) => i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y));
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+
+        // ══════════════════════════════════════════
+        // ACTION CENTER — GAIN COMPUTATION ENGINE
+        // ══════════════════════════════════════════
+        function computeScoreGains(attemptsArr) {
+            attemptsArr = attemptsArr || [];
+            if (!attemptsArr.length) return [];
+            const gains = [];
+            const total = attemptsArr.length;
+            const totalCorrect = attemptsArr.filter(a => a.correct).length;
+            const overallAcc = pct(totalCorrect, total);
+            function subAcc(arr) { return arr.length ? pct(arr.filter(a => a.correct).length, arr.length) : null; }
+
+            // GAIN 1: Worst question type
+            const byType = {};
+            TYPES.forEach(t => byType[t] = { c: 0, n: 0 });
+            attemptsArr.forEach(a => { const t = a.question_type || 'Other'; if (!byType[t]) byType[t] = { c: 0, n: 0 }; byType[t].n++; if (a.correct) byType[t].c++; });
+            const eligibleTypes = Object.entries(byType).filter(([, v]) => v.n >= 4);
+            if (eligibleTypes.length) {
+                const sorted = eligibleTypes.sort((a, b) => pct(a[1].c, a[1].n) - pct(b[1].c, b[1].n));
+                const [worstType, worstData] = sorted[0];
+                const worstAcc = pct(worstData.c, worstData.n);
+                const bestType = sorted[sorted.length - 1];
+                const bestAcc = pct(bestType[1].c, bestType[1].n);
+                const gap = bestAcc - worstAcc;
+                const projectedCorrect = totalCorrect + Math.round((overallAcc / 100 - worstAcc / 100) * worstData.n);
+                const projectedAcc = pct(projectedCorrect, total);
+                const impact = Math.max(2, projectedAcc - overallAcc);
+                gains.push({
+                    id: 'worst_type', type: 'Question Type',
+                    icon: TYPE_ICONS[worstType]?.[1] || '#f59e0b', iconClass: TYPE_ICONS[worstType]?.[0] || 'ti-help',
+                    title: `Fix your ${worstType} accuracy`,
+                    reason: `You're getting <strong>${worstAcc}%</strong> on ${worstType} across <strong>${worstData.n} attempts</strong>. Bringing this up to your average of ${overallAcc}% would move overall RC accuracy by ~${impact}pp.`,
+                    impact: `+${impact}pp`, impactColor: 'amber', impactUnit: 'accuracy',
+                    meta: [
+                        { icon: 'ti-target', label: `${worstAcc}% currently`, cls: 'red' },
+                        { icon: 'ti-trending-up', label: `Gap vs best type: ${gap}pp`, cls: 'highlight' },
+                        { icon: 'ti-list-numbers', label: `${worstData.n} attempts`, cls: '' },
+                    ],
+                    action: `Drill ${worstType}`, rawImpact: impact,
+                });
+            }
+
+            // GAIN 2: Passage map lift
+            const solidArr = attemptsArr.filter(a => a.passage_map_quality === 'solid');
+            const offArr = attemptsArr.filter(a => a.passage_map_quality === 'off-track' || a.passage_map_quality === 'partial' || !a.passage_map_quality);
+            const solidAcc = subAcc(solidArr);
+            const offAcc = subAcc(offArr);
+            if (solidArr.length >= 3 && offArr.length >= 3 && solidAcc !== null && offAcc !== null) {
+                const lift = solidAcc - offAcc;
+                const nonSolidN = offArr.length;
+                if (lift >= 5) {
+                    gains.push({
+                        id: 'prethink', type: 'Passage Map', icon: '#9d8ff8', iconClass: 'ti-map-2',
+                        title: 'Build a strong passage map every time',
+                        reason: `With a strong passage map, you hit <strong>${solidAcc}%</strong>. Without it: <strong>${offAcc}%</strong>. That's a <strong>+${lift}pp swing</strong>. ${nonSolidN} of your ${total} attempts lacked a strong map — closing that gap unlocks real points.`,
+                        impact: `+${lift}pp`, impactColor: 'amber', impactUnit: 'per-question',
+                        meta: [
+                            { icon: 'ti-map-2', label: `${solidAcc}% with strong map`, cls: 'green' },
+                            { icon: 'ti-x', label: `${offAcc}% without`, cls: 'red' },
+                            { icon: 'ti-percentage', label: `${pct(solidArr.length, total)}% strong-map rate`, cls: '' },
+                        ],
+                        action: 'Practice mapping', rawImpact: lift,
+                    });
+                }
+            }
+
+            // GAIN 3: Worst passage type
+            const byPassage = {};
+            attemptsArr.forEach(a => { if (!a.passage_type) return; if (!byPassage[a.passage_type]) byPassage[a.passage_type] = { c: 0, n: 0 }; byPassage[a.passage_type].n++; if (a.correct) byPassage[a.passage_type].c++; });
+            const eligiblePassage = Object.entries(byPassage).filter(([, v]) => v.n >= 4);
+            if (eligiblePassage.length) {
+                const sortedP = eligiblePassage.sort((a, b) => pct(a[1].c, a[1].n) - pct(b[1].c, b[1].n));
+                const [worstP, worstPData] = sortedP[0];
+                const worstPAcc = pct(worstPData.c, worstPData.n);
+                if (worstPAcc < overallAcc - 8) {
+                    const impact = Math.max(2, Math.round((overallAcc - worstPAcc) * (worstPData.n / total)));
+                    gains.push({
+                        id: 'worst_passage', type: 'Passage Genre',
+                        icon: PASSAGE_ICONS[worstP]?.[1] || '#60a5fa', iconClass: PASSAGE_ICONS[worstP]?.[0] || 'ti-books',
+                        title: `${worstP} passages are dragging you down`,
+                        reason: `You score <strong>${worstPAcc}%</strong> on ${worstP} passages vs ${overallAcc}% overall. Genre-specific reading habits — vocabulary, structure expectations — make a real difference here.`,
+                        impact: `+${impact}pp`, impactColor: 'amber', impactUnit: 'overall',
+                        meta: [
+                            { icon: 'ti-books', label: `${worstPAcc}% on ${worstP}`, cls: 'red' },
+                            { icon: 'ti-target', label: `${overallAcc}% overall`, cls: '' },
+                            { icon: 'ti-list-numbers', label: `${worstPData.n} attempts`, cls: '' },
+                        ],
+                        action: `Drill ${worstP} passages`, rawImpact: impact,
+                    });
+                }
+            }
+
+            // GAIN 4: Error trap pattern
+            const trapCounts = {};
+            attemptsArr.filter(a => a.trap && !a.correct).forEach(a => { const k = a.trap.trim(); trapCounts[k] = (trapCounts[k] || 0) + 1; });
+            const topTrap = Object.entries(trapCounts).sort((a, b) => b[1] - a[1])[0];
+            if (topTrap && topTrap[1] >= 3) {
+                const [trapName, trapCount] = topTrap;
+                const theme = classifyTrap(trapName);
+                const impact = Math.min(8, Math.round(trapCount * 0.6));
+                gains.push({
+                    id: 'top_trap', type: 'Error Pattern', icon: '#f87171', iconClass: 'ti-alert-circle',
+                    title: `Eliminate your most common trap`,
+                    reason: `"<strong>${trapName.length > 48 ? trapName.slice(0, 48) + '…' : trapName}</strong>" has caused <strong>${trapCount} wrong answers</strong>${theme && theme !== 'Other' ? ` — this maps to the "${theme}" error pattern` : ''}. Each eliminated trap occurrence directly converts a wrong to a right.`,
+                    impact: `+${impact}pp`, impactColor: 'amber', impactUnit: 'if fixed',
+                    meta: [
+                        { icon: 'ti-x', label: `${trapCount}× wrong answers`, cls: 'red' },
+                        theme && theme !== 'Other' ? { icon: 'ti-tag', label: theme, cls: 'highlight' } : null,
+                    ].filter(Boolean),
+                    action: 'Review this trap', rawImpact: impact,
+                });
+            }
+
+            // GAIN 5: Hard vs Medium difficulty gap
+            const hardArr = attemptsArr.filter(a => a.difficulty === 'Hard');
+            const medArr = attemptsArr.filter(a => a.difficulty === 'Medium');
+            const hardAcc = subAcc(hardArr);
+            const medAcc = subAcc(medArr);
+            if (hardArr.length >= 5 && medArr.length >= 5 && hardAcc !== null && medAcc !== null) {
+                const gap = medAcc - hardAcc;
+                if (gap >= 15) {
+                    const impact = Math.round(gap * (hardArr.length / total));
+                    gains.push({
+                        id: 'hard_difficulty', type: 'Difficulty Gap', icon: '#f87171', iconClass: 'ti-flame',
+                        title: 'Close the Medium → Hard accuracy gap',
+                        reason: `Medium questions: <strong>${medAcc}%</strong>. Hard questions: <strong>${hardAcc}%</strong> — a <strong>${gap}pp drop</strong>. Hard RC questions appear in the 700+ scoring range. Closing this gap requires deliberate hard-passage drills.`,
+                        impact: `+${Math.max(2, impact)}pp`, impactColor: 'amber', impactUnit: 'overall',
+                        meta: [
+                            { icon: 'ti-flag-2', label: `Medium: ${medAcc}%`, cls: 'green' },
+                            { icon: 'ti-flame', label: `Hard: ${hardAcc}%`, cls: 'red' },
+                            { icon: 'ti-list-numbers', label: `${hardArr.length} hard attempts`, cls: '' },
+                        ],
+                        action: 'Drill Hard Qs', rawImpact: Math.max(2, impact),
+                    });
+                }
+            }
+
+            return gains.sort((a, b) => b.rawImpact - a.rawImpact).slice(0, 4);
+        }
+
+        function renderActionCenter() {
+            const gains = computeScoreGains(attempts);
+            const el = document.getElementById('ac-gain-list');
+            if (!el) return;
+            if (!attempts.length) {
+                el.innerHTML = `<div class="ac-empty"><i class="ti ti-chart-bar"></i><div class="ac-empty-title">No attempts yet</div><div class="ac-empty-sub">Log some RC attempts and Sheldon will identify your biggest score opportunities.</div></div>`;
+                return;
+            }
+            if (!gains.length) {
+                el.innerHTML = `<div class="ac-empty"><i class="ti ti-check"></i><div class="ac-empty-title">Looking good</div><div class="ac-empty-sub">Not enough data to surface clear gains yet — keep logging attempts with question types, passage types, difficulty, and trap notes.</div></div>`;
+                return;
+            }
+            const rankLabels = ['#1', '#2', '#3', '#4'];
+            el.innerHTML = gains.map((g, i) => `
+    <div class="gain-card">
+      <div class="gain-rank-col">
+        <div class="gain-rank-num">${rankLabels[i]}</div>
+        <div class="gain-rank-label">gain</div>
+      </div>
+      <div class="gain-body">
+        <div class="gain-type-row">
+          <div class="gain-icon" style="background:${g.icon}1a;border:1px solid ${g.icon}33"><i class="ti ${g.iconClass}" style="color:${g.icon}"></i></div>
+          <div class="gain-type-label">${g.type}</div>
+        </div>
+        <div class="gain-title">${g.title}</div>
+        <div class="gain-reason">${g.reason}</div>
+        <div class="gain-meta-row">
+          ${g.meta.map(m => `<div class="gain-stat-chip ${m.cls}"><i class="ti ${m.icon}"></i>${m.label}</div>`).join('')}
+          <button class="gain-action-btn" onclick="showTab('entry')"><i class="ti ti-arrow-right"></i>${g.action}</button>
+        </div>
+      </div>
+      <div class="gain-impact-col">
+        <div class="impact-label">Est. Impact</div>
+        <div class="impact-value ${g.impactColor}">${g.impact}</div>
+        <div class="impact-unit">${g.impactUnit}</div>
+      </div>
+    </div>`).join('');
+        }
+
+        async function generatePlan() {
+            const gains = computeScoreGains(attempts);
+            if (!gains.length) return;
+            const btn = document.getElementById('generate-plan-btn');
+            const outputEl = document.getElementById('plan-output');
+            const emptyMsg = document.getElementById('plan-empty-msg');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="plan-spinner"></span> Generating…`;
+            emptyMsg.style.display = 'none';
+            outputEl.style.display = 'block';
+            outputEl.innerHTML = `<div class="plan-loading"><div class="plan-spinner"></div><span>Sheldon is building your plan…</span></div>`;
+            const total = attempts.length;
+            const overallAcc = pct(attempts.filter(a => a.correct).length, total);
+            const cleanGains = gains.map(g => ({ title: g.title, impact: g.impact, reason: g.reason.replace(/<[^>]+>/g, '') }));
+            try {
+                const res = await supa.functions.invoke('cr-plan', { body: { section: 'RC', totalAttempts: total, overallAccuracy: overallAcc, gains: cleanGains } });
+                if (res.error) throw new Error(res.error.message);
+                const plan = res.data && res.data.plan;
+                if (!plan || !plan.length) throw new Error('Empty plan returned');
+                renderPlan(plan);
+            } catch (err) {
+                console.error('Plan generation error:', err);
+                renderPlan(generateFallbackPlan(gains));
+            }
+            btn.disabled = false;
+            btn.innerHTML = `<i class="ti ti-sparkles"></i> Regenerate Plan`;
+        }
+
+        function generateFallbackPlan(gains) {
+            const plan = [];
+            let totalMins = 0;
+            gains.slice(0, 3).forEach((g, i) => {
+                const mins = i === 0 ? 20 : i === 1 ? 15 : 10;
+                if (totalMins + mins > 55) return;
+                plan.push({ minutes: mins, name: g.action, why: g.reason.replace(/<[^>]+>/g, '').slice(0, 80) + '.', tag: i === 0 ? 'drill' : i === 1 ? 'focus' : 'review' });
+                totalMins += mins;
+            });
+            plan.push({ minutes: 5, name: 'Error Review', why: 'Review today\'s wrong answers and note what to fix.', tag: 'review' });
+            return plan;
+        }
+
+        function renderPlan(plan) {
+            const outputEl = document.getElementById('plan-output');
+            const totalMins = plan.reduce((s, p) => s + p.minutes, 0);
+            outputEl.innerHTML = `<div class="plan-day">
+    ${plan.map(item => `
+      <div class="plan-item">
+        <div><div class="plan-item-time">${item.minutes}</div><div class="plan-item-min">min</div></div>
+        <div class="plan-item-body">
+          <div class="plan-item-name">${item.name}<span class="plan-item-badge ${item.tag}">${item.tag}</span></div>
+          <div class="plan-item-why">${item.why}</div>
+        </div>
+      </div>`).join('')}
+    <div class="plan-total-row">
+      <span style="color:var(--text-3)">Total session time</span>
+      <div style="display:flex;align-items:baseline;gap:5px">
+        <span class="plan-total-num">${totalMins}</span>
+        <span style="font-size:11px;color:var(--text-4)">minutes</span>
+      </div>
+    </div>
+  </div>`;
+        }
+
+        // ══════════════════════════════════════════
+        // MAIN RENDER
+        // ══════════════════════════════════════════
+        function render() {
+            const total = attempts.length;
+            const correct = attempts.filter(a => a.correct === true).length;
+            const overall = pct(correct, total);
+            const solidA = attempts.filter(a => a.passage_map_quality === 'solid');
+            const solidAcc = pct(solidA.filter(a => a.correct).length, solidA.length);
+            const noP = attempts.filter(a => !a.passage_map_quality || a.passage_map_quality === 'off-track');
+            const noPAcc = pct(noP.filter(a => a.correct).length, noP.length);
+            const lift = solidAcc - noPAcc;
+            const timeSamples = attempts.filter(a => a.time_secs);
+            const avgT = timeSamples.length ? Math.round(timeSamples.reduce((s, a) => s + a.time_secs, 0) / timeSamples.length) : 0;
+
+            document.getElementById('sb-attempt-count').textContent = `${total} RC attempts logged`;
+            document.getElementById('tb-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+            document.getElementById('tb-chips').innerHTML = `
+    <div class="t-chip ${overall >= 50 ? 'green' : overall >= 25 ? 'amber' : 'red'}"><i class="ti ti-target"></i>${overall}% accuracy</div>
+    <div class="t-chip indigo"><i class="ti ti-list-check"></i>${total} attempts</div>
+    <div class="t-chip green"><span class="chip-dot"></span>${solidAcc}% strong map</div>
+    <div class="t-chip ${lift > 10 ? 'green' : 'amber'}"><i class="ti ti-trending-up"></i>+${lift}pp lift</div>
+    <div class="t-chip"><i class="ti ti-clock"></i>Avg ${fmtT(avgT)}</div>`;
+
+            const byType = {}; TYPES.forEach(t => byType[t] = { c: 0, n: 0 });
+            attempts.forEach(a => { const t = a.question_type || 'Other'; if (!byType[t]) byType[t] = { c: 0, n: 0 }; byType[t].n++; if (a.correct) byType[t].c++ });
+
+            const byPassage = {}; PASSAGE_TYPES.forEach(p => byPassage[p] = { c: 0, n: 0 });
+            attempts.forEach(a => { if (!a.passage_type) return; if (!byPassage[a.passage_type]) byPassage[a.passage_type] = { c: 0, n: 0 }; byPassage[a.passage_type].n++; if (a.correct) byPassage[a.passage_type].c++ });
+
+            if (!total) {
+                document.getElementById('sb-types').innerHTML = `<div style="padding:10px;font-size:11px;color:var(--text-4)">No attempts logged yet.</div>`;
+                document.getElementById('sb-passages').innerHTML = '';
+                document.getElementById('sb-diff').innerHTML = '';
+            } else {
+                document.getElementById('sb-types').innerHTML = TYPES.map(t => {
+                    const { c, n } = byType[t] || { c: 0, n: 0 }; const p = pct(c, n);
+                    const col = !n ? 'var(--text-4)' : p >= 50 ? 'var(--green)' : p >= 25 ? 'var(--amber)' : 'var(--red)';
+                    const [icon, iconCol] = TYPE_ICONS[t] || ['ti-circle', '#7c6cf6'];
+                    return `<div class="sb-topic-item" onclick="filterByType('${t}')">
+        <div class="sb-topic-row"><div class="sb-topic-name"><i class="ti ${icon}" style="color:${iconCol}"></i> ${t}</div><span class="sb-topic-badge" style="color:${col}">${n ? p + '%' : '—'}</span></div>
+        <div class="sb-topic-track"><div class="sb-topic-fill" style="width:${n ? p : 0}%;background:${col}"></div></div>
+      </div>`;
+                }).join('');
+
+                document.getElementById('sb-passages').innerHTML = PASSAGE_TYPES.map(ptype => {
+                    const { c, n } = byPassage[ptype] || { c: 0, n: 0 }; const p = pct(c, n);
+                    const col = !n ? 'var(--text-4)' : p >= 50 ? 'var(--green)' : p >= 25 ? 'var(--amber)' : 'var(--red)';
+                    const [icon, iconCol] = PASSAGE_ICONS[ptype] || ['ti-book', '#60a5fa'];
+                    return `<div class="sb-topic-item">
+        <div class="sb-topic-row"><div class="sb-topic-name"><i class="ti ${icon}" style="color:${iconCol}"></i> ${ptype}</div><span class="sb-topic-badge" style="color:${col}">${n ? p + '%' : '—'}</span></div>
+        <div class="sb-topic-track"><div class="sb-topic-fill" style="width:${n ? p : 0}%;background:${col}"></div></div>
+      </div>`;
+                }).join('');
+            }
+
+            if (total) {
+                const dM = attempts.filter(a => a.difficulty === 'Medium');
+                const dH = attempts.filter(a => a.difficulty === 'Hard');
+                const pM = pct(dM.filter(a => a.correct).length, dM.length);
+                const pH = pct(dH.filter(a => a.correct).length, dH.length);
+                document.getElementById('sb-diff').innerHTML = `
+      <div class="sb-topic-item">
+        <div class="sb-topic-row"><div class="sb-topic-name"><i class="ti ti-flag-2" style="color:var(--amber)"></i> Medium</div><span class="sb-topic-badge" style="color:${pM >= 50 ? 'var(--green)' : pM >= 25 ? 'var(--amber)' : 'var(--red)'}">${pM}%</span></div>
+        <div class="sb-topic-track"><div class="sb-topic-fill" style="width:${pM}%;background:${pM >= 50 ? 'var(--green)' : pM >= 25 ? 'var(--amber)' : 'var(--red)'}"></div></div>
+      </div>
+      <div class="sb-topic-item">
+        <div class="sb-topic-row"><div class="sb-topic-name"><i class="ti ti-flame" style="color:var(--red)"></i> Hard</div><span class="sb-topic-badge" style="color:${pH >= 50 ? 'var(--green)' : pH >= 25 ? 'var(--amber)' : 'var(--red)'}">${pH}%</span></div>
+        <div class="sb-topic-track"><div class="sb-topic-fill" style="width:${pH}%;background:${pH >= 50 ? 'var(--green)' : pH >= 25 ? 'var(--amber)' : 'var(--red)'}"></div></div>
+      </div>`;
+            }
+
+            // Insight banner
+            const worstT = TYPES.slice().sort((a, b) => pct(byType[a].c, byType[a].n) - pct(byType[b].c, byType[b].n))[0];
+            const wAcc = pct(byType[worstT].c, byType[worstT].n);
+            const insightText = lift > 15
+                ? `A strong passage map gives you <strong>+${lift}pp</strong> accuracy — your biggest lever. Of ${solidA.length} strong-map attempts, ${solidA.filter(a => a.correct).length} were correct. Build the structural map before touching answer choices. Weakest type: <strong>${worstT}</strong> at <strong>${wAcc}%</strong>.`
+                : `The collapse is happening after the read. A strong map only gets you to ${solidAcc}% — prioritise answer-choice elimination discipline. Weakest type: <strong>${worstT}</strong> at <strong>${wAcc}%</strong> across ${byType[worstT].n} attempts.`;
+            document.getElementById('insight-banner').innerHTML = `
+    <div class="sheldon-orb">🔍</div>
+    <div><div class="sheldon-label">Sheldon Analysis — Pattern Detected</div><div class="sheldon-text">${insightText}</div></div>`;
+
+            // Hero cards
+            document.getElementById('hero-cards').innerHTML = `
+    <div class="card card-accent-indigo"><div class="card-eyebrow">Total Attempts <i class="ti ti-list-numbers"></i></div><div class="big-num white">${total}</div><div class="card-sub">${attempts.filter(a => a.source === 'excel').length} from log · ${attempts.filter(a => a.source === 'manual').length} manual</div></div>
+    <div class="card card-accent-green"><div class="card-eyebrow">Overall Accuracy <i class="ti ti-target"></i></div><div class="big-num white">${overall}%</div><div class="card-sub">${correct} correct · ${total - correct} wrong</div></div>
+    <div class="card card-accent-green"><div class="card-eyebrow">Strong Map Acc. <i class="ti ti-map-2"></i></div><div class="big-num green">${solidAcc}%</div><div class="card-sub">${solidA.length} attempts with a strong map</div></div>
+    <div class="card"><div class="card-eyebrow">Avg. Time / Question <i class="ti ti-clock"></i></div><div class="big-num white">${fmtT(avgT)}</div><div class="card-sub">Target: under 1:30 per RC Q</div></div>`;
+
+            // Period mini cards
+            const now = new Date();
+            const todayStr = now.toISOString().slice(0, 10);
+            const weekStart = new Date(now); weekStart.setDate(now.getDate() - 6);
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const todayA = attempts.filter(a => a.logged_at && a.logged_at.slice(0, 10) === todayStr);
+            const weekA = attempts.filter(a => a.logged_at && new Date(a.logged_at) >= weekStart);
+            const monthA = attempts.filter(a => a.logged_at && new Date(a.logged_at) >= monthStart);
+            const days7 = Array.from({ length: 7 }, (_, i) => { const d = new Date(weekStart); d.setDate(weekStart.getDate() + i); return d.toISOString().slice(0, 10); });
+            const weekDayCounts = days7.map(d => attempts.filter(a => a.logged_at && a.logged_at.slice(0, 10) === d).length);
+            const weekDayAcc = days7.map(d => { const da = attempts.filter(a => a.logged_at && a.logged_at.slice(0, 10) === d); return da.length ? pct(da.filter(a => a.correct).length, da.length) : 0; });
+            const monthWeeks = [0, 1, 2, 3].map(w => { const wa = monthA.filter(a => { const d = new Date(a.logged_at); return Math.floor((d.getDate() - 1) / 7) === w }); return wa.length ? pct(wa.filter(a => a.correct).length, wa.length) : 0; });
+            const todayAcc = pct(todayA.filter(a => a.correct).length, todayA.length);
+            const weekAcc = pct(weekA.filter(a => a.correct).length, weekA.length);
+            const monthAcc = pct(monthA.filter(a => a.correct).length, monthA.length);
+
+            document.getElementById('period-cards').innerHTML = `
+    <div class="mini-stat-card" id="today-card"><div class="mini-stat-eyebrow">Today <i class="ti ti-clock"></i></div><div class="mini-stat-num">${todayA.length === 0 ? 'Ready' : todayA.length + 'q'}</div><div class="mini-stat-sub">${todayA.length === 0 ? 'No attempts yet' : 'Acc: ' + todayAcc + '%'}</div><div class="sparkline-wrap"><canvas id="spark-today" style="width:100%;height:52px"></canvas></div></div>
+    <div class="mini-stat-card" id="week-card"><div class="mini-stat-eyebrow">This Week <i class="ti ti-calendar"></i></div><div class="mini-stat-num">${weekA.length > 0 ? weekAcc + '%' : '0q'}</div><div class="mini-stat-sub">${weekA.length} attempts · ${pct(weekA.filter(a => a.correct).length, weekA.length)}% acc</div><div class="sparkline-wrap"><canvas id="spark-week" style="width:100%;height:52px"></canvas></div></div>
+    <div class="mini-stat-card" id="month-card"><div class="mini-stat-eyebrow">This Month <i class="ti ti-trending-up"></i></div><div class="mini-stat-num">${monthA.length > 0 ? monthAcc + '%' : '0q'}</div><div class="mini-stat-sub">${monthA.length} attempts logged</div><div class="sparkline-wrap"><canvas id="spark-month" style="width:100%;height:52px"></canvas></div></div>`;
+
+            requestAnimationFrame(() => {
+                drawSparkline('spark-today', weekDayCounts, 'rgb(124,108,246)');
+                drawSparkline('spark-week', weekDayAcc.filter(v => v > 0).length ? weekDayAcc : [0, 0, 0, 0, 0, 0, 0], 'rgb(52,211,153)');
+                drawSparkline('spark-month', monthWeeks, 'rgb(245,158,11)');
+            });
+
+            // Type bars
+            document.getElementById('type-bars').innerHTML = TYPES.map(t => {
+                const { c, n } = byType[t] || { c: 0, n: 0 }; const p = pct(c, n); const col = accCol(p);
+                return `<div class="acc-row"><div class="acc-label">${t}</div><div class="acc-track"><div class="acc-fill" style="width:${p}%;background:${col}"></div></div><div class="acc-pct" style="color:${col}">${p}%</div><div class="acc-n">${n}q</div></div>`;
+            }).join('');
+
+            // Passage type bars
+            document.getElementById('passage-bars').innerHTML = PASSAGE_TYPES.map(ptype => {
+                const { c, n } = byPassage[ptype] || { c: 0, n: 0 }; const p = pct(c, n); const col = accCol(p);
+                const [icon, iconCol] = PASSAGE_ICONS[ptype] || ['ti-book', '#60a5fa'];
+                return `<div class="acc-row"><div class="acc-label" style="display:flex;align-items:center;gap:6px"><i class="ti ${icon}" style="color:${iconCol};font-size:13px"></i>${ptype}</div><div class="acc-track"><div class="acc-fill" style="width:${p}%;background:${col}"></div></div><div class="acc-pct" style="color:${n ? col : 'var(--text-4)'}">${n ? p + '%' : '—'}</div><div class="acc-n">${n}q</div></div>`;
+            }).join('');
+
+            // Passage map quality matrix
+            const byPQ = { solid: { c: 0, n: 0 }, partial: { c: 0, n: 0 }, 'off-track': { c: 0, n: 0 } };
+            attempts.forEach(a => { const pq = a.passage_map_quality; if (pq && byPQ[pq]) { byPQ[pq].n++; if (a.correct) byPQ[pq].c++ } });
+            const maxPQN = Math.max(...Object.values(byPQ).map(v => v.n));
+            document.getElementById('prethink-matrix').innerHTML = PQO.map(pq => {
+                const { c, n } = byPQ[pq]; const p = pct(c, n); const col = accCol(p);
+                return `<div class="matrix-row"><div class="matrix-label">${PQL[pq]}</div><div class="matrix-track"><div class="matrix-fill" style="width:${maxPQN ? Math.round(n / maxPQN * 100) : 0}%;background:${col}"></div></div><div class="matrix-pct" style="color:${col}">${p}%</div><div class="matrix-n">${n} att.</div></div>`;
+            }).join('');
+
+            document.getElementById('prethink-stacked').innerHTML = TYPES.map(t => {
+                const ta = attempts.filter(a => a.question_type === t); if (!ta.length) return '';
+                const s = ta.filter(a => a.passage_map_quality === 'solid').length;
+                const p = ta.filter(a => a.passage_map_quality === 'partial').length;
+                const o = ta.filter(a => a.passage_map_quality === 'off-track').length;
+                const tot = ta.length;
+                return `<div class="stack-row"><div class="stack-header"><span class="stack-label">${t}</span><span class="stack-count">${tot}q</span></div><div class="stack-bar"><div style="width:${pct(s, tot)}%;background:var(--green)"></div><div style="width:${pct(p, tot)}%;background:var(--amber)"></div><div style="width:${pct(o, tot)}%;background:var(--red)"></div><div style="flex:1;background:rgba(255,255,255,0.04)"></div></div></div>`;
+            }).join('');
+
+            // Top error traps
+            const tC = {}; attempts.forEach(a => { if (a.trap) { const k = a.trap.replace(/\n/g, ' ').trim(); tC[k] = (tC[k] || 0) + 1 } });
+            const sortedT = Object.entries(tC).sort((a, b) => b[1] - a[1]).slice(0, 12);
+            const mxT = sortedT[0]?.[1] || 1;
+            document.getElementById('trap-list').innerHTML = sortedT.length
+                ? sortedT.map(([name, cnt], i) => `<div class="trap-row"><div class="trap-rank">${i + 1}</div><div class="trap-name">${name.substring(0, 38)}${name.length > 38 ? '…' : ''}</div><div style="flex:1"><div class="trap-bar" style="width:${Math.round(cnt / mxT * 100)}%;opacity:${0.35 + cnt / mxT * 0.65}"></div></div><div class="trap-n">${cnt}</div></div>`).join('')
+                : `<div style="color:var(--text-4);font-size:11.5px;padding:12px 0">No trap data yet.</div>`;
+
+            // Medium vs Hard breakdown
+            let diffHTML = '';
+            ['Medium', 'Hard'].forEach((d) => {
+                const da = attempts.filter(a => a.difficulty === d);
+                const dc = da.filter(a => a.correct).length;
+                const dp = pct(dc, da.length);
+                const col = accCol(dp);
+                const ptR = pct(da.filter(a => a.passage_map_quality === 'solid').length, da.length);
+                diffHTML += `<div class="diff-block">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px"><span class="diff-badge ${d}">${d}</span><span style="font-family:'Fraunces',serif;font-size:28px;font-weight:600;color:${col};line-height:1">${dp}%</span><span style="font-size:10.5px;color:var(--text-4)">${da.length} questions</span></div>
+      <div class="acc-track" style="height:3px;margin-bottom:8px"><div class="acc-fill" style="width:${dp}%;background:${col}"></div></div>
+      <div style="display:flex;gap:14px"><span style="font-size:10.5px;color:var(--text-3)">${dc} correct · ${da.length - dc} wrong</span><span style="font-size:10.5px;color:var(--text-3)">Strong map: <span style="color:var(--green)">${ptR}%</span></span></div>
+    </div>`;
+            });
+            document.getElementById('diff-breakdown').innerHTML = diffHTML;
+
+            // Difficulty × Accuracy Matrix
+            const DIFFS = ['Easy', 'Medium', 'Hard'];
+            const matrixHead = `<thead><tr><th>Question Type</th>${DIFFS.map(d => `<th class="diff-col">${d}</th>`).join('')}</tr></thead>`;
+            const matrixRows = TYPES.map(t => {
+                const cells = DIFFS.map(d => {
+                    const cell = attempts.filter(a => a.question_type === t && a.difficulty === d);
+                    if (!cell.length) return `<td class="matrix-cell"><span class="matrix-pill empty"><span class="mp-pct">—</span></span></td>`;
+                    const c = cell.filter(a => a.correct).length;
+                    const p = pct(c, cell.length);
+                    const col = accCol(p);
+                    const bg = p >= 55 ? 'rgba(52,211,153,0.13)' : p >= 30 ? 'rgba(251,191,36,0.13)' : 'rgba(251,113,133,0.13)';
+                    return `<td class="matrix-cell"><span class="matrix-pill" style="background:${bg};color:${col}"><span class="mp-pct">${p}%</span><span class="mp-n">${cell.length}q</span></span></td>`;
+                }).join('');
+                return `<tr><td class="type-cell">${t}</td>${cells}</tr>`;
+            }).join('');
+            document.getElementById('diff-matrix-table').innerHTML = matrixHead + `<tbody>${matrixRows}</tbody>`;
+
+            renderErrorPatterns();
+
+            // Log table
+            document.getElementById('log-count').textContent = attempts.length;
+            document.getElementById('log-tbody').innerHTML = [...attempts].reverse().map((a, i) => {
+                const pqCls = a.passage_map_quality === 'solid' ? 'solid' : a.passage_map_quality === 'partial' ? 'partial' : a.passage_map_quality === 'off-track' ? 'off' : null;
+                const pqTag = pqCls ? `<span class="tag tag-${pqCls}">${a.passage_map_quality}</span>` : `<span style="color:var(--text-4);font-size:10px">—</span>`;
+                const ptypeTag = a.passage_type ? `<span class="tag tag-passage">${a.passage_type}</span>` : `<span style="color:var(--text-4)">—</span>`;
+                const trap = a.trap ? `<span style="font-size:10.5px;color:var(--text-3)">${a.trap.substring(0, 26)}${a.trap.length > 26 ? '…' : ''}</span>` : `<span style="color:var(--text-4)">—</span>`;
+                return `<tr>
+      <td style="color:var(--text-4);font-size:10px">${attempts.length - i}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-2);font-size:11.5px">${a.question_name || '—'}</td>
+      <td>${ptypeTag}</td>
+      <td><span class="tag tag-type">${a.question_type}</span></td>
+      <td><span class="diff-badge ${a.difficulty}">${a.difficulty}</span></td>
+      <td><span class="tag ${a.correct ? 'tag-correct' : 'tag-wrong'}">${a.correct ? '✓' : '✗'}</span></td>
+      <td style="color:var(--text-3);font-size:11px">${fmtT(a.time_secs)}</td>
+      <td>${pqTag}</td>
+      <td>${trap}</td>
+    </tr>`;
+            }).join('');
+
+            // Quick stats panel (entry tab)
+            document.getElementById('quick-stats').innerHTML = TYPES.slice(0, 5).map(t => {
+                const { c, n } = byType[t] || { c: 0, n: 0 }; const p = pct(c, n); const col = accCol(p);
+                return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:11px;color:var(--text-3);width:84px;flex-shrink:0">${t}</span><div class="acc-track" style="flex:1"><div class="acc-fill" style="width:${p}%;background:${col}"></div></div><span style="font-size:11px;font-weight:700;color:${col};width:28px;text-align:right">${p}%</span></div>`;
+            }).join('');
+        }
+
+        // ══════════════════════════════════════════
+        // RC JOURNEY CHART — accuracy across sessions
+        // ══════════════════════════════════════════
+        let _journeySessions = [];
+        let _journeyChart = null;
+        let _journeyXAxis = 'session';
+
+        function parseRCAccuracy(noteText) {
+            if (!noteText) return null;
+            const m = noteText.match(/(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)\s*%/) || noteText.match(/(\d+)\s*\/\s*(\d+)/);
+            if (!m) {
+                const pctOnly = noteText.match(/(\d{1,3})\s*%/);
+                if (pctOnly) { const v = parseInt(pctOnly[1], 10); return v >= 0 && v <= 100 ? v : null; }
+                return null;
+            }
+            const correct = parseInt(m[1], 10), totalQ = parseInt(m[2], 10);
+            if (!totalQ) return null;
+            const p = m[3] ? parseInt(m[3], 10) : Math.round((correct / totalQ) * 100);
+            return (p >= 0 && p <= 100) ? p : null;
+        }
+
+        function guessSessionTag(noteText) {
+            if (!noteText) return 'RC';
+            const lower = noteText.toLowerCase();
+            if (lower.includes('mock') || lower.includes('test')) return 'Mock';
+            if (lower.includes('drill')) return 'Drill';
+            if (lower.includes('review')) return 'Review';
+            return 'RC';
+        }
+
+        async function loadJourneySessions() {
+            try {
+                const { data, error } = await supa
+                    .from('sessions')
+                    .select('id, date, notes, mins, topic, deleted, created_at')
+                    .eq('user_id', _uid)
+                    .eq('topic', 'RC')
+                    .eq('deleted', false)
+                    .order('date', { ascending: true })
+                    .limit(500);
+                if (error) { console.warn('journey load error', error); _journeySessions = []; return; }
+                _journeySessions = (data || [])
+                    .map(s => ({ id: s.id, date: s.date, mins: s.mins || 0, notes: s.notes || '', acc: parseRCAccuracy(s.notes), tag: guessSessionTag(s.notes), created_at: s.created_at }))
+                    .filter(s => s.acc !== null)
+                    .sort((a, b) => new Date(a.date) - new Date(b.date) || new Date(a.created_at) - new Date(b.created_at));
+            } catch (e) {
+                console.warn('journey load exception', e);
+                _journeySessions = [];
+            }
+        }
+
+        function setJourneyXAxis(mode, btn) {
+            _journeyXAxis = mode;
+            document.querySelectorAll('#journey-xaxis-toggle .seg-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderJourneyChart();
+        }
+
+        function countUp(el, target, suffix) {
+            if (!el) return;
+            const dur = 700, start = performance.now();
+            function step(now) {
+                const t = Math.min(1, (now - start) / dur);
+                const eased = 1 - Math.pow(1 - t, 3);
+                el.textContent = Math.round(target * eased) + (suffix || '');
+                if (t < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        }
+
+        function renderJourneyChart() {
+            const canvas = document.getElementById('journey-canvas');
+            const emptyEl = document.getElementById('journey-empty-state');
+            const statsEl = document.getElementById('journey-stats');
+            const milestonesEl = document.getElementById('journey-milestones');
+            const ring = document.getElementById('peak-pulse-ring');
+            if (!canvas) return;
+
+            const filterSel = document.getElementById('journey-type-filter');
+            const filterVal = filterSel ? filterSel.value : 'all';
+            let data = _journeySessions.slice();
+            if (filterVal !== 'all') data = data.filter(s => s.tag === filterVal);
+
+            if (!data.length) {
+                canvas.style.display = 'none';
+                if (ring) ring.style.display = 'none';
+                if (emptyEl) emptyEl.style.display = 'block';
+                if (statsEl) statsEl.innerHTML = '';
+                if (milestonesEl) milestonesEl.innerHTML = '';
+                if (_journeyChart) { _journeyChart.destroy(); _journeyChart = null; }
+                return;
+            }
+            canvas.style.display = 'block';
+            if (emptyEl) emptyEl.style.display = 'none';
+
+            const accs = data.map(s => s.acc);
+            const labels = data.map((s, i) => _journeyXAxis === 'date'
+                ? new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                : 'S' + (i + 1));
+            const peakVal = Math.max(...accs);
+            const peakIdx = accs.indexOf(peakVal);
+            const latest = accs[accs.length - 1];
+            const avg = Math.round(accs.reduce((s, v) => s + v, 0) / accs.length);
+            const first = accs[0];
+            const delta = latest - first;
+
+            // improving streak
+            let streak = 1, bestStreak = 1;
+            for (let i = 1; i < accs.length; i++) { if (accs[i] >= accs[i - 1]) { streak++; bestStreak = Math.max(bestStreak, streak); } else streak = 1; }
+
+            // Stats
+            if (statsEl) {
+                statsEl.innerHTML = `
+      <div class="jc-stat"><div class="jc-stat-val" id="jc-latest" style="color:${accCol(latest)}">0%</div><div class="jc-stat-label">Latest</div></div>
+      <div class="jc-stat"><div class="jc-stat-val" id="jc-peak" style="color:var(--green)">0%</div><div class="jc-stat-label">Peak</div></div>
+      <div class="jc-stat"><div class="jc-stat-val" id="jc-avg" style="color:var(--text-1)">0%</div><div class="jc-stat-label">Average</div></div>
+      <div class="jc-stat"><div class="jc-stat-val" id="jc-delta" style="color:${delta >= 0 ? 'var(--green)' : 'var(--red)'}">0</div><div class="jc-stat-label">Since Start</div></div>`;
+                countUp(document.getElementById('jc-latest'), latest, '%');
+                countUp(document.getElementById('jc-peak'), peakVal, '%');
+                countUp(document.getElementById('jc-avg'), avg, '%');
+                const deltaEl = document.getElementById('jc-delta');
+                if (deltaEl) { const sign = delta >= 0 ? '+' : ''; setTimeout(() => { deltaEl.textContent = sign + delta + 'pp'; }, 120); }
+            }
+
+            // Milestones
+            if (milestonesEl) {
+                const chips = [];
+                chips.push(`<div class="jc-chip peak" style="animation-delay:.05s"><i class="ti ti-trophy"></i>Peak ${peakVal}% on ${new Date(data[peakIdx].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>`);
+                if (bestStreak >= 3) chips.push(`<div class="jc-chip streak" style="animation-delay:.12s"><i class="ti ti-flame"></i>${bestStreak}-session climb</div>`);
+                if (latest >= 75) chips.push(`<div class="jc-chip peak" style="animation-delay:.19s"><i class="ti ti-target"></i>At target (75%)</div>`);
+                chips.push(`<div class="jc-chip" style="animation-delay:.26s"><i class="ti ti-list-check"></i>${data.length} scored sessions</div>`);
+                milestonesEl.innerHTML = chips.join('');
+            }
+
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createLinearGradient(0, 0, 0, 240);
+            grad.addColorStop(0, 'rgba(157,143,248,0.30)');
+            grad.addColorStop(1, 'rgba(157,143,248,0.01)');
+
+            const pointColors = accs.map((v, i) => i === peakIdx ? '#34d399' : v < 40 ? '#f87171' : '#9d8ff8');
+            const pointRadii = accs.map((v, i) => i === peakIdx ? 6 : 4);
+
+            if (_journeyChart) { _journeyChart.destroy(); _journeyChart = null; }
+
+            const targetLine = {
+                id: 'targetLine',
+                afterDraw(chart) {
+                    const { ctx, chartArea, scales } = chart;
+                    if (!scales.y) return;
+                    const y = scales.y.getPixelForValue(75);
+                    ctx.save();
+                    ctx.setLineDash([5, 5]);
+                    ctx.strokeStyle = 'rgba(245,158,11,0.45)';
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath();
+                    ctx.moveTo(chartArea.left, y);
+                    ctx.lineTo(chartArea.right, y);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            };
+
+            const peakRing = {
+                id: 'peakRing',
+                afterDatasetsDraw(chart) {
+                    const meta = chart.getDatasetMeta(0);
+                    if (!meta || !meta.data[peakIdx]) { if (ring) ring.style.display = 'none'; return; }
+                    const pt = meta.data[peakIdx];
+                    const wrap = document.getElementById('jc-chart-wrap');
+                    if (ring && wrap) {
+                        const wrapRect = wrap.getBoundingClientRect();
+                        const canRect = chart.canvas.getBoundingClientRect();
+                        ring.style.display = 'block';
+                        ring.style.width = '12px';
+                        ring.style.height = '12px';
+                        ring.style.left = (canRect.left - wrapRect.left + pt.x) + 'px';
+                        ring.style.top = (canRect.top - wrapRect.top + pt.y) + 'px';
+                    }
+                }
+            };
+
+            _journeyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'RC Accuracy',
+                        data: accs,
+                        borderColor: '#9d8ff8',
+                        backgroundColor: grad,
+                        borderWidth: 2.4,
+                        fill: true,
+                        tension: 0.38,
+                        pointBackgroundColor: pointColors,
+                        pointBorderColor: 'rgba(10,14,26,0.9)',
+                        pointBorderWidth: 1.5,
+                        pointRadius: pointRadii,
+                        pointHoverRadius: 7,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 800, easing: 'easeOutCubic' },
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(10,14,26,0.95)',
+                            borderColor: 'rgba(124,108,246,0.35)',
+                            borderWidth: 1,
+                            titleColor: '#fff',
+                            bodyColor: 'rgba(255,255,255,0.75)',
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                title: (items) => {
+                                    const s = data[items[0].dataIndex];
+                                    return new Date(s.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                                },
+                                label: (item) => {
+                                    const s = data[item.dataIndex];
+                                    const extra = s.mins ? ` · ${s.mins} min` : '';
+                                    return `${s.acc}% accuracy${extra}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 0, max: 100,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: 'rgba(255,255,255,0.38)', font: { size: 10 }, callback: (v) => v + '%', stepSize: 25 }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: 'rgba(255,255,255,0.38)', font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 10 }
+                        }
+                    }
+                },
+                plugins: [targetLine, peakRing]
+            });
+        }
+
+        // ── BOOT ──
+        init();
+    </script>
+</body>
+
+</html>
