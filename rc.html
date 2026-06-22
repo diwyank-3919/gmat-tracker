@@ -399,7 +399,6 @@
             <div class="sb-section">
                 <div class="sb-section-label">Navigation</div>
                 <a href="https://scoreconsole.com/app.html" class="sb-nav-item"><i class="ti ti-layout-dashboard"></i>Dashboard</a>
-                <a href="https://scoreconsole.com/cr.html" class="sb-nav-item"><i class="ti ti-activity"></i>CR Tracker</a>
                 <div class="sb-nav-item active"><i class="ti ti-book"></i>RC Tracker</div>
                 <div class="sb-nav-item" onclick="showTab('analytics')"><i class="ti ti-chart-bar"></i>Analytics</div>
                 <div class="sb-nav-item" onclick="showTab('log')"><i class="ti ti-list-check"></i>Attempt Log</div>
@@ -1239,7 +1238,7 @@
             const overallAcc = pct(attempts.filter(a => a.correct).length, total);
             const cleanGains = gains.map(g => ({ title: g.title, impact: g.impact, reason: g.reason.replace(/<[^>]+>/g, '') }));
             try {
-                const res = await supa.functions.invoke('cr-plan', { body: { section: 'RC', totalAttempts: total, overallAccuracy: overallAcc, gains: cleanGains } });
+                const res = await supa.functions.invoke('rc-plan', { body: { section: 'RC', totalAttempts: total, overallAccuracy: overallAcc, gains: cleanGains } });
                 if (res.error) throw new Error(res.error.message);
                 const plan = res.data && res.data.plan;
                 if (!plan || !plan.length) throw new Error('Empty plan returned');
@@ -1755,3 +1754,4 @@
 </body>
 
 </html>
+
