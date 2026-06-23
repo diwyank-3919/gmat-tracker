@@ -11681,7 +11681,7 @@
                                         <option>Mock test</option>
                                         <option>Review</option>
                                     </select>
-                                    <button id="timer-start-btn" class="timer-btn primary" onclick="timerStart()"><i
+                                   <button id="timer-start-btn" class="timer-btn primary" onclick="timerStart()"><i
                                             class="ti ti-player-play"></i> Start</button>
                                     <button id="timer-pause-btn" class="timer-btn" onclick="timerPause()"
                                         style="display:none;background:rgba(240,189,106,0.15);color:#f0bd6a;border:1px solid rgba(240,189,106,0.28)"><i
@@ -11692,20 +11692,21 @@
                                     <button id="timer-discard-btn" class="timer-btn ghost" onclick="timerDiscard()"
                                         style="display:none" title="Discard"><i class="ti ti-x"></i></button>
                                 </div>
+                                <div class="sc-qgrid">
+                                    <div class="sc-qf sc-qfull"><label>Source / Test topic<span class="opt">optional</span></label><input id="tm-source" type="text" placeholder="e.g. CEM Quiz · Hard"></div>
+                                    <div class="sc-qf"><label>Correct</label><input id="tm-correct" type="number" min="0" inputmode="numeric" placeholder="0" oninput="scQRecalc('tm')"></div>
+                                    <div class="sc-qf"><label>Total questions</label><input id="tm-total" type="number" min="0" inputmode="numeric" placeholder="0" oninput="scQRecalc('tm')"></div>
+                                    <div class="sc-qf"><label>Incorrect<span class="opt">auto</span></label><input id="tm-incorrect" type="number" readonly tabindex="-1" placeholder="—"></div>
+                                    <div class="sc-qf"><label>Accuracy<span class="opt">auto</span></label><input id="tm-acc" class="sc-acc-val" type="text" readonly tabindex="-1" placeholder="—"></div>
+                                    <div class="sc-qf sc-qfull"><label>Weighted score<span class="opt">optional · 0–100, difficulty-adjusted</span></label><input id="tm-weighted" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="e.g. 64"></div>
+                                </div>
                             </div>
                             <input type="text" id="timer-notes"
                                 placeholder="Quick note about this timed session… (optional)" maxlength="200"
                                 style="margin:8px 0 4px;width:100%;height:32px;font-size:12px;font-family:'Hanken Grotesk',sans-serif;font-weight:500;padding:0 11px;border:1px solid var(--border);border-radius:9px;background:var(--bg-input);color:var(--text-primary);outline:none;transition:border-color 0.15s"
                                 onfocus="this.style.borderColor='rgba(135,141,255,0.45)'"
                                 onblur="this.style.borderColor='var(--border)'">
-                            <div class="sc-qgrid">
-  <div class="sc-qf sc-qfull"><label>Source / Test topic<span class="opt">optional</span></label><input id="tm-source" type="text" placeholder="e.g. CEM Quiz · Hard"></div>
-  <div class="sc-qf"><label>Correct</label><input id="tm-correct" type="number" min="0" inputmode="numeric" placeholder="0" oninput="scQRecalc('tm')"></div>
-  <div class="sc-qf"><label>Incorrect<span class="opt">auto</span></label><input id="tm-incorrect" type="number" readonly tabindex="-1" placeholder="—"></div>
-  <div class="sc-qf"><label>Total questions</label><input id="tm-total" type="number" min="0" inputmode="numeric" placeholder="0" oninput="scQRecalc('tm')"></div>
-  <div class="sc-qf"><label>Accuracy<span class="opt">auto</span></label><input id="tm-acc" class="sc-acc-val" type="text" readonly tabindex="-1" placeholder="—"></div>
-  <div class="sc-qf sc-qfull"><label>Weighted score<span class="opt">optional · 0–100, difficulty-adjusted</span></label><input id="tm-weighted" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="e.g. 64"></div>
-</div>
+                            
                             <div class="timer-divider" id="manual-divider"><span>or log manually</span></div>
                             <div class="form-grid" id="manual-form">
                                 <div class="field">
