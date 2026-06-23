@@ -11698,6 +11698,14 @@
                                 style="margin:8px 0 4px;width:100%;height:32px;font-size:12px;font-family:'Hanken Grotesk',sans-serif;font-weight:500;padding:0 11px;border:1px solid var(--border);border-radius:9px;background:var(--bg-input);color:var(--text-primary);outline:none;transition:border-color 0.15s"
                                 onfocus="this.style.borderColor='rgba(135,141,255,0.45)'"
                                 onblur="this.style.borderColor='var(--border)'">
+                            <div class="sc-qgrid">
+  <div class="sc-qf sc-qfull"><label>Source / Test topic<span class="opt">optional</span></label><input id="tm-source" type="text" placeholder="e.g. CEM Quiz · Hard"></div>
+  <div class="sc-qf"><label>Correct</label><input id="tm-correct" type="number" min="0" inputmode="numeric" placeholder="0" oninput="scQRecalc('tm')"></div>
+  <div class="sc-qf"><label>Incorrect<span class="opt">auto</span></label><input id="tm-incorrect" type="number" readonly tabindex="-1" placeholder="—"></div>
+  <div class="sc-qf"><label>Total questions</label><input id="tm-total" type="number" min="0" inputmode="numeric" placeholder="0" oninput="scQRecalc('tm')"></div>
+  <div class="sc-qf"><label>Accuracy<span class="opt">auto</span></label><input id="tm-acc" class="sc-acc-val" type="text" readonly tabindex="-1" placeholder="—"></div>
+  <div class="sc-qf sc-qfull"><label>Weighted score<span class="opt">optional · 0–100, difficulty-adjusted</span></label><input id="tm-weighted" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="e.g. 64"></div>
+</div>
                             <div class="timer-divider" id="manual-divider"><span>or log manually</span></div>
                             <div class="form-grid" id="manual-form">
                                 <div class="field">
@@ -11813,6 +11821,16 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="field full">
+  <div class="sc-qgrid">
+    <div class="sc-qf sc-qfull"><label>Source / Test topic<span class="opt">optional</span></label><input id="mn-source" type="text" placeholder="e.g. CEM Quiz · Hard"></div>
+    <div class="sc-qf"><label>Correct</label><input id="mn-correct" type="number" min="0" inputmode="numeric" placeholder="0" oninput="scQRecalc('mn')"></div>
+    <div class="sc-qf"><label>Total questions</label><input id="mn-total" type="number" min="0" inputmode="numeric" placeholder="0" oninput="scQRecalc('mn')"></div>
+    <div class="sc-qf"><label>Incorrect<span class="opt">auto</span></label><input id="mn-incorrect" type="number" readonly tabindex="-1" placeholder="—"></div>
+    <div class="sc-qf"><label>Accuracy<span class="opt">auto</span></label><input id="mn-acc" class="sc-acc-val" type="text" readonly tabindex="-1" placeholder="—"></div>
+    <div class="sc-qf sc-qfull"><label>Weighted score<span class="opt">optional · 0–100, difficulty-adjusted</span></label><input id="mn-weighted" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="e.g. 64"></div>
+  </div>
+</div>
                                 <div class="field full">
                                     <label>Notes <span
                                             style="color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">optional
@@ -25632,6 +25650,56 @@ function injectSndChip() {
     }
   };
   window.openReads = function(){ window.switchView('reads'); };
+})();
+</script>
+
+    <style id="sc-qstats-css">
+.sc-qgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}
+.sc-qgrid .sc-qfull{grid-column:1/-1}
+.sc-qf{display:flex;flex-direction:column;gap:4px}
+.sc-qf label{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-tertiary,rgba(255,255,255,.5))}
+.sc-qf label .opt{font-weight:500;letter-spacing:0;text-transform:none;color:var(--text-muted,rgba(255,255,255,.35));font-size:9.5px;margin-left:5px}
+.sc-qf input{height:34px;font-size:12.5px;font-family:'Hanken Grotesk',sans-serif;font-weight:600;padding:0 11px;border:1px solid var(--border);border-radius:9px;background:var(--bg-input);color:var(--text-primary);outline:none;transition:border-color .15s,box-shadow .15s}
+.sc-qf input:focus{border-color:rgba(135,141,255,.45);box-shadow:0 0 0 3px rgba(135,141,255,.14)}
+.sc-qf input[readonly]{background:rgba(255,255,255,.03);color:var(--text-secondary,rgba(255,255,255,.62));cursor:default}
+.sc-qf input::placeholder{color:rgba(255,255,255,.28)}
+.sc-acc-val{color:var(--green-bright,#34d399)!important;font-family:'Fraunces',serif!important;font-weight:600}
+</style>
+
+    <script>
+// auto-fill incorrect + accuracy from correct/total
+function scQRecalc(p){
+  var g=function(s){return document.getElementById(p+'-'+s);};
+  var c=parseInt(g('correct').value,10), t=parseInt(g('total').value,10);
+  if(!isNaN(c)&&!isNaN(t)&&t>0){ g('incorrect').value=Math.max(0,t-c); g('acc').value=Math.round(c/t*100)+'%'; }
+  else { g('incorrect').value=''; g('acc').value=''; }
+}
+// compose canonical note tail so existing journey parsers pick it up
+function scComposeNote(p){
+  var g=function(s){return document.getElementById(p+'-'+s);};
+  var noteEl=document.getElementById(p==='tm'?'timer-notes':'inp-notes'); if(!noteEl) return;
+  var src=(g('source').value||'').trim();
+  var c=parseInt(g('correct').value,10), t=parseInt(g('total').value,10), w=parseFloat(g('weighted').value);
+  var base=(noteEl.value||'')
+    .replace(/(?:\[[^\]]*\]\s*·?\s*)?Accuracy-\d+\/\d+=\d+%/ig,'')
+    .replace(/·?\s*WScore-[\d.]+/ig,'')
+    .replace(/^\s*\[[^\]]*\]\s*·?\s*/,'')
+    .replace(/^\s*·\s*|\s*·\s*$/g,'').trim();
+  var parts=[];
+  if(src) parts.push('['+src+']');
+  if(!isNaN(c)&&!isNaN(t)&&t>0) parts.push('Accuracy-'+c+'/'+t+'='+Math.round(c/t*100)+'%');
+  if(!isNaN(w)) parts.push('WScore-'+w);
+  var tail=parts.join(' · ');
+  noteEl.value=[base,tail].filter(Boolean).join(base&&tail?' · ':'');
+}
+function scClearQ(p){['source','correct','total','incorrect','acc','weighted'].forEach(function(s){var e=document.getElementById(p+'-'+s);if(e)e.value='';});}
+// wrap the existing save handlers (no edits to their internals)
+(function(){
+  function ready(fn){document.readyState!=='loading'?fn():document.addEventListener('DOMContentLoaded',fn);}
+  ready(function(){
+    if(window.timerStop&&!window.timerStop.__scQ){var _ts=window.timerStop;window.timerStop=function(){try{scComposeNote('tm');}catch(e){}var r=_ts.apply(this,arguments);try{scClearQ('tm');}catch(e){}return r;};window.timerStop.__scQ=1;}
+    if(window.addSession&&!window.addSession.__scQ){var _as=window.addSession;window.addSession=function(){try{scComposeNote('mn');}catch(e){}var r=_as.apply(this,arguments);try{scClearQ('mn');}catch(e){}return r;};window.addSession.__scQ=1;}
+  });
 })();
 </script>
 
