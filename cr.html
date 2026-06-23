@@ -4480,18 +4480,21 @@
         let _journeyXAxis = 'session';
 
         function parseCRAccuracy(noteText) {
-            if (!noteText) return null;
-            const patterns = [/(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)\s*%/, /accuracy[\s:-]*(\d+)\s*\/\s*(\d+)/i];
-            for (const re of patterns) {
-                const m = noteText.match(re);
-                if (m) {
-                    const correct = parseInt(m[1], 10), total = parseInt(m[2], 10);
-                    const pct = m[3] ? parseInt(m[3], 10) : Math.round((correct / total) * 100);
-                    if (total > 0 && !isNaN(pct)) return { correct, total, pct };
-                }
-            }
-            return null;
+    if (!noteText) return null;
+    let weighted = null;
+    const wm = noteText.match(/WScore[\s:=-]*(\d+(?:\.\d+)?)/i);
+    if (wm) { const wv = parseFloat(wm[1]); if (!isNaN(wv)) weighted = wv; }
+    const patterns = [/(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)\s*%/, /accuracy[\s:-]*(\d+)\s*\/\s*(\d+)/i];
+    for (const re of patterns) {
+        const m = noteText.match(re);
+        if (m) {
+            const correct = parseInt(m[1], 10), total = parseInt(m[2], 10);
+            const pct = m[3] ? parseInt(m[3], 10) : Math.round((correct / total) * 100);
+            if (total > 0 && !isNaN(pct)) return { correct, total, pct, weighted };
         }
+    }
+    return null;
+}
 
         function guessSessionTag(notes) {
             if (!notes) return 'General';
@@ -4563,7 +4566,7 @@
             const labels = scored.map(s => _journeyXAxis === 'session'
                 ? `#${s.idx}`
                 : new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-            const values = scored.map(s => s.acc.pct);
+           const values = scored.map(s => (s.acc.weighted != null ? s.acc.weighted : s.acc.pct));
 
             const firstVal = values[0], lastVal = values[values.length - 1];
             const peak = Math.max(...values);
@@ -4760,7 +4763,10 @@
                                 },
                                 label: (item) => {
                                     const s = scored[item.dataIndex];
-                                    const lines = [`${s.acc.pct}% accuracy  ·  ${s.acc.correct}/${s.acc.total} correct`];
+const head = s.acc.weighted != null
+    ? `${s.acc.weighted} weighted  ·  ${s.acc.pct}% raw`
+    : `${s.acc.pct}% accuracy`;
+const lines = [`${head}  ·  ${s.acc.correct}/${s.acc.total} correct`];
                                     if (s.notes) lines.push(s.notes.length > 52 ? s.notes.substring(0,52)+'…' : s.notes);
                                     return lines;
                                 }
