@@ -875,6 +875,8 @@
 
             function _parseAcc(noteText) {
                 if (!noteText) return null;
+                const wm = noteText.match(/WScore[\s:=-]*(\d+(?:\.\d+)?)/i);
+                if (wm) { const wv = parseFloat(wm[1]); if (!isNaN(wv)) return wv; }
                 const m = noteText.match(/(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)\s*%/) || noteText.match(/accuracy[\s:-]*(\d+)\s*\/\s*(\d+)/i);
                 if (!m) return null;
                 const correct = parseInt(m[1], 10), total = parseInt(m[2], 10);
@@ -1512,18 +1514,21 @@
         let _journeyXAxis = 'session';
 
         function parseRCAccuracy(noteText) {
-            if (!noteText) return null;
-            const m = noteText.match(/(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)\s*%/) || noteText.match(/(\d+)\s*\/\s*(\d+)/);
-            if (!m) {
-                const pctOnly = noteText.match(/(\d{1,3})\s*%/);
-                if (pctOnly) { const v = parseInt(pctOnly[1], 10); return v >= 0 && v <= 100 ? v : null; }
-                return null;
-            }
-            const correct = parseInt(m[1], 10), totalQ = parseInt(m[2], 10);
-            if (!totalQ) return null;
-            const p = m[3] ? parseInt(m[3], 10) : Math.round((correct / totalQ) * 100);
-            return (p >= 0 && p <= 100) ? p : null;
+    if (!noteText) return null;
+    let weighted = null;
+    const wm = noteText.match(/WScore[\s:=-]*(\d+(?:\.\d+)?)/i);
+    if (wm) { const wv = parseFloat(wm[1]); if (!isNaN(wv)) weighted = wv; }
+    const patterns = [/(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)\s*%/, /accuracy[\s:-]*(\d+)\s*\/\s*(\d+)/i];
+    for (const re of patterns) {
+        const m = noteText.match(re);
+        if (m) {
+            const correct = parseInt(m[1], 10), total = parseInt(m[2], 10);
+            const pct = m[3] ? parseInt(m[3], 10) : Math.round((correct / total) * 100);
+            if (total > 0 && !isNaN(pct)) return { correct, total, pct, weighted };
         }
+    }
+    return null;
+}
 
         function guessSessionTag(noteText) {
             if (!noteText) return 'RC';
@@ -1599,7 +1604,7 @@
             canvas.style.display = 'block';
             if (emptyEl) emptyEl.style.display = 'none';
 
-            const accs = data.map(s => s.acc);
+            const accs = data.map(s => (s.acc.weighted != null ? s.acc.weighted : s.acc.pct));
             const labels = data.map((s, i) => _journeyXAxis === 'date'
                 ? new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                 : 'S' + (i + 1));
@@ -1727,7 +1732,10 @@
                                 label: (item) => {
                                     const s = data[item.dataIndex];
                                     const extra = s.mins ? ` · ${s.mins} min` : '';
-                                    return `${s.acc}% accuracy${extra}`;
+                                    const head = s.acc.weighted != null
+                                        ? `${s.acc.weighted} weighted · ${s.acc.pct}% raw`
+                                        : `${s.acc.pct}% accuracy`;
+                                    return `${head}${extra}`;
                                 }
                             }
                         }
