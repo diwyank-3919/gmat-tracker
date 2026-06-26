@@ -215,6 +215,14 @@ section{position:relative}
   filter:blur(30px);
 }
 
+/* ── SHELDON ORB BADGE ── */
+.orb-badge{display:inline-flex;align-items:center;gap:12px;margin-bottom:18px;padding:6px 14px 6px 6px;border-radius:100px;background:rgba(124,132,230,0.08);border:1px solid rgba(124,132,230,0.20)}
+.orb-badge img{width:32px;height:32px;border-radius:50%;object-fit:cover;box-shadow:0 0 18px rgba(124,132,230,0.45)}
+.orb-badge .meta{display:flex;flex-direction:column;line-height:1.15}
+.orb-badge .name{font-size:12.5px;font-weight:600;color:var(--text);letter-spacing:-0.01em}
+.orb-badge .role{font-size:10.5px;color:var(--text-3);letter-spacing:0.04em}
+.orb-badge .pulse{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);margin-left:2px}
+
 /* ── BENTO MINI FEATURES ── */
 .bento{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:60px}
 @media(max-width:900px){.bento{grid-template-columns:1fr 1fr}}
@@ -431,6 +439,86 @@ footer{border-top:1px solid var(--border);padding:50px 0 36px;margin-top:120px}
       <div class="split-img">
         <div class="shot-frame">
           <img src="https://customer-assets.emergentagent.com/job_b4bc6c7f-7ae8-48c0-ae70-1c4d58941bd4/artifacts/dn54anih_image.png" alt="RC Drill Tracker — accuracy journey, pattern detection and action center" loading="lazy">
+        </div>
+      </div>
+    </div>
+
+    <!-- SPLIT 5 — SHELDON AI COACH -->
+    <div class="split reveal">
+      <div class="split-text">
+        <span class="orb-badge">
+          <img src="https://customer-assets.emergentagent.com/job_prep-dashboard-23/artifacts/dzrhf362_image.png" alt="Sheldon AI coach avatar">
+          <span class="meta"><span class="name">Sheldon</span><span class="role">GMAT COACH · ONLINE</span></span>
+          <span class="pulse"></span>
+        </span>
+        <h3>Your AI coach, <span class="em">on call.</span></h3>
+        <p>Sheldon reads your dashboard — every hour logged, every mock attempted, every weak topic — and tells you what to do next in plain English. Not a chatbot, a coach.</p>
+        <ul class="split-bullets">
+          <li><b>Knows your data</b> — weak spots, streaks, time gaps, mock trends</li>
+          <li><b>Asks the smart question</b> ("What's my weakest topic?" "Am I on track?")</li>
+          <li><b>Hands you a 45-min sprint</b> with warm-up, drill and review steps</li>
+        </ul>
+      </div>
+      <div class="split-img">
+        <div class="shot-frame">
+          <img src="https://customer-assets.emergentagent.com/job_prep-dashboard-23/artifacts/brdutq5j_image.png" alt="Sheldon chat — GMAT coach diagnosing weakest topic and prescribing a 45-min sprint" loading="lazy">
+        </div>
+      </div>
+    </div>
+
+    <!-- SPLIT 6 — DAILY READS -->
+    <div class="split reverse reveal">
+      <div class="split-text">
+        <span class="split-tag"><span class="d"></span> Daily Reads</span>
+        <h3>A two-minute read, <span class="em">every day.</span></h3>
+        <p>GMAT-hard passages, hand-picked for the test's difficulty curve. Sharpen comprehension and vocabulary in the same coffee you'd waste scrolling.</p>
+        <ul class="split-bullets">
+          <li><b>GMAT-calibrated</b> passages across science, cosmos, economics and policy</li>
+          <li><b>Reader mode</b> with typography controls and a calm sepia theme</li>
+          <li><b>Library</b> archives every read so you can revisit the hard ones</li>
+        </ul>
+      </div>
+      <div class="split-img">
+        <div class="shot-frame">
+          <img src="https://customer-assets.emergentagent.com/job_prep-dashboard-23/artifacts/xh8c99xz_image.png" alt="Daily Reads — a GMAT-hard article in reader mode with typography controls" loading="lazy">
+        </div>
+      </div>
+    </div>
+
+    <!-- SPLIT 7 — DAILY GREETING -->
+    <div class="split reveal">
+      <div class="split-text">
+        <span class="split-tag"><span class="d"></span> Check-in</span>
+        <h3>A morning <span class="em">that knows you.</span></h3>
+        <p>Every login opens with the only three things that matter: how close you are, what you did yesterday, and what you're choosing to focus on today.</p>
+        <ul class="split-bullets">
+          <li><b>Days to exam</b> and <b>streak count</b> front and centre</li>
+          <li><b>Yesterday's wins</b> auto-summarised — hours, topics, mocks</li>
+          <li><b>Focus list</b> for today, written by you, remembered by us</li>
+        </ul>
+      </div>
+      <div class="split-img">
+        <div class="shot-frame">
+          <img src="https://customer-assets.emergentagent.com/job_prep-dashboard-23/artifacts/zcarbnhb_image.png" alt="Good evening greeting card — 35 days to GMAT, 62 day streak, yesterday's study, today's focus" loading="lazy">
+        </div>
+      </div>
+    </div>
+
+    <!-- SPLIT 8 — SHARE PROGRESS -->
+    <div class="split reverse reveal">
+      <div class="split-text">
+        <span class="split-tag"><span class="d"></span> Share</span>
+        <h3>Your progress, <span class="em">postable.</span></h3>
+        <p>One tap renders a clean, brand-matched card of your stats — total hours, streak, consistency, topic mix and 30-day activity. Download or copy, then post it anywhere.</p>
+        <ul class="split-bullets">
+          <li><b>Auto-generated</b> from your live data, never a screenshot guess</li>
+          <li><b>Download PNG</b> or copy to clipboard in one click</li>
+          <li><b>Built for sharing</b> — Twitter, LinkedIn, study groups, your fridge</li>
+        </ul>
+      </div>
+      <div class="split-img">
+        <div class="shot-frame">
+          <img src="https://customer-assets.emergentagent.com/job_prep-dashboard-23/artifacts/nvvhtujp_image.png" alt="Share your progress — auto-generated stats card with download PNG and copy image" loading="lazy">
         </div>
       </div>
     </div>
