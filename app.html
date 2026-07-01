@@ -1487,16 +1487,16 @@
             box-shadow: 0 0 6px rgba(52, 211, 153, 0.20);
         }
 
-        .s-dot.missed {
+        .s-dot.below {
+            background: rgba(240, 189, 106, 0.14);
+            color: #f0bd6a;
+            border: 1px solid rgba(240, 189, 106, 0.28)
+        }
+
+        .s-dot.nodata {
             background: rgba(251, 113, 133, 0.12);
             color: var(--red);
             border: 1px solid rgba(251, 113, 133, 0.22)
-        }
-
-        .s-dot.empty {
-            background: rgba(255, 255, 255, 0.04);
-            color: var(--text-muted);
-            border: 1px solid rgba(255, 255, 255, 0.06)
         }
 
         .streak-key {
@@ -11952,10 +11952,10 @@
                                     style="display:inline-block;width:11px;height:11px;border-radius:3px;background:rgba(52,211,153,0.18)"></span>Target
                                 met</span>
                             <span><span
-                                    style="display:inline-block;width:11px;height:11px;border-radius:3px;background:rgba(251,113,133,0.12)"></span>Below
+                                    style="display:inline-block;width:11px;height:11px;border-radius:3px;background:rgba(240,189,106,0.14)"></span>Below
                                 target</span>
                             <span><span
-                                    style="display:inline-block;width:11px;height:11px;border-radius:3px;background:rgba(255,255,255,0.04)"></span>No
+                                    style="display:inline-block;width:11px;height:11px;border-radius:3px;background:rgba(251,113,133,0.12)"></span>No
                                 data</span>
                         </div>
                     </div>
@@ -13371,15 +13371,15 @@
         }
 
         function renderStreak() {
-            var grid, i, d, ds, mins, tgt, met, empty, dot;
+            var grid, i, d, ds, mins, tgt, met, noData, below, dot;
             grid = document.getElementById("streak-grid"); grid.innerHTML = "";
             for (i = 29; i >= 0; i--) {
                 d = addDays(today, -i); ds = dateStr(d); mins = minsOn(ds); tgt = targetFor(d);
-                met = mins >= tgt && mins > 0; empty = mins === 0;
+                met = mins >= tgt && mins > 0; noData = mins === 0; below = !met && !noData;
                 dot = document.createElement("div");
-                dot.className = "s-dot " + (met ? "met" : empty ? "empty" : "missed");
-                dot.title = ds + (mins ? " - " + fmtH(mins) : "");
-                dot.innerHTML = met ? '<i class="ti ti-check" style="font-size:8px"></i>' : empty ? '<span style="font-size:7px;opacity:.2">·</span>' : '<i class="ti ti-x" style="font-size:8px"></i>';
+                dot.className = "s-dot " + (met ? "met" : below ? "below" : "nodata");
+                dot.title = ds + (mins ? " - " + fmtH(mins) : " - No session logged");
+                dot.innerHTML = '<i class="ti ' + (met ? "ti-check" : "ti-x") + '" style="font-size:8px"></i>';
                 grid.appendChild(dot);
             }
         }
