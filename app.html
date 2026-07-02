@@ -11886,6 +11886,7 @@
                             <div class="chart-legend">
                                 <span><span class="cleg" style="background:var(--green)"></span>On target</span>
                                 <span><span class="cleg" style="background:var(--red)"></span>Below</span>
+                                <span><span class="cleg" style="background:rgba(255,255,255,0.14)"></span>No data</span>
                                 <span style="align-items:center"><span
                                         style="display:inline-block;width:14px;height:2px;border-top:2px dashed rgba(255,255,255,0.20);margin-right:4px"></span>Target</span>
                             </div>
@@ -13269,7 +13270,7 @@
             actual = dates.map(function (d) { return parseFloat((minsOn(dateStr(d)) / 60).toFixed(2)); });
             target = dates.map(function (d) { return parseFloat((targetFor(d) / 60).toFixed(1)); });
             colors = dates.map(function (d, i) {
-                return actual[i] === 0 ? "rgba(255,255,255,0.06)" : actual[i] >= target[i] ? "rgba(52,211,153,0.78)" : "rgba(251,113,133,0.72)";
+                return actual[i] === 0 ? "rgba(255,255,255,0.14)" : actual[i] >= target[i] ? "rgba(52,211,153,0.78)" : "rgba(251,113,133,0.72)";
             });
             if (mainChartInst) mainChartInst.destroy();
 
@@ -13284,14 +13285,14 @@
             gradRed.addColorStop(1, "rgba(251,113,133,0.18)");
 
             var gradColors = dates.map(function (d, i) {
-                return actual[i] === 0 ? "rgba(255,255,255,0.06)" : actual[i] >= target[i] ? gradGreen : gradRed;
+                return actual[i] === 0 ? "rgba(255,255,255,0.14)" : actual[i] >= target[i] ? gradGreen : gradRed;
             });
 
             mainChartInst = new Chart(canvas, {
                 type: "bar",
                 data: {
                     labels: labels, datasets: [
-                        { label: "Actual", data: actual, backgroundColor: gradColors, borderRadius: 10, borderSkipped: false, order: 2 },
+                        { label: "Actual", data: actual, backgroundColor: gradColors, borderRadius: 10, borderSkipped: false, order: 2, minBarLength: 6 },
                         {
                             label: "Target", data: target, type: "line",
                             borderColor: "rgba(255,255,255,0.22)", borderWidth: 1.5, borderDash: [5, 4],
