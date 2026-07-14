@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
     <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
     <link href="https://api.fontshare.com/v2/css?f[]=satoshi@500,700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.3/chart.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         *,
@@ -9165,20 +9165,8 @@
             font-variant-numeric: tabular-nums;
         }
     </style>
-    <!-- ════════════════════════════════════════════════════════════════════
-  SCORECONSOLE — MICRO-INTERACTIONS PATCH v1
-  Two paste blocks. No existing code is modified — both blocks are
-  additive, so your IIFEs and braces stay untouched.
-
-  AFTER the last existing </style> (it must win the cascade — same rule
-  as the Sheldon Coach block).
- 
-  BLOCK B (script): paste immediately BEFORE the closing </body> tag,
-  after all existing scripts.
-═════════════════════════════════════════════════════════════════════ -->
 
 
-    <!-- ━━━━━━━━━━ BLOCK A —  ━━━━━━━━━━ -->
     <style id="sc-micro-css">
         @property --sc-angle {
             syntax: '<angle>';
@@ -10873,7 +10861,7 @@
         </div>
         <div class="sb-section">
             <div class="sb-section-label">Topics</div>
-            <div class="sb-topic-item" style="cursor:pointer" onclick="window.location='/quant.html'">
+            <div class="sb-topic-item">
                 <div class="sb-topic-row">
                     <div class="sb-topic-name"><i class="ti ti-math" style="color:#8b7cf8"></i> Quant</div><span
                         class="sb-topic-hours" id="mob-sb-quant">0h</span>
@@ -10990,22 +10978,14 @@
                     Error log
                 </div>
                 <div class="sb-item" onclick="switchView('reads')" id="nav-reads"><i class="ti ti-book-2"></i> Daily Reads</div>
-                <div class="sb-item" onclick="window.location='/quant.html#entry'" id="nav-quant-drill"
-                    title="Log a Quant attempt"><i class="ti ti-math-symbols"></i> Quant drills</div>
             </div>
 
             <div class="sb-section">
                 <div class="sb-section-label">Topics</div>
-                <div class="sb-topic-item" id="sbt-quant" style="cursor:pointer" onclick="window.location='/quant.html'"
-                    title="Open Quant Drill Tracker">
+                <div class="sb-topic-item" id="sbt-quant">
                     <div class="sb-topic-row">
                         <div class="sb-topic-name"><i class="ti ti-math" style="color:#8b7cf8"></i> Quant</div>
-                        <span style="display:flex;align-items:center;gap:6px">
-                            <span class="sb-topic-hours" id="sb-quant">0h</span>
-                            <span
-                                style="font-size:9px;font-weight:700;letter-spacing:0.06em;background:rgba(139,124,248,0.12);color:#8b7cf8;border:1px solid rgba(139,124,248,0.2);padding:1px 5px;border-radius:4px">DRILL
-                                →</span>
-                        </span>
+                        <span class="sb-topic-hours" id="sb-quant">0h</span>
                     </div>
                     <div class="sb-topic-track">
                         <div class="sb-topic-fill" id="sbf-quant" style="width:0%;background:#8b7cf8"></div>
@@ -11164,7 +11144,6 @@
             </div>
 
             <div class="content">
-                <!-- ============ 2) VIEW MARKUP  (replace your old #view-reads with this) ============ -->
 <div id="view-reads" style="display:none">
   <div id="sc-reader" data-theme="paper" data-face="lit">
  
@@ -19088,7 +19067,6 @@
             setTimeout(function () { scTourStart(); }, 1200);
         })();
     </script>
-    <!-- ━━━━━━━━━━ BLOCK B — paste before </body> ━━━━━━━━━━ -->
     <script id="sc-micro-js">
         (function () {
             function ready(fn) { if (document.body) fn(); else document.addEventListener('DOMContentLoaded', fn); }
@@ -25259,7 +25237,6 @@ function injectSndChip() {
     };
 })();
 </script>
-<!-- ============ 3) STYLES ============ -->
 <style id="reads-css">
 @import url('https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Inter:wght@400;500;600&display=swap');
  
@@ -25358,8 +25335,6 @@ function injectSndChip() {
 @media (prefers-reduced-motion:reduce){ #sc-reader *{ transition:none!important; } }
 </style>
  
-<!-- ============ 4) SCRIPT  -  v3 (highlight persistence + real completion) ============
-     Replace ONLY your <script id="reads-js"> block with this. Markup + CSS unchanged. -->
 <script id="reads-js">
 (function(){
   "use strict";
