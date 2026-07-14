@@ -12508,7 +12508,7 @@
             localStorage.setItem('gmat_completed_topics', JSON.stringify(arr));
             if (window.scSnd) { nowDone ? scSnd.success() : scSnd.tick(); }
             if (typeof showToast === 'function') showToast(
-                nowDone ? '<i class="ti ti-circle-check-filled" style="color:var(--green)"></i>' : '<i class="ti ti-rotate-2" style="color:var(--amber)"></i>',
+                nowDone ? '✅' : '↩️',
                 nowDone ? t + ' marked complete' : t + ' reopened',
                 nowDone ? "Sheldon will steer practice elsewhere" : "Back in Sheldon's rotation");
             if (typeof render === 'function') render();
