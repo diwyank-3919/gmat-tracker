@@ -2370,6 +2370,52 @@
             justify-content: space-between;
         }
 
+        .sc-done-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: 0;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            color: var(--text-secondary);
+            opacity: 0.45;
+            transition: opacity 0.15s, color 0.15s, transform 0.15s;
+            line-height: 0;
+        }
+
+        .sc-done-toggle .ti {
+            font-size: 14px;
+        }
+
+        .sb-topic-item:hover .sc-done-toggle {
+            opacity: 0.85;
+        }
+
+        .sc-done-toggle:hover {
+            opacity: 1;
+            transform: scale(1.12);
+        }
+
+        .sc-topic-done .sc-done-toggle {
+            color: var(--green, #34d399);
+            opacity: 1;
+        }
+
+        .sc-topic-done .sb-topic-name {
+            color: var(--green, #34d399);
+        }
+
+        .sc-topic-done .sb-topic-name > .ti {
+            filter: grayscale(0.35);
+        }
+
+        .sc-topic-done .sb-topic-fill {
+            background: var(--green, #34d399) !important;
+            opacity: 0.55;
+        }
+
         .sb-topic-name {
             display: flex;
             align-items: center;
@@ -12452,6 +12498,21 @@
         var TC = { "Quant": "#8b7cf8", "RC": "#34d399", "CR": "#fbbf24", "DI": "#60a5fa", "Mock test": "#f472b6", "Review": "#fb923c" };
         var TOPICS = ["Quant", "RC", "CR", "DI", "Mock test", "Review"];
         var SB_IDS = { "Quant": "sb-quant", "RC": "sb-rc", "CR": "sb-cr", "DI": "sb-di", "Mock test": "sb-mock", "Review": "sb-review" };
+        /* ── Topic completion (user-marked "done" → Sheldon deprioritises) ── */
+        var SBT_IDS = { "Quant": "sbt-quant", "RC": "sbt-rc", "CR": "sbt-cr", "DI": "sbt-di", "Mock test": "sbt-mock", "Review": "sbt-review" };
+        function scCompletedTopics() { try { return JSON.parse(localStorage.getItem('gmat_completed_topics') || '[]'); } catch (e) { return []; } }
+        function scIsTopicDone(t) { return scCompletedTopics().indexOf(t) !== -1; }
+        function scToggleTopicDone(t) {
+            var arr = scCompletedTopics(), i = arr.indexOf(t), nowDone;
+            if (i === -1) { arr.push(t); nowDone = true; } else { arr.splice(i, 1); nowDone = false; }
+            localStorage.setItem('gmat_completed_topics', JSON.stringify(arr));
+            if (window.scSnd) { nowDone ? scSnd.success() : scSnd.tick(); }
+            if (typeof showToast === 'function') showToast(
+                nowDone ? '<i class="ti ti-circle-check-filled" style="color:var(--green)"></i>' : '<i class="ti ti-rotate-2" style="color:var(--amber)"></i>',
+                nowDone ? t + ' marked complete' : t + ' reopened',
+                nowDone ? "Sheldon will steer practice elsewhere" : "Back in Sheldon's rotation");
+            if (typeof render === 'function') render();
+        }
         var QUOTES = [
             ["Every hour compounds.", "700+ is built one session at a time."],
             ["Consistency beats intensity.", "Show up daily and the score follows."],
@@ -13180,6 +13241,25 @@
                 var el = document.getElementById(SB_IDS[t]); if (el) el.textContent = topicTotals[t] ? fmtH(topicTotals[t]) : "0h";
                 var fill = document.getElementById(SBF_IDS[t]);
                 if (fill) fill.style.width = Math.round((topicTotals[t] || 0) / maxTopic * 100) + "%";
+                var item = document.getElementById(SBT_IDS[t]);
+                if (item) {
+                    var done = scIsTopicDone(t);
+                    item.classList.toggle('sc-topic-done', done);
+                    var nameEl = item.querySelector('.sb-topic-name');
+                    if (nameEl) {
+                        var btn = item.querySelector('.sc-done-toggle');
+                        if (!btn) {
+                            btn = document.createElement('button');
+                            btn.className = 'sc-done-toggle';
+                            btn.type = 'button';
+                            btn.addEventListener('click', function (e) { e.stopPropagation(); scToggleTopicDone(t); });
+                            nameEl.insertBefore(btn, nameEl.firstChild);
+                        }
+                        btn.innerHTML = done ? '<i class="ti ti-circle-check-filled"></i>' : '<i class="ti ti-circle"></i>';
+                        btn.title = done ? 'Marked complete — click to reopen' : 'Mark ' + t + ' as complete';
+                        btn.setAttribute('aria-pressed', done ? 'true' : 'false');
+                    }
+                }
             });
 
             qi = streak % QUOTES.length;
@@ -14508,7 +14588,8 @@
                 topicTotals: Object.fromEntries(Object.entries(topicTotals).map(function (e) { return [e[0], +(e[1] / 60).toFixed(1)]; })),
                 daysLeft: daysLeft,
                 latestMock: window.mockScores && window.mockScores.length ? window.mockScores[window.mockScores.length - 1].score : null,
-                targetScore: TARGET_SCORE
+                targetScore: TARGET_SCORE,
+                completedTopics: (typeof scCompletedTopics === 'function' ? scCompletedTopics() : [])
             };
         }
 
@@ -14546,6 +14627,10 @@
                     + 'This week: ' + _ctx.weekHours + 'h of ' + _ctx.weekTarget + 'h target\n'
                     + 'Consistency: ' + _ctx.consistency + '%\n'
                     + 'Topic breakdown (hours): ' + JSON.stringify(_ctx.topicTotals) + '\n'
+                    + (_ctx.completedTopics && _ctx.completedTopics.length
+                        ? 'Topics the user has MARKED COMPLETE: ' + _ctx.completedTopics.join(', ')
+                          + '. Do NOT recommend further drilling on these — treat them as consolidated and redirect all "what to practise next" guidance toward the remaining/weaker topics. Only revisit a completed topic if a mock score or recent attempts show it regressing, and if so, flag that explicitly.\n'
+                        : '')
                     + (_ctx.daysLeft != null ? 'Days to exam: ' + _ctx.daysLeft + '\n' : '')
                     + (_ctx.latestMock ? 'Latest mock score: ' + _ctx.latestMock + '\n' : '')
                     + 'Target score: ' + _ctx.targetScore + '\n'
