@@ -7594,6 +7594,321 @@
             color: #0f1118
         }
 
+        /* ══ LOG MOCK SCORE — instrument dialog ══ */
+        #add-mock-modal {
+            padding: 24px;
+            background: rgba(0, 0, 0, 0.52) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+        }
+
+        .mkm-card {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 420px;
+            padding: 24px 24px 20px;
+            border-radius: 20px;
+            background: linear-gradient(155deg, #151a26, #1a2030);
+            border: 1px solid rgba(255, 255, 255, 0.11);
+            box-shadow: 0 40px 90px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(135, 141, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+            animation: scdPop .28s cubic-bezier(.34, 1.56, .64, 1);
+        }
+
+        .mkm-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(255, 255, 255, .016) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, .016) 1px, transparent 1px);
+            background-size: 28px 28px;
+            pointer-events: none;
+            border-radius: inherit;
+        }
+
+        .mkm-card>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        .mkm-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .mkm-head-ic {
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            color: var(--accent-bright);
+            font-size: 19px;
+        }
+
+        .mkm-title {
+            font-family: 'Fraunces', serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        .mkm-sub {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
+
+        .mkm-lbl {
+            display: block;
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 7px;
+        }
+
+        .mkm-date {
+            height: 42px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 13px;
+            border-radius: 11px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 13px;
+            font-weight: 650;
+            color: var(--text-primary);
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            transition: border-color .15s;
+        }
+
+        .mkm-date:hover {
+            border-color: rgba(135, 141, 255, .45);
+        }
+
+        /* ── total score: the drum ── */
+        .mkm-total {
+            position: relative;
+            margin: 16px 0 14px;
+            border-radius: 14px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #222a3a, #1a2030);
+            border: 1px solid rgba(0, 0, 0, 0.45);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -12px 24px rgba(0, 0, 0, 0.38), 0 6px 18px rgba(0, 0, 0, 0.35);
+            transition: border-color .15s, box-shadow .15s;
+        }
+
+        .mkm-total:focus-within {
+            border-color: rgba(135, 141, 255, 0.55);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -12px 24px rgba(0, 0, 0, 0.38), 0 0 0 3px rgba(135, 141, 255, 0.13);
+        }
+
+        .mkm-total input {
+            width: 100%;
+            height: 84px;
+            border: none;
+            background: none;
+            outline: none;
+            text-align: center;
+            font-family: 'Fraunces', serif !important;
+            font-weight: 600;
+            font-size: 44px;
+            line-height: 84px;
+            color: #f4eee2 !important;
+            -webkit-text-fill-color: #f4eee2 !important;
+            -moz-appearance: textfield;
+        }
+
+        .mkm-total input::placeholder {
+            color: rgba(244, 238, 226, 0.17);
+            -webkit-text-fill-color: rgba(244, 238, 226, 0.17);
+        }
+
+        .mkm-total input::-webkit-outer-spin-button,
+        .mkm-total input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .mkm-end {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            color: rgba(244, 238, 226, 0.20);
+            pointer-events: none;
+        }
+
+        .mkm-end.l {
+            left: 14px;
+        }
+
+        .mkm-end.r {
+            right: 14px;
+        }
+
+        /* ── section trio ── */
+        .mkm-secs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 9px;
+        }
+
+        .mkm-sec {
+            position: relative;
+            border-radius: 12px;
+            padding: 9px 6px 7px;
+            text-align: center;
+            background: linear-gradient(180deg, #1e2534, #191f2d);
+            border: 1px solid rgba(255, 255, 255, 0.055);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            transition: border-color .15s;
+        }
+
+        .mkm-sec:focus-within {
+            border-color: rgba(135, 141, 255, 0.40);
+        }
+
+        .mkm-sec-lbl {
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .mkm-sec input {
+            width: 100%;
+            height: 36px;
+            border: none;
+            background: none;
+            outline: none;
+            text-align: center;
+            font-family: 'Fraunces', serif !important;
+            font-weight: 600;
+            font-size: 23px;
+            line-height: 36px;
+            color: #f4eee2 !important;
+            -webkit-text-fill-color: #f4eee2 !important;
+            -moz-appearance: textfield;
+        }
+
+        .mkm-sec input::placeholder {
+            color: rgba(244, 238, 226, 0.15);
+            -webkit-text-fill-color: rgba(244, 238, 226, 0.15);
+        }
+
+        .mkm-sec input::-webkit-outer-spin-button,
+        .mkm-sec input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .mkm-scale {
+            font-size: 8.5px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            color: rgba(244, 238, 226, 0.18);
+        }
+
+        .mkm-notes {
+            margin-top: 14px;
+        }
+
+        .mkm-notes input {
+            width: 100%;
+            height: 40px;
+            padding: 0 13px;
+            border-radius: 11px;
+            font-family: inherit;
+            font-size: 13px;
+            color: var(--text-primary);
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            outline: none;
+            transition: border-color .15s, background .15s;
+        }
+
+        .mkm-notes input:focus {
+            background: var(--bg-input-focus);
+            border-color: rgba(135, 141, 255, .45);
+        }
+
+        .mkm-notes input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .mkm-acts {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .mkm-btn {
+            height: 42px;
+            border: none;
+            border-radius: 11px;
+            font-family: 'Hanken Grotesk', sans-serif;
+            font-size: 13px;
+            font-weight: 650;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: filter .14s, transform .1s;
+        }
+
+        .mkm-btn:hover {
+            filter: brightness(1.10);
+        }
+
+        .mkm-btn:active {
+            transform: scale(0.97);
+        }
+
+        .mkm-save {
+            flex: 1;
+            background: #878dff;
+            color: #0f1118;
+            box-shadow: 0 6px 20px rgba(135, 141, 255, 0.28);
+        }
+
+        .mkm-cancel {
+            padding: 0 18px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.10) !important;
+            color: var(--text-secondary);
+        }
+
+        .mkm-cancel:hover {
+            background: rgba(255, 255, 255, 0.10);
+            filter: none;
+        }
+
+        @media(max-width:480px) {
+            .mkm-total input {
+                font-size: 36px;
+            }
+
+            .mkm-end {
+                display: none;
+            }
+        }
+
         /* ── Compact timer: unified 42px row ── */
         #timer-panel .timer-select,
         #timer-panel .cs-wrap {
@@ -12161,45 +12476,58 @@
 
             <!-- ADD MOCK MODAL -->
             <div id="add-mock-modal"
-                style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.60);backdrop-filter:blur(12px);z-index:1000;align-items:center;justify-content:center">
-                <div
-                    style="background:rgba(15,12,26,0.97);border:1px solid rgba(139,124,248,0.25);border-radius:20px;padding:26px 30px;max-width:430px;width:90%;box-shadow:0 32px 80px rgba(0,0,0,0.60)">
-                    <div style="font-size:17px;font-weight:750;color:var(--text-primary);margin-bottom:4px">Log mock
-                        score</div>
-                    <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:18px">Record your GMAT practice
-                        test
-                        result</div>
-                    <div style="display:flex;flex-direction:column;gap:11px">
-                        <div class="field"><label>Date</label>
-                            <input type="hidden" id="mock-date-inp">
-                            <div id="mock-date-display"
-                                onclick="openPicker({inputId:'mock-date-inp',textId:'mock-date-text',displayId:'mock-date-display'})"
-                                style="height:36px;display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:0 11px;border-radius:9px;cursor:pointer;background:var(--bg-input);border:1px solid var(--border);color:var(--text-primary);user-select:none">
-                                <i class="ti ti-calendar" style="font-size:14px;color:var(--accent-bright)"></i>
-                                <span id="mock-date-text">Select date</span>
-                            </div>
+                style="display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center">
+                <div class="mkm-card">
+                    <div class="mkm-head">
+                        <div class="mkm-head-ic"><i class="ti ti-clipboard-check"></i></div>
+                        <div>
+                            <div class="mkm-title">Log mock score</div>
+                            <div class="mkm-sub">Record your GMAT practice test result</div>
                         </div>
-                        <div class="field"><label>Total score</label><input type="number" id="mock-score-inp" min="205"
-                                max="805" step="10" placeholder="e.g. 645"
-                                style="font-size:22px;font-weight:700;text-align:center;color:var(--accent-bright)">
-                        </div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
-                            <div class="field"><label>Quant</label><input type="number" id="mock-quant-inp"
-                                    min="60" max="90" placeholder="e.g. 80"></div>
-                            <div class="field"><label>Verbal</label><input type="number" id="mock-verbal-inp"
-                                    min="60" max="90" placeholder="e.g. 77"></div>
-                            <div class="field"><label>DI</label><input type="number" id="mock-di-inp"
-                                    min="60" max="90" placeholder="e.g. 75"></div>
-                        </div>
-                        <div class="field"><label>Notes (optional)</label><input type="text" id="mock-notes-inp"
-                                placeholder="e.g. Struggled with RC timing"></div>
                     </div>
-                    <div style="display:flex;gap:9px;margin-top:18px">
-                        <button onclick="saveMock()"
-                            style="flex:1;padding:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:650;cursor:pointer;box-shadow:0 4px 14px rgba(124,60,237,0.45)"><i
-                                class="ti ti-check"></i> Save score</button>
-                        <button onclick="closeAddMock()"
-                            style="padding:10px 16px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;font-size:13px;cursor:pointer;color:var(--text-secondary)">Cancel</button>
+
+                    <label class="mkm-lbl">Date</label>
+                    <input type="hidden" id="mock-date-inp">
+                    <div id="mock-date-display" class="mkm-date"
+                        onclick="openPicker({inputId:'mock-date-inp',textId:'mock-date-text',displayId:'mock-date-display'})">
+                        <i class="ti ti-calendar" style="font-size:14px;color:var(--accent-bright)"></i>
+                        <span id="mock-date-text">Select date</span>
+                    </div>
+
+                    <label class="mkm-lbl" style="margin-top:16px">Total score</label>
+                    <div class="mkm-total">
+                        <span class="mkm-end l">205</span>
+                        <input type="number" id="mock-score-inp" min="205" max="805" step="10" placeholder="645">
+                        <span class="mkm-end r">805</span>
+                    </div>
+
+                    <div class="mkm-secs">
+                        <div class="mkm-sec">
+                            <div class="mkm-sec-lbl" style="color:#8b7cf8">Quant</div>
+                            <input type="number" id="mock-quant-inp" min="60" max="90" placeholder="80">
+                            <div class="mkm-scale">60–90</div>
+                        </div>
+                        <div class="mkm-sec">
+                            <div class="mkm-sec-lbl" style="color:#7e9bf0">Verbal</div>
+                            <input type="number" id="mock-verbal-inp" min="60" max="90" placeholder="77">
+                            <div class="mkm-scale">60–90</div>
+                        </div>
+                        <div class="mkm-sec">
+                            <div class="mkm-sec-lbl" style="color:#60a5fa">DI</div>
+                            <input type="number" id="mock-di-inp" min="60" max="90" placeholder="75">
+                            <div class="mkm-scale">60–90</div>
+                        </div>
+                    </div>
+
+                    <div class="mkm-notes">
+                        <label class="mkm-lbl">Notes (optional)</label>
+                        <input type="text" id="mock-notes-inp" placeholder="e.g. Struggled with RC timing">
+                    </div>
+
+                    <div class="mkm-acts">
+                        <button class="mkm-btn mkm-save" onclick="saveMock()"><i class="ti ti-check"></i> Save
+                            score</button>
+                        <button class="mkm-btn mkm-cancel" onclick="closeAddMock()">Cancel</button>
                     </div>
                 </div>
             </div>
