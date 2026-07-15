@@ -4499,6 +4499,7 @@
         function guessSessionTag(notes) {
             if (!notes) return 'General';
             const n = notes.toLowerCase();
+            if (n.includes('verbal sitting')) return 'Verbal';
             if (n.includes('mixed bag')) return 'Mixed Bag';
             if (n.includes('reviewing')) return 'Review';
             if (n.includes('hard')) return 'Hard Drill';
