@@ -13533,6 +13533,7 @@
             filtered = sessions.slice();
             if (sessFilter === "today") filtered = sessions.filter(function (s) { return s.date === ts; });
             else if (sessFilter === "week") filtered = sessions.filter(function (s) { return s.date >= dateStr(ws) && s.date <= dateStr(we); });
+            filtered = filtered.filter(function (s) { return !((s.topic === "RC" || s.topic === "CR") && !s.mins && /\[Verbal sitting/.test(s.notes || "")); });
             filtered.sort(function (a, b) { return b.date.localeCompare(a.date) || ((b.created_at || 0) - (a.created_at || 0)); });
             total = filtered.reduce(function (a, s) { return a + s.mins; }, 0);
             document.getElementById("sess-total-label").textContent = filtered.length ? fmtH(total) + " total" : "";
@@ -25964,6 +25965,24 @@ function addVerbalSitting(){
     var _tt=document.getElementById('timer-topic');
     if(_tt&&!_tt.__vb){_tt.addEventListener('change',vbtToggle);_tt.__vb=1;vbtToggle();}
     if(window.addSession&&!window.addSession.__scQ){var _as=window.addSession;window.addSession=function(){if(vbIsVerbal()){return addVerbalSitting();}try{scComposeNote('mn');}catch(e){}var r=_as.apply(this,arguments);try{scClearQ('mn');}catch(e){}return r;};window.addSession.__scQ=1;}
+    if(window.delSession&&!window.delSession.__vb){
+      var _ds=window.delSession;
+      window.delSession=function(id){
+        try{
+          var arr=window.sessions||[],row=null,i,s;
+          for(i=0;i<arr.length;i++){if(String(arr[i].id)===String(id)){row=arr[i];break;}}
+          if(row&&row.topic==='Verbal'&&/\[Verbal sitting/.test(row.notes||'')){
+            var sibs=[];
+            for(i=0;i<arr.length;i++){s=arr[i];
+              if(String(s.id)===String(id))continue;
+              if((s.topic==='RC'||s.topic==='CR')&&s.date===row.date&&/\[Verbal sitting/.test(s.notes||'')&&Math.abs((s.created_at||0)-(row.created_at||0))<=5)sibs.push(s.id);}
+            if(sibs.length){supa.from('sessions').update({deleted:true}).in('id',sibs).then(function(){_ds(id);});return;}
+          }
+        }catch(e){}
+        return _ds(id);
+      };
+      window.delSession.__vb=1;
+    }
     var _tp=document.getElementById('inp-topic');
     if(_tp&&!_tp.__vb){_tp.addEventListener('change',vbToggle);_tp.__vb=1;vbToggle();}
   });
