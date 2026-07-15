@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verbal Command Center — ScoreConsole</title>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='r' x1='6' y1='26' x2='26' y2='6' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%238b7cf8'/%3E%3Cstop offset='1' stop-color='%235fd9a8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%230a0e1a'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='rgba(255,255,255,0.10)' stroke-width='3'/%3E%3Cpath d='M21.2 8.4 A 9 9 0 1 1 10.8 8.4' fill='none' stroke='url(%23r)' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='21.2' cy='8.4' r='2' fill='%235fd9a8'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+    <style>
+        *,
+        *::before,
+        *::after { box-sizing: border-box; margin: 0; padding: 0 }
+        html { font-size: 16px; height: 100% }
+
+        :root {
+            --navy-900: #070b14; --navy-800: #0a0e1a; --navy-700: #0d1220; --navy-600: #111828;
+            --navy-500: #162033; --navy-400: #1c2a40; --navy-300: #243350;
+            --indigo: #7c6cf6; --indigo-bright: #9d8ff8; --indigo-soft: rgba(124, 108, 246, 0.14); --indigo-glow: rgba(124, 108, 246, 0.28);
+            --green: #34d399; --green-dim: #2db584; --green-soft: rgba(52, 211, 153, 0.12); --green-glow: rgba(52, 211, 153, 0.25);
+            --amber: #f59e0b; --amber-soft: rgba(245, 158, 11, 0.12);
+            --red: #f87171; --red-soft: rgba(248, 113, 113, 0.12);
+            --blue: #60a5fa; --blue-soft: rgba(96, 165, 250, 0.12);
+            --surface-0: rgba(255, 255, 255, 0.000); --surface-1: rgba(255, 255, 255, 0.032); --surface-2: rgba(255, 255, 255, 0.055);
+            --surface-3: rgba(255, 255, 255, 0.085); --surface-hover: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.08); --border-subtle: rgba(255, 255, 255, 0.05); --border-accent: rgba(124, 108, 246, 0.35);
+            --text-1: rgba(255, 255, 255, 0.92); --text-2: rgba(255, 255, 255, 0.62); --text-3: rgba(255, 255, 255, 0.38); --text-4: rgba(255, 255, 255, 0.20);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3); --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35); --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.45);
+            --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 4px 20px rgba(0, 0, 0, 0.30);
+            --ease-out: .22s cubic-bezier(0.16, 1, 0.3, 1); --ease-spring: .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif; background: var(--navy-800); color: var(--text-1);
+            min-height: 100vh; line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+        }
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 55% 40% at 78% 5%, rgba(100, 80, 220, 0.09) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 35% at 10% 90%, rgba(30, 160, 110, 0.05) 0%, transparent 55%),
+                linear-gradient(175deg, #07091280 0%, #0a0e1a 40%, #080c18 100%);
+        }
+        .shell { display: grid; grid-template-columns: 188px 1fr; height: 100vh; position: relative; z-index: 1; overflow: hidden; }
+
+        .sidebar {
+            background: rgba(7, 9, 18, 0.90); backdrop-filter: blur(24px) saturate(160%);
+            border-right: 1px solid var(--border-subtle); display: flex; flex-direction: column;
+            height: 100vh; overflow-y: auto; position: relative;
+            box-shadow: 1px 0 0 rgba(255, 255, 255, 0.05), inset -1px 0 30px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+        .sidebar::after { content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 1px; background: linear-gradient(180deg, transparent 0%, rgba(124, 108, 246, 0.20) 30%, rgba(52, 211, 153, 0.12) 70%, transparent 100%); }
+        .sb-logo { display: flex; align-items: center; gap: 10px; padding: 18px 14px 15px; border-bottom: 1px solid var(--border-subtle); }
+        .sb-logo-icon { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, rgba(124, 108, 246, 0.20), rgba(52, 211, 153, 0.10)); border: 1px solid rgba(124, 108, 246, 0.30); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 16px rgba(124, 108, 246, 0.18); transition: box-shadow var(--ease-out); }
+        .sb-logo-icon:hover { box-shadow: 0 0 28px rgba(124, 108, 246, 0.35) }
+        .sb-logo-name { font-size: 13.5px; }
+        .sb-logo-sub { font-size: 9px; color: var(--text-4); font-weight: 500; margin-top: 1px; letter-spacing: 0.06em; text-transform: uppercase }
+        .sb-section { padding: 12px 10px 4px; }
+        .sb-section-label { opacity: 0.55; font-size: 8px; }
+        .sb-nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border-radius: 9px; font-size: 12.5px; font-weight: 500; color: var(--text-2); cursor: pointer; transition: all 0.18s; margin-bottom: 2px; border: 1px solid transparent; position: relative; text-decoration: none; }
+        .sb-nav-item i { font-size: 14px; flex-shrink: 0 }
+        .sb-nav-item:hover { background: rgba(255, 255, 255, 0.06); color: var(--text-1); border-color: rgba(255, 255, 255, 0.07); transform: translateX(2px); }
+        .sb-nav-item.active { background: linear-gradient(135deg, rgba(139, 124, 248, 0.22) 0%, rgba(139, 124, 248, 0.10) 100%); color: var(--indigo-bright); font-weight: 650; border: 1px solid rgba(139, 124, 248, 0.30); box-shadow: 0 2px 14px rgba(139, 124, 248, 0.18), inset 0 1px 0 rgba(139, 124, 248, 0.15); }
+        .sb-nav-item.active::before { content: ''; position: absolute; left: -1px; top: 25%; bottom: 25%; width: 2.5px; background: var(--indigo-bright); border-radius: 0 2px 2px 0; box-shadow: 0 0 10px var(--indigo-bright); }
+        .sb-nav-item .ti { font-size: 15px; opacity: 0.8; transition: opacity 0.18s; }
+        .sb-nav-item.active .ti, .sb-nav-item:hover .ti { opacity: 1 }
+        .sb-topic-item { padding: 7px 9px; border-radius: 8px; cursor: pointer; transition: background var(--ease-out), transform var(--ease-out); }
+        .sb-topic-item:hover { background: var(--surface-1); transform: translateX(2px) }
+        .sb-topic-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px }
+        .sb-topic-name { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; color: var(--text-2) }
+        .sb-topic-name i { font-size: 12px }
+        .sb-topic-badge { font-size: 10px; font-weight: 600; color: var(--text-3); background: var(--surface-2); padding: 1px 7px; border-radius: 4px }
+        .sb-topic-track { height: 2px; background: rgba(255, 255, 255, 0.05); border-radius: 2px; overflow: hidden }
+        .sb-topic-fill { height: 100%; border-radius: 2px; transition: width .8s cubic-bezier(0.16, 1, 0.3, 1) }
+        .sb-divider { height: 1px; background: var(--border-subtle); margin: 8px 12px }
+        .main { display: flex; flex-direction: column; height: 100vh; overflow: hidden }
+        .topbar { display: flex; align-items: center; gap: 12px; padding: 12px 24px; border-bottom: 1px solid var(--border-subtle); background: rgba(7, 9, 18, 0.70); backdrop-filter: blur(16px); flex-shrink: 0; }
+        .topbar-left { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex-shrink: 0 }
+        .topbar-title { font-size: 18px; font-weight: 700; letter-spacing: -0.4px; color: var(--text-1) }
+        .topbar-sub { font-size: 10.5px; color: var(--text-3); font-weight: 400 }
+        .topbar-chips { display: flex; align-items: center; gap: 5px; flex: 1; flex-wrap: nowrap; overflow: hidden }
+        .t-chip { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-subtle); background: var(--surface-1); color: var(--text-2); white-space: nowrap; transition: all var(--ease-out); }
+        .t-chip:hover { background: var(--surface-2); border-color: var(--border) }
+        .t-chip i { font-size: 11px; flex-shrink: 0 }
+        .t-chip.green, .t-chip.indigo, .t-chip.amber, .t-chip.red { color: var(--text-2); border-color: var(--border-subtle); background: var(--surface-1); }
+        .t-chip.green i { color: var(--green) } .t-chip.indigo i { color: var(--indigo-bright) } .t-chip.amber i { color: var(--amber) } .t-chip.red i { color: var(--red) }
+        .chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: inline-block; box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); animation: pulse-dot 2.4s ease-in-out infinite; }
+        @keyframes pulse-dot { 0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5) } 50% { box-shadow: 0 0 0 5px rgba(52, 211, 153, 0) } }
+        .topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0 }
+        .btn-icon { width: 32px; height: 32px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-3); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all var(--ease-out); }
+        .btn-icon:hover { background: var(--surface-2); color: var(--text-1); border-color: var(--border) }
+        .btn-primary { font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600; padding: 7px 14px; border-radius: 7px; border: none; cursor: pointer; background: linear-gradient(135deg, #7c6cf6, #6056d4); color: #fff; letter-spacing: 0.01em; box-shadow: 0 2px 12px rgba(124, 108, 246, 0.35), 0 1px 0 rgba(255, 255, 255, 0.12) inset; transition: all var(--ease-out); white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+        .btn-primary:hover { background: linear-gradient(135deg, #8d7ef8, #6e60e2); box-shadow: 0 4px 20px rgba(124, 108, 246, 0.50), 0 1px 0 rgba(255, 255, 255, 0.15) inset; transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0) }
+        .btn-primary i { font-size: 13px }
+        .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--indigo), #5fd9a8); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; border: 2px solid rgba(124, 108, 246, 0.30); cursor: pointer; transition: box-shadow var(--ease-out); box-shadow: 0 0 0 0 rgba(124, 108, 246, 0); }
+        .avatar:hover { box-shadow: 0 0 0 3px rgba(124, 108, 246, 0.25) }
+        .tabs-row { display: flex; align-items: center; gap: 0; border-bottom: 1px solid var(--border-subtle); padding: 0 24px; flex-shrink: 0; background: rgba(7, 9, 18, 0.50); }
+        .tab-btn { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; padding: 12px 14px; border: none; background: none; color: var(--text-3); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all var(--ease-out); position: relative; }
+        .tab-btn:hover { color: var(--text-2) }
+        .tab-btn.active { color: var(--indigo-bright); border-bottom-color: var(--indigo) }
+        .tab-btn.action-tab { color: var(--amber) }
+        .tab-btn.action-tab:hover { color: #fbbf24 }
+        .tab-btn.action-tab.active { color: var(--amber); border-bottom-color: var(--amber) }
+        .content-area { flex: 1; overflow-y: auto; padding: 22px 24px 48px; scroll-behavior: smooth; }
+        .content-area::-webkit-scrollbar { width: 3px } .content-area::-webkit-scrollbar-track { background: transparent }
+        .content-area::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.07); border-radius: 2px }
+        .content-area::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.12) }
+        .eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-4); margin-bottom: 12px; }
+        .notices-wrap { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px }
+        .sheldon-notice { display: flex; align-items: center; gap: 10px; padding: 10px 13px; border-radius: 10px; border: 1px solid var(--border-subtle); background: rgba(255, 255, 255, 0.025); font-size: 11.5px; color: var(--text-2); animation: fadeInUp .35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .sheldon-notice.warning { border-color: rgba(245, 158, 11, 0.22); background: var(--amber-soft) }
+        .sheldon-notice.positive { border-color: rgba(52, 211, 153, 0.22); background: var(--green-soft) }
+        .notice-icon { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+        .sheldon-notice.warning .notice-icon { background: rgba(245, 158, 11, 0.18); color: var(--amber) }
+        .sheldon-notice.positive .notice-icon { background: rgba(52, 211, 153, 0.18); color: var(--green) }
+        .notice-text { flex: 1; line-height: 1.4 }
+        .notice-dismiss { width: 18px; height: 18px; border-radius: 5px; border: none; background: none; color: var(--text-4); cursor: pointer; font-size: 14px; line-height: 1; flex-shrink: 0; transition: all var(--ease-out); }
+        .notice-dismiss:hover { background: rgba(255, 255, 255, 0.08); color: var(--text-2) }
+        .sheldon-banner { display: flex; align-items: flex-start; gap: 14px; background: linear-gradient(135deg, rgba(18, 24, 44, 0.80), rgba(12, 17, 34, 0.90)); border: 1px solid var(--border); border-left: 3px solid var(--indigo); border-radius: 12px; padding: 14px 16px; margin-bottom: 18px; position: relative; overflow: hidden; animation: slideDown .45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px) } to { opacity: 1; transform: translateY(0) } }
+        .sheldon-banner::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 50% 100% at 0% 50%, rgba(124, 108, 246, 0.07) 0%, transparent 65%); pointer-events: none; }
+        .sheldon-orb { width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; background: var(--indigo-soft); border: 1px solid var(--border-accent); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+        .sheldon-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--indigo-bright); margin-bottom: 3px; }
+        .sheldon-text { font-size: 12px; color: var(--text-2); line-height: 1.55 }
+        .sheldon-text strong { color: var(--text-1) }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px }
+        .grid-full { margin-bottom: 16px }
+        .card { background: linear-gradient(160deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.028)); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-card); padding: 18px; position: relative; overflow: hidden; transition: all var(--ease-out); animation: fadeInUp .4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: translateY(0) } }
+        .grid-4 .card:nth-child(1) { animation-delay: .05s } .grid-4 .card:nth-child(2) { animation-delay: .10s } .grid-4 .card:nth-child(3) { animation-delay: .15s } .grid-4 .card:nth-child(4) { animation-delay: .20s }
+        .grid-2 .card:nth-child(1) { animation-delay: .25s } .grid-2 .card:nth-child(2) { animation-delay: .30s }
+        .card:hover { background: linear-gradient(160deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.045)); border-color: rgba(255, 255, 255, 0.11); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 12px 40px rgba(0, 0, 0, 0.40); transform: translateY(-1px); }
+        .card-accent-green { border-top: 2px solid rgba(52, 211, 153, 0.35) } .card-accent-indigo { border-top: 2px solid rgba(124, 108, 246, 0.35) } .card-accent-amber { border-top: 2px solid rgba(245, 158, 11, 0.35) }
+        .card-eyebrow { font-size: 9px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+        .card-eyebrow i { font-size: 13px; color: var(--text-4) }
+        .big-num { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; margin-bottom: 4px; }
+        .big-num.green { color: var(--green); text-shadow: 0 0 28px rgba(52, 211, 153, 0.30) }
+        .big-num.indigo { color: var(--indigo-bright); text-shadow: 0 0 28px rgba(124, 108, 246, 0.30) }
+        .big-num.amber { color: var(--amber); text-shadow: 0 0 28px rgba(245, 158, 11, 0.25) }
+        .big-num.red { color: var(--red); text-shadow: 0 0 28px rgba(248, 113, 113, 0.25) }
+        .big-num.white { color: var(--text-1) }
+        .card-sub { font-size: 10.5px; color: var(--text-3); font-weight: 400 }
+        .mini-stat-card { background: linear-gradient(160deg, rgba(255, 255, 255, 0.048), rgba(255, 255, 255, 0.025)); border: 1px solid var(--border); border-radius: 12px; padding: 18px 18px 14px; position: relative; overflow: hidden; transition: all var(--ease-out); animation: fadeInUp .4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .mini-stat-card:hover { border-color: rgba(255, 255, 255, 0.11); transform: translateY(-1px); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); }
+        .mini-stat-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+        .mini-stat-eyebrow i { font-size: 13px; color: var(--text-4) }
+        .mini-stat-num { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; color: var(--text-1); margin-bottom: 3px; }
+        .mini-stat-sub { font-size: 10.5px; color: var(--text-3); margin-bottom: 12px }
+        .sparkline-wrap { height: 52px; position: relative; margin-top: 4px }
+        .acc-list { display: flex; flex-direction: column }
+        .acc-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border-subtle); transition: background var(--ease-out); border-radius: 4px; }
+        .acc-row:last-child { border-bottom: none } .acc-row:hover { background: rgba(255, 255, 255, 0.02) }
+        .acc-label { font-size: 11.5px; font-weight: 500; color: var(--text-2); width: 110px; flex-shrink: 0 }
+        .acc-track { flex: 1; height: 3px; background: rgba(255, 255, 255, 0.05); border-radius: 2px; overflow: hidden }
+        .acc-fill { height: 100%; border-radius: 2px; transition: width .9s cubic-bezier(0.16, 1, 0.3, 1); position: relative; }
+        .acc-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.22) 50%, transparent 100%); transform: translateX(-100%); animation: shimmer 2.5s ease-in-out infinite; }
+        @keyframes shimmer { 0% { transform: translateX(-100%); opacity: 0 } 30% { opacity: 1 } 100% { transform: translateX(100%); opacity: 0 } }
+        .acc-pct { font-size: 10.5px; font-weight: 700; width: 30px; text-align: right; flex-shrink: 0 }
+        .acc-n { font-size: 9.5px; color: var(--text-4); width: 24px; text-align: right; flex-shrink: 0 }
+        .matrix-list { display: flex; flex-direction: column }
+        .matrix-row { display: grid; grid-template-columns: 110px 1fr 44px 52px; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border-subtle); }
+        .matrix-row:last-child { border-bottom: none }
+        .matrix-label { font-size: 11.5px; font-weight: 500; color: var(--text-2) }
+        .matrix-track { height: 3px; background: rgba(255, 255, 255, 0.05); border-radius: 2px; overflow: hidden }
+        .matrix-fill { height: 100%; border-radius: 2px; transition: width .8s cubic-bezier(0.16, 1, 0.3, 1) }
+        .matrix-pct { font-size: 10.5px; font-weight: 700; text-align: right }
+        .matrix-n { font-size: 9.5px; color: var(--text-4); text-align: right }
+        .stack-row { margin-bottom: 8px }
+        .stack-header { display: flex; justify-content: space-between; margin-bottom: 4px }
+        .stack-label { font-size: 11px; font-weight: 500; color: var(--text-2) }
+        .stack-count { font-size: 10px; color: var(--text-4) }
+        .stack-bar { height: 3px; border-radius: 2px; overflow: hidden; display: flex }
+        .trap-list { display: flex; flex-direction: column }
+        .trap-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border-subtle); transition: background var(--ease-out); border-radius: 4px; }
+        .trap-row:last-child { border-bottom: none } .trap-row:hover { background: rgba(255, 255, 255, 0.02) }
+        .trap-rank { font-family: 'Fraunces', serif; font-size: 12px; font-weight: 600; color: var(--text-4); width: 16px; flex-shrink: 0 }
+        .trap-name { flex: 1; font-size: 11.5px; color: var(--text-2) }
+        .trap-bar { height: 2px; border-radius: 2px; background: var(--indigo); opacity: .6; transition: width var(--ease-out) }
+        .trap-n { font-size: 10.5px; font-weight: 700; color: var(--indigo-bright); width: 16px; text-align: right; flex-shrink: 0 }
+        .diff-block { padding-bottom: 14px }
+        .diff-block+.diff-block { padding-top: 14px; border-top: 1px solid var(--border-subtle); padding-bottom: 0 }
+        .tag { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; }
+        .tag-correct { background: var(--green-soft); color: var(--green); border: 1px solid rgba(52, 211, 153, 0.20) }
+        .tag-wrong { background: var(--red-soft); color: var(--red); border: 1px solid rgba(248, 113, 113, 0.20) }
+        .tag-type { background: var(--indigo-soft); color: var(--indigo-bright); border: 1px solid rgba(124, 108, 246, 0.20) }
+        .tag-passage { background: var(--blue-soft); color: var(--blue); border: 1px solid rgba(96, 165, 250, 0.20) }
+        .tag-solid { background: var(--green-soft); color: var(--green) }
+        .tag-partial { background: var(--amber-soft); color: var(--amber) }
+        .tag-off { background: var(--red-soft); color: var(--red) }
+        .diff-badge { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; }
+        .diff-badge.Hard { background: var(--red-soft); color: var(--red); border: 1px solid rgba(248, 113, 113, 0.20) }
+        .diff-badge.Medium { background: var(--amber-soft); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.20) }
+        .diff-badge.Easy { background: var(--green-soft); color: var(--green); border: 1px solid rgba(52, 211, 153, 0.20) }
+        .table-outer { overflow-x: auto }
+        .table-inner { max-height: 480px; overflow-y: auto }
+        .log-table { width: 100%; border-collapse: collapse; font-size: 12px }
+        .matrix-table { width: 100%; border-collapse: collapse; font-size: 12.5px }
+        .matrix-table th { text-align: left; padding: 10px 14px; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); border-bottom: 1px solid var(--border-subtle); }
+        .matrix-table th.diff-col { text-align: center }
+        .matrix-table td { padding: 11px 14px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle }
+        .matrix-table tbody tr:last-child td { border-bottom: none }
+        .matrix-table tbody tr:hover td { background: var(--surface-1) }
+        .matrix-table td.type-cell { font-weight: 600; color: var(--text-2) }
+        .matrix-cell { text-align: center; position: relative }
+        .matrix-pill { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-width: 54px; padding: 6px 10px; border-radius: 9px; font-family: 'Fraunces', serif; font-weight: 600; transition: transform .15s; }
+        .matrix-pill:hover { transform: scale(1.06) }
+        .matrix-pill .mp-pct { font-size: 15px; line-height: 1 }
+        .matrix-pill .mp-n { font-family: 'Inter', sans-serif; font-size: 8.5px; font-weight: 600; color: var(--text-4); margin-top: 2px }
+        .matrix-pill.empty { background: rgba(255, 255, 255, 0.02); color: var(--text-4) }
+        .matrix-pill.empty .mp-pct { font-size: 12px; font-weight: 500 }
+        .ep-card { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: start; padding: 14px 0; border-bottom: 1px solid var(--border-subtle); }
+        .ep-card:last-child { border-bottom: none }
+        .ep-theme-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap }
+        .ep-theme-name { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; color: var(--text-1) }
+        .ep-count-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: var(--indigo-soft); color: var(--indigo-bright); }
+        .ep-acc-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+        .ep-examples { font-size: 11.5px; color: var(--text-3); line-height: 1.5 }
+        .ep-drill-box { text-align: right; min-width: 160px; }
+        .ep-drill-label { font-size: 8.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); margin-bottom: 4px }
+        .ep-drill-text { font-size: 12.5px; font-weight: 600; color: var(--indigo-bright) }
+        .ep-drill-none { font-size: 11px; color: var(--text-4); font-style: italic }
+        .ep-minor-strip { border-top: 1px solid var(--border-subtle); padding-top: 12px; display: flex; align-items: flex-start; gap: 8px; }
+        .ep-minor-strip i { font-size: 13px; color: var(--text-4); margin-top: 1px; flex-shrink: 0 }
+        .ep-minor-text { font-size: 11px; color: var(--text-4); line-height: 1.5 }
+        .ep-minor-text strong { color: var(--text-3) }
+        .log-table th { text-align: left; padding: 9px 12px; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); border-bottom: 1px solid var(--border-subtle); white-space: nowrap; position: sticky; top: 0; background: rgba(7, 9, 18, 0.97); backdrop-filter: blur(8px); }
+        .log-table td { padding: 9px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle }
+        .log-table tbody tr { transition: background var(--ease-out) }
+        .log-table tbody tr:hover td { background: rgba(255, 255, 255, 0.025) }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px }
+        .form-group { margin-bottom: 14px } .form-group:last-of-type { margin-bottom: 0 }
+        .form-label { display: block; font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4); margin-bottom: 7px; }
+        .chip-row { display: flex; flex-wrap: wrap; gap: 5px }
+        .fchip { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; padding: 5px 11px; border-radius: 6px; border: 1px solid var(--border-subtle); background: var(--surface-1); color: var(--text-3); cursor: pointer; transition: all var(--ease-out); }
+        .fchip:hover { border-color: var(--border); color: var(--text-2); background: var(--surface-2) }
+        .fchip.active { background: var(--indigo-soft); border-color: var(--border-accent); color: var(--indigo-bright) }
+        .fchip.c-active { background: var(--green-soft); border-color: rgba(52, 211, 153, 0.25); color: var(--green) }
+        .fchip.w-active { background: var(--red-soft); border-color: rgba(248, 113, 113, 0.25); color: var(--red) }
+        .fchip.pqs-active { background: var(--green-soft); border-color: rgba(52, 211, 153, 0.25); color: var(--green) }
+        .fchip.pqp-active { background: var(--amber-soft); border-color: rgba(245, 158, 11, 0.25); color: var(--amber) }
+        .fchip.pqo-active { background: var(--red-soft); border-color: rgba(248, 113, 113, 0.25); color: var(--red) }
+        .finput { font-family: 'Inter', sans-serif; font-size: 12.5px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-subtle); color: var(--text-1); padding: 9px 12px; border-radius: 8px; outline: none; transition: all var(--ease-out); width: 100%; }
+        .finput:focus { border-color: var(--border-accent); background: rgba(255, 255, 255, 0.08); box-shadow: 0 0 0 3px rgba(124, 108, 246, 0.12); }
+        .finput::placeholder { color: var(--text-4) }
+        textarea.finput { resize: none; font-size: 11.5px; line-height: 1.5 }
+        .timer-num { font-family: 'Fraunces', serif; font-size: 50px; font-weight: 600; color: var(--indigo-bright); text-align: center; letter-spacing: -2px; line-height: 1; margin: 10px 0 12px; text-shadow: 0 0 30px rgba(124, 108, 246, 0.35); transition: color var(--ease-out), text-shadow var(--ease-out); }
+        .timer-num.running { color: var(--green); text-shadow: 0 0 30px rgba(52, 211, 153, 0.40); animation: timerPulse 1s ease-in-out infinite; }
+        @keyframes timerPulse { 0%, 100% { opacity: 1 } 50% { opacity: .85 } }
+        .timer-btns { display: flex; gap: 6px; justify-content: center }
+        .tbtn { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; padding: 6px 12px; border-radius: 7px; border: 1px solid var(--border-subtle); background: var(--surface-1); color: var(--text-3); cursor: pointer; transition: all var(--ease-out); display: flex; align-items: center; gap: 5px; }
+        .tbtn:hover { color: var(--text-2); border-color: var(--border); background: var(--surface-2); transform: translateY(-1px) }
+        .tbtn i { font-size: 12px }
+        .btn-submit { font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; padding: 11px; border-radius: 9px; border: none; cursor: pointer; background: linear-gradient(135deg, #7c6cf6, #6056d4); color: #fff; width: 100%; margin-top: 14px; box-shadow: 0 4px 16px rgba(124, 108, 246, 0.30), 0 1px 0 rgba(255, 255, 255, 0.10) inset; transition: all var(--ease-out); position: relative; overflow: hidden; }
+        .btn-submit::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent); transform: translateX(-100%); transition: transform .5s ease; }
+        .btn-submit:hover:not(:disabled)::before { transform: translateX(100%) }
+        .btn-submit:hover:not(:disabled) { background: linear-gradient(135deg, #8d7ef8, #6e60e2); box-shadow: 0 6px 24px rgba(124, 108, 246, 0.45), 0 1px 0 rgba(255, 255, 255, 0.12) inset; transform: translateY(-1px); }
+        .btn-submit:disabled { opacity: .30; cursor: not-allowed; transform: none }
+        .ac-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+        .ac-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber); margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+        .ac-eyebrow::before { content: ''; display: inline-block; width: 16px; height: 1px; background: var(--amber); opacity: .5 }
+        .ac-main-title { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; letter-spacing: -0.4px; color: var(--text-1); line-height: 1.15; margin-bottom: 4px; }
+        .ac-sub { font-size: 12px; color: var(--text-3); line-height: 1.5 }
+        .gain-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px }
+        .gain-card { display: grid; grid-template-columns: 56px 1fr auto; gap: 0; border-radius: 14px; border: 1px solid var(--border); background: linear-gradient(145deg, rgba(255, 255, 255, 0.050), rgba(255, 255, 255, 0.024)); overflow: hidden; transition: all var(--ease-out); animation: fadeInUp .45s cubic-bezier(0.16, 1, 0.3, 1) both; box-shadow: var(--shadow-card); }
+        .gain-card:nth-child(1) { animation-delay: .05s; border-left: 3px solid var(--amber) }
+        .gain-card:nth-child(2) { animation-delay: .12s; border-left: 3px solid rgba(245, 158, 11, 0.55) }
+        .gain-card:nth-child(3) { animation-delay: .19s; border-left: 3px solid rgba(245, 158, 11, 0.28) }
+        .gain-card:nth-child(4) { animation-delay: .26s; border-left: 3px solid rgba(245, 158, 11, 0.15) }
+        .gain-card:hover { background: linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.040)); border-color: rgba(255, 255, 255, 0.11); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.40); }
+        .gain-rank-col { display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.18); border-right: 1px solid var(--border-subtle); padding: 22px 0; flex-direction: column; gap: 4px; }
+        .gain-rank-num { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: var(--amber); line-height: 1; }
+        .gain-rank-label { font-size: 8px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: var(--text-4) }
+        .gain-body { padding: 18px 20px }
+        .gain-type-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px }
+        .gain-icon { width: 24px; height: 24px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+        .gain-type-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4) }
+        .gain-title { font-size: 15px; font-weight: 700; color: var(--text-1); letter-spacing: -0.2px; margin-bottom: 5px; line-height: 1.3; }
+        .gain-reason { font-size: 11.5px; color: var(--text-3); line-height: 1.55; margin-bottom: 12px }
+        .gain-reason strong { color: var(--text-2) }
+        .gain-meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+        .gain-stat-chip { display: flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 5px; background: var(--surface-2); color: var(--text-3); border: 1px solid var(--border-subtle); }
+        .gain-stat-chip i { font-size: 10px }
+        .gain-stat-chip.highlight { background: var(--amber-soft); color: var(--amber); border-color: rgba(245, 158, 11, 0.22) }
+        .gain-stat-chip.green { background: var(--green-soft); color: var(--green); border-color: rgba(52, 211, 153, 0.22) }
+        .gain-stat-chip.red { background: var(--red-soft); color: var(--red); border-color: rgba(248, 113, 113, 0.22) }
+        .gain-impact-col { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 18px 20px; min-width: 100px; border-left: 1px solid var(--border-subtle); background: rgba(0, 0, 0, 0.10); gap: 3px; }
+        .impact-label { font-size: 8px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4) }
+        .impact-value { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; }
+        .impact-value.amber { color: var(--amber); text-shadow: 0 0 20px rgba(245, 158, 11, 0.30) }
+        .impact-value.green { color: var(--green); text-shadow: 0 0 20px rgba(52, 211, 153, 0.30) }
+        .impact-value.red { color: var(--red); text-shadow: 0 0 20px rgba(248, 113, 113, 0.30) }
+        .impact-unit { font-size: 9px; color: var(--text-4); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase }
+        .gain-action-btn { display: flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif; font-size: 10.5px; font-weight: 600; padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.30); background: rgba(245, 158, 11, 0.08); color: var(--amber); cursor: pointer; transition: all var(--ease-out); white-space: nowrap; }
+        .gain-action-btn:hover { background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.50); transform: translateY(-1px) }
+        .gain-action-btn i { font-size: 11px }
+        .ac-empty { text-align: center; padding: 48px 20px; border: 1px dashed var(--border); border-radius: 14px; color: var(--text-4); }
+        .ac-empty i { font-size: 36px; margin-bottom: 12px; display: block; opacity: .4 }
+        .ac-empty-title { font-size: 14px; font-weight: 600; color: var(--text-3); margin-bottom: 6px }
+        .ac-empty-sub { font-size: 11.5px; line-height: 1.5 }
+        .ac-plan-section { border-radius: 14px; border: 1px solid var(--border-accent); background: linear-gradient(135deg, rgba(124, 108, 246, 0.08), rgba(52, 211, 153, 0.04)); overflow: hidden; }
+        .ac-plan-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--border-subtle); flex-wrap: wrap; gap: 10px; }
+        .ac-plan-title { font-size: 13px; font-weight: 700; color: var(--text-1); display: flex; align-items: center; gap: 8px }
+        .ac-plan-title i { color: var(--indigo-bright); font-size: 15px }
+        .ac-plan-sub { font-size: 11px; color: var(--text-3); margin-top: 2px }
+        .btn-generate { font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 700; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; background: linear-gradient(135deg, #7c6cf6, #5fd9a8); color: #fff; box-shadow: 0 2px 14px rgba(124, 108, 246, 0.35); transition: all var(--ease-out); display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+        .btn-generate:hover:not(:disabled) { box-shadow: 0 4px 20px rgba(124, 108, 246, 0.55); transform: translateY(-1px); }
+        .btn-generate:disabled { opacity: .45; cursor: not-allowed; transform: none }
+        .btn-generate i { font-size: 13px }
+        .ac-plan-output { padding: 20px }
+        .plan-empty { font-size: 12px; color: var(--text-4); text-align: center; padding: 10px; line-height: 1.6; }
+        .plan-loading { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text-3); padding: 8px 0; }
+        .plan-spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(124, 108, 246, 0.20); border-top-color: var(--indigo); animation: spin .7s linear infinite; flex-shrink: 0; }
+        @keyframes spin { to { transform: rotate(360deg) } }
+        .plan-day { display: flex; flex-direction: column; gap: 8px }
+        .plan-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 9px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); transition: background var(--ease-out); }
+        .plan-item:hover { background: rgba(255, 255, 255, 0.05) }
+        .plan-item-time { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; color: var(--indigo-bright); flex-shrink: 0; width: 36px; text-align: right; line-height: 1.1; }
+        .plan-item-min { font-size: 8px; color: var(--text-4); font-weight: 600; letter-spacing: 0.06em }
+        .plan-item-body { flex: 1 }
+        .plan-item-name { font-size: 12.5px; font-weight: 700; color: var(--text-1); margin-bottom: 2px }
+        .plan-item-why { font-size: 11px; color: var(--text-3); line-height: 1.5 }
+        .plan-item-badge { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 4px; margin-left: 6px; display: inline-block; }
+        .plan-item-badge.focus { background: var(--indigo-soft); color: var(--indigo-bright) }
+        .plan-item-badge.review { background: var(--amber-soft); color: var(--amber) }
+        .plan-item-badge.drill { background: var(--green-soft); color: var(--green) }
+        .plan-total-row { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; margin-top: 4px; border-top: 1px solid var(--border-subtle); font-size: 11px; color: var(--text-3); }
+        .plan-total-num { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; color: var(--text-1) }
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px); background: rgba(10, 14, 22, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(52, 211, 153, 0.28); color: var(--green); font-size: 11.5px; font-weight: 600; padding: 9px 18px; border-radius: 9px; opacity: 0; pointer-events: none; transition: opacity .22s, transform .3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 999; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.50), 0 0 20px rgba(52, 211, 153, 0.10); display: flex; align-items: center; gap: 7px; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0) }
+        .toast i { font-size: 14px }
+        .sidebar::-webkit-scrollbar { width: 3px } .sidebar::-webkit-scrollbar-track { background: transparent }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.06); border-radius: 2px }
+        .journey-card { background: linear-gradient(160deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.026)); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 16px; padding: 22px 24px 20px; position: relative; overflow: hidden; margin-bottom: 20px; animation: fadeInUp .45s cubic-bezier(0.16, 1, 0.3, 1) both; box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 8px 32px rgba(0, 0, 0, 0.30); }
+        .journey-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 120px; background: radial-gradient(ellipse 70% 100% at 50% 0%, rgba(124, 108, 246, 0.045) 0%, transparent 70%); pointer-events: none; }
+        .journey-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+        .journey-card-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; letter-spacing: -0.3px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.72)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2px; }
+        .journey-card-sub { font-size: 10.5px; color: var(--text-3); }
+        .journey-card-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .jc-stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+        .jc-stat { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 11px 14px; text-align: center; transition: all var(--ease-out); position: relative; overflow: hidden; }
+        .jc-stat::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, currentColor, transparent); opacity: 0; transition: opacity .3s; }
+        .jc-stat:hover { transform: translateY(-2px); border-color: var(--border); }
+        .jc-stat:hover::after { opacity: .25; }
+        .jc-stat-val { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; line-height: 1; margin-bottom: 3px; transition: color .3s; color: var(--text-1); }
+        .jc-stat-label { font-size: 9px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-4); }
+        .jc-chart-wrap { position: relative; height: 260px; background: rgba(255, 255, 255, 0.015); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px 10px 8px; overflow: hidden; }
+        .peak-pulse-ring { position: absolute; border-radius: 50%; pointer-events: none; z-index: 10; transform: translate(-50%, -50%); }
+        .peak-pulse-ring::before, .peak-pulse-ring::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 1.5px solid rgba(52, 211, 153, 0.55); animation: peakPing 2.2s cubic-bezier(0, 0, .2, 1) infinite; }
+        .peak-pulse-ring::after { animation-delay: 1.1s; }
+        @keyframes peakPing { 0% { transform: scale(1); opacity: .7; } 70% { transform: scale(2.4); opacity: 0; } 100% { transform: scale(2.4); opacity: 0; } }
+        .jc-legend { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; font-size: 10.5px; color: var(--text-3); font-weight: 500; }
+        .jc-legend span { display: flex; align-items: center; gap: 5px; }
+        .jc-ld { width: 6px; height: 6px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+        .jc-ll { width: 12px; height: 0; border-top: 1.5px dashed rgba(245, 158, 11, 0.45); display: inline-block; flex-shrink: 0; }
+        .jc-milestones { display: flex; gap: 7px; margin-top: 14px; flex-wrap: wrap; }
+        .jc-chip { display: flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 600; padding: 5px 11px; border-radius: 20px; border: 1px solid var(--border-subtle); background: rgba(255, 255, 255, 0.02); color: var(--text-2); opacity: 0; transform: translateY(6px); animation: chipIn .5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .jc-chip.peak { border-color: rgba(52, 211, 153, 0.30); background: linear-gradient(135deg, rgba(52, 211, 153, 0.12), rgba(52, 211, 153, 0.04)); color: var(--green); }
+        .jc-chip.streak { border-color: var(--border-accent); background: linear-gradient(135deg, rgba(124, 108, 246, 0.14), rgba(124, 108, 246, 0.04)); color: var(--indigo-bright); }
+        @keyframes chipIn { to { opacity: 1; transform: translateY(0); } }
+        .jc-empty { text-align: center; padding: 50px 20px; color: var(--text-3); }
+        .jc-empty i { font-size: 32px; color: var(--text-4); margin-bottom: 10px; display: block; }
+        .seg-control { display: flex; background: var(--surface-1); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 3px; gap: 2px; }
+        .seg-btn { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 6px; border: none; background: none; color: var(--text-3); cursor: pointer; transition: all var(--ease-out); }
+        .seg-btn.active { background: var(--indigo-soft); color: var(--indigo-bright); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset; }
+        .type-select { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; background: var(--surface-1); border: 1px solid var(--border-subtle); color: var(--text-2); padding: 6px 12px; border-radius: 7px; outline: none; cursor: pointer; transition: border-color var(--ease-out); }
+        .type-select:focus { border-color: var(--border-accent) }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <aside class="sidebar">
+            <div class="sb-logo">
+                <div class="sb-logo-icon"><svg class="brand-ring" viewBox="0 0 32 32" width="23" height="23" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="brandGradMain" x1="6" y1="26" x2="26" y2="6" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#8b7cf8" /><stop offset="0.55" stop-color="#7e9bf0" /><stop offset="1" stop-color="#5fd9a8" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="16" cy="16" r="11" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="3.4" />
+                        <path d="M22.3 7 A 11 11 0 1 1 9.7 7" fill="none" stroke="url(#brandGradMain)" stroke-width="3.4" stroke-linecap="round" />
+                        <circle cx="22.3" cy="7" r="2.4" fill="#6fe7b6" />
+                    </svg></div>
+                <div><div class="sb-logo-name">Score<span style="font-weight:700">Console</span></div></div>
+            </div>
+
+            <div class="sb-section">
+                <div class="sb-section-label">Navigation</div>
+                <a href="https://scoreconsole.com/app.html" class="sb-nav-item"><i class="ti ti-layout-dashboard"></i>Dashboard</a>
+                <a href="https://scoreconsole.com/rc.html" class="sb-nav-item"><i class="ti ti-book"></i>RC Tracker</a>
+                <a href="https://scoreconsole.com/cr.html" class="sb-nav-item"><i class="ti ti-activity"></i>CR Tracker</a>
+                <div class="sb-nav-item active"><i class="ti ti-layers-intersect"></i>Verbal Tracker</div>
+                <div class="sb-nav-item" onclick="showTab('analytics')"><i class="ti ti-chart-bar"></i>Analytics</div>
+                <div class="sb-nav-item" onclick="showTab('log')"><i class="ti ti-list-check"></i>Attempt Log</div>
+                <div class="sb-nav-item" onclick="showTab('action')" style="color:var(--amber)"><i class="ti ti-bolt"></i>Action Center</div>
+            </div>
+
+            <div class="sb-divider"></div>
+            <div class="sb-section"><div class="sb-section-label">Sections</div><div id="sb-sections"></div></div>
+            <div class="sb-divider"></div>
+            <div class="sb-section"><div class="sb-section-label">Difficulty</div><div id="sb-diff"></div></div>
+
+            <div style="flex:1"></div>
+            <div style="padding:14px;border-top:1px solid var(--border-subtle)">
+                <div style="font-size:9.5px;color:var(--text-4);text-align:center" id="sb-attempt-count">Verbal attempts</div>
+            </div>
+        </aside>
+
+        <div class="main">
+            <div class="topbar">
+                <div class="topbar-left">
+                    <div class="topbar-title">Verbal Command Center</div>
+                    <div class="topbar-sub" id="tb-date"></div>
+                </div>
+                <div class="topbar-chips" id="tb-chips"></div>
+                <div class="topbar-right">
+                    <button class="btn-icon" title="Sync" onclick="init()"><i class="ti ti-refresh"></i></button>
+                    <a class="btn-primary" href="https://scoreconsole.com/app.html?log=verbal" style="text-decoration:none"><i class="ti ti-plus"></i> Log Sitting</a>
+                    <div class="avatar" title="Profile">S</div>
+                </div>
+            </div>
+
+            <div class="tabs-row">
+                <button class="tab-btn active" onclick="showTab('analytics')">Analytics</button>
+                <button class="tab-btn" onclick="showTab('log')">Attempt Log</button>
+                <button class="tab-btn action-tab" onclick="showTab('action')">⚡ Action Center</button>
+            </div>
+
+            <!-- ANALYTICS -->
+            <div id="tab-analytics" class="content-area">
+                <div id="notices-wrap" class="notices-wrap"></div>
+                <div id="insight-banner" class="sheldon-banner"></div>
+
+                <!-- ── COMBINED VERBAL JOURNEY ── -->
+                <div class="journey-card">
+                    <div class="journey-card-header">
+                        <div>
+                            <div class="journey-card-title">Your Verbal Journey</div>
+                            <div class="journey-card-sub" id="journey-sub">Combined RC + CR accuracy across your Verbal sectional sittings</div>
+                        </div>
+                        <div class="journey-card-controls">
+                            <div class="seg-control" id="journey-xaxis-toggle">
+                                <button class="seg-btn active" onclick="setJourneyXAxis('session',this)">By Sitting</button>
+                                <button class="seg-btn" onclick="setJourneyXAxis('date',this)">By Date</button>
+                            </div>
+                            <select class="type-select" id="journey-type-filter" onchange="renderJourneyChart()">
+                                <option value="all">All Verbal Sittings</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="jc-stat-row" id="journey-stats"></div>
+
+                    <div class="jc-legend">
+                        <span><span class="jc-ld" style="background:#9d8ff8"></span>Combined accuracy</span>
+                        <span><span class="jc-ld" style="background:#34d399"></span>Peak sitting</span>
+                        <span><span class="jc-ld" style="background:#f87171"></span>Below 50%</span>
+                        <span><span class="jc-ll"></span>75% target</span>
+                    </div>
+
+                    <div class="jc-chart-wrap" id="jc-chart-wrap">
+                        <canvas id="journey-canvas" role="img" aria-label="Combined Verbal accuracy over time line chart"></canvas>
+                        <div id="journey-empty-state" class="jc-empty" style="display:none">
+                            <i class="ti ti-chart-line"></i>
+                            <div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:4px">No Verbal sittings logged yet</div>
+                            <div style="font-size:11px">Log a <strong>Verbal (RC+CR)</strong> sectional sitting from the Dashboard to start your combined journey graph.</div>
+                        </div>
+                        <div class="peak-pulse-ring" id="peak-pulse-ring" style="display:none;width:10px;height:10px;"></div>
+                    </div>
+
+                    <div class="jc-milestones" id="journey-milestones"></div>
+                </div>
+
+                <div class="eyebrow">Overview</div>
+                <div class="grid-4" id="hero-cards"></div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-eyebrow">RC vs CR — Accuracy <i class="ti ti-chart-bar"></i></div>
+                        <div class="acc-list" id="section-bars"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-eyebrow">Section Split — Volume <i class="ti ti-chart-pie"></i></div>
+                        <div id="section-split"></div>
+                    </div>
+                </div>
+
+                <div class="grid-full">
+                    <div class="card">
+                        <div class="card-eyebrow">Difficulty × Section Matrix <i class="ti ti-grid-dots"></i></div>
+                        <div class="table-outer">
+                            <table class="matrix-table" id="diff-matrix-table"></table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-full">
+                    <div class="card">
+                        <div class="card-eyebrow">Recent Verbal Sittings <i class="ti ti-history"></i></div>
+                        <div id="recent-sittings"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LOG -->
+            <div id="tab-log" class="content-area" style="display:none">
+                <div class="eyebrow">All Verbal Attempts — <span id="log-count">0</span> total (RC + CR)</div>
+                <div class="card" style="padding:0">
+                    <div class="table-outer">
+                        <div class="table-inner">
+                            <table class="log-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Section</th>
+                                        <th>Question</th>
+                                        <th>Type</th>
+                                        <th>Diff</th>
+                                        <th>Result</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="log-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACTION CENTER -->
+            <div id="tab-action" class="content-area" style="display:none">
+                <div class="ac-header">
+                    <div class="ac-title-block">
+                        <div class="ac-eyebrow">Sheldon Intelligence</div>
+                        <div class="ac-main-title">Your Biggest Verbal Score Gains</div>
+                        <div class="ac-sub">Ranked by estimated Verbal-section impact, computed from your combined RC + CR attempts.</div>
+                    </div>
+                    <button class="btn-primary" onclick="render();renderActionCenter()" style="flex-shrink:0">
+                        <i class="ti ti-refresh"></i> Recalculate
+                    </button>
+                </div>
+                <div id="ac-gain-list" class="gain-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"><i class="ti ti-check"></i> Synced</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ── SUPABASE ──
+        const SUPA_URL = 'https://zglxfaarezgyibewtmbh.supabase.co';
+        const SUPA_KEY = 'sb_publishable_24bSL5sfl-tRgRLtik1qNA_NdexORqM';
+        const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+        let attempts = [];          // merged RC + CR attempts, each tagged with .section
+        let _verbalSessions = [];   // sessions with topic = 'Verbal'
+        let _uid = null;
+
+        // ── AUTH + LOAD ──
+        async function init() {
+            try {
+                const { data: { session }, error: sessErr } = await supa.auth.getSession();
+                if (sessErr) { showFatalError('Auth error: ' + sessErr.message); return; }
+                if (!session) {
+                    showFatalError('Not signed in — redirecting to dashboard…');
+                    setTimeout(() => { window.location.href = '/app.html'; }, 1200);
+                    return;
+                }
+                _uid = session.user.id;
+                await loadData();
+                await loadJourneySessions();
+                renderJourneyChart();
+            } catch (e) {
+                showFatalError('Unexpected error: ' + (e?.message || e));
+            }
+        }
+
+        function showFatalError(msg) {
+            const el = document.getElementById('insight-banner');
+            el.innerHTML = `<div class="sheldon-orb">⚠️</div><div><div class="sheldon-label" style="color:var(--red)">Couldn't Load</div><div class="sheldon-text">${msg}</div></div>`;
+        }
+        function showLoading() {
+            const el = document.getElementById('insight-banner');
+            el.innerHTML = `<div class="sheldon-orb">⏳</div><div><div class="sheldon-label">Loading</div><div class="sheldon-text">Fetching your Verbal (RC + CR) attempts…</div></div>`;
+        }
+
+        async function loadData() {
+            showLoading();
+            try {
+                const [rcRes, crRes, sessRes] = await Promise.all([
+                    supa.from('rc_attempts').select('*').eq('user_id', _uid).order('logged_at', { ascending: true }).limit(2000),
+                    supa.from('cr_attempts').select('*').eq('user_id', _uid).order('logged_at', { ascending: true }).limit(2000),
+                    supa.from('sessions').select('id,date,notes,mins,topic,deleted,created_at').eq('user_id', _uid).eq('topic', 'Verbal').eq('deleted', false).limit(500)
+                ]);
+
+                if (rcRes.error && crRes.error) {
+                    showFatalError('Database error: ' + (rcRes.error.message || crRes.error.message));
+                    return;
+                }
+
+                const rc = (rcRes.data || []).map(a => Object.assign({}, a, { section: 'RC' }));
+                const cr = (crRes.data || []).map(a => Object.assign({}, a, { section: 'CR' }));
+                attempts = rc.concat(cr).sort((a, b) => new Date(a.logged_at || 0) - new Date(b.logged_at || 0));
+
+                _verbalSessions = sessRes.data || [];
+
+                render();
+                renderNotices();
+            } catch (e) {
+                showFatalError('Network error loading attempts: ' + (e?.message || e));
+            }
+        }
+
+        // ── TABS ──
+        function showTab(name) {
+            ['analytics', 'log', 'action'].forEach(t => { const el = document.getElementById('tab-' + t); if (el) el.style.display = t === name ? 'block' : 'none'; });
+            document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', ['analytics', 'log', 'action'][i] === name));
+            if (name === 'action') renderActionCenter();
+        }
+
+        // ── HELPERS ──
+        function pct(c, n) { return n === 0 ? 0 : Math.round(c / n * 100); }
+        function accCol(p) { return p >= 55 ? 'var(--green)' : p >= 30 ? 'var(--amber)' : 'var(--red)'; }
+        function fmtT(s) { if (!s && s !== 0) return '—'; return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+        const SECTIONS = ['RC', 'CR'];
+        const SECTION_ICONS = { RC: ['ti-book', '#60a5fa'], CR: ['ti-activity', '#f59e0b'] };
+
+        function parseVerbalAccuracy(noteText) {
+            if (!noteText) return null;
+            let weighted = null;
+            const wm = noteText.match(/WScore[\s:=-]*(\d+(?:\.\d+)?)/i);
+            if (wm) { const wv = parseFloat(wm[1]); if (!isNaN(wv)) weighted = wv; }
+            const patterns = [/(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)\s*%/, /accuracy[\s:-]*(\d+)\s*\/\s*(\d+)/i];
+            for (const re of patterns) {
+                const m = noteText.match(re);
+                if (m) {
+                    const correct = parseInt(m[1], 10), total = parseInt(m[2], 10);
+                    const p = m[3] ? parseInt(m[3], 10) : Math.round((correct / total) * 100);
+                    if (total > 0 && !isNaN(p)) return { correct, total, pct: p, weighted };
+                }
+            }
+            return null;
+        }
+
+        // ══════════════════════════════════════════
+        // SHELDON NOTICES — Verbal-level pattern detection
+        // ══════════════════════════════════════════
+        function computeSheldonNotices(attemptsArr, sessionsArr) {
+            const notices = [];
+            attemptsArr = attemptsArr || [];
+            sessionsArr = sessionsArr || [];
+
+            const rc = attemptsArr.filter(a => a.section === 'RC');
+            const cr = attemptsArr.filter(a => a.section === 'CR');
+            const rcAcc = pct(rc.filter(a => a.correct).length, rc.length);
+            const crAcc = pct(cr.filter(a => a.correct).length, cr.length);
+
+            if (rc.length >= 5 && cr.length >= 5) {
+                const gap = Math.abs(rcAcc - crAcc);
+                if (gap >= 12) {
+                    const weaker = rcAcc < crAcc ? 'RC' : 'CR';
+                    const weakAcc = Math.min(rcAcc, crAcc), strongAcc = Math.max(rcAcc, crAcc);
+                    notices.push({ id: 'section_gap', severity: 'warning', text: `${weaker} is your weaker Verbal half at ${weakAcc}% vs ${strongAcc}% — closing this gap is your fastest combined-accuracy win.` });
+                }
+            }
+
+            // Coverage imbalance
+            if (rc.length + cr.length >= 10) {
+                const total = rc.length + cr.length;
+                const rcShare = Math.round(rc.length / total * 100);
+                if (rcShare >= 75) notices.push({ id: 'coverage_cr', severity: 'warning', text: `Only ${100 - rcShare}% of your Verbal attempts are CR — under-practiced sections tend to collapse under exam timing.` });
+                else if (rcShare <= 25) notices.push({ id: 'coverage_rc', severity: 'warning', text: `Only ${rcShare}% of your Verbal attempts are RC — under-practiced sections tend to collapse under exam timing.` });
+            }
+
+            // Improving streak across sittings (combined)
+            const scored = sessionsArr
+                .map(s => ({ date: s.date, acc: (parseVerbalAccuracy(s.notes) || {}).pct }))
+                .filter(s => s.acc != null)
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+            if (scored.length >= 3) {
+                let streak = 1, best = 1;
+                for (let i = 1; i < scored.length; i++) { if (scored[i].acc >= scored[i - 1].acc) { streak++; best = Math.max(best, streak); } else streak = 1; }
+                if (best >= 3) notices.push({ id: 'improving_streak', severity: 'positive', text: `You're on a ${best}-sitting improving streak in combined Verbal accuracy — keep the momentum going.` });
+            }
+
+            // Stale topic
+            if (sessionsArr.length) {
+                const mostRecent = sessionsArr.reduce((l, s) => new Date(s.date) > new Date(l.date) ? s : l);
+                const daysSince = Math.floor((Date.now() - new Date(mostRecent.date)) / 86400000);
+                if (daysSince >= 4) notices.push({ id: 'stale_topic', severity: 'warning', text: `No full Verbal sitting in ${daysSince} days — a timed RC+CR set keeps sectional stamina sharp.` });
+            }
+
+            const PRIORITY = { stale_topic: 1, section_gap: 2, coverage_rc: 3, coverage_cr: 3, improving_streak: 4 };
+            notices.sort((a, b) => (PRIORITY[a.id] || 99) - (PRIORITY[b.id] || 99));
+            return notices.slice(0, 3);
+        }
+
+        async function getActiveDismissals() {
+            const { data, error } = await supa.from('sheldon_notice_dismissals').select('notice_id, dismissed_until')
+                .eq('user_id', _uid).gt('dismissed_until', new Date().toISOString());
+            if (error || !data) return [];
+            return data.map(d => d.notice_id);
+        }
+        async function dismissNotice(noticeId) {
+            const until = new Date(Date.now() + 7 * 86400000).toISOString();
+            await supa.from('sheldon_notice_dismissals').upsert(
+                { user_id: _uid, notice_id: 'verbal_' + noticeId, dismissed_at: new Date().toISOString(), dismissed_until: until },
+                { onConflict: 'user_id,notice_id' }
+            );
+            const el = document.querySelector(`[data-notice-id="${noticeId}"]`);
+            if (el) { el.style.opacity = '0'; el.style.transform = 'translateY(-6px)'; setTimeout(() => el.remove(), 200); }
+        }
+        async function renderNotices() {
+            const notices = computeSheldonNotices(attempts, _verbalSessions);
+            const dismissed = await getActiveDismissals();
+            const visible = notices.filter(n => !dismissed.includes('verbal_' + n.id));
+            const wrap = document.getElementById('notices-wrap');
+            if (!visible.length) { wrap.innerHTML = ''; return; }
+            wrap.innerHTML = visible.map(n => `
+    <div class="sheldon-notice ${n.severity}" data-notice-id="${n.id}">
+      <span class="notice-icon">${n.severity === 'positive' ? '✓' : '⚠'}</span>
+      <span class="notice-text">${n.text}</span>
+      <button class="notice-dismiss" onclick="dismissNotice('${n.id}')">&times;</button>
+    </div>`).join('');
+        }
+
+        // ══════════════════════════════════════════
+        // MAIN RENDER
+        // ══════════════════════════════════════════
+        function render() {
+            const total = attempts.length;
+            const correct = attempts.filter(a => a.correct === true).length;
+            const overall = pct(correct, total);
+
+            const rc = attempts.filter(a => a.section === 'RC');
+            const cr = attempts.filter(a => a.section === 'CR');
+            const rcAcc = pct(rc.filter(a => a.correct).length, rc.length);
+            const crAcc = pct(cr.filter(a => a.correct).length, cr.length);
+
+            const timeSamples = attempts.filter(a => a.time_secs);
+            const avgT = timeSamples.length ? Math.round(timeSamples.reduce((s, a) => s + a.time_secs, 0) / timeSamples.length) : 0;
+
+            document.getElementById('tb-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('sb-attempt-count').textContent = total + ' Verbal attempts';
+
+            document.getElementById('tb-chips').innerHTML = `
+    <div class="t-chip ${overall >= 60 ? 'green' : overall >= 40 ? 'amber' : 'red'}"><i class="ti ti-target"></i>${overall}% combined</div>
+    <div class="t-chip indigo"><i class="ti ti-list-check"></i>${total} attempts</div>
+    <div class="t-chip"><i class="ti ti-book"></i>RC ${rc.length ? rcAcc + '%' : '—'}</div>
+    <div class="t-chip"><i class="ti ti-activity"></i>CR ${cr.length ? crAcc + '%' : '—'}</div>
+    <div class="t-chip"><i class="ti ti-clock"></i>Avg ${fmtT(avgT)}</div>`;
+
+            // ── Sidebar: Sections ──
+            if (!total) {
+                document.getElementById('sb-sections').innerHTML = `<div style="padding:10px;font-size:11px;color:var(--text-4)">No attempts logged yet.</div>`;
+                document.getElementById('sb-diff').innerHTML = '';
+            } else {
+                document.getElementById('sb-sections').innerHTML = SECTIONS.map(sec => {
+                    const arr = attempts.filter(a => a.section === sec);
+                    const p = pct(arr.filter(a => a.correct).length, arr.length);
+                    const col = !arr.length ? 'var(--text-4)' : accCol(p);
+                    const [icon, iconCol] = SECTION_ICONS[sec];
+                    return `<div class="sb-topic-item">
+        <div class="sb-topic-row">
+          <div class="sb-topic-name"><i class="ti ${icon}" style="color:${iconCol}"></i> ${sec}</div>
+          <span class="sb-topic-badge" style="color:${col}">${arr.length ? p + '%' : '—'}</span>
+        </div>
+        <div class="sb-topic-track"><div class="sb-topic-fill" style="width:${arr.length ? p : 0}%;background:${col}"></div></div>
+      </div>`;
+                }).join('');
+
+                const dM = attempts.filter(a => a.difficulty === 'Medium');
+                const dH = attempts.filter(a => a.difficulty === 'Hard');
+                const pM = pct(dM.filter(a => a.correct).length, dM.length);
+                const pH = pct(dH.filter(a => a.correct).length, dH.length);
+                document.getElementById('sb-diff').innerHTML = `
+      <div class="sb-topic-item">
+        <div class="sb-topic-row"><div class="sb-topic-name"><i class="ti ti-flag-2" style="color:var(--amber)"></i> Medium</div>
+          <span class="sb-topic-badge" style="color:${accCol(pM)}">${dM.length ? pM + '%' : '—'}</span></div>
+        <div class="sb-topic-track"><div class="sb-topic-fill" style="width:${pM}%;background:${accCol(pM)}"></div></div>
+      </div>
+      <div class="sb-topic-item">
+        <div class="sb-topic-row"><div class="sb-topic-name"><i class="ti ti-flame" style="color:var(--red)"></i> Hard</div>
+          <span class="sb-topic-badge" style="color:${accCol(pH)}">${dH.length ? pH + '%' : '—'}</span></div>
+        <div class="sb-topic-track"><div class="sb-topic-fill" style="width:${pH}%;background:${accCol(pH)}"></div></div>
+      </div>`;
+            }
+
+            // ── Insight banner ──
+            let insightText;
+            if (!total) {
+                insightText = `No Verbal attempts yet. Log RC drills in the <strong>RC Tracker</strong>, CR drills in the <strong>CR Tracker</strong>, or a full <strong>Verbal (RC+CR) sitting</strong> from the Dashboard — this page combines all of it.`;
+            } else {
+                const weaker = rcAcc <= crAcc ? 'RC' : 'CR';
+                const weakAcc = Math.min(rcAcc, crAcc), strongAcc = Math.max(rcAcc, crAcc);
+                const gap = strongAcc - weakAcc;
+                insightText = gap >= 10
+                    ? `Combined Verbal accuracy is <strong>${overall}%</strong>. Your weaker half is <strong>${weaker}</strong> at <strong>${weakAcc}%</strong> (vs ${strongAcc}%) — a ${gap}pp gap. Rebalancing effort toward ${weaker} is your fastest lever on the combined score.`
+                    : `Combined Verbal accuracy is <strong>${overall}%</strong>, with RC and CR closely matched (${rcAcc}% vs ${crAcc}%). Push both toward the 75% target with timed full sittings.`;
+            }
+            document.getElementById('insight-banner').innerHTML = `
+    <div class="sheldon-orb">🔍</div>
+    <div><div class="sheldon-label">Sheldon Analysis — Verbal Overview</div><div class="sheldon-text">${insightText}</div></div>`;
+
+            // ── Hero cards ──
+            document.getElementById('hero-cards').innerHTML = `
+    <div class="card card-accent-indigo">
+      <div class="card-eyebrow">Combined Attempts <i class="ti ti-list-numbers"></i></div>
+      <div class="big-num white">${total}</div>
+      <div class="card-sub">${rc.length} RC · ${cr.length} CR</div>
+    </div>
+    <div class="card card-accent-green">
+      <div class="card-eyebrow">Combined Accuracy <i class="ti ti-target"></i></div>
+      <div class="big-num white">${overall}%</div>
+      <div class="card-sub">${correct} correct · ${total - correct} wrong</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">RC Accuracy <i class="ti ti-book"></i></div>
+      <div class="big-num ${rcAcc >= 55 ? 'green' : rcAcc >= 30 ? 'amber' : 'red'}">${rc.length ? rcAcc + '%' : '—'}</div>
+      <div class="card-sub">${rc.length} RC attempts</div>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">CR Accuracy <i class="ti ti-activity"></i></div>
+      <div class="big-num ${crAcc >= 55 ? 'green' : crAcc >= 30 ? 'amber' : 'red'}">${cr.length ? crAcc + '%' : '—'}</div>
+      <div class="card-sub">${cr.length} CR attempts</div>
+    </div>`;
+
+            // ── RC vs CR accuracy bars ──
+            document.getElementById('section-bars').innerHTML = SECTIONS.map(sec => {
+                const arr = attempts.filter(a => a.section === sec);
+                const p = pct(arr.filter(a => a.correct).length, arr.length);
+                const col = accCol(p);
+                return `<div class="acc-row">
+      <div class="acc-label">${sec}</div>
+      <div class="acc-track"><div class="acc-fill" style="width:${p}%;background:${col}"></div></div>
+      <div class="acc-pct" style="color:${col}">${arr.length ? p + '%' : '—'}</div>
+      <div class="acc-n">${arr.length}q</div>
+    </div>`;
+            }).join('');
+
+            // ── Section split (volume) ──
+            const splitTotal = total || 1;
+            document.getElementById('section-split').innerHTML = `
+    <div style="display:flex;height:10px;border-radius:6px;overflow:hidden;margin-bottom:12px;background:rgba(255,255,255,0.04)">
+      <div style="width:${pct(rc.length, splitTotal)}%;background:#60a5fa"></div>
+      <div style="width:${pct(cr.length, splitTotal)}%;background:#f59e0b"></div>
+    </div>
+    <div style="display:flex;gap:18px;font-size:11.5px;color:var(--text-2)">
+      <span><i class="ti ti-book" style="color:#60a5fa"></i> RC — ${rc.length} (${pct(rc.length, splitTotal)}%)</span>
+      <span><i class="ti ti-activity" style="color:#f59e0b"></i> CR — ${cr.length} (${pct(cr.length, splitTotal)}%)</span>
+    </div>`;
+
+            // ── Difficulty × Section matrix ──
+            const DIFFS = ['Easy', 'Medium', 'Hard'];
+            const matrixHead = `<thead><tr><th>Section</th>${DIFFS.map(d => `<th class="diff-col">${d}</th>`).join('')}</tr></thead>`;
+            const matrixRows = SECTIONS.map(sec => {
+                const cells = DIFFS.map(d => {
+                    const cell = attempts.filter(a => a.section === sec && a.difficulty === d);
+                    if (!cell.length) return `<td class="matrix-cell"><span class="matrix-pill empty"><span class="mp-pct">—</span></span></td>`;
+                    const p = pct(cell.filter(a => a.correct).length, cell.length);
+                    const col = accCol(p);
+                    const bg = p >= 55 ? 'rgba(52,211,153,0.13)' : p >= 30 ? 'rgba(251,191,36,0.13)' : 'rgba(251,113,133,0.13)';
+                    return `<td class="matrix-cell"><span class="matrix-pill" style="background:${bg};color:${col}"><span class="mp-pct">${p}%</span><span class="mp-n">${cell.length}q</span></span></td>`;
+                }).join('');
+                return `<tr><td class="type-cell">${sec}</td>${cells}</tr>`;
+            }).join('');
+            document.getElementById('diff-matrix-table').innerHTML = matrixHead + `<tbody>${matrixRows}</tbody>`;
+
+            // ── Recent Verbal sittings ──
+            const sittings = _verbalSessions
+                .map(s => ({ date: s.date, mins: s.mins || 0, notes: s.notes || '', acc: parseVerbalAccuracy(s.notes) }))
+                .filter(s => s.acc)
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 8);
+            document.getElementById('recent-sittings').innerHTML = sittings.length
+                ? sittings.map(s => {
+                    const col = accCol(s.acc.pct);
+                    const dl = new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    return `<div class="acc-row">
+        <div class="acc-label" style="width:120px">${dl}</div>
+        <div class="acc-track"><div class="acc-fill" style="width:${s.acc.pct}%;background:${col}"></div></div>
+        <div class="acc-pct" style="color:${col};width:40px">${s.acc.pct}%</div>
+        <div class="acc-n" style="width:64px">${s.acc.correct}/${s.acc.total}</div>
+      </div>`;
+                }).join('')
+                : `<div style="color:var(--text-4);font-size:11.5px;padding:12px 0">No scored Verbal sittings yet. Log a <strong>Verbal (RC+CR)</strong> sitting from the Dashboard.</div>`;
+
+            // ── Attempt log ──
+            document.getElementById('log-count').textContent = total;
+            document.getElementById('log-tbody').innerHTML = [...attempts].reverse().map((a, i) => {
+                const secCol = a.section === 'RC' ? '#60a5fa' : '#f59e0b';
+                return `<tr>
+      <td style="color:var(--text-4);font-size:10px">${total - i}</td>
+      <td><span class="tag tag-type" style="color:${secCol};border-color:${secCol}33;background:${secCol}1a">${a.section}</span></td>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-2);font-size:11.5px">${a.question_name || '—'}</td>
+      <td style="color:var(--text-3);font-size:11px">${a.question_type || '—'}</td>
+      <td>${a.difficulty ? `<span class="diff-badge ${a.difficulty}">${a.difficulty}</span>` : '—'}</td>
+      <td><span class="tag ${a.correct ? 'tag-correct' : 'tag-wrong'}">${a.correct ? '✓' : '✗'}</span></td>
+      <td style="color:var(--text-3);font-size:11px">${fmtT(a.time_secs)}</td>
+    </tr>`;
+            }).join('');
+        }
+
+        // ══════════════════════════════════════════
+        // ACTION CENTER — Verbal-level gains
+        // ══════════════════════════════════════════
+        function computeScoreGains(attemptsArr) {
+            attemptsArr = attemptsArr || [];
+            if (!attemptsArr.length) return [];
+            const gains = [];
+            const total = attemptsArr.length;
+            const totalCorrect = attemptsArr.filter(a => a.correct).length;
+            const overallAcc = pct(totalCorrect, total);
+
+            const rc = attemptsArr.filter(a => a.section === 'RC');
+            const cr = attemptsArr.filter(a => a.section === 'CR');
+            const rcAcc = pct(rc.filter(a => a.correct).length, rc.length);
+            const crAcc = pct(cr.filter(a => a.correct).length, cr.length);
+
+            // GAIN 1: weaker section
+            if (rc.length >= 4 && cr.length >= 4) {
+                const weaker = rcAcc <= crAcc ? 'RC' : 'CR';
+                const weakArr = weaker === 'RC' ? rc : cr;
+                const weakAcc = Math.min(rcAcc, crAcc), strongAcc = Math.max(rcAcc, crAcc);
+                const gap = strongAcc - weakAcc;
+                if (gap >= 6) {
+                    const projected = totalCorrect + Math.round((overallAcc / 100 - weakAcc / 100) * weakArr.length);
+                    const impact = Math.max(2, pct(projected, total) - overallAcc);
+                    gains.push({
+                        id: 'weak_section', type: 'Section Balance',
+                        icon: weaker === 'RC' ? '#60a5fa' : '#f59e0b',
+                        iconClass: weaker === 'RC' ? 'ti-book' : 'ti-activity',
+                        title: `Lift your ${weaker} accuracy`,
+                        reason: `${weaker} sits at <strong>${weakAcc}%</strong> across ${weakArr.length} attempts vs <strong>${strongAcc}%</strong> on the other half. Bringing ${weaker} up to your combined average moves overall Verbal accuracy by ~${impact}pp.`,
+                        impact: `+${impact}pp`, impactColor: 'amber', impactUnit: 'combined',
+                        meta: [
+                            { icon: 'ti-target', label: `${weaker}: ${weakAcc}%`, cls: 'red' },
+                            { icon: 'ti-trending-up', label: `Gap: ${gap}pp`, cls: 'highlight' },
+                            { icon: 'ti-list-numbers', label: `${weakArr.length} attempts`, cls: '' },
+                        ],
+                        action: `Drill ${weaker}`, href: weaker === 'RC' ? '/rc.html' : '/cr.html', rawImpact: impact,
+                    });
+                }
+            }
+
+            // GAIN 2: coverage imbalance
+            if (total >= 8) {
+                const rcShare = Math.round(rc.length / total * 100);
+                const under = rcShare >= 70 ? 'CR' : rcShare <= 30 ? 'RC' : null;
+                if (under) {
+                    const underN = under === 'RC' ? rc.length : cr.length;
+                    gains.push({
+                        id: 'coverage', type: 'Coverage Gap',
+                        icon: '#f59e0b', iconClass: 'ti-alert-triangle',
+                        title: `${under} is under-practiced`,
+                        reason: `Only <strong>${pct(underN, total)}%</strong> of your Verbal attempts are ${under}. Sections you rarely drill tend to break down under real sectional timing — balance the mix before test day.`,
+                        impact: '+3pp', impactColor: 'amber', impactUnit: 'potential',
+                        meta: [
+                            { icon: 'ti-list-numbers', label: `${underN} ${under} attempts`, cls: 'red' },
+                            { icon: 'ti-scale', label: `${pct(underN, total)}% of Verbal`, cls: '' },
+                        ],
+                        action: `Add ${under} drills`, href: under === 'RC' ? '/rc.html' : '/cr.html', rawImpact: 3,
+                    });
+                }
+            }
+
+            // GAIN 3: Hard-difficulty gap (combined)
+            const hard = attemptsArr.filter(a => a.difficulty === 'Hard');
+            const med = attemptsArr.filter(a => a.difficulty === 'Medium');
+            const hardAcc = pct(hard.filter(a => a.correct).length, hard.length);
+            const medAcc = pct(med.filter(a => a.correct).length, med.length);
+            if (hard.length >= 5 && med.length >= 5) {
+                const gap = medAcc - hardAcc;
+                if (gap >= 15) {
+                    const impact = Math.max(2, Math.round(gap * (hard.length / total)));
+                    gains.push({
+                        id: 'hard_gap', type: 'Difficulty Gap',
+                        icon: '#f87171', iconClass: 'ti-flame',
+                        title: 'Close the Medium → Hard gap',
+                        reason: `Across RC + CR, Medium sits at <strong>${medAcc}%</strong> but Hard drops to <strong>${hardAcc}%</strong> — a ${gap}pp fall. Hard Verbal questions gate the 700+ range.`,
+                        impact: `+${impact}pp`, impactColor: 'amber', impactUnit: 'overall',
+                        meta: [
+                            { icon: 'ti-flag-2', label: `Medium: ${medAcc}%`, cls: 'green' },
+                            { icon: 'ti-flame', label: `Hard: ${hardAcc}%`, cls: 'red' },
+                            { icon: 'ti-list-numbers', label: `${hard.length} hard`, cls: '' },
+                        ],
+                        action: 'Drill Hard Qs', href: '/rc.html', rawImpact: impact,
+                    });
+                }
+            }
+
+            return gains.sort((a, b) => b.rawImpact - a.rawImpact).slice(0, 4);
+        }
+
+        function renderActionCenter() {
+            const gains = computeScoreGains(attempts);
+            const el = document.getElementById('ac-gain-list');
+            if (!el) return;
+            if (!attempts.length) {
+                el.innerHTML = `<div class="ac-empty"><i class="ti ti-chart-bar"></i>
+      <div class="ac-empty-title">No Verbal attempts yet</div>
+      <div class="ac-empty-sub">Log RC and CR drills, or a full Verbal (RC+CR) sitting, and Sheldon will surface your biggest combined-score opportunities.</div></div>`;
+            return;
+            }
+            if (!gains.length) {
+                el.innerHTML = `<div class="ac-empty"><i class="ti ti-check"></i>
+      <div class="ac-empty-title">Well balanced</div>
+      <div class="ac-empty-sub">RC and CR are tracking closely with no single dominant gap yet — keep logging attempts across both sections and difficulties.</div></div>`;
+            return;
+            }
+            const rankLabels = ['#1', '#2', '#3', '#4'];
+            el.innerHTML = gains.map((g, i) => `
+    <div class="gain-card">
+      <div class="gain-rank-col"><div class="gain-rank-num">${rankLabels[i]}</div><div class="gain-rank-label">gain</div></div>
+      <div class="gain-body">
+        <div class="gain-type-row">
+          <div class="gain-icon" style="background:${g.icon}1a;border:1px solid ${g.icon}33"><i class="ti ${g.iconClass}" style="color:${g.icon}"></i></div>
+          <div class="gain-type-label">${g.type}</div>
+        </div>
+        <div class="gain-title">${g.title}</div>
+        <div class="gain-reason">${g.reason}</div>
+        <div class="gain-meta-row">
+          ${g.meta.map(m => `<div class="gain-stat-chip ${m.cls}"><i class="ti ${m.icon}"></i>${m.label}</div>`).join('')}
+          <a class="gain-action-btn" href="${g.href}" style="text-decoration:none"><i class="ti ti-arrow-right"></i>${g.action}</a>
+        </div>
+      </div>
+      <div class="gain-impact-col"><div class="impact-label">Est. Impact</div><div class="impact-value ${g.impactColor}">${g.impact}</div><div class="impact-unit">${g.impactUnit}</div></div>
+    </div>`).join('');
+        }
+
+        // ══════════════════════════════════════════
+        // COMBINED VERBAL JOURNEY (topic = 'Verbal' sessions)
+        // ══════════════════════════════════════════
+        let _journeySessions = [];
+        let _journeyChart = null;
+        let _journeyXAxis = 'session';
+
+        function guessSessionTag(notes) {
+            if (!notes) return 'Sitting';
+            const n = notes.toLowerCase();
+            if (n.includes('mock') || n.includes('test')) return 'Mock';
+            if (n.includes('review')) return 'Review';
+            return 'Sitting';
+        }
+
+        async function loadJourneySessions() {
+            const { data, error } = await supa.from('sessions')
+                .select('id,date,notes,mins,created_at')
+                .eq('user_id', _uid).eq('topic', 'Verbal').eq('deleted', false)
+                .order('date', { ascending: true }).order('created_at', { ascending: true }).limit(500);
+            if (error || !data) { _journeySessions = []; return; }
+            _journeySessions = data.map((s, i) => ({
+                idx: i + 1, date: s.date, notes: s.notes || '', mins: s.mins,
+                tag: guessSessionTag(s.notes), acc: parseVerbalAccuracy(s.notes),
+            }));
+            const tags = [...new Set(_journeySessions.map(s => s.tag))];
+            const sel = document.getElementById('journey-type-filter');
+            sel.innerHTML = `<option value="all">All Verbal Sittings</option>` + tags.map(t => `<option value="${t}">${t} only</option>`).join('');
+        }
+
+        function setJourneyXAxis(mode, el) {
+            _journeyXAxis = mode;
+            document.querySelectorAll('#journey-xaxis-toggle .seg-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            renderJourneyChart();
+        }
+
+        function countUp(el, target, suffix, duration) {
+            if (!el) return;
+            const start = performance.now();
+            function step(now) {
+                const p = Math.min((now - start) / duration, 1);
+                const eased = 1 - Math.pow(1 - p, 3);
+                el.textContent = Math.round(target * eased) + suffix;
+                if (p < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        }
+
+        function renderJourneyChart() {
+            const filterVal = document.getElementById('journey-type-filter').value;
+            let scored = _journeySessions.filter(s => s.acc);
+            if (filterVal !== 'all') scored = scored.filter(s => s.tag === filterVal);
+
+            const emptyState = document.getElementById('journey-empty-state');
+            const canvas = document.getElementById('journey-canvas');
+            const pulseDot = document.getElementById('peak-pulse-ring');
+
+            if (!scored.length) {
+                emptyState.style.display = 'block'; canvas.style.display = 'none';
+                if (pulseDot) pulseDot.style.display = 'none';
+                document.getElementById('journey-stats').innerHTML = '';
+                document.getElementById('journey-milestones').innerHTML = '';
+                if (_journeyChart) { _journeyChart.destroy(); _journeyChart = null; }
+                return;
+            }
+            emptyState.style.display = 'none'; canvas.style.display = 'block';
+
+            const labels = scored.map(s => _journeyXAxis === 'session'
+                ? `#${s.idx}`
+                : new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+            const values = scored.map(s => (s.acc.weighted != null ? s.acc.weighted : s.acc.pct));
+
+            const firstVal = values[0], lastVal = values[values.length - 1];
+            const peak = Math.max(...values);
+            const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+            const delta = lastVal - firstVal;
+            const deltaColor = delta >= 0 ? '#34d399' : '#f87171';
+
+            document.getElementById('journey-stats').innerHTML = `
+                <div class="jc-stat"><div class="jc-stat-val" id="jcs-0" style="color:rgba(255,255,255,0.92)">0</div><div class="jc-stat-label">Sittings</div></div>
+                <div class="jc-stat"><div class="jc-stat-val" id="jcs-1" style="color:#34d399">0%</div><div class="jc-stat-label">Peak</div></div>
+                <div class="jc-stat"><div class="jc-stat-val" id="jcs-2" style="color:#f59e0b">0%</div><div class="jc-stat-label">Average</div></div>
+                <div class="jc-stat"><div class="jc-stat-val" id="jcs-3" style="color:${deltaColor}">—</div><div class="jc-stat-label">First → Last</div></div>`;
+            requestAnimationFrame(() => {
+                countUp(document.getElementById('jcs-0'), scored.length, '', 900);
+                countUp(document.getElementById('jcs-1'), peak, '%', 1100);
+                countUp(document.getElementById('jcs-2'), avg, '%', 950);
+                const d3el = document.getElementById('jcs-3');
+                if (d3el) {
+                    const start = performance.now();
+                    (function step(now) {
+                        const p = Math.min((now - start) / 950, 1);
+                        const eased = 1 - Math.pow(1 - p, 3);
+                        const v = Math.round(delta * eased);
+                        d3el.textContent = (v >= 0 ? '+' : '') + v + 'pp';
+                        if (p < 1) requestAnimationFrame(step);
+                    })(start);
+                }
+            });
+
+            const peakIdx = values.indexOf(peak);
+            let milestoneHTML = `<div class="jc-chip peak" style="animation-delay:.05s">🏆 Peak: ${peak}% — sitting #${scored[peakIdx].idx}</div>`;
+            let curStreak = 1, bestStreak = 1;
+            for (let i = 1; i < values.length; i++) { if (values[i] >= values[i - 1]) { curStreak++; if (curStreak > bestStreak) bestStreak = curStreak; } else curStreak = 1; }
+            if (bestStreak >= 3) milestoneHTML += `<div class="jc-chip streak" style="animation-delay:.15s">📈 ${bestStreak}-sitting improving streak</div>`;
+            if (delta > 0) milestoneHTML += `<div class="jc-chip" style="animation-delay:.25s">🚀 Up ${delta}pp since first sitting</div>`;
+            document.getElementById('journey-milestones').innerHTML = milestoneHTML;
+
+            if (_journeyChart) _journeyChart.destroy();
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+            gradient.addColorStop(0, 'rgba(139,124,248,0.16)');
+            gradient.addColorStop(0.5, 'rgba(139,124,248,0.06)');
+            gradient.addColorStop(1, 'rgba(139,124,248,0.00)');
+
+            const pointColors = values.map((v, i) => i === peakIdx ? '#34d399' : v < 50 ? '#f87171' : '#8b7cf8');
+            const pointRadii = values.map((v, i) => i === peakIdx ? 7 : 4);
+            const pointHoverR = values.map((v, i) => i === peakIdx ? 9 : 6);
+
+            const crosshairPlugin = {
+                id: 'crosshair',
+                afterDraw(chart) {
+                    if (!chart._crosshairX) return;
+                    const { ctx: c2, chartArea: { top, bottom } } = chart;
+                    c2.save(); c2.beginPath(); c2.moveTo(chart._crosshairX, top); c2.lineTo(chart._crosshairX, bottom);
+                    c2.strokeStyle = 'rgba(255,255,255,0.10)'; c2.lineWidth = 1; c2.setLineDash([4, 4]); c2.stroke(); c2.restore();
+                }
+            };
+            const targetLabelPlugin = {
+                id: 'targetLabel',
+                afterDraw(chart) {
+                    const { ctx: c2, chartArea: { right }, scales: { y } } = chart;
+                    const yPos = y.getPixelForValue(75);
+                    c2.save(); c2.fillStyle = 'rgba(245,158,11,0.45)'; c2.font = '600 9px Inter, system-ui';
+                    c2.textAlign = 'right'; c2.fillText('TARGET', right - 4, yPos - 5); c2.restore();
+                }
+            };
+
+            _journeyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'Target', data: values.map(() => 75), borderColor: 'rgba(245,158,11,0.22)', borderWidth: 1.5, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0, order: 2 },
+                        {
+                            label: 'Verbal Accuracy', data: values, borderColor: '#8b7cf8', borderWidth: 2.5, backgroundColor: gradient, fill: true,
+                            tension: 0.4, cubicInterpolationMode: 'monotone', pointRadius: pointRadii,
+                            pointBackgroundColor: values.map((v, i) => i === peakIdx ? '#34d399' : '#0a0e1a'),
+                            pointBorderColor: pointColors, pointBorderWidth: 2.5, pointHoverRadius: pointHoverR,
+                            pointHoverBackgroundColor: (c) => pointColors[c.dataIndex] || '#9d8ff8', pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2, order: 1,
+                        }
+                    ]
+                },
+                plugins: [crosshairPlugin, targetLabelPlugin],
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    animation: { duration: 1400, easing: 'easeOutQuart', x: { from: 0 } },
+                    interaction: { intersect: false, mode: 'index' },
+                    onHover: (event, elements, chart) => {
+                        if (elements.length) { const el = elements.find(e => e.datasetIndex === 1); if (el) chart._crosshairX = chart.getDatasetMeta(1).data[el.index].x; }
+                        else chart._crosshairX = null;
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            enabled: true, backgroundColor: 'rgba(8,12,22,0.97)', borderColor: 'rgba(255,255,255,0.12)', borderWidth: 1.5, cornerRadius: 10,
+                            padding: { top: 11, bottom: 11, left: 14, right: 14 }, titleFont: { family: 'Inter', size: 12, weight: '700' }, titleColor: '#fff',
+                            titleMarginBottom: 5, bodyFont: { family: 'Inter', size: 11, weight: '500' }, bodyColor: 'rgba(255,255,255,0.72)', bodySpacing: 4,
+                            displayColors: false, caretSize: 6, filter: (item) => item.datasetIndex === 1,
+                            callbacks: {
+                                title: (items) => {
+                                    const i = items[0].dataIndex;
+                                    return _journeyXAxis === 'session' ? `Sitting #${scored[i].idx}` : new Date(scored[i].date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                                },
+                                label: (item) => {
+                                    const s = scored[item.dataIndex];
+                                    const head = s.acc.weighted != null ? `${s.acc.weighted} weighted  ·  ${s.acc.pct}% raw` : `${s.acc.pct}% combined`;
+                                    const lines = [`${head}  ·  ${s.acc.correct}/${s.acc.total} correct`];
+                                    if (s.notes) lines.push(s.notes.length > 52 ? s.notes.substring(0, 52) + '…' : s.notes);
+                                    return lines;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.028)', drawTicks: false }, ticks: { color: 'rgba(255,255,255,0.28)', font: { family: 'Inter', size: 10, weight: '500' }, maxRotation: 0 }, border: { display: false } },
+                        y: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,0.028)', drawTicks: false }, ticks: { color: 'rgba(255,255,255,0.28)', font: { family: 'Inter', size: 10, weight: '500' }, stepSize: 20, callback: v => v + '%' }, border: { display: false } }
+                    }
+                }
+            });
+
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    if (!_journeyChart || !pulseDot) return;
+                    try {
+                        const meta = _journeyChart.getDatasetMeta(1);
+                        const pt = meta.data[peakIdx];
+                        if (!pt) return;
+                        const wrap = document.getElementById('jc-chart-wrap');
+                        if (!wrap) return;
+                        const wRect = wrap.getBoundingClientRect();
+                        const cRect = canvas.getBoundingClientRect();
+                        pulseDot.style.display = 'block';
+                        pulseDot.style.left = (cRect.left - wRect.left + pt.x) + 'px';
+                        pulseDot.style.top = (cRect.top - wRect.top + pt.y) + 'px';
+                    } catch (e) { /* ignore */ }
+                }, 1500);
+            });
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
