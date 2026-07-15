@@ -11098,6 +11098,18 @@
                         <div class="sb-topic-fill" id="sbf-cr" style="width:0%;background:#fbbf24"></div>
                     </div>
                 </div>
+                <div class="sb-topic-item" id="sbt-verbal" style="cursor:pointer" onclick="window.location='/verbal.html'"
+                    title="Open Verbal Command Center">
+                    <div class="sb-topic-row">
+                        <div class="sb-topic-name"><i class="ti ti-layers-intersect" style="color:#7e9bf0"></i> Verbal</div>
+                        <span class="sb-topic-hours" id="sb-verbal" style="display:flex;align-items:center;gap:6px">0h <span
+                                style="font-size:9px;font-weight:700;letter-spacing:0.06em;background:rgba(126,155,240,0.12);color:#7e9bf0;border:1px solid rgba(126,155,240,0.2);padding:1px 5px;border-radius:4px">DRILL
+                                →</span></span>
+                    </div>
+                    <div class="sb-topic-track">
+                        <div class="sb-topic-fill" id="sbf-verbal" style="width:0%;background:#7e9bf0"></div>
+                    </div>
+                </div>
                 <div class="sb-topic-item" id="sbt-di">
                     <div class="sb-topic-row">
                         <div class="sb-topic-name"><i class="ti ti-chart-dots" style="color:#60a5fa"></i> DI</div>
@@ -11865,6 +11877,7 @@
                                         <option>Quant</option>
                                         <option>RC</option>
                                         <option>CR</option>
+                                        <option>Verbal (RC+CR)</option>
                                         <option>DI</option>
                                         <option>Mock test</option>
                                         <option>Review</option>
@@ -11901,6 +11914,18 @@
     <div class="sc-qf"><label>Incorrect<span class="opt">auto</span></label><input id="mn-incorrect" type="number" readonly tabindex="-1" placeholder="—"></div>
     <div class="sc-qf"><label>Accuracy<span class="opt">auto</span></label><input id="mn-acc" class="sc-acc-val" type="text" readonly tabindex="-1" placeholder="—"></div>
     <div class="sc-qf sc-qfull"><label>Weighted score<span class="opt">optional · 0–100, difficulty-adjusted</span></label><input id="mn-weighted" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="e.g. 64"></div>
+  </div>
+</div>
+                                <div class="field full" id="vb-split" style="display:none">
+  <div class="sc-qgrid">
+    <div class="sc-qf sc-qfull"><label>Source / Test topic<span class="opt">optional</span></label><input id="vb-source" type="text" placeholder="e.g. Verbal Sectional · Hard"></div>
+    <div class="sc-qf"><label>RC correct</label><input id="vb-rc-correct" type="number" min="0" inputmode="numeric" placeholder="0" oninput="vbRecalc()"></div>
+    <div class="sc-qf"><label>RC total</label><input id="vb-rc-total" type="number" min="0" inputmode="numeric" placeholder="0" oninput="vbRecalc()"></div>
+    <div class="sc-qf"><label>RC accuracy<span class="opt">auto</span></label><input id="vb-rc-acc" class="sc-acc-val" type="text" readonly tabindex="-1" placeholder="—"></div>
+    <div class="sc-qf"><label>CR correct</label><input id="vb-cr-correct" type="number" min="0" inputmode="numeric" placeholder="0" oninput="vbRecalc()"></div>
+    <div class="sc-qf"><label>CR total</label><input id="vb-cr-total" type="number" min="0" inputmode="numeric" placeholder="0" oninput="vbRecalc()"></div>
+    <div class="sc-qf"><label>CR accuracy<span class="opt">auto</span></label><input id="vb-cr-acc" class="sc-acc-val" type="text" readonly tabindex="-1" placeholder="—"></div>
+    <div class="sc-qf sc-qfull"><label>Combined accuracy<span class="opt">auto · RC + CR</span></label><input id="vb-combined-acc" class="sc-acc-val" type="text" readonly tabindex="-1" placeholder="—"></div>
   </div>
 </div>
                                 <div class="field full">
@@ -12512,9 +12537,9 @@
         }
         setStatus("connecting");
 
-        var TC = { "Quant": "#8b7cf8", "RC": "#34d399", "CR": "#fbbf24", "DI": "#60a5fa", "Mock test": "#f472b6", "Review": "#fb923c" };
+        var TC = { "Quant": "#8b7cf8", "RC": "#34d399", "CR": "#fbbf24", "DI": "#60a5fa", "Mock test": "#f472b6", "Review": "#fb923c", "Verbal": "#7e9bf0" };
         var TOPICS = ["Quant", "RC", "CR", "DI", "Mock test", "Review"];
-        var SB_IDS = { "Quant": "sb-quant", "RC": "sb-rc", "CR": "sb-cr", "DI": "sb-di", "Mock test": "sb-mock", "Review": "sb-review" };
+       var SB_IDS = { "Quant": "sb-quant", "RC": "sb-rc", "CR": "sb-cr", "DI": "sb-di", "Mock test": "sb-mock", "Review": "sb-review", "Verbal": "sb-verbal" };
         /* ── Topic completion (user-marked "done" → Sheldon deprioritises) ── */
         var SBT_IDS = { "Quant": "sbt-quant", "RC": "sbt-rc", "CR": "sbt-cr", "DI": "sbt-di", "Mock test": "sbt-mock", "Review": "sbt-review" };
         function scCompletedTopics() { try { return JSON.parse(localStorage.getItem('gmat_completed_topics') || '[]'); } catch (e) { return []; } }
@@ -13252,7 +13277,7 @@
             readEl.style.borderColor = readiness >= 80 ? "rgba(52,211,153,0.25)" : readiness >= 60 ? "rgba(251,191,36,0.22)" : "rgba(255,255,255,0.10)";
 
             topicTotals = {}; sessions.forEach(function (s) { topicTotals[s.topic] = (topicTotals[s.topic] || 0) + s.mins; });
-            var SBF_IDS = { "Quant": "sbf-quant", "RC": "sbf-rc", "CR": "sbf-cr", "DI": "sbf-di", "Mock test": "sbf-mock", "Review": "sbf-review" };
+            var SBF_IDS = { "Quant": "sbf-quant", "RC": "sbf-rc", "CR": "sbf-cr", "DI": "sbf-di", "Mock test": "sbf-mock", "Review": "sbf-review", "Verbal": "sbf-verbal" };
             var maxTopic = Math.max.apply(null, TOPICS.map(function (t) { return topicTotals[t] || 0; }).concat([1]));
             TOPICS.forEach(function (t) {
                 var el = document.getElementById(SB_IDS[t]); if (el) el.textContent = topicTotals[t] ? fmtH(topicTotals[t]) : "0h";
@@ -25805,12 +25830,75 @@ function scComposeNote(p){
   noteEl.value=[base,tail].filter(Boolean).join(base&&tail?' · ':'');
 }
 function scClearQ(p){['source','correct','total','incorrect','acc','weighted'].forEach(function(s){var e=document.getElementById(p+'-'+s);if(e)e.value='';});}
+
+/* ── VERBAL (RC+CR) SECTIONAL SITTING ── */
+function vbIsVerbal(){var t=document.getElementById('inp-topic');return !!t&&t.value==='Verbal (RC+CR)';}
+function vbNums(){
+  var gi=function(id){var v=parseInt((document.getElementById(id)||{}).value,10);return isNaN(v)?null:v;};
+  return {rcC:gi('vb-rc-correct'),rcT:gi('vb-rc-total'),crC:gi('vb-cr-correct'),crT:gi('vb-cr-total')};
+}
+function vbRecalc(){
+  var n=vbNums(), set=function(id,v){var e=document.getElementById(id);if(e)e.value=v;};
+  set('vb-rc-acc', (n.rcC!=null&&n.rcT>0)?Math.round(n.rcC/n.rcT*100)+'%':'');
+  set('vb-cr-acc', (n.crC!=null&&n.crT>0)?Math.round(n.crC/n.crT*100)+'%':'');
+  var tC=(n.rcC||0)+(n.crC||0), tT=(n.rcT||0)+(n.crT||0);
+  set('vb-combined-acc', tT>0?tC+'/'+tT+' = '+Math.round(tC/tT*100)+'%':'');
+}
+function vbToggle(){
+  var on=vbIsVerbal();
+  var split=document.getElementById('vb-split'); if(split) split.style.display=on?'':'none';
+  var mn=document.getElementById('mn-correct'); var grid=mn&&mn.closest?mn.closest('.field.full'):null;
+  if(grid) grid.style.display=on?'none':'';
+}
+function vbClear(){['source','rc-correct','rc-total','rc-acc','cr-correct','cr-total','cr-acc','combined-acc']
+  .forEach(function(s){var e=document.getElementById('vb-'+s);if(e)e.value='';});}
+function vbTail(src,c,t){
+  var p=[]; p.push('[Verbal sitting'+(src?' · '+src:'')+']');
+  p.push('Accuracy-'+c+'/'+t+'='+Math.round(c/t*100)+'%');
+  return p.join(' · ');
+}
+function addVerbalSitting(){
+  var n=vbNums();
+  if(!(n.rcT>0)||!(n.crT>0)||n.rcC==null||n.crC==null){scNotify('Enter RC and CR correct/total for the sitting','error');return;}
+  if(n.rcC>n.rcT||n.crC>n.crT){scNotify('Correct cannot exceed total','error');return;}
+  var d=document.getElementById('inp-date').value;
+  var h=parseInt(document.getElementById('inp-hours').value)||0;
+  var m=parseInt(document.getElementById('inp-mins').value)||0;
+  if(!d||h+m===0){scNotify('Pick a date and duration','error');return;}
+  var mins=h*60+m;
+  var src=(document.getElementById('vb-source').value||'').trim();
+  var base=(document.getElementById('inp-notes').value||'').trim();
+  var join=function(tail){return [base,tail].filter(Boolean).join(base?' · ':'');};
+  var now=Date.now();
+  var rows=[
+    {date:d,topic:'Verbal',mins:mins,created_at:now,   notes:join(vbTail(src,n.rcC+n.crC,n.rcT+n.crT))},
+    {date:d,topic:'RC',    mins:0,   created_at:now+1, notes:join(vbTail(src,n.rcC,n.rcT))},
+    {date:d,topic:'CR',    mins:0,   created_at:now+2, notes:join(vbTail(src,n.crC,n.crT))}
+  ];
+  var btn=document.querySelector('.log-btn'); btn.disabled=true; btn.textContent='Saving...';
+  setStatus('saving');
+  supa.from('sessions').insert(rows).then(function(res){
+    if(res.error) throw res.error;
+    document.getElementById('inp-hours').value='';
+    document.getElementById('inp-mins').value='';
+    document.getElementById('inp-notes').value='';
+    vbClear();
+    btn.disabled=false; btn.innerHTML='<i class="ti ti-plus"></i> Bank study time';
+    scNotify('Verbal sitting logged — RC, CR and combined updated','success');
+    loadSessions();
+  }).catch(function(err){
+    setStatus('error'); scNotify('Save failed — '+(err.message||'check your connection'),'error');
+    btn.disabled=false; btn.innerHTML='<i class="ti ti-plus"></i> Bank study time';
+  });
+}
 // wrap the existing save handlers (no edits to their internals)
 (function(){
   function ready(fn){document.readyState!=='loading'?fn():document.addEventListener('DOMContentLoaded',fn);}
   ready(function(){
     if(window.timerStop&&!window.timerStop.__scQ){var _ts=window.timerStop;window.timerStop=function(){try{scComposeNote('tm');}catch(e){}var r=_ts.apply(this,arguments);try{scClearQ('tm');}catch(e){}return r;};window.timerStop.__scQ=1;}
-    if(window.addSession&&!window.addSession.__scQ){var _as=window.addSession;window.addSession=function(){try{scComposeNote('mn');}catch(e){}var r=_as.apply(this,arguments);try{scClearQ('mn');}catch(e){}return r;};window.addSession.__scQ=1;}
+    if(window.addSession&&!window.addSession.__scQ){var _as=window.addSession;window.addSession=function(){if(vbIsVerbal()){return addVerbalSitting();}try{scComposeNote('mn');}catch(e){}var r=_as.apply(this,arguments);try{scClearQ('mn');}catch(e){}return r;};window.addSession.__scQ=1;}
+    var _tp=document.getElementById('inp-topic');
+    if(_tp&&!_tp.__vb){_tp.addEventListener('change',vbToggle);_tp.__vb=1;vbToggle();}
   });
 })();
 </script>
