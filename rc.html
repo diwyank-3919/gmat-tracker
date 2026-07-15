@@ -1533,6 +1533,7 @@
         function guessSessionTag(noteText) {
             if (!noteText) return 'RC';
             const lower = noteText.toLowerCase();
+            if (lower.includes('verbal sitting')) return 'Verbal';
             if (lower.includes('mock') || lower.includes('test')) return 'Mock';
             if (lower.includes('drill')) return 'Drill';
             if (lower.includes('review')) return 'Review';
