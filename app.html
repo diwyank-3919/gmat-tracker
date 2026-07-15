@@ -11760,6 +11760,7 @@
                                         <option>Quant</option>
                                         <option>RC</option>
                                         <option>CR</option>
+                                        <option>Verbal (RC+CR)</option>
                                         <option>DI</option>
                                         <option>Mock test</option>
                                         <option>Review</option>
@@ -11782,6 +11783,16 @@
                                     <div class="sc-qf"><label>Incorrect<span class="opt">auto</span></label><input id="tm-incorrect" type="number" readonly tabindex="-1" placeholder="—"></div>
                                     <div class="sc-qf"><label>Accuracy<span class="opt">auto</span></label><input id="tm-acc" class="sc-acc-val" type="text" readonly tabindex="-1" placeholder="—"></div>
                                     <div class="sc-qf sc-qfull"><label>Weighted score<span class="opt">optional · 0–100, difficulty-adjusted</span></label><input id="tm-weighted" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="e.g. 64"></div>
+                                </div>
+                                <div class="sc-qgrid" id="vbt-split" style="display:none">
+                                    <div class="sc-qf sc-qfull"><label>Source / Test topic<span class="opt">optional</span></label><input id="vbt-source" type="text" placeholder="e.g. Verbal Sectional · Hard"></div>
+                                    <div class="sc-qf"><label>RC correct</label><input id="vbt-rc-correct" type="number" min="0" inputmode="numeric" placeholder="0" oninput="vbtRecalc()"></div>
+                                    <div class="sc-qf"><label>RC total</label><input id="vbt-rc-total" type="number" min="0" inputmode="numeric" placeholder="0" oninput="vbtRecalc()"></div>
+                                    <div class="sc-qf"><label>RC accuracy<span class="opt">auto</span></label><input id="vbt-rc-acc" class="sc-acc-val" type="text" readonly tabindex="-1" placeholder="—"></div>
+                                    <div class="sc-qf"><label>CR correct</label><input id="vbt-cr-correct" type="number" min="0" inputmode="numeric" placeholder="0" oninput="vbtRecalc()"></div>
+                                    <div class="sc-qf"><label>CR total</label><input id="vbt-cr-total" type="number" min="0" inputmode="numeric" placeholder="0" oninput="vbtRecalc()"></div>
+                                    <div class="sc-qf"><label>CR accuracy<span class="opt">auto</span></label><input id="vbt-cr-acc" class="sc-acc-val" type="text" readonly tabindex="-1" placeholder="—"></div>
+                                    <div class="sc-qf sc-qfull"><label>Combined accuracy<span class="opt">auto · RC + CR</span></label><input id="vbt-combined-acc" class="sc-acc-val" type="text" readonly tabindex="-1" placeholder="—"></div>
                                 </div>
                             </div>
                             <input type="text" id="timer-notes"
@@ -14336,6 +14347,41 @@
                     var topic = state.topic || "Quant", btn = document.getElementById("timer-stop-btn");
                     if (btn) btn.disabled = true; setStatus("saving");
                     var timerNotes = (document.getElementById("timer-notes").value || "").trim();
+                    if (topic === 'Verbal (RC+CR)') {
+                        var vn = vbtNums();
+                        if (!(vn.rcT > 0) || !(vn.crT > 0) || vn.rcC == null || vn.crC == null) {
+                            if (btn) btn.disabled = false; setStatus('idle');
+                            scNotify('Enter RC and CR correct/total before finishing the sitting', 'error');
+                            return;
+                        }
+                        if (vn.rcC > vn.rcT || vn.crC > vn.crT) {
+                            if (btn) btn.disabled = false; setStatus('idle');
+                            scNotify('Correct cannot exceed total', 'error');
+                            return;
+                        }
+                        var vDate = (window.__timerLogDate || dateStr(today));
+                        var vStart = new Date(state.firstStart || (Date.now() - elapsedMs())).toISOString();
+                        var vSrc = (document.getElementById('vbt-source').value || '').trim();
+                        var vJoin = function (tail) { return [timerNotes, tail].filter(Boolean).join(timerNotes ? ' · ' : ''); };
+                        var vNow = Date.now();
+                        var vRows = [
+                            { date: vDate, topic: 'Verbal', mins: m, created_at: vNow, started_at: vStart, notes: vJoin(vbTail(vSrc, vn.rcC + vn.crC, vn.rcT + vn.crT)) },
+                            { date: vDate, topic: 'RC', mins: 0, created_at: vNow + 1, started_at: vStart, notes: vJoin(vbTail(vSrc, vn.rcC, vn.rcT)) },
+                            { date: vDate, topic: 'CR', mins: 0, created_at: vNow + 2, started_at: vStart, notes: vJoin(vbTail(vSrc, vn.crC, vn.crT)) }
+                        ];
+                        supa.from("sessions").insert(vRows)
+                            .then(function (res) {
+                                if (res.error) throw res.error;
+                                clear(); stopTick(); paint();
+                                var tn = document.getElementById("timer-notes"); if (tn) tn.value = "";
+                                vbtClear();
+                                if (btn) btn.disabled = false;
+                                if (typeof showToast === "function") { showToast("⏱️", "Verbal sitting logged!", fmtH(m) + " — RC, CR and combined all updated."); }
+                                loadSessions();
+                            })
+                            .catch(function (err) { setStatus("error"); scNotify("Save failed — " + (err.message || "check your connection"), 'error'); if (btn) btn.disabled = false; });
+                        return;
+                    }
                     var timerRow = { date: (window.__timerLogDate || dateStr(today)), topic: topic, mins: m, created_at: Date.now(), started_at: new Date(state.firstStart || (Date.now() - elapsedMs())).toISOString() };
                     if (timerNotes) timerRow.notes = timerNotes;
                     supa.from("sessions").insert(timerRow)
@@ -25895,7 +25941,25 @@ function addVerbalSitting(){
 (function(){
   function ready(fn){document.readyState!=='loading'?fn():document.addEventListener('DOMContentLoaded',fn);}
   ready(function(){
-    if(window.timerStop&&!window.timerStop.__scQ){var _ts=window.timerStop;window.timerStop=function(){try{scComposeNote('tm');}catch(e){}var r=_ts.apply(this,arguments);try{scClearQ('tm');}catch(e){}return r;};window.timerStop.__scQ=1;}
+    /* ── VERBAL (RC+CR) — TIMER TAB ── */
+function vbtIsVerbal(){var t=document.getElementById('timer-topic');return !!t&&t.value==='Verbal (RC+CR)';}
+function vbtNums(){var gi=function(id){var v=parseInt((document.getElementById(id)||{}).value,10);return isNaN(v)?null:v;};
+  return {rcC:gi('vbt-rc-correct'),rcT:gi('vbt-rc-total'),crC:gi('vbt-cr-correct'),crT:gi('vbt-cr-total')};}
+function vbtRecalc(){var n=vbtNums(),set=function(id,v){var e=document.getElementById(id);if(e)e.value=v;};
+  set('vbt-rc-acc',(n.rcC!=null&&n.rcT>0)?Math.round(n.rcC/n.rcT*100)+'%':'');
+  set('vbt-cr-acc',(n.crC!=null&&n.crT>0)?Math.round(n.crC/n.crT*100)+'%':'');
+  var tC=(n.rcC||0)+(n.crC||0),tT=(n.rcT||0)+(n.crT||0);
+  set('vbt-combined-acc',tT>0?tC+'/'+tT+' = '+Math.round(tC/tT*100)+'%':'');}
+function vbtToggle(){var on=vbtIsVerbal();
+  var sp=document.getElementById('vbt-split'); if(sp) sp.style.display=on?'':'none';
+  var src=document.getElementById('tm-source'); var g=src&&src.closest?src.closest('.sc-qgrid'):null;
+  if(g) g.style.display=on?'none':'';}
+function vbtClear(){['source','rc-correct','rc-total','rc-acc','cr-correct','cr-total','cr-acc','combined-acc']
+  .forEach(function(s){var e=document.getElementById('vbt-'+s);if(e)e.value='';});}
+
+    if(window.timerStop&&!window.timerStop.__scQ){var _ts=window.timerStop;window.timerStop=function(){if(vbtIsVerbal()){return _ts.apply(this,arguments);}try{scComposeNote('tm');}catch(e){}var r=_ts.apply(this,arguments);try{scClearQ('tm');}catch(e){}return r;};window.timerStop.__scQ=1;}
+    var _tt=document.getElementById('timer-topic');
+    if(_tt&&!_tt.__vb){_tt.addEventListener('change',vbtToggle);_tt.__vb=1;vbtToggle();}
     if(window.addSession&&!window.addSession.__scQ){var _as=window.addSession;window.addSession=function(){if(vbIsVerbal()){return addVerbalSitting();}try{scComposeNote('mn');}catch(e){}var r=_as.apply(this,arguments);try{scClearQ('mn');}catch(e){}return r;};window.addSession.__scQ=1;}
     var _tp=document.getElementById('inp-topic');
     if(_tp&&!_tp.__vb){_tp.addEventListener('change',vbToggle);_tp.__vb=1;vbToggle();}
