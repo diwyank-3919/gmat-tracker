@@ -12163,7 +12163,7 @@
             <div id="add-mock-modal"
                 style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.60);backdrop-filter:blur(12px);z-index:1000;align-items:center;justify-content:center">
                 <div
-                    style="background:rgba(15,12,26,0.97);border:1px solid rgba(139,124,248,0.25);border-radius:20px;padding:26px 30px;max-width:380px;width:90%;box-shadow:0 32px 80px rgba(0,0,0,0.60)">
+                    style="background:rgba(15,12,26,0.97);border:1px solid rgba(139,124,248,0.25);border-radius:20px;padding:26px 30px;max-width:430px;width:90%;box-shadow:0 32px 80px rgba(0,0,0,0.60)">
                     <div style="font-size:17px;font-weight:750;color:var(--text-primary);margin-bottom:4px">Log mock
                         score</div>
                     <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:18px">Record your GMAT practice
@@ -12179,15 +12179,17 @@
                                 <span id="mock-date-text">Select date</span>
                             </div>
                         </div>
-                        <div class="field"><label>Total score</label><input type="number" id="mock-score-inp" min="200"
-                                max="805" placeholder="e.g. 645"
+                        <div class="field"><label>Total score</label><input type="number" id="mock-score-inp" min="205"
+                                max="805" step="10" placeholder="e.g. 645"
                                 style="font-size:22px;font-weight:700;text-align:center;color:var(--accent-bright)">
                         </div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
-                            <div class="field"><label>Quant score</label><input type="number" id="mock-quant-inp"
-                                    min="60" max="90" placeholder="e.g. 72"></div>
-                            <div class="field"><label>Verbal score</label><input type="number" id="mock-verbal-inp"
-                                    min="60" max="90" placeholder="e.g. 78"></div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
+                            <div class="field"><label>Quant</label><input type="number" id="mock-quant-inp"
+                                    min="60" max="90" placeholder="e.g. 80"></div>
+                            <div class="field"><label>Verbal</label><input type="number" id="mock-verbal-inp"
+                                    min="60" max="90" placeholder="e.g. 77"></div>
+                            <div class="field"><label>DI</label><input type="number" id="mock-di-inp"
+                                    min="60" max="90" placeholder="e.g. 75"></div>
                         </div>
                         <div class="field"><label>Notes (optional)</label><input type="text" id="mock-notes-inp"
                                 placeholder="e.g. Struggled with RC timing"></div>
@@ -13934,14 +13936,17 @@
         window.mockScores = mockScores;
         var mockChartInst = null;
         function saveMockScores() { localStorage.setItem("gmat_mock_scores", JSON.stringify(mockScores)); }
-        function openAddMock() { document.getElementById("mock-date-inp").value = dateStr(today); setDateDisplay("mock-date-inp", "mock-date-text");["mock-score-inp", "mock-quant-inp", "mock-verbal-inp", "mock-notes-inp"].forEach(function (id) { document.getElementById(id).value = ""; }); document.getElementById("add-mock-modal").style.display = "flex"; }
+        function openAddMock() { document.getElementById("mock-date-inp").value = dateStr(today); setDateDisplay("mock-date-inp", "mock-date-text");["mock-score-inp", "mock-quant-inp", "mock-verbal-inp", "mock-di-inp", "mock-notes-inp"].forEach(function (id) { document.getElementById(id).value = ""; }); document.getElementById("add-mock-modal").style.display = "flex"; }
         function closeAddMock() { document.getElementById("add-mock-modal").style.display = "none"; }
         function saveMock() {
             var date = document.getElementById("mock-date-inp").value; var score = parseInt(document.getElementById("mock-score-inp").value);
             var quant = parseInt(document.getElementById("mock-quant-inp").value) || null; var verbal = parseInt(document.getElementById("mock-verbal-inp").value) || null;
+            var di = parseInt(document.getElementById("mock-di-inp").value) || null;
             var notes = document.getElementById("mock-notes-inp").value.trim();
-            if (!date || !score || score < 200 || score > 805) { scNotify("Enter a valid date and a score between 200–805.", 'warning'); return; }
-            mockScores.push({ id: Date.now(), date: date, score: score, quant: quant, verbal: verbal, notes: notes });
+            if (!date || !score || score < 205 || score > 805) { scNotify("Enter a valid date and a score between 205–805.", 'warning'); return; }
+            var badSec = [["Quant", quant], ["Verbal", verbal], ["DI", di]].filter(function (p) { return p[1] !== null && (p[1] < 60 || p[1] > 90); });
+            if (badSec.length) { scNotify(badSec[0][0] + " score must be between 60 and 90.", 'warning'); return; }
+            mockScores.push({ id: Date.now(), date: date, score: score, quant: quant, verbal: verbal, di: di, notes: notes });
             mockScores.sort(function (a, b) { return a.date.localeCompare(b.date); });
             saveMockScores(); window.mockScores = mockScores; closeAddMock(); renderMockView(); updateCommandCenter();
             showToast("📊", "Mock score logged!", "Score of " + score + " recorded. Keep pushing!");
@@ -14009,7 +14014,7 @@
                 var gapColor = gap2 <= 0 ? "var(--green)" : "var(--red)"; var gapBg = gap2 <= 0 ? "rgba(52,211,153,0.12)" : "rgba(251,113,133,0.10)";
                 var gapText = gap2 > 0 ? "+" + gap2 + " to go" : "Target hit! 🎯";
                 var dateLine = parseLocal(m.date).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
-                var subLine = dateLine + (m.quant ? " · Q: " + m.quant : "") + (m.verbal ? " · V: " + m.verbal : "") + (m.notes ? " · " + m.notes : "");
+                var subLine = dateLine + (m.quant ? " · Q: " + m.quant : "") + (m.verbal ? " · V: " + m.verbal : "") + (m.di ? " · DI: " + m.di : "") + (m.notes ? " · " + m.notes : "");
                 var div = document.createElement("div");
                 div.style.cssText = "display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);margin-bottom:4px";
                 div.innerHTML = '<div style="width:26px;height:26px;border-radius:7px;background:rgba(139,124,248,0.12);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--accent-bright);flex-shrink:0">M' + rank + '</div>'
