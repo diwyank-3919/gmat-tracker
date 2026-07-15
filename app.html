@@ -9605,11 +9605,23 @@
             font-size: 12px
         }
 
-        #view-analytics>.sec-header,
+        /* Title lives in the topbar — hide the duplicate, keep the actions */
+        #view-calendar>.sec-header>div:first-child,
+        #view-sessions>.sec-header>div:first-child,
+        #view-mock>.sec-header>div:first-child,
+        #view-errors>.sec-header>div:first-child {
+            display: none !important;
+        }
+
         #view-calendar>.sec-header,
         #view-sessions>.sec-header,
         #view-mock>.sec-header,
-        #view-errorlog>.sec-header {
+        #view-errors>.sec-header {
+            justify-content: flex-end !important;
+        }
+
+        /* Analytics has no right-hand actions — collapse the whole row */
+        #view-analytics>.sec-header {
             display: none !important;
         }
 
@@ -12070,7 +12082,6 @@
 
                     <div class="footer">Built for focused GMAT prep · <strong>Aditya Diwyank</strong></div>
                 </div>
-            </div>
 
             <!-- MOCK SCORE VIEW -->
             <div id="view-mock" style="display:none">
@@ -12519,8 +12530,9 @@
                 </div>
 
             </div>
-            <!-- ══ /ERROR LOG VIEW ══ -->
+          <!-- ══ /ERROR LOG VIEW ══ -->
 
+            </div>
         </main>
     </div>
 
