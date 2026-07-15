@@ -7899,6 +7899,37 @@
             filter: none;
         }
 
+        .mkm-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            height: 36px;
+            padding: 0 15px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Hanken Grotesk', sans-serif;
+            font-size: 13px;
+            font-weight: 650;
+            cursor: pointer;
+            background: #878dff;
+            color: #0f1118;
+            box-shadow: none;
+            transition: background .2s ease, transform .1s ease;
+        }
+
+        .mkm-cta .ti {
+            font-size: 15px;
+        }
+
+        .mkm-cta:hover {
+            background: #9ca2ff;
+        }
+
+        .mkm-cta:active {
+            transform: scale(0.97);
+        }
+
         @media(max-width:480px) {
             .mkm-total input {
                 font-size: 36px;
@@ -12405,9 +12436,8 @@
                         <div class="sec-title">Mock Scores</div>
                         <div class="sec-sub">Track your GMAT practice test scores</div>
                     </div>
-                    <button onclick="openAddMock()"
-                        style="display:inline-flex;align-items:center;gap:6px;padding:8px 15px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:650;cursor:pointer;box-shadow:0 4px 18px rgba(124,60,237,0.45),inset 0 1px 0 rgba(255,255,255,0.15)"><i
-                            class="ti ti-plus"></i> Log mock score</button>
+                    <button class="mkm-cta" onclick="openAddMock()"><i class="ti ti-clipboard-plus"></i> Log mock
+                        score</button>
                 </div>
                 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:14px"
                     class="mock-kpi-grid">
