@@ -4622,14 +4622,15 @@
 
             // Premium area gradient
             const gradient = ctx.createLinearGradient(0, 0, 0, 260);
-            gradient.addColorStop(0,  'rgba(135,141,255,0.11)');
-            gradient.addColorStop(0.5,'rgba(135,141,255,0.04)');
-            gradient.addColorStop(1,  'rgba(135,141,255,0.00)');
+            gradient.addColorStop(0,    'rgba(135,141,255,0.24)');
+            gradient.addColorStop(0.45, 'rgba(135,141,255,0.07)');
+            gradient.addColorStop(1,    'rgba(135,141,255,0.00)');
 
             const peakValIdx = values.indexOf(peak);
             const pointColors = values.map((v,i) => i === peakValIdx ? '#46c98f' : v < 40 ? '#fb7185' : '#878dff');
-            const pointRadii  = values.map((v,i) => i === peakValIdx ? 7 : 4);
-            const pointHoverR = values.map((v,i) => i === peakValIdx ? 9 : 6);
+            // Only the peak and sub-40 dips get a marker; the rest is line. Hover reveals the rest.
+            const pointRadii  = values.map((v,i) => i === peakValIdx ? 5 : v < 40 ? 3.5 : 0);
+            const pointHoverR = values.map((v,i) => i === peakValIdx ? 7 : 5);
 
             // ── PLUGINS ──
             // 1. Line glow
@@ -4639,8 +4640,9 @@
                     if (args.index !== 1) return;
                     const ctx2 = chart.ctx;
                     ctx2.save();
-                    ctx2.shadowColor = 'transparent';
-                    ctx2.shadowBlur = 0;
+                    ctx2.shadowColor = 'rgba(0,0,0,0.45)';
+                    ctx2.shadowBlur = 8;
+                    ctx2.shadowOffsetY = 3;
                 }
             };
             const glowPluginAfter = {
@@ -4669,17 +4671,33 @@
                 }
             };
 
-            // 3. Target line label
+            // 3. Target line label — left-anchored, out of the data's way
             const targetLabelPlugin = {
                 id: 'targetLabel',
                 afterDraw(chart) {
-                    const { ctx: c2, chartArea: { right }, scales: { y } } = chart;
+                    const { ctx: c2, chartArea: { left }, scales: { y } } = chart;
                     const yPos = y.getPixelForValue(70);
                     c2.save();
-                    c2.fillStyle = 'rgba(245,158,11,0.45)';
-                    c2.font = '600 9px Inter, system-ui';
-                    c2.textAlign = 'right';
-                    c2.fillText('TARGET', right - 4, yPos - 5);
+                    c2.fillStyle = 'rgba(240,189,106,0.50)';
+                    c2.font = '600 8.5px "Hanken Grotesk", system-ui';
+                    c2.textAlign = 'left';
+                    c2.fillText('70% TARGET', left + 3, yPos - 7);
+                    c2.restore();
+                }
+            };
+
+            // 4. Target zone — a faint band, so "above the line" reads as a place
+            const targetBandPlugin = {
+                id: 'targetBand',
+                beforeDatasetsDraw(chart) {
+                    const { ctx: c2, chartArea: { left, right }, scales: { y } } = chart;
+                    const yTop = y.getPixelForValue(100), yTgt = y.getPixelForValue(70);
+                    c2.save();
+                    const g = c2.createLinearGradient(0, yTop, 0, yTgt);
+                    g.addColorStop(0, 'rgba(70,201,143,0.055)');
+                    g.addColorStop(1, 'rgba(70,201,143,0.00)');
+                    c2.fillStyle = g;
+                    c2.fillRect(left, yTop, right - left, yTgt - yTop);
                     c2.restore();
                 }
             };
@@ -4704,15 +4722,16 @@
                             label: 'CR Accuracy',
                             data: values,
                             borderColor: '#878dff',
-                            borderWidth: 2,
+                            borderWidth: 1.75,
                             backgroundColor: gradient,
                             fill: true,
                             tension: 0.4,
                             cubicInterpolationMode: 'monotone',
                             pointRadius: pointRadii,
-                            pointBackgroundColor: values.map((v,i) => i === peakValIdx ? '#46c98f' : '#151a26'),
+                            pointBackgroundColor: values.map((v,i) => i === peakValIdx ? '#46c98f' : '#11151f'),
                             pointBorderColor: pointColors,
-                            pointBorderWidth: 2.5,
+                            pointBorderWidth: 2,
+                            pointHitRadius: 14,
                             pointHoverRadius: pointHoverR,
                             pointHoverBackgroundColor: (c) => pointColors[c.dataIndex] || '#9ca2ff',
                             pointHoverBorderColor: '#fff',
@@ -4721,7 +4740,7 @@
                         }
                     ]
                 },
-                plugins: [glowPlugin, glowPluginAfter, crosshairPlugin, targetLabelPlugin],
+                plugins: [targetBandPlugin, glowPlugin, glowPluginAfter, crosshairPlugin, targetLabelPlugin],
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -4751,10 +4770,10 @@
                             borderWidth: 1.5,
                             cornerRadius: 10,
                             padding: { top:11, bottom:11, left:14, right:14 },
-                            titleFont: { family:'Inter', size:12, weight:'700' },
+                            titleFont: { family:'Fraunces', size:13, weight:'600' },
                             titleColor: '#fff',
                             titleMarginBottom: 5,
-                            bodyFont: { family:'Inter', size:11, weight:'500' },
+                            bodyFont: { family:'Hanken Grotesk', size:11, weight:'500' },
                             bodyColor: 'rgba(255,255,255,0.72)',
                             bodySpacing: 4,
                             displayColors: false,
@@ -4779,16 +4798,30 @@ const lines = [`${head}  ·  ${s.acc.correct}/${s.acc.total} correct`];
                             }
                         }
                     },
+                    layout: { padding: { top: 8, right: 8 } },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(255,255,255,0.028)', drawTicks: false },
-                            ticks: { color:'rgba(255,255,255,0.28)', font:{ family:'Inter', size:10, weight:'500' }, maxRotation:0 },
+                            grid: { display: false },
+                            ticks: {
+                                color: 'rgba(255,255,255,0.30)',
+                                font: { family:'Hanken Grotesk', size:9.5, weight:'500' },
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: 10,
+                                padding: 8
+                            },
                             border: { display: false }
                         },
                         y: {
                             min: 0, max: 100,
-                            grid: { color: 'rgba(255,255,255,0.028)', drawTicks: false },
-                            ticks: { color:'rgba(255,255,255,0.28)', font:{ family:'Inter', size:10, weight:'500' }, stepSize:20, callback: v => v+'%' },
+                            grid: { color: 'rgba(255,255,255,0.05)', drawTicks: false, lineWidth: 1 },
+                            ticks: {
+                                color: 'rgba(255,255,255,0.30)',
+                                font: { family:'Hanken Grotesk', size:9.5, weight:'500' },
+                                stepSize: 25,
+                                padding: 10,
+                                callback: v => v + '%'
+                            },
                             border: { display: false }
                         }
                     }
@@ -5048,6 +5081,13 @@ body{ font-variant-numeric:tabular-nums; }
   box-shadow:0 4px 14px rgba(0,0,0,0.30);
 }
 .pf-btn img{ width:100%; height:100%; object-fit:cover; display:block; }
+        .jc-chart-wrap{
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 0%, rgba(135,141,255,0.045), transparent 72%),
+    rgba(0,0,0,0.18) !important;
+  border-color:rgba(255,255,255,0.05) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);
+}
 </style>
 </body>
 
