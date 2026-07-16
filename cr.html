@@ -9,6 +9,9 @@
         href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='r' x1='6' y1='26' x2='26' y2='6' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%238b7cf8'/%3E%3Cstop offset='1' stop-color='%235fd9a8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%230a0e1a'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='rgba(255,255,255,0.10)' stroke-width='3'/%3E%3Cpath d='M21.2 8.4 A 9 9 0 1 1 10.8 8.4' fill='none' stroke='url(%23r)' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='21.2' cy='8.4' r='2' fill='%235fd9a8'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@500,700&display=swap" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap"
         rel="stylesheet">
@@ -4617,12 +4620,12 @@
 
             // Premium area gradient
             const gradient = ctx.createLinearGradient(0, 0, 0, 260);
-            gradient.addColorStop(0,  'rgba(139,124,248,0.16)');
-            gradient.addColorStop(0.5,'rgba(139,124,248,0.06)');
-            gradient.addColorStop(1,  'rgba(139,124,248,0.00)');
+            gradient.addColorStop(0,  'rgba(135,141,255,0.11)');
+            gradient.addColorStop(0.5,'rgba(135,141,255,0.04)');
+            gradient.addColorStop(1,  'rgba(135,141,255,0.00)');
 
             const peakValIdx = values.indexOf(peak);
-            const pointColors = values.map((v,i) => i === peakValIdx ? '#34d399' : v < 40 ? '#f87171' : '#8b7cf8');
+            const pointColors = values.map((v,i) => i === peakValIdx ? '#46c98f' : v < 40 ? '#fb7185' : '#878dff');
             const pointRadii  = values.map((v,i) => i === peakValIdx ? 7 : 4);
             const pointHoverR = values.map((v,i) => i === peakValIdx ? 9 : 6);
 
@@ -4634,8 +4637,8 @@
                     if (args.index !== 1) return;
                     const ctx2 = chart.ctx;
                     ctx2.save();
-                    ctx2.shadowColor = 'rgba(139,124,248,0.30)';
-                    ctx2.shadowBlur = 7;
+                    ctx2.shadowColor = 'transparent';
+                    ctx2.shadowBlur = 0;
                 }
             };
             const glowPluginAfter = {
@@ -4698,18 +4701,18 @@
                         {
                             label: 'CR Accuracy',
                             data: values,
-                            borderColor: '#8b7cf8',
-                            borderWidth: 2.5,
+                            borderColor: '#878dff',
+                            borderWidth: 2,
                             backgroundColor: gradient,
                             fill: true,
                             tension: 0.4,
                             cubicInterpolationMode: 'monotone',
                             pointRadius: pointRadii,
-                            pointBackgroundColor: values.map((v,i) => i === peakValIdx ? '#34d399' : '#0a0e1a'),
+                            pointBackgroundColor: values.map((v,i) => i === peakValIdx ? '#46c98f' : '#151a26'),
                             pointBorderColor: pointColors,
                             pointBorderWidth: 2.5,
                             pointHoverRadius: pointHoverR,
-                            pointHoverBackgroundColor: (c) => pointColors[c.dataIndex] || '#9d8ff8',
+                            pointHoverBackgroundColor: (c) => pointColors[c.dataIndex] || '#9ca2ff',
                             pointHoverBorderColor: '#fff',
                             pointHoverBorderWidth: 2,
                             order: 1,
@@ -4814,65 +4817,193 @@ const lines = [`${head}  ·  ${s.acc.correct}/${s.acc.total} correct`];
         init();
     </script>
     <style id="cr-premium-match">
-/* ── Match app.html premium feel: neutral surfaces, semantic color ── */
+/* ══════════════════════════════════════════════════════════
+   CR ⇄ DASHBOARD CALIBRATION
+   Mirrors the final calm pass in app.html (§ :root #0c0e15 →
+   PART 2 PALETTE). Navy surfaces, indigo used sparingly,
+   zero neon, two fonts.
+   ══════════════════════════════════════════════════════════ */
+
+/* 1 ── TOKEN REMAP ── everything token-driven fixes itself */
 :root{
-  --bg-base:#0f0c1a;
-  --bg-card:rgba(255,255,255,0.055);
-  --border:rgba(255,255,255,0.10);
-  --accent:#8b7cf8;            /* accent ONLY — never a surface wash */
-  --green-bright:#34d399;
-  --amber:#fbbf24;
-  --red:#fb7185;
-  --text-primary:rgba(255,255,255,0.92);
-  --text-secondary:rgba(255,255,255,0.62);
-  --text-tertiary:rgba(255,255,255,0.38);
+  --navy-900:#090b12;  --navy-800:#0c0e15;  --navy-700:#101520;
+  --navy-600:#151a26;  --navy-500:#1a2030;  --navy-400:#1e2538;
+  --navy-300:#252d42;
+
+  --indigo:#878dff;          --indigo-bright:#9ca2ff;
+  --indigo-soft:rgba(135,141,255,0.10);
+  --indigo-glow:rgba(135,141,255,0.16);
+  --accent:#878dff;          --accent-bright:#9ca2ff;
+
+  --green:#46c98f;           --green-dim:#2f8f6b;
+  --green-soft:rgba(70,201,143,0.10);
+  --green-glow:rgba(70,201,143,0.16);
+  --amber:#f0bd6a;           --amber-soft:rgba(240,189,106,0.10);
+  --red:#fb7185;             --red-soft:rgba(251,113,133,0.10);
+
+  --border:rgba(255,255,255,0.06);
+  --border-subtle:rgba(255,255,255,0.05);
+  --border-accent:rgba(135,141,255,0.22);
+
+  --text-1:rgba(255,255,255,0.95);  --text-2:rgba(255,255,255,0.70);
+  --text-3:rgba(255,255,255,0.46);  --text-4:rgba(255,255,255,0.30);
+  --text-primary:rgba(255,255,255,0.95);
+  --text-secondary:rgba(255,255,255,0.70);
+  --text-tertiary:rgba(255,255,255,0.46);
+
+  --shadow-card:0 1px 0 rgba(255,255,255,0.05) inset, 0 6px 24px rgba(0,0,0,0.35);
+  --shadow-md:0 6px 24px rgba(0,0,0,0.35);
+  --shadow-lg:0 14px 40px rgba(0,0,0,0.45);
 }
 
-/* 1. Neutralize all surfaces */
-body{ background:var(--bg-base); }
-.card, .panel, .cr-card, .stat-card, .analytics-card{
-  background:var(--bg-card) !important;
-  border:1px solid var(--border) !important;
-  box-shadow:0 1px 0 rgba(255,255,255,0.06) inset,
-             0 8px 32px rgba(0,0,0,0.30) !important;
-  border-radius:14px;
+/* 2 ── SHELL: identical ambient wash + chrome to the dashboard */
+body{ background:var(--navy-800) !important; }
+body::before{
+  background:
+    radial-gradient(ellipse 70% 55% at 82% 6%, rgba(120,90,230,0.07) 0%, transparent 58%),
+    radial-gradient(ellipse 60% 50% at 8% 88%, rgba(40,180,130,0.035) 0%, transparent 55%),
+    linear-gradient(160deg,#0b0d14 0%,#0d1019 50%,#0b0d14 100%) !important;
 }
+.sidebar { background:rgba(9,11,17,0.90) !important; }
+.topbar  { background:rgba(9,11,17,0.75) !important; }
+.tabs-row{ background:rgba(9,11,17,0.55) !important; }
+.sidebar::after{ display:none !important; }   /* the indigo→green rail has no dashboard equivalent */
 
-/* 2. Big numbers → Fraunces, white by default, colored only when semantic */
-.stat-card .stat-value, .stat-value, .hero-num{
+/* 3 ── SURFACES: solid navy gradient, not translucent glass */
+.card,
+.mini-stat-card,
+.journey-card,
+.sheldon-banner{
+  background:linear-gradient(155deg,#151a26 0%,#1a2030 100%) !important;
+  border-color:rgba(255,255,255,0.06) !important;
+  box-shadow:var(--shadow-card) !important;
+}
+.card:hover,
+.mini-stat-card:hover{
+  background:linear-gradient(155deg,#171c2a 0%,#1e2538 100%) !important;
+  border-color:rgba(135,141,255,0.16) !important;
+  box-shadow:0 1px 0 rgba(255,255,255,0.08) inset, 0 14px 40px rgba(0,0,0,0.45) !important;
+}
+.journey-card::before{ display:none !important; }
+/* nested wells go one step DARKER than their card, never lighter */
+.jc-stat,
+.jc-chart-wrap{
+  background:rgba(0,0,0,0.18) !important;
+  border-color:rgba(255,255,255,0.05) !important;
+}
+.jc-stat::after{ display:none !important; }
+.jc-stat:hover{ transform:none !important; }
+/* retire the coloured top-edge stripes */
+.card-accent-green,
+.card-accent-indigo,
+.card-accent-amber{ border-top:1px solid rgba(255,255,255,0.06) !important; }
+
+/* 4 ── NUMBERS: one Fraunces voice, solid fill, zero glow */
+.big-num,
+.mini-stat-num,
+.jc-stat-val,
+.journey-card-title{
   font-family:'Fraunces',serif !important;
-  color:var(--text-primary);
-  font-weight:600;
-  letter-spacing:-0.01em;
+  font-weight:600 !important;
+  letter-spacing:-0.01em !important;
+  text-shadow:none !important;
+  background:none !important;
+  -webkit-text-fill-color:currentColor !important;
 }
-.stat-value.is-good{ color:var(--green-bright); }   /* 90% peak, +31pp */
-.stat-value.is-warn{ color:var(--amber); }          /* 59% average */
-.stat-value.is-bad { color:var(--red); }
+.big-num,
+.big-num.white,
+.big-num.indigo,          /* indigo is an accent — never a headline */
+.mini-stat-num,
+.journey-card-title{ color:var(--text-1) !important; }
+.big-num.green{ color:#46c98f !important; }
+.big-num.amber{ color:#f0bd6a !important; }
+.big-num.red  { color:#fb7185 !important; }
 
-/* 3. Sheldon banner: thin accent edge, not a purple fill */
-.sheldon-banner, .insight-banner, .cr-sheldon-card{
-  background:rgba(139,124,248,0.06) !important;
-  border:1px solid var(--border) !important;
-  border-left:2px solid var(--accent) !important;
+/* 5 ── LABELS: faint white small-caps, airy tracking */
+.card-eyebrow,
+.mini-stat-eyebrow,
+.jc-stat-label,
+.eyebrow,
+.sheldon-label,
+.sb-section-label{
+  color:rgba(255,255,255,0.42) !important;
+  letter-spacing:0.13em !important;
+}
+.card-eyebrow i,
+.mini-stat-eyebrow i{ color:rgba(255,255,255,0.30) !important; }
+
+/* 6 ── SIDEBAR ACTIVE: neutral surface + a single indigo edge */
+.sb-nav-item.active{
+  background:rgba(255,255,255,0.06) !important;
+  color:var(--text-1) !important;
+  font-weight:600 !important;
+  border:1px solid rgba(255,255,255,0.08) !important;
+  box-shadow:none !important;
+}
+.sb-nav-item.active::before{ background:#878dff !important; box-shadow:none !important; }
+.sb-nav-item.active .ti   { color:#878dff !important; }
+.sb-nav-item:hover        { transform:none !important; box-shadow:none !important; }
+.sb-topic-fill, .sb-topic-badge{ box-shadow:none !important; }
+
+/* 7 ── PRIMARY CTA: flat indigo, matches "Add session" */
+.btn-primary{
+  background:#878dff !important;
+  box-shadow:none !important;
+  animation:none !important;
+}
+.btn-primary:hover{
+  background:#9ca2ff !important;
+  box-shadow:none !important;
+  transform:none !important;
 }
 
-/* 4. Sidebar to match app.html */
-.sidebar, nav.sidebar{
-  background:rgba(10,7,22,0.88);
-  backdrop-filter:blur(40px) saturate(180%);
+/* 8 ── SHELDON BANNER: thin edge over a card surface, no purple wash */
+.sheldon-banner{ border-left:2px solid #878dff !important; }
+.sheldon-banner::before{ display:none !important; }
+.sheldon-orb{
+  background:rgba(255,255,255,0.05) !important;
+  border-color:rgba(255,255,255,0.08) !important;
 }
-        .sb-item.active {
-            background: rgba(255, 255, 255, 0.06) !important;
-            color: var(--text-primary) !important;
-            border-color: rgba(255, 255, 255, 0.08) !important;
-            box-shadow: none !important;
-        }
-         .sb-item.active {
-            box-shadow: 0 0 0 1px rgba(139, 124, 248, 0.25), inset 0 1px 0 rgba(139, 124, 248, 0.12) !important;
-        }
-        .sidebar {
-            background: rgba(9, 11, 17, 0.90) !important;
-        }
+
+/* 9 ── ODDS & ENDS */
+.avatar{
+  background:linear-gradient(135deg,#878dff,#5fd9a8) !important;
+  border-color:rgba(255,255,255,0.10) !important;
+  box-shadow:none !important;
+}
+.avatar:hover{ box-shadow:0 0 0 3px rgba(135,141,255,0.18) !important; }
+.tab-btn.active{ color:var(--text-1) !important; border-bottom-color:#878dff !important; }
+.jc-chip.streak{
+  background:rgba(255,255,255,0.04) !important;
+  border-color:rgba(255,255,255,0.08) !important;
+  color:var(--text-2) !important;
+}
+.sb-logo-icon{
+  background:#13161f !important;
+  border-color:rgba(135,141,255,0.22) !important;
+  box-shadow:inset 0 0 0 1px rgba(135,141,255,0.22), 0 4px 14px rgba(0,0,0,0.35) !important;
+}
+input[type="date"], input[type="number"], select{ color-scheme:dark; accent-color:#878dff; }
+
+/* 10 ── TYPE SYSTEM: two fonts only */
+body,
+.btn-primary, .tab-btn, .fchip, .seg-btn, .tbtn,
+.type-select, .finput{
+  font-family:'Hanken Grotesk', system-ui, sans-serif !important;
+}
+body{ font-variant-numeric:tabular-nums; }
+.topbar-title{
+  font-family:'Fraunces',serif !important;
+  font-weight:600 !important;
+  letter-spacing:-0.01em !important;
+}
+.sb-logo-name{
+  font-family:'Satoshi',sans-serif !important;
+  font-weight:500 !important;
+  font-size:15px !important;
+  letter-spacing:-0.01em !important;
+  color:var(--text-1) !important;
+}
 </style>
 </body>
 
