@@ -9,6 +9,9 @@
         href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='r' x1='6' y1='26' x2='26' y2='6' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%238b7cf8'/%3E%3Cstop offset='1' stop-color='%235fd9a8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%230a0e1a'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='rgba(255,255,255,0.10)' stroke-width='3'/%3E%3Cpath d='M21.2 8.4 A 9 9 0 1 1 10.8 8.4' fill='none' stroke='url(%23r)' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='21.2' cy='8.4' r='2' fill='%235fd9a8'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@500,700&display=swap" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap"
         rel="stylesheet">
@@ -429,7 +432,9 @@
                     <button class="btn-icon" title="Sound"><i class="ti ti-volume"></i></button>
                     <button class="btn-icon" title="Sync" onclick="init()"><i class="ti ti-refresh"></i></button>
                     <button class="btn-primary" onclick="showTab('entry')"><i class="ti ti-plus"></i> Log Attempt</button>
-                    <div class="avatar" title="Profile">S</div>
+                    <div class="pf-wrap" id="pf-wrap">
+                        <button class="pf-btn" id="pf-btn" title="Profile"><span id="pf-btn-txt">?</span></button>
+                    </div>
                 </div>
             </div>
 
@@ -462,9 +467,9 @@
                     </div>
                     <div class="jc-stat-row" id="journey-stats"></div>
                     <div class="jc-legend">
-                        <span><span class="jc-ld" style="background:#9d8ff8"></span>Accuracy</span>
-                        <span><span class="jc-ld" style="background:#34d399"></span>Peak session</span>
-                        <span><span class="jc-ld" style="background:#f87171"></span>Below 40%</span>
+                        <span><span class="jc-ld" style="background:#878dff"></span>Accuracy</span>
+                        <span><span class="jc-ld" style="background:#46c98f"></span>Peak session</span>
+                        <span><span class="jc-ld" style="background:#fb7185"></span>Below 40%</span>
                         <span><span class="jc-ll"></span>80% target</span>
                     </div>
                     <div class="jc-chart-wrap" id="jc-chart-wrap">
@@ -682,23 +687,23 @@
         const PQO = ['solid', 'partial', 'off-track'];
         const PQL = { solid: '🟢 Clean setup', partial: '🟡 Partial setup', 'off-track': '🔴 Wrong setup' };
         const TYPE_ICONS = {
-            'Arithmetic': ['ti-calculator', '#7c6cf6'],
+            'Arithmetic': ['ti-calculator', '#878dff'],
             'Algebra': ['ti-math-symbols', '#60a5fa'],
-            'Number Properties': ['ti-hash', '#34d399'],
-            'Word Problems': ['ti-file-text', '#f59e0b'],
-            'Rates & Work': ['ti-run', '#f472b6'],
-            'Ratios & Percents': ['ti-percentage', '#a78bfa'],
-            'Statistics': ['ti-chart-histogram', '#fb923c'],
-            'Inequalities': ['ti-math-lower', '#22d3ee'],
-            'Exponents & Roots': ['ti-square-root-2', '#facc15'],
-            'Other': ['ti-dots', '#fb923c'],
+            'Number Properties': ['ti-hash', '#46c98f'],
+            'Word Problems': ['ti-file-text', '#f0bd6a'],
+            'Rates & Work': ['ti-run', '#e08bb0'],
+            'Ratios & Percents': ['ti-percentage', '#9ca2ff'],
+            'Statistics': ['ti-chart-histogram', '#e59a6a'],
+            'Inequalities': ['ti-math-lower', '#5cc4d6'],
+            'Exponents & Roots': ['ti-square-root-2', '#d9c169'],
+            'Other': ['ti-dots', '#e59a6a'],
         };
         const METHOD_ICONS = {
-            'Algebraic': ['ti-variable', '#7c6cf6'],
-            'Backsolving': ['ti-arrow-back-up', '#f59e0b'],
-            'Number Picking': ['ti-dice', '#34d399'],
+            'Algebraic': ['ti-variable', '#878dff'],
+            'Backsolving': ['ti-arrow-back-up', '#f0bd6a'],
+            'Number Picking': ['ti-dice', '#46c98f'],
             'Estimation': ['ti-scale', '#60a5fa'],
-            'Conceptual': ['ti-bulb', '#f472b6'],
+            'Conceptual': ['ti-bulb', '#e08bb0'],
         };
         const TARGET_ACC = 80;
 
@@ -1680,11 +1685,13 @@
 
             const ctx = canvas.getContext('2d');
             const grad = ctx.createLinearGradient(0, 0, 0, 240);
-            grad.addColorStop(0, 'rgba(157,143,248,0.30)');
-            grad.addColorStop(1, 'rgba(157,143,248,0.01)');
+           grad.addColorStop(0,    'rgba(135,141,255,0.24)');
+            grad.addColorStop(0.45, 'rgba(135,141,255,0.07)');
+            grad.addColorStop(1,    'rgba(135,141,255,0.00)');
 
-            const pointColors = accs.map((v, i) => i === peakIdx ? '#34d399' : v < 40 ? '#f87171' : '#9d8ff8');
-            const pointRadii = accs.map((v, i) => i === peakIdx ? 6 : 4);
+            // Only the peak and sub-40 dips get a marker; the rest is line. Hover reveals the rest.
+            const pointColors = accs.map((v, i) => i === peakIdx ? '#46c98f' : v < 40 ? '#fb7185' : '#878dff');
+            const pointRadii  = accs.map((v, i) => i === peakIdx ? 5 : v < 40 ? 3.5 : 0);
 
             if (_journeyChart) { _journeyChart.destroy(); _journeyChart = null; }
 
@@ -1696,32 +1703,57 @@
                     const y = scales.y.getPixelForValue(TARGET_ACC);
                     ctx.save();
                     ctx.setLineDash([5, 5]);
-                    ctx.strokeStyle = 'rgba(245,158,11,0.45)';
+                    ctx.strokeStyle = 'rgba(240,189,106,0.40)';
                     ctx.lineWidth = 1.2;
                     ctx.beginPath();
                     ctx.moveTo(chartArea.left, y);
                     ctx.lineTo(chartArea.right, y);
                     ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.fillStyle = 'rgba(240,189,106,0.50)';
+                    ctx.font = '600 8.5px "Hanken Grotesk", system-ui';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(TARGET_ACC + '% TARGET', chartArea.left + 3, y - 7);
                     ctx.restore();
                 }
             };
 
-            const peakRing = {
-                id: 'peakRing',
+            // Target zone — a faint band, so "above the line" reads as a place
+            const targetBand = {
+                id: 'targetBand',
+                beforeDatasetsDraw(chart) {
+                    const { ctx, chartArea, scales } = chart;
+                    if (!scales.y) return;
+                    const yTop = scales.y.getPixelForValue(100), yTgt = scales.y.getPixelForValue(TARGET_ACC);
+                    ctx.save();
+                    const g = ctx.createLinearGradient(0, yTop, 0, yTgt);
+                    g.addColorStop(0, 'rgba(70,201,143,0.055)');
+                    g.addColorStop(1, 'rgba(70,201,143,0.00)');
+                    ctx.fillStyle = g;
+                    ctx.fillRect(chartArea.left, yTop, chartArea.right - chartArea.left, yTgt - yTop);
+                    ctx.restore();
+                }
+            };
+
+            // Peak halo — drawn on canvas, so it can't desync from the point it marks
+            const peakHalo = {
+                id: 'peakHalo',
                 afterDatasetsDraw(chart) {
                     const meta = chart.getDatasetMeta(0);
-                    if (!meta || !meta.data[peakIdx]) { if (ring) ring.style.display = 'none'; return; }
-                    const pt = meta.data[peakIdx];
-                    const wrap = document.getElementById('jc-chart-wrap');
-                    if (ring && wrap) {
-                        const wrapRect = wrap.getBoundingClientRect();
-                        const canRect = chart.canvas.getBoundingClientRect();
-                        ring.style.display = 'block';
-                        ring.style.width = '12px';
-                        ring.style.height = '12px';
-                        ring.style.left = (canRect.left - wrapRect.left + pt.x) + 'px';
-                        ring.style.top = (canRect.top - wrapRect.top + pt.y) + 'px';
-                    }
+                    const pt = meta && meta.data[peakIdx];
+                    if (!pt) return;
+                    const c = chart.ctx;
+                    c.save();
+                    const g = c.createRadialGradient(pt.x, pt.y, 2, pt.x, pt.y, 15);
+                    g.addColorStop(0, 'rgba(70,201,143,0.28)');
+                    g.addColorStop(1, 'rgba(70,201,143,0.00)');
+                    c.fillStyle = g;
+                    c.beginPath(); c.arc(pt.x, pt.y, 15, 0, Math.PI * 2); c.fill();
+                    c.beginPath(); c.arc(pt.x, pt.y, 8.5, 0, Math.PI * 2);
+                    c.strokeStyle = 'rgba(70,201,143,0.40)';
+                    c.lineWidth = 1;
+                    c.stroke();
+                    c.restore();
                 }
             };
 
@@ -1732,32 +1764,39 @@
                     datasets: [{
                         label: 'Quant Accuracy',
                         data: accs,
-                        borderColor: '#9d8ff8',
+                        borderColor: '#878dff',
                         backgroundColor: grad,
-                        borderWidth: 2.4,
+                        borderWidth: 1.75,
+                        clip: false,
                         fill: true,
                         tension: 0.38,
-                        pointBackgroundColor: pointColors,
-                        pointBorderColor: 'rgba(10,14,26,0.9)',
-                        pointBorderWidth: 1.5,
+                        cubicInterpolationMode: 'monotone',
+                        pointBackgroundColor: accs.map((v, i) => i === peakIdx ? '#46c98f' : '#11151f'),
+                        pointBorderColor: pointColors,
+                        pointBorderWidth: 2,
                         pointRadius: pointRadii,
-                        pointHoverRadius: 7,
+                        pointHoverRadius: 6,
+                        pointHitRadius: 14,
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: { padding: { top: 12, right: 10 } },
                     animation: { duration: 800, easing: 'easeOutCubic' },
                     interaction: { intersect: false, mode: 'index' },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: 'rgba(10,14,26,0.95)',
-                            borderColor: 'rgba(124,108,246,0.35)',
+                            backgroundColor: 'rgba(9,11,17,0.97)',
+                            borderColor: 'rgba(255,255,255,0.12)',
                             borderWidth: 1,
+                            cornerRadius: 10,
+                            titleFont: { family: 'Fraunces', size: 13, weight: '600' },
                             titleColor: '#fff',
-                            bodyColor: 'rgba(255,255,255,0.75)',
-                            padding: 10,
+                            bodyFont: { family: 'Hanken Grotesk', size: 11, weight: '500' },
+                            bodyColor: 'rgba(255,255,255,0.72)',
+                            padding: { top: 11, bottom: 11, left: 14, right: 14 },
                             displayColors: false,
                             callbacks: {
                                 title: (items) => {
@@ -1776,18 +1815,20 @@
                         }
                     },
                     scales: {
-                        y: {
+                       y: {
                             min: 0, max: 100,
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: 'rgba(255,255,255,0.38)', font: { size: 10 }, callback: (v) => v + '%', stepSize: 25 }
+                            grid: { color: 'rgba(255,255,255,0.05)', drawTicks: false },
+                            border: { display: false },
+                            ticks: { color: 'rgba(255,255,255,0.30)', font: { family: 'Hanken Grotesk', size: 9.5, weight: '500' }, padding: 10, callback: (v) => v + '%', stepSize: 25 }
                         },
                         x: {
                             grid: { display: false },
-                            ticks: { color: 'rgba(255,255,255,0.38)', font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 10 }
+                            border: { display: false },
+                            ticks: { color: 'rgba(255,255,255,0.30)', font: { family: 'Hanken Grotesk', size: 9.5, weight: '500' }, padding: 8, maxRotation: 0, autoSkip: true, maxTicksLimit: 10 }
                         }
                     }
                 },
-                plugins: [targetLine, peakRing]
+                plugins: [targetBand, targetLine, peakHalo]
             });
         }
 
@@ -1796,8 +1837,269 @@
             const h = (location.hash || '').replace('#', '');
             if (['analytics', 'log', 'entry', 'action'].includes(h)) showTab(h);
         })();
+        // ── PROFILE AVATAR — mirrors paint() in app.html (line 15219) ──
+        function pfInitials(n){
+            if (!n) return "?";
+            var p = n.trim().split(/\s+/);
+            return (p[0][0] + (p[1] ? p[1][0] : "")).toUpperCase();
+        }
+        function pfPaint(user){
+            if (!user) return;
+            var md = user.user_metadata || {};
+            var name = md.full_name || md.name || user.email || "Account";
+            var pic  = md.avatar_url || md.picture || "";
+            var btn = document.getElementById("pf-btn");
+            var txt = document.getElementById("pf-btn-txt");
+            if (!btn) return;
+            btn.title = name;
+            if (pic) btn.innerHTML = '<img src="' + pic + '" alt="">';
+            else if (txt) txt.textContent = pfInitials(name);
+        }
+        supa.auth.getUser().then(function(r){ pfPaint(r && r.data && r.data.user); });
+        supa.auth.onAuthStateChange(function(_e, s){ if (s && s.user) pfPaint(s.user); });
         init();
     </script>
+
+    <style id="quant-premium-match">
+/* ══════════════════════════════════════════════════════════
+   RC ⇄ DASHBOARD CALIBRATION
+   Mirrors the final calm pass in app.html (§ :root #0c0e15 →
+   PART 2 PALETTE). Navy surfaces, indigo used sparingly,
+   zero neon, two fonts.
+   ══════════════════════════════════════════════════════════ */
+
+/* 1 ── TOKEN REMAP ── everything token-driven fixes itself */
+:root{
+  --navy-900:#090b12;  --navy-800:#0c0e15;  --navy-700:#101520;
+  --navy-600:#151a26;  --navy-500:#1a2030;  --navy-400:#1e2538;
+  --navy-300:#252d42;
+
+  --indigo:#878dff;          --indigo-bright:#9ca2ff;
+  --indigo-soft:rgba(135,141,255,0.10);
+  --indigo-glow:rgba(135,141,255,0.16);
+  --accent:#878dff;          --accent-bright:#9ca2ff;
+
+  --green:#46c98f;           --green-dim:#2f8f6b;
+  --green-soft:rgba(70,201,143,0.10);
+  --green-glow:rgba(70,201,143,0.16);
+  --amber:#f0bd6a;           --amber-soft:rgba(240,189,106,0.10);
+  --red:#fb7185;             --red-soft:rgba(251,113,133,0.10);
+
+  --border:rgba(255,255,255,0.06);
+  --border-subtle:rgba(255,255,255,0.05);
+  --border-accent:rgba(135,141,255,0.22);
+
+  --text-1:rgba(255,255,255,0.95);  --text-2:rgba(255,255,255,0.70);
+  --text-3:rgba(255,255,255,0.46);  --text-4:rgba(255,255,255,0.30);
+
+  --shadow-card:0 1px 0 rgba(255,255,255,0.05) inset, 0 6px 24px rgba(0,0,0,0.35);
+  --shadow-md:0 6px 24px rgba(0,0,0,0.35);
+  --shadow-lg:0 14px 40px rgba(0,0,0,0.45);
+}
+
+/* 2 ── SHELL */
+body{ background:var(--navy-800) !important; }
+body::before{
+  background:
+    radial-gradient(ellipse 70% 55% at 82% 6%, rgba(120,90,230,0.07) 0%, transparent 58%),
+    radial-gradient(ellipse 60% 50% at 8% 88%, rgba(40,180,130,0.035) 0%, transparent 55%),
+    linear-gradient(160deg,#0b0d14 0%,#0d1019 50%,#0b0d14 100%) !important;
+}
+.sidebar { background:rgba(9,11,17,0.90) !important; }
+.topbar  { background:rgba(9,11,17,0.75) !important; }
+.tabs-row{ background:rgba(9,11,17,0.55) !important; }
+.sidebar::after{ display:none !important; }
+
+/* 3 ── SURFACES */
+.card,
+.mini-stat-card,
+.journey-card,
+.sheldon-banner,
+.gain-card,
+.ep-card{
+  background:linear-gradient(155deg,#151a26 0%,#1a2030 100%) !important;
+  border-color:rgba(255,255,255,0.06) !important;
+  box-shadow:var(--shadow-card) !important;
+}
+.card:hover,
+.mini-stat-card:hover{
+  background:linear-gradient(155deg,#171c2a 0%,#1e2538 100%) !important;
+  border-color:rgba(135,141,255,0.16) !important;
+  box-shadow:0 1px 0 rgba(255,255,255,0.08) inset, 0 14px 40px rgba(0,0,0,0.45) !important;
+}
+.journey-card::before,
+.sheldon-banner::before{ display:none !important; }
+/* nested wells go one step DARKER than their card, never lighter */
+.jc-stat,
+.jc-chart-wrap{
+  background:rgba(0,0,0,0.18) !important;
+  border-color:rgba(255,255,255,0.05) !important;
+}
+.jc-chart-wrap{
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 0%, rgba(135,141,255,0.045), transparent 72%),
+    rgba(0,0,0,0.18) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);
+}
+.jc-stat::after{ display:none !important; }
+.jc-stat:hover{ transform:none !important; }
+.card-accent-green,
+.card-accent-indigo,
+.card-accent-amber{ border-top:1px solid rgba(255,255,255,0.06) !important; }
+.ac-plan-section{
+  background:rgba(255,255,255,0.03) !important;
+  border-color:rgba(255,255,255,0.08) !important;
+}
+
+/* 4 ── NUMBERS: one Fraunces voice, solid colour, zero glow */
+.big-num,
+.mini-stat-num,
+.jc-stat-val,
+.journey-card-title,
+.ac-main-title,
+.gain-rank-num,
+.impact-value,
+.plan-total-num,
+.timer-num{
+  font-family:'Fraunces',serif !important;
+  font-weight:600 !important;
+  letter-spacing:-0.01em !important;
+  text-shadow:none !important;
+  background:none !important;
+  -webkit-text-fill-color:currentColor !important;
+}
+.big-num, .big-num.white, .big-num.indigo,
+.mini-stat-num, .journey-card-title{ color:var(--text-1) !important; }
+.big-num.green{ color:#46c98f !important; }
+.big-num.amber{ color:#f0bd6a !important; }
+.big-num.red  { color:#fb7185 !important; }
+.impact-value.amber{ color:#f0bd6a !important; }
+.gain-rank-num     { color:#f0bd6a !important; }
+
+/* 4b ── TIMER: an ivory display element, per app.html's flip clock (#f4eee2) */
+.timer-num{
+  color:#f4eee2 !important;
+  letter-spacing:-1px !important;
+}
+.timer-num.running{
+  color:#46c98f !important;
+  animation:none !important;
+}
+
+/* 5 ── LABELS */
+.card-eyebrow,
+.mini-stat-eyebrow,
+.jc-stat-label,
+.eyebrow,
+.ac-eyebrow,
+.sheldon-label,
+.sb-section-label,
+.form-label,
+.impact-label,
+.gain-rank-label{
+  color:rgba(255,255,255,0.42) !important;
+  letter-spacing:0.13em !important;
+}
+.card-eyebrow i,
+.mini-stat-eyebrow i{ color:rgba(255,255,255,0.30) !important; }
+
+/* 6 ── SIDEBAR ACTIVE */
+.sb-nav-item.active{
+  background:rgba(255,255,255,0.06) !important;
+  color:var(--text-1) !important;
+  font-weight:600 !important;
+  border:1px solid rgba(255,255,255,0.08) !important;
+  box-shadow:none !important;
+}
+.sb-nav-item.active::before{ background:#878dff !important; box-shadow:none !important; }
+.sb-nav-item.active .ti   { color:#878dff !important; }
+.sb-nav-item:hover        { transform:none !important; box-shadow:none !important; }
+.sb-topic-fill, .sb-topic-badge{ box-shadow:none !important; }
+
+/* 7 ── BUTTONS: flat indigo, no shimmer */
+.btn-primary,
+.btn-submit,
+.btn-generate{
+  background:#878dff !important;
+  box-shadow:none !important;
+  animation:none !important;
+}
+.btn-primary:hover,
+.btn-submit:hover:not(:disabled),
+.btn-generate:hover:not(:disabled){
+  background:#9ca2ff !important;
+  box-shadow:none !important;
+  transform:none !important;
+}
+.btn-submit::before{ display:none !important; }   /* kill the sweep shimmer */
+
+/* 8 ── SHELDON */
+.sheldon-banner{ border-left:2px solid #878dff !important; }
+.sheldon-orb{
+  background:rgba(255,255,255,0.05) !important;
+  border-color:rgba(255,255,255,0.08) !important;
+}
+
+/* 9 ── ODDS & ENDS */
+.acc-fill::after{ display:none !important; }      /* app.html retired the XP shimmer */
+.jc-chip.streak{
+  background:rgba(255,255,255,0.04) !important;
+  border-color:rgba(255,255,255,0.08) !important;
+  color:var(--text-2) !important;
+}
+.tab-btn.active{ color:var(--text-1) !important; border-bottom-color:#878dff !important; }
+.finput:focus{ box-shadow:0 0 0 3px rgba(135,141,255,0.10) !important; }
+.sb-logo-icon{
+  background:#13161f !important;
+  border-color:rgba(135,141,255,0.22) !important;
+  box-shadow:inset 0 0 0 1px rgba(135,141,255,0.22), 0 4px 14px rgba(0,0,0,0.35) !important;
+}
+input[type="date"], input[type="number"], select{ color-scheme:dark; accent-color:#878dff; }
+
+/* 9b ── PROFILE AVATAR — verbatim from app.html .pf-btn (line 14989) */
+.pf-wrap{ position:relative; display:inline-flex; }
+.pf-btn{
+  width:32px; height:32px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.06);
+  cursor:pointer;
+  padding:0;
+  overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Hanken Grotesk', sans-serif;
+  font-size:12px; font-weight:700;
+  color:var(--accent-bright);
+  transition:transform .2s cubic-bezier(.34,1.7,.64,1), box-shadow .15s, border-color .15s;
+}
+.pf-btn:hover{
+  transform:translateY(-2px) scale(1.06);
+  border-color:rgba(135,141,255,0.40);
+  box-shadow:0 4px 14px rgba(0,0,0,0.30);
+}
+.pf-btn img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+/* 10 ── TYPE SYSTEM: two fonts only */
+body,
+.btn-primary, .btn-submit, .btn-generate, .tab-btn, .fchip,
+.seg-btn, .tbtn, .type-select, .finput{
+  font-family:'Hanken Grotesk', system-ui, sans-serif !important;
+}
+body{ font-variant-numeric:tabular-nums; }
+.topbar-title{
+  font-family:'Fraunces',serif !important;
+  font-weight:600 !important;
+  letter-spacing:-0.01em !important;
+}
+.sb-logo-name{
+  font-family:'Satoshi',sans-serif !important;
+  font-weight:500 !important;
+  font-size:15px !important;
+  letter-spacing:-0.01em !important;
+  color:var(--text-1) !important;
+}
+        .jc-ll{ border-top-color:rgba(240,189,106,0.45) !important; }   /* legend's dashed target rule */
+</style>
 </body>
 
 </html>
