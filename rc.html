@@ -1697,22 +1697,25 @@
                     ctx.restore();
                 }
             };
-            const peakRing = {
-                id: 'peakRing',
+           // Peak halo — drawn on canvas, so it can't desync from the point it marks
+            const peakHalo = {
+                id: 'peakHalo',
                 afterDatasetsDraw(chart) {
                     const meta = chart.getDatasetMeta(0);
-                    if (!meta || !meta.data[peakIdx]) { if (ring) ring.style.display = 'none'; return; }
-                    const pt = meta.data[peakIdx];
-                    const wrap = document.getElementById('jc-chart-wrap');
-                    if (ring && wrap) {
-                        const wrapRect = wrap.getBoundingClientRect();
-                        const canRect = chart.canvas.getBoundingClientRect();
-                        ring.style.display = 'block';
-                        ring.style.width = '12px';
-                        ring.style.height = '12px';
-                        ring.style.left = (canRect.left - wrapRect.left + pt.x) + 'px';
-                        ring.style.top = (canRect.top - wrapRect.top + pt.y) + 'px';
-                    }
+                    const pt = meta && meta.data[peakIdx];
+                    if (!pt) return;
+                    const c = chart.ctx;
+                    c.save();
+                    const g = c.createRadialGradient(pt.x, pt.y, 2, pt.x, pt.y, 15);
+                    g.addColorStop(0, 'rgba(70,201,143,0.28)');
+                    g.addColorStop(1, 'rgba(70,201,143,0.00)');
+                    c.fillStyle = g;
+                    c.beginPath(); c.arc(pt.x, pt.y, 15, 0, Math.PI * 2); c.fill();
+                    c.beginPath(); c.arc(pt.x, pt.y, 8.5, 0, Math.PI * 2);
+                    c.strokeStyle = 'rgba(70,201,143,0.40)';
+                    c.lineWidth = 1;
+                    c.stroke();
+                    c.restore();
                 }
             };
 
@@ -1726,6 +1729,7 @@
                        borderColor: '#878dff',
                         backgroundColor: grad,
                         borderWidth: 1.75,
+                        clip: false,
                         fill: true,
                         tension: 0.38,
                         cubicInterpolationMode: 'monotone',
@@ -1740,6 +1744,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: { padding: { top: 12, right: 10 } },
                     animation: { duration: 800, easing: 'easeOutCubic' },
                     interaction: { intersect: false, mode: 'index' },
                     plugins: {
@@ -1785,7 +1790,7 @@
                         }
                     }
                 },
-                plugins: [targetBand, targetLine, peakRing]
+                plugins: [targetBand, targetLine, peakHalo]
             });
         }
 
