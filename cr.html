@@ -2788,31 +2788,6 @@
             padding:14px 10px 8px;
             overflow:hidden;
         }
-        /* Peak pulse ring — absolute overlay */
-        .peak-pulse-ring {
-            position:absolute;
-            border-radius:50%;
-            pointer-events:none;
-            z-index:10;
-            transform:translate(-50%,-50%);
-        }
-        .peak-pulse-ring::before,
-        .peak-pulse-ring::after {
-            content:'';
-            position:absolute;
-            inset:-4px;
-            border-radius:50%;
-            border:1.5px solid rgba(52,211,153,0.55);
-            animation:peakPing 2.2s cubic-bezier(0,0,.2,1) infinite;
-        }
-        .peak-pulse-ring::after {
-            animation-delay:1.1s;
-        }
-        @keyframes peakPing {
-            0%   { transform:scale(1); opacity:.7; }
-            70%  { transform:scale(2.4); opacity:0; }
-            100% { transform:scale(2.4); opacity:0; }
-        }
         /* Crosshair line (drawn by plugin, this is the class for the container hint) */
         .jc-legend {
             display:flex;
@@ -3206,7 +3181,6 @@
                             <div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:4px">No scored CR sessions yet</div>
                             <div style="font-size:11px">Log a session with an accuracy note (e.g. "6/10=60%") to start your journey graph.</div>
                         </div>
-                        <div class="peak-pulse-ring" id="peak-pulse-ring" style="display:none;width:10px;height:10px;"></div>
                     </div>
 
                     <div class="jc-milestones" id="journey-milestones"></div>
@@ -4557,11 +4531,9 @@
 
             const emptyState = document.getElementById('journey-empty-state');
             const canvas = document.getElementById('journey-canvas');
-            const pulseDot = document.getElementById('peak-pulse-ring');
 
             if (!scored.length) {
                 emptyState.style.display = 'block'; canvas.style.display = 'none';
-                if (pulseDot) pulseDot.style.display = 'none';
                 document.getElementById('journey-stats').innerHTML = '';
                 document.getElementById('journey-milestones').innerHTML = '';
                 if (_journeyChart) { _journeyChart.destroy(); _journeyChart = null; }
@@ -4686,6 +4658,28 @@
                 }
             };
 
+            // 5. Peak halo — drawn on canvas, so it can't desync from the point it marks
+            const peakHaloPlugin = {
+                id: 'peakHalo',
+                afterDatasetsDraw(chart) {
+                    const meta = chart.getDatasetMeta(1);
+                    const pt = meta && meta.data[peakValIdx];
+                    if (!pt) return;
+                    const c = chart.ctx;
+                    c.save();
+                    const g = c.createRadialGradient(pt.x, pt.y, 2, pt.x, pt.y, 15);
+                    g.addColorStop(0, 'rgba(70,201,143,0.28)');
+                    g.addColorStop(1, 'rgba(70,201,143,0.00)');
+                    c.fillStyle = g;
+                    c.beginPath(); c.arc(pt.x, pt.y, 15, 0, Math.PI * 2); c.fill();
+                    c.beginPath(); c.arc(pt.x, pt.y, 8.5, 0, Math.PI * 2);
+                    c.strokeStyle = 'rgba(70,201,143,0.40)';
+                    c.lineWidth = 1;
+                    c.stroke();
+                    c.restore();
+                }
+            };
+
             // 4. Target zone — a faint band, so "above the line" reads as a place
             const targetBandPlugin = {
                 id: 'targetBand',
@@ -4724,6 +4718,7 @@
                             borderColor: '#878dff',
                             borderWidth: 1.75,
                             backgroundColor: gradient,
+                            clip: false,
                             fill: true,
                             tension: 0.4,
                             cubicInterpolationMode: 'monotone',
@@ -4740,7 +4735,7 @@
                         }
                     ]
                 },
-                plugins: [targetBandPlugin, glowPlugin, glowPluginAfter, crosshairPlugin, targetLabelPlugin],
+                plugins: [targetBandPlugin, glowPlugin, glowPluginAfter, crosshairPlugin, targetLabelPlugin, peakHaloPlugin],
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -4798,7 +4793,7 @@ const lines = [`${head}  ·  ${s.acc.correct}/${s.acc.total} correct`];
                             }
                         }
                     },
-                    layout: { padding: { top: 8, right: 8 } },
+                   layout: { padding: { top: 12, right: 10 } },
                     scales: {
                         x: {
                             grid: { display: false },
@@ -4826,27 +4821,6 @@ const lines = [`${head}  ·  ${s.acc.correct}/${s.acc.total} correct`];
                         }
                     }
                 }
-            });
-
-            // Place peak pulse ring on the peak data point
-            requestAnimationFrame(() => {
-                setTimeout(() => {
-                    if (!_journeyChart || !pulseDot) return;
-                    try {
-                        const meta = _journeyChart.getDatasetMeta(1);
-                        const pt = meta.data[peakValIdx];
-                        if (!pt) return;
-                        const wrap = document.getElementById('jc-chart-wrap');
-                        if (!wrap) return;
-                        const wRect = wrap.getBoundingClientRect();
-                        const cRect = canvas.getBoundingClientRect();
-                        const offsetX = cRect.left - wRect.left + pt.x;
-                        const offsetY = cRect.top  - wRect.top  + pt.y;
-                        pulseDot.style.display = 'block';
-                        pulseDot.style.left = offsetX + 'px';
-                        pulseDot.style.top  = offsetY + 'px';
-                    } catch(e) { /* ignore */ }
-                }, 1500); // wait for draw-in animation
             });
         }
         // ── PROFILE AVATAR — mirrors paint() in app.html (line 15219) ──
