@@ -8101,6 +8101,38 @@
             background-clip: border-box !important;
         }
 
+       /* ── Format presets ── */
+        #sc-stage {
+            position: relative;
+            overflow: hidden;
+        }
+
+        #share-card {
+            transform-origin: top left;
+        }
+
+        #share-card.sc2-fixed {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        #share-card.sc2-post {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+            grid-template-rows: auto auto auto 1fr auto auto;
+            column-gap: 26px;
+            align-content: start;
+        }
+
+        #share-card.sc2-post .sc2-hdr { grid-column: 1 / -1; grid-row: 1; }
+        #share-card.sc2-post .sc2-hero { grid-column: 1; grid-row: 2; }
+        #share-card.sc2-post .sc2-tiles { grid-column: 1; grid-row: 3; }
+        #share-card.sc2-post .sc2-hl { grid-column: 1; grid-row: 4; align-self: start; }
+        #share-card.sc2-post .sc2-sec { grid-column: 2; grid-row: 2 / 5; align-self: start; }
+        #share-card.sc2-post .sc2-prog { grid-column: 1 / -1; grid-row: 5; }
+        #share-card.sc2-post .sc2-foot { grid-column: 1 / -1; grid-row: 6; }
+
         @media (prefers-reduced-motion: reduce) {
             #days-left.rolling .dl-strip {
                 transition: none !important;
@@ -17365,7 +17397,24 @@
                     style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--text-tertiary);font-size:16px;display:flex;align-items:center;justify-content:center">&times;</button>
             </div>
 
-            <!-- THE CARD TO SCREENSHOT -->
+           <!-- Format bar -->
+            <div id="sc-fmt-bar" style="display:flex;align-items:center;gap:6px;margin-bottom:11px">
+                <div
+                    style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-tertiary);margin-right:2px;white-space:nowrap">
+                    Format</div>
+                <button data-fmt="fit" onclick="sc2SetFormat('fit')"
+                    style="padding:5px 11px;border-radius:100px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--text-tertiary);font-family:inherit;font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap">Fit</button>
+                <button data-fmt="post" onclick="sc2SetFormat('post')"
+                    style="padding:5px 11px;border-radius:100px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--text-tertiary);font-family:inherit;font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap">Post
+                    1.91:1</button>
+                <button data-fmt="square" onclick="sc2SetFormat('square')"
+                    style="padding:5px 11px;border-radius:100px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--text-tertiary);font-family:inherit;font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap">Square</button>
+                <button data-fmt="story" onclick="sc2SetFormat('story')"
+                    style="padding:5px 11px;border-radius:100px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--text-tertiary);font-family:inherit;font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap">Story</button>
+            </div>
+
+            <div id="sc-stage">
+                <!-- THE CARD TO SCREENSHOT -->
             <div id="share-card"
                 style="background:radial-gradient(120% 85% at 88% -12%, rgba(135,141,255,0.11), rgba(135,141,255,0) 58%),radial-gradient(95% 70% at -5% 108%, rgba(70,201,143,0.07), rgba(70,201,143,0) 55%),linear-gradient(155deg,#141923,#1a2234);border:1px solid rgba(255,255,255,0.10);border-radius:16px;padding:24px;position:relative;overflow:hidden">
                 <div class="sc2-fx sc2-grain"></div>
@@ -17498,13 +17547,6 @@
                     </div>
                 </div>
 
-                <!-- 30-day dots -->
-                <div style="margin-bottom:14px">
-                    <div
-                        style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.13em;color:rgba(255,255,255,0.30);margin-bottom:8px">
-                        30-day activity</div>
-                    <div style="display:flex;gap:3px;flex-wrap:wrap" id="sc-streak-dots"></div>
-                </div>
 
                 <!-- Exam progress bar -->
                 <div id="sc-prog-wrap" style="display:none;margin-bottom:16px">
@@ -17531,7 +17573,8 @@
                 </div>
 
             </div>
-            <!-- /share-card -->
+            </div>
+            <!-- /share-card + /sc-stage -->
 
             <!-- Action buttons -->
             <div style="display:flex;gap:9px;margin-top:16px;flex-wrap:wrap">
@@ -17608,6 +17651,7 @@
         function openShareModal() {
             populateShareCard();
             document.getElementById("share-modal").style.display = "flex";
+            sc2SetFormat(scFmt);
             requestAnimationFrame(sc2Animate);
         }
         function closeShareModal() {
@@ -17691,7 +17735,7 @@
             });
 
             // 30-day dots
-            var dotWrap = document.getElementById("sc-streak-dots"); dotWrap.innerHTML = "";
+           var dotWrap = document.createElement("div"); // dots retired from the card — detached, output discarded
             for (var di = 29; di >= 0; di--) {
                 var d2 = addDays(today, -di), ds2 = dateStr(d2), mins2 = minsOn(ds2), tgt2 = targetFor(d2);
                 var dot = document.createElement("div");
@@ -17832,11 +17876,6 @@
             Object.keys(agg).forEach(function (k) { if (k !== "Verbal") qs += agg[k].t; });
             if (qs > 0) chips.push({ i: "ti-checkbox", c: "#60a5fa", t: qs.toLocaleString() + " questions attempted" });
 
-            // Days on target (last 30)
-            var onT = 0;
-            for (var i = 0; i < 30; i++) { var dd = addDays(today, -i); if (minsOn(dateStr(dd)) >= targetFor(dd)) onT++; }
-            if (onT >= 5) chips.push({ i: "ti-circle-check", c: "#46c98f", t: onT + "/30 days on target" });
-
             chips = chips.slice(0, 5);
             var wrap = document.getElementById("sc-hl-wrap"), el = document.getElementById("sc-highlights");
             if (!chips.length) { wrap.style.display = "none"; return; }
@@ -17973,18 +18012,83 @@
             void card.offsetWidth;
             card.classList.add("sc2-live");
         }
+        // ── Format presets ──
+        var SC_FMT = {
+            fit: { w: 0, h: 0, scale: 2, pad: 24 },
+            post: { w: 1146, h: 600, scale: 1.05, pad: 30 },   // 1.91:1 → 1203×630
+            square: { w: 900, h: 900, scale: 1.2, pad: 40 },   // 1:1    → 1080×1080
+            story: { w: 720, h: 1280, scale: 1.5, pad: 44 }    // 9:16   → 1080×1920
+        };
+        var scFmt = "fit";
+
+        function sc2TagKids() {
+            var card = document.getElementById("share-card");
+            var slots = ["hdr", "hero", "hl", "tiles", "sec", "prog", "foot"], i = 0;
+            Array.prototype.forEach.call(card.children, function (n) {
+                if (n.classList.contains("sc2-fx")) return;
+                if (slots[i]) n.classList.add("sc2-" + slots[i]);
+                i++;
+            });
+        }
+
+        function sc2Fit() {
+            var card = document.getElementById("share-card"), stage = document.getElementById("sc-stage");
+            var f = SC_FMT[scFmt];
+            if (!card || !stage || !f || !f.w) return;
+            var k = Math.min(1, stage.clientWidth / f.w);
+            card.style.transform = "scale(" + k + ")";
+            stage.style.height = Math.round(f.h * k) + "px";
+        }
+
+        function sc2SetFormat(name) {
+            var f = SC_FMT[name];
+            if (!f) return;
+            scFmt = name;
+            var card = document.getElementById("share-card"), stage = document.getElementById("sc-stage");
+            sc2TagKids();
+            card.classList.remove("sc2-post", "sc2-fixed");
+
+            Array.prototype.forEach.call(document.querySelectorAll("#sc-fmt-bar [data-fmt]"), function (b) {
+                var on = b.getAttribute("data-fmt") === name;
+                b.style.background = on ? "rgba(135,141,255,0.16)" : "rgba(255,255,255,0.04)";
+                b.style.borderColor = on ? "rgba(135,141,255,0.42)" : "var(--border)";
+                b.style.color = on ? "#9aa0ff" : "var(--text-tertiary)";
+            });
+
+            if (!f.w) {
+                card.style.width = ""; card.style.height = "";
+                card.style.padding = "24px"; card.style.transform = "";
+                stage.style.height = "";
+                return;
+            }
+            card.style.width = f.w + "px";
+            card.style.height = f.h + "px";
+            card.style.padding = f.pad + "px";
+            card.classList.add(name === "post" ? "sc2-post" : "sc2-fixed");
+            sc2Fit();
+        }
+
+        window.addEventListener("resize", function () { sc2Fit(); });
 
         async function captureShareCard() {
             document.getElementById("share-status").textContent = "Generating image…";
             var card = document.getElementById("share-card");
+            var f = SC_FMT[scFmt] || SC_FMT.fit;
             sc2Settle();
             card.classList.remove("sc2-live");
             card.classList.add("sc2-cap");
-            document.querySelectorAll("#share-card .sc2-fill").forEach(function (el) { el.style.transition = "none"; });
+            Array.prototype.forEach.call(document.querySelectorAll("#share-card .sc2-fill"), function (el) {
+                el.style.transition = "none";
+            });
+            var prevT = card.style.transform;
+            card.style.transform = "none"; // capture at true pixel size, not preview scale
             await new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); });
             try {
-                return await html2canvas(card, { backgroundColor: "#141923", scale: 2, useCORS: true, logging: false });
+                var o = { backgroundColor: "#141923", scale: f.scale, useCORS: true, logging: false };
+                if (f.w) { o.width = f.w; o.height = f.h; o.windowWidth = f.w + 40; }
+                return await html2canvas(card, o);
             } finally {
+                card.style.transform = prevT;
                 card.classList.remove("sc2-cap");
             }
         }
