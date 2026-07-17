@@ -17616,15 +17616,16 @@
 
             </div>
             </div>
-                    </div>
+                    <!-- /sc-card-holder -->
 
                     <div class="sc-fr-cta sc-fr-only"
                         style="font-size:17px;font-weight:700;color:rgba(255,255,255,0.40);letter-spacing:0.02em">
                         ✦ scoreconsole.com</div>
 
                 </div>
+                <!-- /sc-frame -->
             </div>
-            <!-- /share-card + /holder + /frame + /stage -->
+            <!-- /sc-stage -->
 
             <!-- Action buttons -->
             <div style="display:flex;gap:9px;margin-top:16px;flex-wrap:wrap">
@@ -18087,7 +18088,7 @@
             var frame = document.getElementById("sc-frame"), stage = document.getElementById("sc-stage");
             var f = SC_FMT[scFmt];
             if (!frame || !stage || !f || !f.lay) return;
-            var k = Math.min(1, stage.clientWidth / f.w);
+            var k = Math.min(stage.clientWidth / f.w, 520 / f.h, 1);
             frame.style.transform = "scale(" + k + ")";
             stage.style.height = Math.round(f.h * k) + "px";
         }
