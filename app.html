@@ -17193,6 +17193,159 @@
         })();
     </script>
 
+    <style id="sc2-css">
+        /* ── Share card premium finish + microanimations (sc2- namespace) ── */
+        #share-card {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 26px 64px rgba(0, 0, 0, 0.50);
+        }
+
+        .sc2-fx {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        /* Foil hairline */
+        .sc2-foil {
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            z-index: 5;
+            background: linear-gradient(90deg, rgba(135, 141, 255, 0) 0%, rgba(135, 141, 255, 0.65) 22%, rgba(70, 201, 143, 0.55) 46%, rgba(240, 189, 106, 0.45) 68%, rgba(135, 141, 255, 0.55) 84%, rgba(135, 141, 255, 0) 100%);
+            background-size: 220% 100%;
+        }
+
+        #share-card.sc2-live .sc2-foil {
+            animation: sc2Foil 7s linear infinite;
+        }
+
+        @keyframes sc2Foil {
+            to {
+                background-position: 220% 0;
+            }
+        }
+
+        /* Print grain */
+        .sc2-grain {
+            inset: 0;
+            z-index: 0;
+            opacity: 0.045;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* Sheen sweep */
+        .sc2-sheen {
+            top: -60%;
+            left: 0;
+            width: 30%;
+            height: 220%;
+            z-index: 4;
+            background: linear-gradient(100deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.035) 42%, rgba(255, 255, 255, 0.085) 50%, rgba(255, 255, 255, 0.035) 58%, rgba(255, 255, 255, 0) 100%);
+            transform: rotate(14deg) translateX(-200%);
+            opacity: 0;
+        }
+
+        #share-card.sc2-live .sc2-sheen {
+            animation: sc2Sweep 2.4s cubic-bezier(.24, .62, .3, 1) .5s both;
+        }
+
+        @keyframes sc2Sweep {
+            0% { transform: rotate(14deg) translateX(-200%); opacity: 0; }
+            12% { opacity: 1; }
+            88% { opacity: 1; }
+            100% { transform: rotate(14deg) translateX(560%); opacity: 0; }
+        }
+
+        /* Staggered reveal — also lifts content above the fx layers */
+        .sc2-rv {
+            position: relative;
+            z-index: 2;
+        }
+
+        #share-card.sc2-live .sc2-rv {
+            animation: sc2Rise .58s cubic-bezier(.22, .92, .3, 1) both;
+            animation-delay: var(--d, 0s);
+        }
+
+        @keyframes sc2Rise {
+            from { opacity: 0; transform: translateY(9px); }
+            to { opacity: 1; transform: none; }
+        }
+
+        /* Bar growth */
+        .sc2-fill {
+            transform-origin: left center;
+        }
+
+        /* Dot cascade */
+        #share-card.sc2-live #sc-streak-dots > div {
+            animation: sc2Pop .34s cubic-bezier(.3, 1.5, .5, 1) both;
+            animation-delay: var(--d, 0s);
+        }
+
+        @keyframes sc2Pop {
+            from { opacity: 0; transform: scale(.4); }
+            to { opacity: 1; transform: none; }
+        }
+
+        /* BEST badge shimmer */
+        .sc2-best {
+            position: relative;
+            overflow: hidden;
+        }
+
+        #share-card.sc2-live .sc2-best::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(100deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.38) 50%, rgba(255, 255, 255, 0) 70%);
+            transform: translateX(-120%);
+            animation: sc2Shim 3.2s ease-in-out 1.4s infinite;
+        }
+
+        @keyframes sc2Shim {
+            0% { transform: translateX(-120%); }
+            50%, 100% { transform: translateX(260%); }
+        }
+
+        /* Panel bezels */
+        .sc2-bezel {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
+        }
+
+        /* ── CAPTURE MODE: freeze everything, snap to final ── */
+        #share-card.sc2-cap,
+        #share-card.sc2-cap * {
+            animation: none !important;
+            transition: none !important;
+            opacity: 1 !important;
+        }
+
+        #share-card.sc2-cap .sc2-rv,
+        #share-card.sc2-cap #sc-streak-dots > div {
+            transform: none !important;
+        }
+
+        #share-card.sc2-cap .sc2-sheen {
+            display: none !important;
+        }
+
+        #share-card.sc2-cap .sc2-best::after {
+            display: none !important;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #share-card.sc2-live .sc2-rv,
+            #share-card.sc2-live .sc2-sheen,
+            #share-card.sc2-live .sc2-foil,
+            #share-card.sc2-live #sc-streak-dots > div,
+            #share-card.sc2-live .sc2-best::after {
+                animation: none !important;
+            }
+            #share-card.sc2-live .sc2-rv { opacity: 1; transform: none; }
+        }
+    </style>
+
     <div id="share-modal"
         style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(14px);z-index:2000;align-items:center;justify-content:center;padding:20px">
         <div
@@ -17215,9 +17368,9 @@
             <!-- THE CARD TO SCREENSHOT -->
             <div id="share-card"
                 style="background:radial-gradient(120% 85% at 88% -12%, rgba(135,141,255,0.11), rgba(135,141,255,0) 58%),radial-gradient(95% 70% at -5% 108%, rgba(70,201,143,0.07), rgba(70,201,143,0) 55%),linear-gradient(155deg,#141923,#1a2234);border:1px solid rgba(255,255,255,0.10);border-radius:16px;padding:24px;position:relative;overflow:hidden">
-                <div
-                    style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,rgba(135,141,255,0),rgba(135,141,255,0.55),rgba(70,201,143,0.35),rgba(135,141,255,0))">
-                </div>
+                <div class="sc2-fx sc2-grain"></div>
+                <div class="sc2-fx sc2-sheen"></div>
+                <div class="sc2-fx sc2-foil"></div>
 
                 <!-- Card header -->
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
@@ -17355,7 +17508,7 @@
                         <span>Prep progress</span><span id="sc-prog-pct" style="color:#9aa0ff;font-weight:700">0%</span>
                     </div>
                     <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden">
-                        <div id="sc-prog-fill"
+                        <div id="sc-prog-fill" class="sc2-fill"
                             style="height:100%;border-radius:100px;background:linear-gradient(90deg,#878dff,#46c98f);width:0%">
                         </div>
                     </div>
@@ -17450,6 +17603,7 @@
         function openShareModal() {
             populateShareCard();
             document.getElementById("share-modal").style.display = "flex";
+            requestAnimationFrame(sc2Animate);
         }
         function closeShareModal() {
             document.getElementById("share-modal").style.display = "none";
@@ -17465,16 +17619,17 @@
             document.getElementById("sc-share-name").textContent = uName.replace("'s Dashboard", "").replace(" Dashboard", "").trim() || "Your Progress";
 
             // Hero stats
-            document.getElementById("sc-h-total").textContent = tot > 0 ? fmtH(tot) : "0h";
+            sc2Num(document.getElementById("sc-h-total"), tot, function (v) { return v > 0 ? fmtH(v) : "0h"; }, 1100);
 
             var streak = 0, cur = minsOn(dateStr(today)) > 0 ? new Date(today) : addDays(today, -1);
             while (minsOn(dateStr(cur)) > 0) { streak++; cur = addDays(cur, -1); }
-            document.getElementById("sc-h-streak").textContent = streak + "🔥";
+            sc2Num(document.getElementById("sc-h-streak"), streak, function (v) { return v + "🔥"; }, 800);
 
             var PREP_START_SC = new Date(2026, 3, 25); PREP_START_SC.setHours(0, 0, 0, 0);
             var cD = 0, tD = 0, cc = new Date(PREP_START_SC);
             while (cc <= today) { tD++; var m = minsOn(dateStr(cc)); if (m > 0 && m >= targetFor(cc) * 0.8) cD++; cc = addDays(cc, 1); }
-            document.getElementById("sc-h-cons").textContent = tD > 0 ? Math.min(100, Math.round(cD / tD * 100)) + "%" : "—";
+            if (tD > 0) sc2Num(document.getElementById("sc-h-cons"), Math.min(100, Math.round(cD / tD * 100)), function (v) { return v + "%"; }, 950);
+            else document.getElementById("sc-h-cons").textContent = "—";
 
             var examDateVal = localStorage.getItem("gmat_exam_date");
             if (examDateVal) {
@@ -17523,7 +17678,7 @@
                 var pct = Math.round(topicTotals[t] / maxT * 100);
                 var row = document.createElement("div"); row.style.cssText = "display:flex;align-items:center;gap:9px;margin-bottom:6px";
                 row.innerHTML = '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.65);width:48px;flex-shrink:0">' + t + '</div>'
-                    + '<div style="flex:1;height:5px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden"><div style="width:' + pct + '%;height:100%;background:' + TC[t] + ';border-radius:100px"></div></div>'
+                    + '<div style="flex:1;height:5px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden;box-shadow:inset 0 1px 1px rgba(0,0,0,0.28)"><div class="sc2-fill" style="width:' + pct + '%;height:100%;background:linear-gradient(90deg,' + TC[t] + ',' + TC[t] + ' 72%,rgba(255,255,255,0.5));border-radius:100px"></div></div>'
                     + '<div style="font-size:10.5px;font-weight:600;color:rgba(255,255,255,0.40);width:32px;text-align:right">' + fmtH(topicTotals[t]) + '</div>';
                 tbEl.appendChild(row);
             });
@@ -17561,7 +17716,7 @@
 
         function scRenderSections() {
             var agg = scSectionAgg();
-            var order = ["Quant", "RC", "CR", "DI", "Verbal"];
+            var order = ["Quant", "RC", "CR", "DI"]; // Verbal excluded — its C/T is already inside RC + CR
             var rows = order.filter(function (t) { return agg[t] && agg[t].t > 0; })
                 .map(function (t) { return { topic: t, c: agg[t].c, t: agg[t].t, p: Math.round(agg[t].c / agg[t].t * 100) }; });
             var wrap = document.getElementById("sc-sec-wrap"), el = document.getElementById("sc-sections");
@@ -17570,15 +17725,19 @@
             el.innerHTML = "";
             rows.forEach(function (r) {
                 var isBest = rows.length > 1 && r.topic === best.topic && r.p >= 70;
+                var col = TC[r.topic] || "#878dff";
                 var row = document.createElement("div");
-                row.style.cssText = "display:flex;align-items:center;gap:9px;background:rgba(255,255,255,0.03);border:1px solid " + (isBest ? "rgba(70,201,143,0.24)" : "rgba(255,255,255,0.06)") + ";border-radius:9px;padding:7px 10px";
+                row.className = "sc2-bezel";
+                row.style.cssText = "display:grid;grid-template-columns:7px 44px 40px 1fr 54px 38px;align-items:center;gap:9px;background:" + (isBest ? "linear-gradient(90deg,rgba(70,201,143,0.07),rgba(255,255,255,0.02))" : "rgba(255,255,255,0.03)") + ";border:1px solid " + (isBest ? "rgba(70,201,143,0.26)" : "rgba(255,255,255,0.06)") + ";border-radius:10px;padding:8px 11px";
                 row.innerHTML =
-                    '<div style="width:6px;height:6px;border-radius:100px;background:' + (TC[r.topic] || "#878dff") + ';flex:0 0 auto"></div>'
-                    + '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.70);flex:0 0 auto;white-space:nowrap;width:46px">' + r.topic + '</div>'
-                    + (isBest ? '<div style="flex:0 0 auto;font-size:7.5px;font-weight:800;letter-spacing:0.12em;color:#46c98f;background:rgba(70,201,143,0.12);border:1px solid rgba(70,201,143,0.28);border-radius:100px;padding:2px 6px;white-space:nowrap">BEST</div>' : '')
-                    + '<div style="flex:1 1 auto;min-width:0;height:5px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden"><div style="width:' + r.p + '%;height:100%;border-radius:100px;background:' + (TC[r.topic] || "#878dff") + '"></div></div>'
-                    + '<div style="flex:0 0 auto;font-size:10px;color:rgba(255,255,255,0.34);white-space:nowrap">' + r.c + '/' + r.t + '</div>'
-                    + '<div style="flex:0 0 auto;font-family:\'Fraunces\',serif;font-size:13px;font-weight:600;color:' + (isBest ? "#46c98f" : "#f4eee2") + ';width:34px;text-align:right;white-space:nowrap">' + r.p + '%</div>';
+                    '<div style="width:7px;height:7px;border-radius:100px;background:' + col + '"></div>'
+                    + '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.72);white-space:nowrap">' + r.topic + '</div>'
+                    + (isBest
+                        ? '<div class="sc2-best" style="font-size:7.5px;font-weight:800;letter-spacing:0.11em;color:#46c98f;background:rgba(70,201,143,0.12);border:1px solid rgba(70,201,143,0.30);border-radius:100px;padding:2px 0;text-align:center;white-space:nowrap">BEST</div>'
+                        : '<div></div>')
+                    + '<div style="min-width:0;height:6px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden;box-shadow:inset 0 1px 1px rgba(0,0,0,0.28)"><div class="sc2-fill" style="width:' + r.p + '%;height:100%;border-radius:100px;background:linear-gradient(90deg,' + col + ',' + col + ' 70%,rgba(255,255,255,0.55))"></div></div>'
+                    + '<div style="font-size:10px;color:rgba(255,255,255,0.34);text-align:right;white-space:nowrap">' + r.c + '/' + r.t + '</div>'
+                    + '<div style="font-family:\'Fraunces\',serif;font-size:13.5px;font-weight:600;color:' + (isBest ? "#46c98f" : "#f4eee2") + ';text-align:right;white-space:nowrap">' + r.p + '%</div>';
                 el.appendChild(row);
             });
             wrap.style.display = "block";
@@ -17703,11 +17862,80 @@
             }
         }
 
+        // ── Microanimation engine ──
+        var _sc2Raf = [];
+
+        function sc2Num(el, to, render, dur) {
+            if (!el) return;
+            el.dataset.scFinal = render(to);
+            var t0 = null, D = dur || 950;
+            function step(ts) {
+                if (!t0) t0 = ts;
+                var p = Math.min(1, (ts - t0) / D), e = 1 - Math.pow(1 - p, 3);
+                el.innerHTML = render(Math.round(to * e));
+                if (p < 1) _sc2Raf.push(requestAnimationFrame(step));
+            }
+            _sc2Raf.push(requestAnimationFrame(step));
+        }
+
+        function sc2Settle() {
+            _sc2Raf.forEach(function (id) { cancelAnimationFrame(id); });
+            _sc2Raf = [];
+            document.querySelectorAll("#share-card [data-sc-final]").forEach(function (el) {
+                el.innerHTML = el.dataset.scFinal;
+            });
+        }
+
+        function sc2Animate() {
+            var card = document.getElementById("share-card");
+            if (!card) return;
+            sc2Settle();
+            card.classList.remove("sc2-live", "sc2-cap");
+
+            // Stagger the direct children
+            var i = 0;
+            Array.prototype.forEach.call(card.children, function (n) {
+                if (n.classList.contains("sc2-fx")) return;
+                if (n.offsetParent === null && n.style.display === "none") return;
+                n.classList.add("sc2-rv");
+                n.style.setProperty("--d", (0.055 * i + 0.04).toFixed(3) + "s");
+                i++;
+            });
+
+            // Dot cascade
+            var dots = card.querySelectorAll("#sc-streak-dots > div");
+            Array.prototype.forEach.call(dots, function (d, k) {
+                d.style.setProperty("--d", (0.42 + k * 0.014).toFixed(3) + "s");
+            });
+
+            // Bars grow from zero
+            var fills = card.querySelectorAll(".sc2-fill");
+            Array.prototype.forEach.call(fills, function (el) {
+                var w = el.style.width;
+                el.style.transition = "none";
+                el.style.width = "0%";
+                void el.offsetWidth;
+                el.style.transition = "width 1.05s cubic-bezier(.22,.92,.3,1) .32s";
+                el.style.width = w;
+            });
+
+            void card.offsetWidth;
+            card.classList.add("sc2-live");
+        }
+
         async function captureShareCard() {
             document.getElementById("share-status").textContent = "Generating image…";
             var card = document.getElementById("share-card");
-            var canvas = await html2canvas(card, { backgroundColor: "#141923", scale: 2, useCORS: true, logging: false });
-            return canvas;
+            sc2Settle();
+            card.classList.remove("sc2-live");
+            card.classList.add("sc2-cap");
+            document.querySelectorAll("#share-card .sc2-fill").forEach(function (el) { el.style.transition = "none"; });
+            await new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); });
+            try {
+                return await html2canvas(card, { backgroundColor: "#141923", scale: 2, useCORS: true, logging: false });
+            } finally {
+                card.classList.remove("sc2-cap");
+            }
         }
         async function shareDownload() {
             var canvas = await captureShareCard();
