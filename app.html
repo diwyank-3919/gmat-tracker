@@ -17214,7 +17214,10 @@
 
             <!-- THE CARD TO SCREENSHOT -->
             <div id="share-card"
-                style="background:linear-gradient(155deg,#141923,#1a2234);border:1px solid rgba(255,255,255,0.10);border-radius:16px;padding:24px;position:relative;overflow:hidden">
+                style="background:radial-gradient(120% 85% at 88% -12%, rgba(135,141,255,0.11), rgba(135,141,255,0) 58%),radial-gradient(95% 70% at -5% 108%, rgba(70,201,143,0.07), rgba(70,201,143,0) 55%),linear-gradient(155deg,#141923,#1a2234);border:1px solid rgba(255,255,255,0.10);border-radius:16px;padding:24px;position:relative;overflow:hidden">
+                <div
+                    style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,rgba(135,141,255,0),rgba(135,141,255,0.55),rgba(70,201,143,0.35),rgba(135,141,255,0))">
+                </div>
 
                 <!-- Card header -->
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
@@ -17290,6 +17293,14 @@
                     </div>
                 </div>
 
+                <!-- Highlights ribbon -->
+                <div id="sc-hl-wrap" style="display:none;margin-bottom:14px">
+                    <div
+                        style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.13em;color:rgba(255,255,255,0.30);margin-bottom:8px">
+                        Highlights</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px" id="sc-highlights"></div>
+                </div>
+
                 <!-- This week / month / mock -->
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
                     <div
@@ -17316,6 +17327,14 @@
                             style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:rgba(255,255,255,0.35)">
                             Latest mock</div>
                     </div>
+                </div>
+
+                <!-- Section performance -->
+                <div id="sc-sec-wrap" style="display:none;margin-bottom:14px">
+                    <div
+                        style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.13em;color:rgba(255,255,255,0.30);margin-bottom:8px">
+                        Section accuracy</div>
+                    <div style="display:grid;gap:6px" id="sc-sections"></div>
                 </div>
 
                 <!-- Topic bars -->
@@ -17361,9 +17380,24 @@
                 <button onclick="shareDownload()"
                     style="flex:1;min-width:140px;padding:10px;background:#878dff;color:#0f1118;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px"><i
                         class="ti ti-download"></i> Download PNG</button>
-                <button onclick="shareCopy()"
+               <button onclick="shareCopy()"
                     style="flex:1;min-width:140px;padding:10px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;gap:7px"><i
                         class="ti ti-copy"></i> Copy image</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:9px;margin-top:9px">
+                <div
+                    style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-tertiary);flex:0 0 auto;white-space:nowrap">
+                    Share to</div>
+                <div style="height:1px;background:var(--border);flex:1 1 auto"></div>
+                <button onclick="shareTo('x')" title="Share on X"
+                    style="flex:0 0 auto;width:36px;height:34px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:9px;cursor:pointer;color:var(--text-secondary);font-size:15px;display:flex;align-items:center;justify-content:center"><i
+                        class="ti ti-brand-x"></i></button>
+                <button onclick="shareTo('linkedin')" title="Share on LinkedIn"
+                    style="flex:0 0 auto;width:36px;height:34px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:9px;cursor:pointer;color:var(--text-secondary);font-size:15px;display:flex;align-items:center;justify-content:center"><i
+                        class="ti ti-brand-linkedin"></i></button>
+                <button onclick="shareTo('instagram')" title="Share on Instagram"
+                    style="flex:0 0 auto;width:36px;height:34px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:9px;cursor:pointer;color:var(--text-secondary);font-size:15px;display:flex;align-items:center;justify-content:center"><i
+                        class="ti ti-brand-instagram"></i></button>
             </div>
             <div id="share-status"
                 style="font-size:11.5px;text-align:center;min-height:18px;margin-top:10px;color:var(--text-tertiary)">
@@ -17463,7 +17497,19 @@
             document.getElementById("sc-today").textContent = minsOn(dateStr(today)) > 0 ? fmtH(minsOn(dateStr(today))) : "0m";
             document.getElementById("sc-week").textContent = wm > 0 ? fmtH(wm) : "0m";
             var latestMock = window.mockScores && window.mockScores.length ? window.mockScores[window.mockScores.length - 1].score : null;
-            document.getElementById("sc-mock").textContent = latestMock || "—";
+            var mkEl = document.getElementById("sc-mock");
+            if (latestMock && window.mockScores.length >= 2) {
+                var prevMock = window.mockScores[window.mockScores.length - 2].score;
+                var mDelta = latestMock - prevMock;
+                mkEl.innerHTML = latestMock + (mDelta !== 0
+                    ? '<span style="font-family:\'Hanken Grotesk\',sans-serif;font-size:9.5px;font-weight:700;margin-left:5px;color:' + (mDelta > 0 ? "#46c98f" : "#fb7185") + '">' + (mDelta > 0 ? "▲" : "▼") + Math.abs(mDelta) + '</span>'
+                    : '');
+            } else {
+                mkEl.textContent = latestMock || "—";
+            }
+
+            scRenderHighlights();
+            scRenderSections();
 
             // Target badge
             document.getElementById("sc-target-badge").textContent = TARGET_SCORE;
@@ -17491,6 +17537,169 @@
                 var brd = mins2 === 0 ? "rgba(255,255,255,0.08)" : mins2 >= tgt2 ? "rgba(70,201,143,0.35)" : "rgba(251,113,133,0.28)";
                 dot.style.cssText = "width:13px;height:13px;border-radius:3px;background:" + col + ";border:1px solid " + brd + ";flex-shrink:0";
                 dotWrap.appendChild(dot);
+            }
+        }
+
+        // ── Share card: accuracy + highlights + section wins ──
+        function scAcc(noteText) {
+            if (!noteText) return null;
+            var m = noteText.match(/(\d+)\s*\/\s*(\d+)\s*=\s*(\d+)\s*%/) || noteText.match(/accuracy[\s:-]*(\d+)\s*\/\s*(\d+)/i);
+            if (!m) return null;
+            var c = parseInt(m[1], 10), t = parseInt(m[2], 10);
+            return (t > 0 && c <= t) ? { c: c, t: t } : null;
+        }
+
+        function scSectionAgg() {
+            var agg = {};
+            sessions.forEach(function (s) {
+                var a = scAcc(s.notes); if (!a) return;
+                if (!agg[s.topic]) agg[s.topic] = { c: 0, t: 0 };
+                agg[s.topic].c += a.c; agg[s.topic].t += a.t;
+            });
+            return agg;
+        }
+
+        function scRenderSections() {
+            var agg = scSectionAgg();
+            var order = ["Quant", "RC", "CR", "DI", "Verbal"];
+            var rows = order.filter(function (t) { return agg[t] && agg[t].t > 0; })
+                .map(function (t) { return { topic: t, c: agg[t].c, t: agg[t].t, p: Math.round(agg[t].c / agg[t].t * 100) }; });
+            var wrap = document.getElementById("sc-sec-wrap"), el = document.getElementById("sc-sections");
+            if (!rows.length) { wrap.style.display = "none"; return; }
+            var best = rows.reduce(function (a, b) { return b.p > a.p ? b : a; }, rows[0]);
+            el.innerHTML = "";
+            rows.forEach(function (r) {
+                var isBest = rows.length > 1 && r.topic === best.topic && r.p >= 70;
+                var row = document.createElement("div");
+                row.style.cssText = "display:flex;align-items:center;gap:9px;background:rgba(255,255,255,0.03);border:1px solid " + (isBest ? "rgba(70,201,143,0.24)" : "rgba(255,255,255,0.06)") + ";border-radius:9px;padding:7px 10px";
+                row.innerHTML =
+                    '<div style="width:6px;height:6px;border-radius:100px;background:' + (TC[r.topic] || "#878dff") + ';flex:0 0 auto"></div>'
+                    + '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.70);flex:0 0 auto;white-space:nowrap;width:46px">' + r.topic + '</div>'
+                    + (isBest ? '<div style="flex:0 0 auto;font-size:7.5px;font-weight:800;letter-spacing:0.12em;color:#46c98f;background:rgba(70,201,143,0.12);border:1px solid rgba(70,201,143,0.28);border-radius:100px;padding:2px 6px;white-space:nowrap">BEST</div>' : '')
+                    + '<div style="flex:1 1 auto;min-width:0;height:5px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden"><div style="width:' + r.p + '%;height:100%;border-radius:100px;background:' + (TC[r.topic] || "#878dff") + '"></div></div>'
+                    + '<div style="flex:0 0 auto;font-size:10px;color:rgba(255,255,255,0.34);white-space:nowrap">' + r.c + '/' + r.t + '</div>'
+                    + '<div style="flex:0 0 auto;font-family:\'Fraunces\',serif;font-size:13px;font-weight:600;color:' + (isBest ? "#46c98f" : "#f4eee2") + ';width:34px;text-align:right;white-space:nowrap">' + r.p + '%</div>';
+                el.appendChild(row);
+            });
+            wrap.style.display = "block";
+        }
+
+        function scRenderHighlights() {
+            var chips = [];
+
+            // Mock momentum
+            var ms = (window.mockScores || []).slice();
+            if (ms.length >= 2) {
+                var d = ms[ms.length - 1].score - ms[0].score;
+                if (d > 0) chips.push({ i: "ti-trending-up", c: "#46c98f", t: "+" + d + " pts since first mock" });
+            }
+            if (ms.length >= 1) {
+                var pb = ms.reduce(function (a, b) { return b.score > a.score ? b : a; }, ms[0]);
+                chips.push({ i: "ti-target-arrow", c: "#f0bd6a", t: "Personal best mock — " + pb.score });
+                var gap = TARGET_SCORE - ms[ms.length - 1].score;
+                if (gap <= 0) chips.push({ i: "ti-trophy", c: "#46c98f", t: "Target " + TARGET_SCORE + " reached" });
+            }
+
+            // Best study day
+            var byDay = {};
+            sessions.forEach(function (s) { byDay[s.date] = (byDay[s.date] || 0) + s.mins; });
+            var bestDay = Object.keys(byDay).reduce(function (a, k) { return byDay[k] > (byDay[a] || 0) ? k : a; }, Object.keys(byDay)[0]);
+            if (bestDay && byDay[bestDay] > 0) chips.push({ i: "ti-flame", c: "#878dff", t: "Best day — " + fmtH(byDay[bestDay]) });
+
+            // Longest streak ever
+            var days = Object.keys(byDay).filter(function (k) { return byDay[k] > 0; }).sort();
+            var bestStreak = 0, run = 0, prev = null;
+            days.forEach(function (k) {
+                var p = k.split("-").map(Number), dt = new Date(p[0], p[1] - 1, p[2]);
+                run = (prev && Math.round((dt - prev) / 86400000) === 1) ? run + 1 : 1;
+                if (run > bestStreak) bestStreak = run;
+                prev = dt;
+            });
+            if (bestStreak >= 3) chips.push({ i: "ti-bolt", c: "#f0bd6a", t: bestStreak + "-day best streak" });
+
+            // Volume of questions
+            var agg = scSectionAgg(), qs = 0;
+            Object.keys(agg).forEach(function (k) { if (k !== "Verbal") qs += agg[k].t; });
+            if (qs > 0) chips.push({ i: "ti-checkbox", c: "#60a5fa", t: qs.toLocaleString() + " questions attempted" });
+
+            // Days on target (last 30)
+            var onT = 0;
+            for (var i = 0; i < 30; i++) { var dd = addDays(today, -i); if (minsOn(dateStr(dd)) >= targetFor(dd)) onT++; }
+            if (onT >= 5) chips.push({ i: "ti-circle-check", c: "#46c98f", t: onT + "/30 days on target" });
+
+            chips = chips.slice(0, 5);
+            var wrap = document.getElementById("sc-hl-wrap"), el = document.getElementById("sc-highlights");
+            if (!chips.length) { wrap.style.display = "none"; return; }
+            el.innerHTML = chips.map(function (h) {
+                return '<div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:100px;padding:5px 11px;white-space:nowrap">'
+                    + '<i class="ti ' + h.i + '" style="font-size:12px;color:' + h.c + '"></i>'
+                    + '<span style="font-size:10.5px;font-weight:600;color:rgba(255,255,255,0.72)">' + h.t + '</span></div>';
+            }).join("");
+            wrap.style.display = "block";
+        }
+
+        function scShareCaption() {
+            var tot = (document.getElementById("sc-h-total") || {}).textContent || "";
+            var st = ((document.getElementById("sc-h-streak") || {}).textContent || "").replace(/[^\d]/g, "");
+            var dl = (document.getElementById("sc-h-days") || {}).textContent || "—";
+            var mk = (document.getElementById("sc-mock") || {}).textContent || "—";
+            var L = [];
+            L.push("My GMAT prep, by the numbers — " + tot + " of focused study logged.");
+            if (st) L.push("🔥 " + st + "-day streak");
+            if (mk !== "—") L.push("📊 Latest mock: " + mk + " · Target: " + TARGET_SCORE);
+            if (dl !== "—") L.push("⏳ " + dl + " days to exam day");
+            L.push("");
+            L.push("Tracked with ScoreConsole → https://scoreconsole.com");
+            return L.join("\n");
+        }
+
+        async function scCardBlob() {
+            var canvas = await captureShareCard();
+            return await new Promise(function (res) { canvas.toBlob(res, "image/png"); });
+        }
+
+        async function shareTo(platform) {
+            var st = document.getElementById("share-status");
+            var cap = scShareCaption();
+
+            if (platform === "instagram") {
+                try {
+                    var blob = await scCardBlob();
+                    var file = new File([blob], "gmat-progress.png", { type: "image/png" });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({ files: [file], text: cap });
+                        st.textContent = "✓ Shared!"; st.style.color = "var(--green)";
+                        return;
+                    }
+                } catch (e) {
+                    if (e && e.name === "AbortError") { st.textContent = ""; return; }
+                }
+                try { await shareDownload(); } catch (e2) { }
+                try { await navigator.clipboard.writeText(cap); } catch (e3) { }
+                st.textContent = "Card saved + caption copied — post it from Instagram on your phone.";
+                st.style.color = "var(--text-tertiary)";
+                return;
+            }
+
+            var copied = false;
+            try {
+                var b2 = await scCardBlob();
+                await navigator.clipboard.write([new ClipboardItem({ "image/png": b2 })]);
+                copied = true;
+            } catch (e) { copied = false; }
+
+            var url = "https://scoreconsole.com";
+            var link = platform === "x"
+                ? "https://twitter.com/intent/tweet?text=" + encodeURIComponent(cap)
+                : "https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(url);
+            window.open(link, "_blank", "noopener");
+
+            if (copied) {
+                st.textContent = "✓ Card copied — paste it into the post (Ctrl/⌘+V).";
+                st.style.color = "var(--green)";
+            } else {
+                st.textContent = "Composer opened — use Download PNG, then attach the card.";
+                st.style.color = "var(--text-tertiary)";
             }
         }
 
