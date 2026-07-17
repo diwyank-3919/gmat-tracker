@@ -17482,16 +17482,21 @@
                     </div>
                 </div>
 
-                <!-- Section performance -->
+               <!-- Sections — hours + accuracy, merged -->
                 <div id="sc-sec-wrap" style="display:none;margin-bottom:14px">
-                    <div
-                        style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.13em;color:rgba(255,255,255,0.30);margin-bottom:8px">
-                        Section accuracy</div>
+                    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px">
+                        <div
+                            style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.13em;color:rgba(255,255,255,0.30)">
+                            Sections</div>
+                        <div
+                            style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:rgba(255,255,255,0.19)">
+                            Hours · Accuracy</div>
+                    </div>
                     <div style="display:grid;gap:6px" id="sc-sections"></div>
+                    <div id="sc-sec-also"
+                        style="display:none;font-size:9.5px;color:rgba(255,255,255,0.32);margin-top:8px;padding-left:3px">
+                    </div>
                 </div>
-
-                <!-- Topic bars -->
-                <div style="margin-bottom:14px" id="sc-topic-bars"></div>
 
                 <!-- 30-day dots -->
                 <div style="margin-bottom:14px">
@@ -17649,7 +17654,9 @@
             // Small stat cards
             var ws = startOfWeek(today), wm = 0;
             for (var i = 0; i < 7; i++) wm += minsOn(dateStr(addDays(ws, i)));
-            document.getElementById("sc-today").textContent = minsOn(dateStr(today)) > 0 ? fmtH(minsOn(dateStr(today))) : "0m";
+            var tdM = minsOn(dateStr(today)), tdEl = document.getElementById("sc-today");
+            tdEl.textContent = tdM > 0 ? fmtH(tdM) : "0m";
+            tdEl.style.color = tdM > 0 ? "#46c98f" : "rgba(255,255,255,0.30)";
             document.getElementById("sc-week").textContent = wm > 0 ? fmtH(wm) : "0m";
             var latestMock = window.mockScores && window.mockScores.length ? window.mockScores[window.mockScores.length - 1].score : null;
             var mkEl = document.getElementById("sc-mock");
@@ -17672,7 +17679,7 @@
             // Topic bars
             var topicTotals = {}; sessions.forEach(function (s) { topicTotals[s.topic] = (topicTotals[s.topic] || 0) + s.mins; });
             var maxT = Math.max.apply(null, Object.values(topicTotals).concat([1]));
-            var tbEl = document.getElementById("sc-topic-bars"); tbEl.innerHTML = '<div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.13em;color:rgba(255,255,255,0.30);margin-bottom:8px">Hours by topic</div>';
+            var tbEl = document.createElement("div"); // legacy renderer — detached, output discarded; scRenderSections() owns this now
             ["Quant", "RC", "CR", "DI", "Mock test", "Review"].forEach(function (t) {
                 if (!(topicTotals[t] > 0)) return;
                 var pct = Math.round(topicTotals[t] / maxT * 100);
@@ -17716,28 +17723,54 @@
 
         function scRenderSections() {
             var agg = scSectionAgg();
-            var order = ["Quant", "RC", "CR", "DI"]; // Verbal excluded — its C/T is already inside RC + CR
-            var rows = order.filter(function (t) { return agg[t] && agg[t].t > 0; })
-                .map(function (t) { return { topic: t, c: agg[t].c, t: agg[t].t, p: Math.round(agg[t].c / agg[t].t * 100) }; });
+
+            // Raw hours per topic — every topic, so the card reconciles with Total hours
+            var hrs = {};
+            sessions.forEach(function (s) { hrs[s.topic] = (hrs[s.topic] || 0) + s.mins; });
+
+            var order = ["Quant", "RC", "CR", "DI"]; // Verbal's C/T is already inside RC + CR — hours handled below
+            var rows = order.filter(function (t) { return (agg[t] && agg[t].t > 0) || hrs[t] > 0; })
+                .map(function (t) {
+                    var a = agg[t];
+                    return {
+                        topic: t, mins: hrs[t] || 0,
+                        c: a ? a.c : 0, t: a ? a.t : 0,
+                        p: (a && a.t > 0) ? Math.round(a.c / a.t * 100) : null
+                    };
+                });
+
             var wrap = document.getElementById("sc-sec-wrap"), el = document.getElementById("sc-sections");
             if (!rows.length) { wrap.style.display = "none"; return; }
-            var best = rows.reduce(function (a, b) { return b.p > a.p ? b : a; }, rows[0]);
+
+            // Anything with hours but no accuracy rides on the "also logged" line
+            var others = ["Verbal", "Mock test", "Review"].filter(function (t) { return hrs[t] > 0; });
+            var alsoEl = document.getElementById("sc-sec-also");
+            if (others.length) {
+                alsoEl.innerHTML = '<span style="color:rgba(255,255,255,0.22);font-weight:700;text-transform:uppercase;letter-spacing:0.09em;font-size:8px">Also logged</span>&nbsp;&nbsp;'
+                    + others.map(function (t) {
+                        return '<span style="color:' + (TC[t] || "#878dff") + '">●</span> ' + t + ' <span style="color:rgba(255,255,255,0.55);font-weight:600">' + fmtH(hrs[t]) + '</span>';
+                    }).join('&nbsp; · &nbsp;');
+                alsoEl.style.display = "block";
+            } else { alsoEl.style.display = "none"; }
+
+            var scored = rows.filter(function (r) { return r.p !== null; });
+            var best = scored.length > 1 ? scored.reduce(function (a, b) { return b.p > a.p ? b : a; }, scored[0]) : null;
             el.innerHTML = "";
-            rows.forEach(function (r) {
-                var isBest = rows.length > 1 && r.topic === best.topic && r.p >= 70;
+            rowsvar isBest = !!(best && r.topic === best.topic && r.p >= 70);
                 var col = TC[r.topic] || "#878dff";
                 var row = document.createElement("div");
                 row.className = "sc2-bezel";
-                row.style.cssText = "display:grid;grid-template-columns:7px 44px 40px 1fr 54px 38px;align-items:center;gap:9px;background:" + (isBest ? "linear-gradient(90deg,rgba(70,201,143,0.07),rgba(255,255,255,0.02))" : "rgba(255,255,255,0.03)") + ";border:1px solid " + (isBest ? "rgba(70,201,143,0.26)" : "rgba(255,255,255,0.06)") + ";border-radius:10px;padding:8px 11px";
+                row.style.cssText = "display:grid;grid-template-columns:7px 42px 62px 38px 1fr 52px 36px;align-items:center;gap:8px;background:" + (isBest ? "linear-gradient(90deg,rgba(70,201,143,0.07),rgba(255,255,255,0.02))" : "rgba(255,255,255,0.03)") + ";border:1px solid " + (isBest ? "rgba(70,201,143,0.26)" : "rgba(255,255,255,0.06)") + ";border-radius:10px;padding:8px 11px";
                 row.innerHTML =
                     '<div style="width:7px;height:7px;border-radius:100px;background:' + col + '"></div>'
                     + '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.72);white-space:nowrap">' + r.topic + '</div>'
-                    + (isBest
-                        ? '<div class="sc2-best" style="font-size:7.5px;font-weight:800;letter-spacing:0.11em;color:#46c98f;background:rgba(70,201,143,0.12);border:1px solid rgba(70,201,143,0.30);border-radius:100px;padding:2px 0;text-align:center;white-space:nowrap">BEST</div>'
-                        : '<div></div>')
-                    + '<div style="min-width:0;height:6px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden;box-shadow:inset 0 1px 1px rgba(0,0,0,0.28)"><div class="sc2-fill" style="width:' + r.p + '%;height:100%;border-radius:100px;background:linear-gradient(90deg,' + col + ',' + col + ' 70%,rgba(255,255,255,0.55))"></div></div>'
-                    + '<div style="font-size:10px;color:rgba(255,255,255,0.34);text-align:right;white-space:nowrap">' + r.c + '/' + r.t + '</div>'
-                    + '<div style="font-family:\'Fraunces\',serif;font-size:13.5px;font-weight:600;color:' + (isBest ? "#46c98f" : "#f4eee2") + ';text-align:right;white-space:nowrap">' + r.p + '%</div>';
+                    + '<div style="font-family:\'Fraunces\',serif;font-size:11.5px;font-weight:600;color:' + (r.mins > 0 ? "#f4eee2" : "rgba(255,255,255,0.22)") + ';white-space:nowrap">' + (r.mins > 0 ? fmtH(r.mins) : "—") + '</div>'
+                    + (isBest ? '<div class="sc2-best" style="font-size:7.5px;font-weight:800;letter-spacing:0.11em;color:#46c98f;background:rgba(70,201,143,0.12);border:1px solid rgba(70,201,143,0.30);border-radius:100px;padding:2px 0;text-align:center;white-space:nowrap">BEST</div>' : '<div></div>')
+                    + '<div style="min-width:0;height:6px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden;box-shadow:inset 0 1px 1px rgba(0,0,0,0.28)">'
+                    + (r.p !== null ? '<div class="sc2-fill" style="width:' + r.p + '%;height:100%;border-radius:100px;background:linear-gradient(90deg,' + col + ',' + col + ' 70%,rgba(255,255,255,0.55))"></div>' : '')
+                    + '</div>'
+                    + '<div style="font-size:10px;color:rgba(255,255,255,0.44);text-align:right;white-space:nowrap">' + (r.p !== null ? r.c + '/' + r.t : '') + '</div>'
+                    + '<div style="font-family:\'Fraunces\',serif;font-size:13.5px;font-weight:600;color:' + (isBest ? "#46c98f" : r.p !== null ? "#f4eee2" : "rgba(255,255,255,0.22)") + ';text-align:right;white-space:nowrap">' + (r.p !== null ? r.p + '%' : '—') + '</div>';
                 el.appendChild(row);
             });
             wrap.style.display = "block";
@@ -17754,9 +17787,11 @@
             }
             if (ms.length >= 1) {
                 var pb = ms.reduce(function (a, b) { return b.score > a.score ? b : a; }, ms[0]);
-                chips.push({ i: "ti-target-arrow", c: "#f0bd6a", t: "Personal best mock — " + pb.score });
-                var gap = TARGET_SCORE - ms[ms.length - 1].score;
-                if (gap <= 0) chips.push({ i: "ti-trophy", c: "#46c98f", t: "Target " + TARGET_SCORE + " reached" });
+                var lat = ms[ms.length - 1].score;
+                // Don't restate a number the Latest mock tile is already showing
+                if (pb.score > lat) chips.push({ i: "ti-target-arrow", c: "#f0bd6a", t: "Personal best mock — " + pb.score });
+                else if (ms.length >= 2) chips.push({ i: "ti-target-arrow", c: "#f0bd6a", t: "Latest mock is your best yet" });
+                if (TARGET_SCORE - lat <= 0) chips.push({ i: "ti-trophy", c: "#46c98f", t: "Target " + TARGET_SCORE + " reached" });
             }
 
             // Best study day
