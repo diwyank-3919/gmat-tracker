@@ -17733,8 +17733,10 @@
                 .map(function (t) {
                     var a = agg[t];
                     return {
-                        topic: t, mins: hrs[t] || 0,
-                        c: a ? a.c : 0, t: a ? a.t : 0,
+                        topic: t,
+                        mins: hrs[t] || 0,
+                        c: a ? a.c : 0,
+                        t: a ? a.t : 0,
                         p: (a && a.t > 0) ? Math.round(a.c / a.t * 100) : null
                     };
                 });
@@ -17742,37 +17744,51 @@
             var wrap = document.getElementById("sc-sec-wrap"), el = document.getElementById("sc-sections");
             if (!rows.length) { wrap.style.display = "none"; return; }
 
-            // Anything with hours but no accuracy rides on the "also logged" line
+            // Topics with hours but no accuracy ride the "also logged" line
             var others = ["Verbal", "Mock test", "Review"].filter(function (t) { return hrs[t] > 0; });
             var alsoEl = document.getElementById("sc-sec-also");
-            if (others.length) {
-                alsoEl.innerHTML = '<span style="color:rgba(255,255,255,0.22);font-weight:700;text-transform:uppercase;letter-spacing:0.09em;font-size:8px">Also logged</span>&nbsp;&nbsp;'
-                    + others.map(function (t) {
-                        return '<span style="color:' + (TC[t] || "#878dff") + '">●</span> ' + t + ' <span style="color:rgba(255,255,255,0.55);font-weight:600">' + fmtH(hrs[t]) + '</span>';
-                    }).join('&nbsp; · &nbsp;');
-                alsoEl.style.display = "block";
-            } else { alsoEl.style.display = "none"; }
+            if (alsoEl) {
+                if (others.length) {
+                    alsoEl.innerHTML = '<span style="color:rgba(255,255,255,0.22);font-weight:700;text-transform:uppercase;letter-spacing:0.09em;font-size:8px">Also logged</span>&nbsp;&nbsp;'
+                        + others.map(function (t) {
+                            return '<span style="color:' + (TC[t] || "#878dff") + '">&#9679;</span> ' + t + ' <span style="color:rgba(255,255,255,0.55);font-weight:600">' + fmtH(hrs[t]) + '</span>';
+                        }).join('&nbsp; · &nbsp;');
+                    alsoEl.style.display = "block";
+                } else {
+                    alsoEl.style.display = "none";
+                }
+            }
 
             var scored = rows.filter(function (r) { return r.p !== null; });
             var best = scored.length > 1 ? scored.reduce(function (a, b) { return b.p > a.p ? b : a; }, scored[0]) : null;
             el.innerHTML = "";
-            rowsvar isBest = !!(best && r.topic === best.topic && r.p >= 70);
+
+            rows.forEach(function (r) {
+                var isBest = !!(best && r.topic === best.topic && r.p >= 70);
                 var col = TC[r.topic] || "#878dff";
                 var row = document.createElement("div");
                 row.className = "sc2-bezel";
-                row.style.cssText = "display:grid;grid-template-columns:7px 42px 62px 38px 1fr 52px 36px;align-items:center;gap:8px;background:" + (isBest ? "linear-gradient(90deg,rgba(70,201,143,0.07),rgba(255,255,255,0.02))" : "rgba(255,255,255,0.03)") + ";border:1px solid " + (isBest ? "rgba(70,201,143,0.26)" : "rgba(255,255,255,0.06)") + ";border-radius:10px;padding:8px 11px";
-                row.innerHTML =
-                    '<div style="width:7px;height:7px;border-radius:100px;background:' + col + '"></div>'
-                    + '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.72);white-space:nowrap">' + r.topic + '</div>'
-                    + '<div style="font-family:\'Fraunces\',serif;font-size:11.5px;font-weight:600;color:' + (r.mins > 0 ? "#f4eee2" : "rgba(255,255,255,0.22)") + ';white-space:nowrap">' + (r.mins > 0 ? fmtH(r.mins) : "—") + '</div>'
-                    + (isBest ? '<div class="sc2-best" style="font-size:7.5px;font-weight:800;letter-spacing:0.11em;color:#46c98f;background:rgba(70,201,143,0.12);border:1px solid rgba(70,201,143,0.30);border-radius:100px;padding:2px 0;text-align:center;white-space:nowrap">BEST</div>' : '<div></div>')
-                    + '<div style="min-width:0;height:6px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden;box-shadow:inset 0 1px 1px rgba(0,0,0,0.28)">'
-                    + (r.p !== null ? '<div class="sc2-fill" style="width:' + r.p + '%;height:100%;border-radius:100px;background:linear-gradient(90deg,' + col + ',' + col + ' 70%,rgba(255,255,255,0.55))"></div>' : '')
-                    + '</div>'
-                    + '<div style="font-size:10px;color:rgba(255,255,255,0.44);text-align:right;white-space:nowrap">' + (r.p !== null ? r.c + '/' + r.t : '') + '</div>'
-                    + '<div style="font-family:\'Fraunces\',serif;font-size:13.5px;font-weight:600;color:' + (isBest ? "#46c98f" : r.p !== null ? "#f4eee2" : "rgba(255,255,255,0.22)") + ';text-align:right;white-space:nowrap">' + (r.p !== null ? r.p + '%' : '—') + '</div>';
+                row.style.cssText = "display:grid;grid-template-columns:7px 42px 62px 38px 1fr 52px 36px;align-items:center;gap:8px;background:"
+                    + (isBest ? "linear-gradient(90deg,rgba(70,201,143,0.07),rgba(255,255,255,0.02))" : "rgba(255,255,255,0.03)")
+                    + ";border:1px solid " + (isBest ? "rgba(70,201,143,0.26)" : "rgba(255,255,255,0.06)")
+                    + ";border-radius:10px;padding:8px 11px";
+
+                var html = '<div style="width:7px;height:7px;border-radius:100px;background:' + col + '"></div>';
+                html += '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.72);white-space:nowrap">' + r.topic + '</div>';
+                html += '<div style="font-family:\'Fraunces\',serif;font-size:11.5px;font-weight:600;color:' + (r.mins > 0 ? "#f4eee2" : "rgba(255,255,255,0.22)") + ';white-space:nowrap">' + (r.mins > 0 ? fmtH(r.mins) : "—") + '</div>';
+                html += isBest
+                    ? '<div class="sc2-best" style="font-size:7.5px;font-weight:800;letter-spacing:0.11em;color:#46c98f;background:rgba(70,201,143,0.12);border:1px solid rgba(70,201,143,0.30);border-radius:100px;padding:2px 0;text-align:center;white-space:nowrap">BEST</div>'
+                    : '<div></div>';
+                html += '<div style="min-width:0;height:6px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden;box-shadow:inset 0 1px 1px rgba(0,0,0,0.28)">';
+                html += (r.p !== null ? '<div class="sc2-fill" style="width:' + r.p + '%;height:100%;border-radius:100px;background:linear-gradient(90deg,' + col + ',' + col + ' 70%,rgba(255,255,255,0.55))"></div>' : '');
+                html += '</div>';
+                html += '<div style="font-size:10px;color:rgba(255,255,255,0.44);text-align:right;white-space:nowrap">' + (r.p !== null ? r.c + '/' + r.t : '') + '</div>';
+                html += '<div style="font-family:\'Fraunces\',serif;font-size:13.5px;font-weight:600;color:' + (isBest ? "#46c98f" : (r.p !== null ? "#f4eee2" : "rgba(255,255,255,0.22)")) + ';text-align:right;white-space:nowrap">' + (r.p !== null ? r.p + '%' : '—') + '</div>';
+
+                row.innerHTML = html;
                 el.appendChild(row);
             });
+
             wrap.style.display = "block";
         }
 
