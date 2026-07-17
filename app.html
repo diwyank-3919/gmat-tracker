@@ -8111,27 +8111,53 @@
             transform-origin: top left;
         }
 
-       #share-card.sc2-fixed {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+       /* ── Letterbox frame ── */
+        #sc-frame { position: relative; }
+        #sc-frame .sc-fr-only { display: none; }
 
-        #share-card.sc2-post {
+        #sc-frame.sc-fr-on {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-            grid-template-rows: auto auto auto 1fr auto auto;
-            column-gap: 26px;
-            align-content: start;
+            overflow: hidden;
+            transform-origin: top left;
+            background:
+                radial-gradient(90% 60% at 80% -5%, rgba(135, 141, 255, 0.17), rgba(135, 141, 255, 0) 62%),
+                radial-gradient(80% 60% at 5% 105%, rgba(70, 201, 143, 0.11), rgba(70, 201, 143, 0) 58%),
+                linear-gradient(160deg, #080a10, #0f131d 55%, #0a0d14);
         }
 
-        #share-card.sc2-post .sc2-hdr { grid-column: 1 / -1; grid-row: 1; }
-        #share-card.sc2-post .sc2-hero { grid-column: 1; grid-row: 2; }
-        #share-card.sc2-post .sc2-tiles { grid-column: 1; grid-row: 3; }
-        #share-card.sc2-post .sc2-hl { grid-column: 1; grid-row: 4; align-self: start; }
-        #share-card.sc2-post .sc2-sec { grid-column: 2; grid-row: 2 / 5; align-self: start; }
-        #share-card.sc2-post .sc2-prog { grid-column: 1 / -1; grid-row: 5; }
-        #share-card.sc2-post .sc2-foot { grid-column: 1 / -1; grid-row: 6; }
+        #sc-frame.sc-fr-on .sc-fr-only { display: block; }
+
+        #sc-frame.sc-fr-on #share-card {
+            border-radius: 18px !important;
+            box-shadow: 0 44px 90px rgba(0, 0, 0, 0.68), 0 0 0 1px rgba(255, 255, 255, 0.06);
+        }
+
+        #sc-card-holder { position: relative; }
+        #share-card { transform-origin: top left; }
+
+        /* Story — headline above, CTA below */
+        #sc-frame.sc-fr-col {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto 1fr auto;
+            align-items: center;
+        }
+        #sc-frame.sc-fr-col #sc-card-holder { justify-self: center; }
+
+        /* Post — card left, headline right */
+        #sc-frame.sc-fr-row {
+            grid-template-columns: auto 1fr;
+            grid-template-rows: 1fr auto;
+            align-items: center;
+            column-gap: 40px;
+        }
+        #sc-frame.sc-fr-row #sc-card-holder { grid-column: 1; grid-row: 1 / -1; }
+        #sc-frame.sc-fr-row .sc-fr-lead { grid-column: 2; grid-row: 1; align-self: end; }
+        #sc-frame.sc-fr-row .sc-fr-cta { grid-column: 2; grid-row: 2; align-self: start; }
+
+        /* Square — pure matte, no bands */
+        #sc-frame.sc-fr-center { place-items: center; }
+        #sc-frame.sc-fr-center .sc-fr-lead,
+        #sc-frame.sc-fr-center .sc-fr-cta { display: none !important; }
 
         @media (prefers-reduced-motion: reduce) {
             #days-left.rolling .dl-strip {
@@ -17418,7 +17444,19 @@
             </div>
 
             <div id="sc-stage">
-                <!-- THE CARD TO SCREENSHOT -->
+                <div id="sc-frame">
+
+                    <div class="sc-fr-lead sc-fr-only">
+                        <div id="sc-fr-eyebrow"
+                            style="font-size:13px;font-weight:800;letter-spacing:0.18em;color:rgba(255,255,255,0.34);margin-bottom:14px">
+                        </div>
+                        <div id="sc-fr-head"
+                            style="font-family:'Fraunces',serif;font-size:46px;font-weight:600;line-height:1.08;color:#f4eee2;letter-spacing:-0.015em">
+                        </div>
+                    </div>
+
+                    <div id="sc-card-holder">
+                        <!-- THE CARD TO SCREENSHOT -->
             <div id="share-card"
                 style="background:radial-gradient(120% 85% at 88% -12%, rgba(135,141,255,0.11), rgba(135,141,255,0) 58%),radial-gradient(95% 70% at -5% 108%, rgba(70,201,143,0.07), rgba(70,201,143,0) 55%),linear-gradient(155deg,#141923,#1a2234);border:1px solid rgba(255,255,255,0.10);border-radius:16px;padding:24px;position:relative;overflow:hidden">
                 <div class="sc2-fx sc2-grain"></div>
@@ -17578,7 +17616,15 @@
 
             </div>
             </div>
-            <!-- /share-card + /sc-stage -->
+                    </div>
+
+                    <div class="sc-fr-cta sc-fr-only"
+                        style="font-size:17px;font-weight:700;color:rgba(255,255,255,0.40);letter-spacing:0.02em">
+                        ✦ scoreconsole.com</div>
+
+                </div>
+            </div>
+            <!-- /share-card + /holder + /frame + /stage -->
 
             <!-- Action buttons -->
             <div style="display:flex;gap:9px;margin-top:16px;flex-wrap:wrap">
@@ -18016,41 +18062,43 @@
             void card.offsetWidth;
             card.classList.add("sc2-live");
         }
-        // ── Format presets ──
+        // ── Format presets (letterbox frame) ──
+        var SC_CARD_W = 580;
         var SC_FMT = {
-            fit: { w: 0, h: 0, scale: 2, pad: 24 },
-            post: { w: 1146, h: 600, scale: 1.05, pad: 30 },   // 1.91:1 → 1203×630
-            square: { w: 900, h: 900, scale: 1.2, pad: 40 },   // 1:1    → 1080×1080
-            story: { w: 720, h: 1280, scale: 1.5, pad: 44 }    // 9:16   → 1080×1920
+            fit: { w: 0, h: 0, scale: 2, lay: null },
+            post: { w: 1146, h: 600, scale: 1.05, lay: "row", pad: 38, maxW: 520, maxH: 524 },
+            square: { w: 900, h: 900, scale: 1.2, lay: "center", pad: 34, maxW: 830, maxH: 830 },
+            story: { w: 720, h: 1280, scale: 1.5, lay: "col", pad: 40, maxW: 640, maxH: 780 }
         };
         var scFmt = "fit";
 
-        function sc2TagKids() {
-            var card = document.getElementById("share-card");
-            var slots = ["hdr", "hero", "hl", "tiles", "sec", "prog", "foot"], i = 0;
-            Array.prototype.forEach.call(card.children, function (n) {
-                if (n.classList.contains("sc2-fx")) return;
-                if (slots[i]) n.classList.add("sc2-" + slots[i]);
-                i++;
-            });
+        function sc2FrameText() {
+            var g = function (id) { var e = document.getElementById(id); return e ? (e.textContent || "").trim() : ""; };
+            var tot = g("sc-h-total"), dl = g("sc-h-days"), dt = g("sc-share-date");
+            var eb = document.getElementById("sc-fr-eyebrow"), hd = document.getElementById("sc-fr-head");
+            if (eb) eb.textContent = ("GMAT Prep · " + dt).toUpperCase();
+            if (hd) {
+                hd.innerHTML = (tot ? tot + " in." : "")
+                    + (dl && dl !== "—" ? '<br><span style="color:#9aa0ff">' + dl + " days out.</span>" : "");
+            }
         }
 
         function sc2Fit() {
-            var card = document.getElementById("share-card"), stage = document.getElementById("sc-stage");
+            var frame = document.getElementById("sc-frame"), stage = document.getElementById("sc-stage");
             var f = SC_FMT[scFmt];
-            if (!card || !stage || !f || !f.w) return;
+            if (!frame || !stage || !f || !f.lay) return;
             var k = Math.min(1, stage.clientWidth / f.w);
-            card.style.transform = "scale(" + k + ")";
+            frame.style.transform = "scale(" + k + ")";
             stage.style.height = Math.round(f.h * k) + "px";
         }
 
         function sc2SetFormat(name) {
-            var f = SC_FMT[name];
-            if (!f) return;
+            var f = SC_FMT[name]; if (!f) return;
             scFmt = name;
-            var card = document.getElementById("share-card"), stage = document.getElementById("sc-stage");
-            sc2TagKids();
-            card.classList.remove("sc2-post", "sc2-fixed");
+            var card = document.getElementById("share-card");
+            var frame = document.getElementById("sc-frame");
+            var holder = document.getElementById("sc-card-holder");
+            var stage = document.getElementById("sc-stage");
 
             Array.prototype.forEach.call(document.querySelectorAll("#sc-fmt-bar [data-fmt]"), function (b) {
                 var on = b.getAttribute("data-fmt") === name;
@@ -18059,16 +18107,30 @@
                 b.style.color = on ? "#9aa0ff" : "var(--text-tertiary)";
             });
 
-            if (!f.w) {
-                card.style.width = ""; card.style.height = "";
-                card.style.padding = "24px"; card.style.transform = "";
-                stage.style.height = "";
+            frame.classList.remove("sc-fr-on", "sc-fr-row", "sc-fr-col", "sc-fr-center");
+            card.style.transform = "none";
+            holder.style.width = ""; holder.style.height = "";
+
+            if (!f.lay) { // Fit — untouched original behaviour
+                card.style.width = "";
+                frame.style.width = ""; frame.style.height = ""; frame.style.padding = "";
+                frame.style.transform = ""; stage.style.height = "";
                 return;
             }
-            card.style.width = f.w + "px";
-            card.style.height = f.h + "px";
-            card.style.padding = f.pad + "px";
-            card.classList.add(name === "post" ? "sc2-post" : "sc2-fixed");
+
+            sc2FrameText();
+            card.style.width = SC_CARD_W + "px";
+            frame.style.width = f.w + "px";
+            frame.style.height = f.h + "px";
+            frame.style.padding = f.pad + "px";
+            frame.classList.add("sc-fr-on", "sc-fr-" + f.lay);
+
+            var natH = card.offsetHeight; // measure untransformed
+            var k = Math.min(f.maxW / SC_CARD_W, f.maxH / natH, 1.6);
+            card.style.transform = "scale(" + k + ")";
+            holder.style.width = Math.round(SC_CARD_W * k) + "px";
+            holder.style.height = Math.round(natH * k) + "px";
+
             sc2Fit();
         }
 
@@ -18077,22 +18139,27 @@
         async function captureShareCard() {
             document.getElementById("share-status").textContent = "Generating image…";
             var card = document.getElementById("share-card");
+            var frame = document.getElementById("sc-frame");
             var f = SC_FMT[scFmt] || SC_FMT.fit;
+            var target = f.lay ? frame : card;
             sc2Settle();
             card.classList.remove("sc2-live");
             card.classList.add("sc2-cap");
             Array.prototype.forEach.call(document.querySelectorAll("#share-card .sc2-fill"), function (el) {
                 el.style.transition = "none";
             });
-            var prevT = card.style.transform;
-            card.style.transform = "none"; // capture at true pixel size, not preview scale
+            var prevT = frame.style.transform;
+            frame.style.transform = "none"; // capture at true pixel size
             await new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); });
             try {
-                var o = { backgroundColor: "#141923", scale: f.scale, useCORS: true, logging: false };
-                if (f.w) { o.width = f.w; o.height = f.h; o.windowWidth = f.w + 40; }
-                return await html2canvas(card, o);
+                var o = {
+                    backgroundColor: f.lay ? "#0a0d14" : "#141923",
+                    scale: f.scale, useCORS: true, logging: false
+                };
+                if (f.lay) { o.width = f.w; o.height = f.h; o.windowWidth = f.w + 40; }
+                return await html2canvas(target, o);
             } finally {
-                card.style.transform = prevT;
+                frame.style.transform = prevT;
                 card.classList.remove("sc2-cap");
             }
         }
