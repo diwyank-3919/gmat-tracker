@@ -3627,10 +3627,27 @@
         }
 
         .sb-topic-meta {
-            display: flex;
+            display: grid;
+            justify-items: end;
             align-items: center;
-            gap: 6px;
             flex: 0 0 auto;
+        }
+
+        .sb-topic-meta > * {
+            grid-area: 1 / 1;
+            transition: opacity 0.15s ease;
+        }
+
+        .sb-topic-meta .sb-drill-chip {
+            opacity: 0;
+        }
+
+        .sb-topic-item:hover .sb-topic-meta .sb-topic-hours {
+            opacity: 0;
+        }
+
+        .sb-topic-item:hover .sb-topic-meta .sb-drill-chip {
+            opacity: 1;
         }
 
         .sb-topic-hours {
