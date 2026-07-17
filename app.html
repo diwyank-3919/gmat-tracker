@@ -8111,10 +8111,10 @@
             transform-origin: top left;
         }
 
-        #share-card.sc2-fixed {
+       #share-card.sc2-fixed {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
         }
 
         #share-card.sc2-post {
@@ -17350,12 +17350,16 @@
         #share-card.sc2-cap * {
             animation: none !important;
             transition: none !important;
-            opacity: 1 !important;
         }
 
-        #share-card.sc2-cap .sc2-rv,
-        #share-card.sc2-cap #sc-streak-dots > div {
+        #share-card.sc2-cap .sc2-rv {
+            opacity: 1 !important;
             transform: none !important;
+        }
+
+        /* Never let the capture reset override intentional opacity */
+        #share-card.sc2-cap .sc2-grain {
+            opacity: 0.045 !important;
         }
 
         #share-card.sc2-cap .sc2-sheen {
