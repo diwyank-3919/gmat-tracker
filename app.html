@@ -13082,12 +13082,41 @@
         function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
         function minsOn(ds) { return sessions.filter(function (s) { return s.date === ds; }).reduce(function (a, s) { return a + s.mins; }, 0); }
 
-        // ── STREAK (single source of truth) ──
+        // ── STREAK SHIELDS (single source of truth) ──
+        var SHIELD_CAP = 2, SHIELD_KEY = "sc_shields_v1";
+        function shieldState() {
+            var d = { count: 0, covered: {}, earnedWeeks: {}, lastSaved: null };
+            try {
+                var raw = localStorage.getItem(SHIELD_KEY);
+                if (raw) { var p = JSON.parse(raw); if (p && typeof p === "object") {
+                    d.count = Math.max(0, Math.min(SHIELD_CAP, p.count | 0));
+                    d.covered = p.covered || {};
+                    d.earnedWeeks = p.earnedWeeks || {};
+                    d.lastSaved = p.lastSaved || null;
+                } }
+            } catch (e) {}
+            return d;
+        }
+        function shieldSave(st) { try { localStorage.setItem(SHIELD_KEY, JSON.stringify(st)); } catch (e) {} }
+        function shieldEarn(weekKey) {
+            var st = shieldState();
+            if (st.earnedWeeks[weekKey] || st.count >= SHIELD_CAP) return;
+            st.count += 1; st.earnedWeeks[weekKey] = true; shieldSave(st);
+        }
         function computeStreak(refToday) {
-            var base = refToday || today;
-            var cur = minsOn(dateStr(base)) > 0 ? new Date(base) : addDays(base, -1);
-            var n = 0;
-            while (minsOn(dateStr(cur)) > 0) { n++; cur = addDays(cur, -1); }
+            var base = refToday || today, st = shieldState(), covered = st.covered, changed = false;
+            function present(d) { var k = dateStr(d); return minsOn(k) > 0 || covered[k] === true; }
+            var cur = present(base) ? new Date(base) : addDays(base, -1), n = 0;
+            while (true) {
+                if (present(cur)) { n++; cur = addDays(cur, -1); continue; }
+                var prev = addDays(cur, -1);
+                if (n > 0 && st.count > 0 && present(prev)) {
+                    st.count -= 1; covered[dateStr(cur)] = true; st.lastSaved = dateStr(cur); changed = true;
+                    n++; cur = prev; continue;
+                }
+                break;
+            }
+            if (changed) shieldSave(st);
             return n;
         }
 
@@ -13714,6 +13743,7 @@
             ws = startOfWeek(today); wm = 0; wt = 0;
             for (var i = 0; i < 7; i++) { wd = addDays(ws, i); wm += minsOn(dateStr(wd)); wt += targetFor(wd); }
             wpct = Math.min(100, Math.round(wm / wt * 100) || 0);
+            if (wt > 0 && wm >= wt) shieldEarn(dateStr(ws));
             document.getElementById("m-week").textContent = wm > 0 ? fmtH(wm) : "0m";
             document.getElementById("m-week").className = "kpi-value" + (wm >= wt && wm > 0 ? " met" : "");
             document.getElementById("m-week-sub").textContent = (wm / 60).toFixed(1) + "h / " + (wt / 60).toFixed(0) + "h target";
