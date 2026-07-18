@@ -13082,6 +13082,15 @@
         function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
         function minsOn(ds) { return sessions.filter(function (s) { return s.date === ds; }).reduce(function (a, s) { return a + s.mins; }, 0); }
 
+        // ── STREAK (single source of truth) ──
+        function computeStreak(refToday) {
+            var base = refToday || today;
+            var cur = minsOn(dateStr(base)) > 0 ? new Date(base) : addDays(base, -1);
+            var n = 0;
+            while (minsOn(dateStr(cur)) > 0) { n++; cur = addDays(cur, -1); }
+            return n;
+        }
+
         document.getElementById("topbar-date").textContent = today.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
         document.getElementById("inp-date").value = dateStr(today);
         document.getElementById("date-display-text").textContent = "Today";
@@ -13755,8 +13764,7 @@
                 document.getElementById("ring-pct-text").style.fill = strokeColor;
             }
 
-            streak = 0; cur = minsOn(ts) > 0 ? new Date(today) : addDays(today, -1);
-            while (true) { ds2 = dateStr(cur); if (minsOn(ds2) > 0) { streak++; cur = addDays(cur, -1); } else break; }
+            streak = computeStreak();
             document.getElementById("streak-chip").textContent = streak;
             document.getElementById("streak-count").textContent = streak;
 
@@ -15159,8 +15167,7 @@
             for (var i = 0; i < 7; i++) { var wd = addDays(ws, i); wm += minsOn(dateStr(wd)); wt += targetFor(wd); }
             var topicTotals = {};
             sessions.forEach(function (s) { topicTotals[s.topic] = (topicTotals[s.topic] || 0) + s.mins; });
-            var streak = 0, cur = minsOn(dateStr(today)) > 0 ? new Date(today) : addDays(today, -1);
-            while (minsOn(dateStr(cur)) > 0) { streak++; cur = addDays(cur, -1); }
+            var streak = computeStreak();
             var ed = localStorage.getItem("gmat_exam_date"), daysLeft = null;
             if (ed) { var p = ed.split("-").map(Number); daysLeft = Math.max(0, Math.ceil((new Date(p[0], p[1] - 1, p[2]) - today) / 86400000)); }
             return {
@@ -17672,8 +17679,7 @@
                 var consistent = 0, totalD = 0, cur = new Date(PS);
                 while (cur <= today) { totalD++; var dm = minsOn(dateStr(cur)), dt = targetFor(cur); if (dm > 0 && dm >= dt * 0.8) consistent++; cur = addDays(cur, 1); }
                 var cons = totalD > 0 ? Math.min(100, Math.round(consistent / totalD * 100)) : 0;
-                var streak = 0, c = minsOn(dateStr(today)) > 0 ? new Date(today) : addDays(today, -1);
-                while (true) { var ds = dateStr(c); if (minsOn(ds) > 0) { streak++; c = addDays(c, -1); } else break; }
+                var streak = computeStreak();
                 return Math.min(100, Math.round(cons * 0.4 + wpct * 0.3 + Math.min(100, streak * 10) * 0.3));
             }
             function snapshot() { window.__rdSnap = { val: computeReadiness(), t: Date.now() }; }
@@ -17721,8 +17727,7 @@
             // Hero stats
             sc2Num(document.getElementById("sc-h-total"), tot, function (v) { return v > 0 ? fmtH(v) : "0h"; }, 1100);
 
-            var streak = 0, cur = minsOn(dateStr(today)) > 0 ? new Date(today) : addDays(today, -1);
-            while (minsOn(dateStr(cur)) > 0) { streak++; cur = addDays(cur, -1); }
+            var streak = computeStreak();
             sc2Num(document.getElementById("sc-h-streak"), streak, function (v) { return v + "🔥"; }, 800);
 
             var PREP_START_SC = new Date(2026, 3, 25); PREP_START_SC.setHours(0, 0, 0, 0);
