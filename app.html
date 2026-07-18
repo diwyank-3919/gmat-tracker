@@ -12190,7 +12190,7 @@
                             </div>
                             <div class="momentum-stat">
                                 <div class="momentum-stat-val green" id="mom-streak">0</div>
-                                <div class="momentum-stat-label"><span class="streak-fire">🔥</span> Day Streak</div>
+                                <div class="momentum-stat-label"><span class="streak-fire">🔥</span> Day Streak <span id="shield-pips" class="shield-pips"></span></div>
                             </div>
                             <div class="momentum-stat">
                                 <div class="momentum-stat-val amber" id="mom-week-pct">0%</div>
@@ -13085,7 +13085,7 @@
         // ── STREAK SHIELDS (single source of truth) ──
         var SHIELD_CAP = 2, SHIELD_KEY = "sc_shields_v1";
         function shieldState() {
-            var d = { count: 0, covered: {}, earnedWeeks: {}, lastSaved: null };
+            var d = { count: 0, covered: {}, earnedWeeks: {}, lastSaved: null, lastEarned: null, toastedSave: null, toastedEarn: null };
             try {
                 var raw = localStorage.getItem(SHIELD_KEY);
                 if (raw) { var p = JSON.parse(raw); if (p && typeof p === "object") {
@@ -13093,6 +13093,9 @@
                     d.covered = p.covered || {};
                     d.earnedWeeks = p.earnedWeeks || {};
                     d.lastSaved = p.lastSaved || null;
+                    d.lastEarned = p.lastEarned || null;
+                    d.toastedSave = p.toastedSave || null;
+                    d.toastedEarn = p.toastedEarn || null;
                 } }
             } catch (e) {}
             return d;
@@ -13101,7 +13104,26 @@
         function shieldEarn(weekKey) {
             var st = shieldState();
             if (st.earnedWeeks[weekKey] || st.count >= SHIELD_CAP) return;
-            st.count += 1; st.earnedWeeks[weekKey] = true; shieldSave(st);
+            st.count += 1; st.earnedWeeks[weekKey] = true; st.lastEarned = weekKey; shieldSave(st);
+        }
+        function syncShields() {
+            var st = shieldState(), dirty = false;
+            var pips = document.getElementById("shield-pips");
+            if (pips) {
+                var html = "";
+                for (var i = 0; i < st.count; i++) html += '<span style="margin-left:2px">🛡️</span>';
+                pips.innerHTML = html;
+                pips.title = st.count > 0 ? st.count + " streak shield" + (st.count > 1 ? "s" : "") + " ready" : "";
+            }
+            if (st.lastEarned && st.lastEarned !== st.toastedEarn) {
+                st.toastedEarn = st.lastEarned; dirty = true;
+                if (typeof showToast === "function") showToast("🛡️", "Shield earned", "You hit your week goal — one missed day is now protected");
+            }
+            if (st.lastSaved && st.lastSaved !== st.toastedSave) {
+                st.toastedSave = st.lastSaved; dirty = true;
+                if (typeof showToast === "function") showToast("🛡️", "Streak saved", "A shield covered a missed day — your streak is intact");
+            }
+            if (dirty) shieldSave(st);
         }
         function computeStreak(refToday) {
             var base = refToday || today, st = shieldState(), covered = st.covered, changed = false;
@@ -13801,6 +13823,7 @@
             var xp = Math.round(tot / 60 * 10);
             document.getElementById("mom-xp").textContent = xp.toLocaleString();
             document.getElementById("mom-streak").textContent = streak;
+            syncShields();
             document.getElementById("mom-week-pct").textContent = wpct + "%";
             var byDate2 = {}; sessions.forEach(function (s) { byDate2[s.date] = (byDate2[s.date] || 0) + s.mins; });
             var bestDayMins = Object.values(byDate2).reduce(function (a, b) { return Math.max(a, b); }, 0);
