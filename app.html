@@ -11956,6 +11956,17 @@
   </div>
 </div>
                 <div id="view-dashboard" class="view-enter">
+                    <!-- WEEKLY WRAPPED PROMPT -->
+                    <div id="wrapped-prompt" style="display:none;align-items:center;gap:14px;background:radial-gradient(120% 200% at 0% 0%, rgba(135,141,255,0.14), rgba(135,141,255,0.03));border:1px solid rgba(135,141,255,0.28);border-radius:14px;padding:14px 16px;margin-bottom:14px">
+                        <div style="width:38px;height:38px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(135,141,255,0.15);color:#9aa0ff;font-size:19px">✦</div>
+                        <div style="flex:1;min-width:0">
+                            <div style="font-family:'Fraunces',serif;font-size:14.5px;font-weight:600;color:var(--text-primary)">Your Weekly Wrapped is ready</div>
+                            <div style="font-size:11.5px;color:var(--text-tertiary);margin-top:1px">See how your week stacked up — and share it.</div>
+                        </div>
+                        <button onclick="openWrappedFromPrompt()" style="flex-shrink:0;padding:8px 16px;background:#878dff;color:#0f1118;border:none;border-radius:9px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer">View</button>
+                        <button onclick="dismissWrappedPrompt()" title="Dismiss" style="flex-shrink:0;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--text-tertiary);font-size:15px;display:flex;align-items:center;justify-content:center">&times;</button>
+                    </div>
+
                     <!-- EXAM COMMAND CENTER -->
                     <div class="card" id="exam-command" style="margin-bottom:14px">
 
@@ -12354,17 +12365,6 @@
                                 <div class="xp-fill" id="xp-fill" style="width:0%"></div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- WEEKLY WRAPPED PROMPT -->
-                    <div id="wrapped-prompt" style="display:none;align-items:center;gap:14px;background:radial-gradient(120% 200% at 0% 0%, rgba(135,141,255,0.14), rgba(135,141,255,0.03));border:1px solid rgba(135,141,255,0.28);border-radius:14px;padding:14px 16px;margin-bottom:14px">
-                        <div style="width:38px;height:38px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(135,141,255,0.15);color:#9aa0ff;font-size:19px">✦</div>
-                        <div style="flex:1;min-width:0">
-                            <div style="font-family:'Fraunces',serif;font-size:14.5px;font-weight:600;color:var(--text-primary)">Your Weekly Wrapped is ready</div>
-                            <div style="font-size:11.5px;color:var(--text-tertiary);margin-top:1px">See how your week stacked up — and share it.</div>
-                        </div>
-                        <button onclick="openWrappedFromPrompt()" style="flex-shrink:0;padding:8px 16px;background:#878dff;color:#0f1118;border:none;border-radius:9px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer">View</button>
-                        <button onclick="dismissWrappedPrompt()" title="Dismiss" style="flex-shrink:0;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--text-tertiary);font-size:15px;display:flex;align-items:center;justify-content:center">&times;</button>
                     </div>
 
                     <!-- BANNER -->
