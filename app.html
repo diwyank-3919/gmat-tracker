@@ -11850,6 +11850,9 @@
                     <button onclick="openTrash()"
                         style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;color:var(--text-secondary);padding:5px 11px;border-radius:100px;border:1px solid var(--border);background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);cursor:pointer"
                         title="View deleted sessions"><i class="ti ti-trash" style="font-size:12px"></i> Trash</button>
+                    <button onclick="openWrapped()"
+                        style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:#9aa0ff;padding:5px 11px;border-radius:100px;border:1px solid rgba(135,141,255,0.32);background:rgba(135,141,255,0.10);backdrop-filter:blur(12px);cursor:pointer"
+                        title="Your weekly recap"><i class="ti ti-sparkles" style="font-size:12px"></i> Wrapped</button>
                     <button onclick="openShareModal()"
                         style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;color:var(--text-secondary);padding:5px 11px;border-radius:100px;border:1px solid var(--border);background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);cursor:pointer"><i
                             class="ti ti-share" style="font-size:12px"></i> Share</button>
@@ -13440,11 +13443,74 @@
                 hasData: cur.mins > 0
             };
         }
-        window.wrappedData = function (refDate) {
+       window.wrappedData = function (refDate) {
             var ws = startOfWeek(refDate || today);
             if (!refDate && _wkAgg(dateStr(ws), dateStr(addDays(ws, 6))).mins === 0) ws = addDays(ws, -7);
             return _wkReport(ws);
         };
+        function renderWrapped() {
+            var d = (typeof wrappedData === "function") ? wrappedData() : null;
+            if (!d) return;
+            function S(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
+            function H(id, v) { var el = document.getElementById(id); if (el) el.innerHTML = v; }
+            var hrs = Math.floor(d.hoursMins / 60), mn = d.hoursMins % 60, big, unit, extra;
+            if (hrs > 0) { big = hrs; unit = "h"; extra = mn ? " " + mn + "m" : ""; } else { big = mn; unit = "m"; extra = ""; }
+            H("wr-hours", big + '<span style="font-size:26px;color:rgba(244,238,226,0.55)">' + unit + extra + '</span>');
+            if (!d.hasData) H("wr-hoursdelta", "");
+            else if (d.hoursDelta > 0) H("wr-hoursdelta", '<span style="color:#46c98f">▲ ' + fmtH(d.hoursDelta) + ' more than last week</span>');
+            else if (d.hoursDelta < 0) H("wr-hoursdelta", '<span style="color:rgba(255,255,255,0.42)">▼ ' + fmtH(-d.hoursDelta) + ' less than last week</span>');
+            else H("wr-hoursdelta", '<span style="color:rgba(255,255,255,0.42)">Same as last week</span>');
+            S("wr-weeklabel", d.weekLabel);
+            S("wr-sessions", d.sessions);
+            S("wr-streak", d.streak);
+            S("wr-acc", d.acc != null ? d.acc + "%" : "—");
+            var ad = document.getElementById("wr-accdelta");
+            if (ad) {
+                if (d.accDelta == null || d.accDelta === 0) { ad.textContent = ""; }
+                else if (d.accDelta > 0) { ad.textContent = "▲" + d.accDelta; ad.style.color = "#46c98f"; }
+                else { ad.textContent = "▼" + Math.abs(d.accDelta); ad.style.color = "rgba(255,255,255,0.42)"; }
+            }
+            var tc = (typeof TC !== "undefined" && d.bestTopic) ? (TC[d.bestTopic] || "#9aa0ff") : "#9aa0ff";
+            H("wr-toptopic", d.bestTopic ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + tc + ';margin-right:6px;vertical-align:middle"></span>' + d.bestTopic : "—");
+            S("wr-toptopic-h", d.bestTopicMins ? fmtH(d.bestTopicMins) + " logged" : "");
+            S("wr-bestday", d.bestDay || "—");
+            S("wr-bestday-h", d.bestDayMins ? fmtH(d.bestDayMins) + " in one day" : "");
+            S("wr-line", d.line);
+            S("wr-name", window.scUserFirstName ? window.scUserFirstName + "'s week" : "");
+        }
+        window.openWrapped = function () {
+            renderWrapped();
+            var m = document.getElementById("wrapped-modal"); if (m) m.style.display = "flex";
+        };
+        window.closeWrapped = function () {
+            var m = document.getElementById("wrapped-modal"); if (m) m.style.display = "none";
+            var st = document.getElementById("wrapped-status"); if (st) st.textContent = "";
+        };
+        async function captureWrapped() {
+            return await html2canvas(document.getElementById("wrapped-card"), { backgroundColor: "#0f1320", scale: 2, useCORS: true, logging: false });
+        }
+        async function wrappedDownload() {
+            var st = document.getElementById("wrapped-status"); if (st) { st.textContent = "Generating image…"; st.style.color = "var(--text-tertiary)"; }
+            try {
+                var canvas = await captureWrapped();
+                var link = document.createElement("a");
+                link.download = "gmat-weekly-wrapped-" + (wrappedData().weekStart || dateStr(today)) + ".png";
+                link.href = canvas.toDataURL("image/png"); link.click();
+                if (st) { st.textContent = "✓ Downloaded!"; st.style.color = "var(--green)"; }
+            } catch (e) { if (st) { st.textContent = "Image failed — try again."; st.style.color = "var(--red)"; } }
+        }
+        async function wrappedCopy() {
+            var st = document.getElementById("wrapped-status"); if (st) { st.textContent = "Generating image…"; st.style.color = "var(--text-tertiary)"; }
+            try {
+                var canvas = await captureWrapped();
+                canvas.toBlob(async function (blob) {
+                    try {
+                        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+                        if (st) { st.textContent = "✓ Copied to clipboard!"; st.style.color = "var(--green)"; }
+                    } catch (e) { if (st) { st.textContent = "Copy failed — try Download instead."; st.style.color = "var(--red)"; } }
+                }, "image/png");
+            } catch (e) { if (st) { st.textContent = "Image failed — try again."; st.style.color = "var(--red)"; } }
+        }
 
         // ── ANIMATED COUNTER ──
         function animateCount(el, fromVal, toVal, suffix, duration) {
@@ -17768,6 +17834,72 @@
             #share-card.sc2-live .sc2-rv { opacity: 1; transform: none; }
         }
     </style>
+
+    <!-- WEEKLY WRAPPED MODAL -->
+    <div id="wrapped-modal" onclick="if(event.target===this)closeWrapped()"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.68);backdrop-filter:blur(14px);z-index:2100;align-items:center;justify-content:center;padding:20px">
+        <div style="max-width:400px;width:100%;max-height:92vh;overflow-y:auto">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+                <div style="font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:#f4eee2">Your Weekly Wrapped</div>
+                <button onclick="closeWrapped()" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--text-tertiary);font-size:16px;display:flex;align-items:center;justify-content:center">&times;</button>
+            </div>
+
+            <div id="wrapped-card" style="background:radial-gradient(120% 80% at 85% -10%, rgba(135,141,255,0.16), rgba(135,141,255,0) 55%),radial-gradient(100% 70% at -8% 110%, rgba(70,201,143,0.10), rgba(70,201,143,0) 52%),linear-gradient(160deg,#10131f,#171d2e);border:1px solid rgba(255,255,255,0.09);border-radius:20px;padding:26px 24px;position:relative;overflow:hidden">
+
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+                    <div style="font-size:10px;font-weight:800;letter-spacing:0.20em;color:#9aa0ff">✦ WEEKLY WRAPPED</div>
+                    <div id="wr-weeklabel" style="font-size:10.5px;font-weight:600;color:rgba(255,255,255,0.42)"></div>
+                </div>
+
+                <div style="margin-bottom:22px">
+                    <div id="wr-hours" style="font-family:'Fraunces',serif;font-size:58px;font-weight:600;color:#f4eee2;line-height:0.9;letter-spacing:-0.02em"></div>
+                    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;color:rgba(255,255,255,0.40);margin-top:8px">Hours studied this week</div>
+                    <div id="wr-hoursdelta" style="font-size:11px;font-weight:600;margin-top:6px"></div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+                    <div style="background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:13px 11px">
+                        <div id="wr-sessions" style="font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:#9aa0ff;line-height:1"></div>
+                        <div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:rgba(255,255,255,0.36);margin-top:5px">Sessions</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:13px 11px">
+                        <div id="wr-streak" style="font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:#46c98f;line-height:1"></div>
+                        <div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:rgba(255,255,255,0.36);margin-top:5px">Day streak</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:13px 11px">
+                        <div style="display:flex;align-items:baseline;gap:4px"><span id="wr-acc" style="font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:#f0bd6a;line-height:1"></span><span id="wr-accdelta" style="font-size:10px;font-weight:700"></span></div>
+                        <div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:rgba(255,255,255,0.36);margin-top:5px">Accuracy</div>
+                    </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+                    <div style="background:rgba(135,141,255,0.07);border:1px solid rgba(135,141,255,0.16);border-radius:12px;padding:13px 14px">
+                        <div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.11em;color:rgba(255,255,255,0.36);margin-bottom:6px">Top focus</div>
+                        <div id="wr-toptopic" style="font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:#f4eee2;line-height:1"></div>
+                        <div id="wr-toptopic-h" style="font-size:10px;color:rgba(255,255,255,0.42);margin-top:4px"></div>
+                    </div>
+                    <div style="background:rgba(70,201,143,0.06);border:1px solid rgba(70,201,143,0.16);border-radius:12px;padding:13px 14px">
+                        <div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.11em;color:rgba(255,255,255,0.36);margin-bottom:6px">Best day</div>
+                        <div id="wr-bestday" style="font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:#f4eee2;line-height:1"></div>
+                        <div id="wr-bestday-h" style="font-size:10px;color:rgba(255,255,255,0.42);margin-top:4px"></div>
+                    </div>
+                </div>
+
+                <div id="wr-line" style="font-size:12px;font-style:italic;line-height:1.5;color:#cdd2e6;background:rgba(255,255,255,0.03);border-left:2px solid #878dff;border-radius:0 8px 8px 0;padding:11px 14px;margin-bottom:18px"></div>
+
+                <div style="display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid rgba(255,255,255,0.07)">
+                    <div style="font-size:10px;color:rgba(255,255,255,0.30);font-weight:600">✦ scoreconsole.com</div>
+                    <div id="wr-name" style="font-family:'Fraunces',serif;font-size:11px;font-weight:600;color:#9aa0ff"></div>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:9px;margin-top:14px;flex-wrap:wrap">
+                <button onclick="wrappedDownload()" style="flex:1;min-width:140px;padding:10px;background:#878dff;color:#0f1118;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px"><i class="ti ti-download"></i> Download PNG</button>
+                <button onclick="wrappedCopy()" style="flex:1;min-width:140px;padding:10px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;gap:7px"><i class="ti ti-copy"></i> Copy image</button>
+            </div>
+            <div id="wrapped-status" style="text-align:center;font-size:11.5px;margin-top:9px;min-height:14px;color:var(--text-tertiary)"></div>
+        </div>
+    </div>
 
     <div id="share-modal"
         style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(14px);z-index:2000;align-items:center;justify-content:center;padding:20px">
