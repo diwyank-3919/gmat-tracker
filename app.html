@@ -13407,42 +13407,43 @@
         }
 
         // ── WEEKLY WRAPPED (data) ──
-        window.wrappedData = function (refDate) {
-            var base = refDate || today;
-            var ws = startOfWeek(base), wsPrev = addDays(ws, -7);
-            function inRange(ds, a, b) { return ds >= a && ds <= b; }
-            var aThis = dateStr(ws), bThis = dateStr(addDays(ws, 6));
-            var aPrev = dateStr(wsPrev), bPrev = dateStr(addDays(wsPrev, 6));
-            function agg(a, b) {
-                var mins = 0, cnt = 0, byTopic = {}, byDay = {}, c = 0, t = 0;
-                (sessions || []).forEach(function (s) {
-                    if (!inRange(s.date, a, b)) return;
-                    if (s.mins > 0) { mins += s.mins; cnt++; byTopic[s.topic] = (byTopic[s.topic] || 0) + s.mins; byDay[s.date] = (byDay[s.date] || 0) + s.mins; }
-                    var m = (s.notes || "").match(/(\d+)\s*\/\s*(\d+)\s*=\s*\d+\s*%/);
-                    if (m) { c += parseInt(m[1], 10); t += parseInt(m[2], 10); }
-                });
-                return { mins: mins, cnt: cnt, byTopic: byTopic, byDay: byDay, acc: t > 0 ? Math.round(c / t * 100) : null };
-            }
-            var cur = agg(aThis, bThis), prev = agg(aPrev, bPrev);
+        function _wkAgg(a, b) {
+            var mins = 0, cnt = 0, byTopic = {}, byDay = {}, c = 0, t = 0;
+            (sessions || []).forEach(function (s) {
+                if (s.date < a || s.date > b) return;
+                if (s.mins > 0) { mins += s.mins; cnt++; byTopic[s.topic] = (byTopic[s.topic] || 0) + s.mins; byDay[s.date] = (byDay[s.date] || 0) + s.mins; }
+                var m = (s.notes || "").match(/(\d+)\s*\/\s*(\d+)\s*=\s*\d+\s*%/);
+                if (m) { c += parseInt(m[1], 10); t += parseInt(m[2], 10); }
+            });
+            return { mins: mins, cnt: cnt, byTopic: byTopic, byDay: byDay, acc: t > 0 ? Math.round(c / t * 100) : null };
+        }
+        function _wkReport(ws) {
+            var cur = _wkAgg(dateStr(ws), dateStr(addDays(ws, 6)));
+            var prev = _wkAgg(dateStr(addDays(ws, -7)), dateStr(addDays(ws, -1)));
             var bt = null, btM = 0; Object.keys(cur.byTopic).forEach(function (k) { if (cur.byTopic[k] > btM) { btM = cur.byTopic[k]; bt = k; } });
             var bd = null, bdM = 0; Object.keys(cur.byDay).forEach(function (k) { if (cur.byDay[k] > bdM) { bdM = cur.byDay[k]; bd = k; } });
             var bdLabel = bd ? new Date(bd + "T00:00:00").toLocaleDateString("en-US", { weekday: "long" }) : "—";
             var accDelta = (cur.acc != null && prev.acc != null) ? (cur.acc - prev.acc) : null;
             var hoursDelta = cur.mins - prev.mins;
             var line;
-            if (cur.mins === 0) line = "A fresh week is waiting — log your first session.";
+            if (cur.mins === 0) line = "A quiet week — a fresh start is waiting.";
             else if (accDelta != null && accDelta >= 3) line = "Your accuracy climbed " + accDelta + " points this week. That's real progress.";
-            else if (hoursDelta > 30) line = "You studied " + fmtH(hoursDelta) + " more than last week. Momentum is building.";
+            else if (hoursDelta > 30) line = "You studied " + fmtH(hoursDelta) + " more than the week before. Momentum is building.";
             else if (bt) line = bt + " got most of your focus this week — keep stacking the reps.";
             else line = "Another week in the books. Consistency wins the GMAT.";
             var lbl = ws.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + " – " + addDays(ws, 6).toLocaleDateString("en-US", { month: "short", day: "numeric" });
             return {
-                weekLabel: lbl, hoursMins: cur.mins, sessions: cur.cnt,
+                weekStart: dateStr(ws), weekLabel: lbl, hoursMins: cur.mins, sessions: cur.cnt,
                 streak: (typeof computeStreak === "function" ? computeStreak() : 0),
                 bestTopic: bt, bestTopicMins: btM, bestDay: bdLabel, bestDayMins: bdM,
                 acc: cur.acc, accDelta: accDelta, hoursDelta: hoursDelta, line: line,
                 hasData: cur.mins > 0
             };
+        }
+        window.wrappedData = function (refDate) {
+            var ws = startOfWeek(refDate || today);
+            if (!refDate && _wkAgg(dateStr(ws), dateStr(addDays(ws, 6))).mins === 0) ws = addDays(ws, -7);
+            return _wkReport(ws);
         };
 
         // ── ANIMATED COUNTER ──
