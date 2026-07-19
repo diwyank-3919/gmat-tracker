@@ -13544,6 +13544,44 @@
         window.openWrappedFromPrompt = function () { _markWrappedSeen(); openWrapped(); };
         window.dismissWrappedPrompt = function () { _markWrappedSeen(); };
 
+        // ── CALIBRATION (data) ──
+        window.calibrationData = function () {
+            var TOPICS = ["Quant", "RC", "CR", "DI", "Verbal"];
+            var pts = [];
+            (sessions || []).forEach(function (s) {
+                var n = s.notes || "";
+                var mp = n.match(/Pred-(\d+)%/i);
+                var ma = n.match(/Accuracy-\d+\s*\/\s*\d+\s*=\s*(\d+)%/i);
+                if (!mp || !ma) return;
+                var pred = parseInt(mp[1], 10), actual = parseInt(ma[1], 10);
+                pts.push({ topic: s.topic, pred: pred, actual: actual, gap: actual - pred, date: s.date });
+            });
+            pts.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+            function agg(arr) {
+                if (!arr.length) return null;
+                var g = 0, ae = 0;
+                arr.forEach(function (p) { g += p.gap; ae += Math.abs(p.gap); });
+                return { n: arr.length, avgGap: Math.round(g / arr.length), avgAbsErr: Math.round(ae / arr.length) };
+            }
+            function verdict(avgGap) {
+                if (avgGap == null) return null;
+                if (avgGap <= -5) return { label: "Overconfident", tone: "warn", detail: "You score about " + Math.abs(avgGap) + " pts below your prediction on average" };
+                if (avgGap >= 5) return { label: "Underconfident", tone: "pos", detail: "You beat your prediction by about " + avgGap + " pts on average" };
+                return { label: "Well calibrated", tone: "good", detail: "Your predictions track your real accuracy within " + Math.abs(avgGap) + " pts" };
+            }
+            var overall = agg(pts), byTopic = {};
+            TOPICS.forEach(function (tp) {
+                var a = agg(pts.filter(function (p) { return p.topic === tp; }));
+                if (a) byTopic[tp] = a;
+            });
+            return {
+                points: pts, count: pts.length,
+                overall: overall, overallVerdict: overall ? verdict(overall.avgGap) : null,
+                byTopic: byTopic, verdictFor: verdict,
+                hasData: pts.length >= 1
+            };
+        };
+
         // ── ANIMATED COUNTER ──
         function animateCount(el, fromVal, toVal, suffix, duration) {
             if (!el) return;
