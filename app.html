@@ -421,6 +421,44 @@
             font-size: 12px
         }
 
+        /* ── STREAK SHIELD PIPS ── */
+        .shield-pips {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            margin-left: 5px;
+            cursor: pointer;
+            vertical-align: middle;
+            white-space: nowrap;
+            outline: none;
+        }
+        .shield-pips:focus-visible {
+            box-shadow: 0 0 0 2px rgba(135, 141, 255, .55);
+            border-radius: 5px;
+        }
+        .shield-pips .sh-pip {
+            font-size: 13px;
+            line-height: 1;
+            transition: opacity .2s ease, transform .2s ease, color .2s ease;
+        }
+        .shield-pips .sh-pip-on {
+            color: #878dff;
+        }
+        .shield-pips .sh-pip-ghost {
+            color: rgba(244, 238, 226, .26);
+        }
+        .shield-pips:hover .sh-pip {
+            transform: translateY(-1px);
+        }
+        .shield-pips.sh-empty .sh-pip-ghost {
+            color: rgba(135, 141, 255, .5);
+            animation: shPipHint 2.6s ease-in-out infinite;
+        }
+        @keyframes shPipHint {
+            0%, 100% { opacity: .55; }
+            50% { opacity: 1; }
+        }
+
         .content {
             padding: 22px 24px;
             flex: 1
@@ -11642,7 +11680,7 @@
                     <div class="topbar-date" id="topbar-date"></div>
                 </div>
                 <div class="topbar-right">
-                    <div class="tb-chip purple"><i class="ti ti-flame"></i><span id="streak-chip">0</span> day streak
+                    <div class="tb-chip purple"><i class="ti ti-flame"></i><span id="streak-chip">0</span> day streak<span id="shield-pips-tb" class="shield-pips" role="button" tabindex="0" aria-label="Streak shields — tap to learn more" onclick="event.stopPropagation();shieldExplain()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();shieldExplain()}"></span>
                     </div>
                     <div class="tb-chip green"><i class="ti ti-target"></i><span id="week-chip">0</span>% this week
                     </div>
@@ -12190,7 +12228,7 @@
                             </div>
                             <div class="momentum-stat">
                                 <div class="momentum-stat-val green" id="mom-streak">0</div>
-                                <div class="momentum-stat-label"><span class="streak-fire">🔥</span> Day Streak <span id="shield-pips" class="shield-pips"></span></div>
+                                <div class="momentum-stat-label"><span class="streak-fire">🔥</span> Day Streak <span id="shield-pips" class="shield-pips" role="button" tabindex="0" aria-label="Streak shields — tap to learn more" onclick="event.stopPropagation();shieldExplain()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();shieldExplain()}"></span></div>
                             </div>
                             <div class="momentum-stat">
                                 <div class="momentum-stat-val amber" id="mom-week-pct">0%</div>
@@ -13106,15 +13144,35 @@
             if (st.earnedWeeks[weekKey] || st.count >= SHIELD_CAP) return;
             st.count += 1; st.earnedWeeks[weekKey] = true; st.lastEarned = weekKey; shieldSave(st);
         }
-        function syncShields() {
-            var st = shieldState(), dirty = false;
-            var pips = document.getElementById("shield-pips");
-            if (pips) {
-                var html = "";
-                for (var i = 0; i < st.count; i++) html += '<span style="margin-left:2px">🛡️</span>';
-                pips.innerHTML = html;
-                pips.title = st.count > 0 ? st.count + " streak shield" + (st.count > 1 ? "s" : "") + " ready" : "";
+       function shieldPipsHTML(count) {
+            var s = "";
+            for (var i = 0; i < SHIELD_CAP; i++) {
+                s += i < count
+                    ? '<i class="ti ti-shield-filled sh-pip sh-pip-on"></i>'
+                    : '<i class="ti ti-shield sh-pip sh-pip-ghost"></i>';
             }
+            return s;
+        }
+        function shieldExplain() {
+            var n = shieldState().count;
+            var msg = n > 0
+                ? "You have " + n + " streak shield" + (n > 1 ? "s" : "") + ". Miss a single day and a shield automatically covers it, so your streak stays alive. You earn one shield each week you hit your goal — you can bank up to " + SHIELD_CAP + "."
+                : "You don't have any streak shields yet. Hit your weekly goal to earn one — then if you ever miss a single day, it'll automatically protect your streak. You can bank up to " + SHIELD_CAP + ".";
+            if (typeof scConfirm === "function") {
+                scConfirm({ title: "Streak Shields", message: msg, icon: '<i class="ti ti-shield-filled" style="font-size:22px;color:var(--accent-bright)"></i>', alertOnly: true, confirmLabel: "Got it" });
+            }
+        }
+        function syncShields() {
+            var st = shieldState(), dirty = false, html = shieldPipsHTML(st.count);
+            ["shield-pips", "shield-pips-tb"].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (!el) return;
+                el.innerHTML = html;
+                el.classList.toggle("sh-empty", st.count === 0);
+                el.setAttribute("title", st.count > 0
+                    ? st.count + " streak shield" + (st.count > 1 ? "s" : "") + " ready — tap to learn more"
+                    : "Tap to learn about streak shields");
+            });
             if (st.lastEarned && st.lastEarned !== st.toastedEarn) {
                 st.toastedEarn = st.lastEarned; dirty = true;
                 if (typeof showToast === "function") showToast("🛡️", "Shield earned", "You hit your week goal — one missed day is now protected");
