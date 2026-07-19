@@ -459,6 +459,79 @@
             50% { opacity: 1; }
         }
 
+        /* ── TODAY'S 3 ── */
+        .t3-row {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 11px 14px;
+            border-radius: 11px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-subtle);
+            transition: transform .15s, border-color .15s;
+        }
+        .t3-row:hover {
+            transform: translateX(3px);
+            border-color: rgba(135, 141, 255, 0.25);
+        }
+        .t3-ic {
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(135, 141, 255, 0.13);
+            color: var(--accent-bright);
+            font-size: 15px;
+        }
+        .t3-body {
+            flex: 1;
+            min-width: 0;
+        }
+        .t3-title {
+            font-size: 12.5px;
+            font-weight: 650;
+            color: var(--text-primary);
+        }
+        .t3-sub {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
+        .t3-go {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 11px;
+            border-radius: 100px;
+            cursor: pointer;
+            background: rgba(135, 141, 255, 0.12);
+            color: var(--accent-bright);
+            border: 1px solid rgba(135, 141, 255, 0.28);
+            transition: background .15s, transform .15s;
+        }
+        .t3-go:hover {
+            background: rgba(135, 141, 255, 0.22);
+            transform: scale(1.04);
+        }
+        .t3-go .ti {
+            font-size: 13px;
+        }
+        /* timer prefill flash */
+        .tp-flash {
+            animation: tpFlash 1.1s ease-out;
+        }
+        @keyframes tpFlash {
+            0% { box-shadow: 0 0 0 0 rgba(135, 141, 255, 0); }
+            25% { box-shadow: 0 0 0 3px rgba(135, 141, 255, 0.45); }
+            100% { box-shadow: 0 0 0 0 rgba(135, 141, 255, 0); }
+        }
         .content {
             padding: 22px 24px;
             flex: 1
@@ -12259,6 +12332,15 @@
                         </div>
                     </div>
 
+                    <!-- TODAY'S 3 -->
+                    <div class="card t3-card" id="t3-card" style="margin-bottom:14px;display:none">
+                        <div class="card-head" style="margin-bottom:12px">
+                            <div class="card-title"><i class="ti ti-checklist"></i> Today's 3</div>
+                            <div style="font-size:11px;color:var(--text-tertiary)">Your best next moves right now</div>
+                        </div>
+                        <div id="t3-list" style="display:flex;flex-direction:column;gap:8px"></div>
+                    </div>
+
                     <!-- LOG + SESSIONS -->
                     <div class="main-grid">
                         <div class="card">
@@ -13204,6 +13286,69 @@
         document.getElementById("inp-date").value = dateStr(today);
         document.getElementById("date-display-text").textContent = "Today";
 
+        // ── TODAY'S 3 (adaptive daily tasks) ──
+        window.startFocus = function (topic) {
+            var sel = document.getElementById("timer-topic");
+            if (sel && topic) {
+                for (var i = 0; i < sel.options.length; i++) {
+                    if (sel.options[i].value === topic || sel.options[i].text === topic) { sel.value = sel.options[i].value; break; }
+                }
+            }
+            var panel = document.getElementById("timer-panel");
+            if (panel) {
+                panel.scrollIntoView({ behavior: "smooth", block: "center" });
+                panel.classList.remove("tp-flash"); void panel.offsetWidth; panel.classList.add("tp-flash");
+            }
+        };
+        window.todaysThree = function () {
+            var AREAS = ["Quant", "RC", "CR", "DI"];
+            var tMins = {}, tLast = {};
+            AREAS.forEach(function (a) { tMins[a] = 0; tLast[a] = null; });
+            (sessions || []).forEach(function (s) {
+                if (tMins.hasOwnProperty(s.topic)) {
+                    tMins[s.topic] += s.mins;
+                    if (!tLast[s.topic] || s.date > tLast[s.topic]) tLast[s.topic] = s.date;
+                }
+            });
+            function daysSince(ds) { if (!ds) return 999; var d = new Date(ds + "T00:00:00"); return Math.round((today - d) / 86400000); }
+            var todayMins = minsOn(dateStr(today));
+            var todayTarget = (typeof targetFor === "function") ? targetFor(today) : 0;
+            var cand = [];
+            AREAS.forEach(function (a) { if (tMins[a] === 0) cand.push({ topic: a, kind: "new", title: "Start " + a, sub: "You haven't logged any " + a + " yet", pri: 1 }); });
+            AREAS.forEach(function (a) { var d = daysSince(tLast[a]); if (tMins[a] > 0 && d >= 3) cand.push({ topic: a, kind: "stale", title: "Revisit " + a, sub: d + " days since your last " + a + " session", pri: 2, sort: d }); });
+            if (todayTarget > 0 && todayMins < todayTarget) {
+                var rem = todayTarget - todayMins;
+                var light = AREAS.filter(function (a) { return tMins[a] > 0; }).sort(function (x, y) { return tMins[x] - tMins[y]; })[0] || "Quant";
+                cand.push({ topic: light, kind: "target", title: "Hit today's target", sub: fmtH(rem) + " more to reach " + fmtH(todayTarget) + " today", pri: 2 });
+            }
+            var touched = AREAS.filter(function (a) { return tMins[a] > 0; });
+            if (touched.length) {
+                var weak = touched.slice().sort(function (x, y) { return tMins[x] - tMins[y]; })[0];
+                cand.push({ topic: weak, kind: "weak", title: "Build up " + weak, sub: "Your lightest area — only " + fmtH(tMins[weak]) + " logged", pri: 3 });
+            }
+            cand.push({ topic: "Review", kind: "review", title: "Quick review session", sub: "Revisit recent mistakes to lock them in", pri: 9 });
+            cand.sort(function (a, b) { return (a.pri - b.pri) || ((b.sort || 0) - (a.sort || 0)); });
+            var seen = {}, out = [];
+            for (var i = 0; i < cand.length && out.length < 3; i++) { var c = cand[i]; if (seen[c.topic]) continue; seen[c.topic] = 1; out.push(c); }
+            return out;
+        };
+        function renderTodaysThree() {
+            var card = document.getElementById("t3-card"), list = document.getElementById("t3-list");
+            if (!card || !list) return;
+            var tasks = (typeof todaysThree === "function") ? todaysThree() : [];
+            if (!tasks.length) { card.style.display = "none"; return; }
+            var ICON = { new: "ti-player-play", stale: "ti-history", target: "ti-target", weak: "ti-trending-up", review: "ti-refresh" };
+            list.innerHTML = tasks.map(function (t) {
+                var ic = ICON[t.kind] || "ti-point";
+                return '<div class="t3-row">'
+                    + '<span class="t3-ic"><i class="ti ' + ic + '"></i></span>'
+                    + '<div class="t3-body"><div class="t3-title">' + t.title + '</div><div class="t3-sub">' + t.sub + '</div></div>'
+                    + '<button class="t3-go" onclick="startFocus(\'' + t.topic.replace(/'/g, "\\'") + '\')">Start <i class="ti ti-arrow-right"></i></button>'
+                    + '</div>';
+            }).join("");
+            card.style.display = "";
+        }
+
         // ── ANIMATED COUNTER ──
         function animateCount(el, fromVal, toVal, suffix, duration) {
             if (!el) return;
@@ -13880,8 +14025,9 @@
 
             var xp = Math.round(tot / 60 * 10);
             document.getElementById("mom-xp").textContent = xp.toLocaleString();
-            document.getElementById("mom-streak").textContent = streak;
+           document.getElementById("mom-streak").textContent = streak;
             syncShields();
+            renderTodaysThree();
             document.getElementById("mom-week-pct").textContent = wpct + "%";
             var byDate2 = {}; sessions.forEach(function (s) { byDate2[s.date] = (byDate2[s.date] || 0) + s.mins; });
             var bestDayMins = Object.values(byDate2).reduce(function (a, b) { return Math.max(a, b); }, 0);
