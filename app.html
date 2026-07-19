@@ -12421,6 +12421,7 @@
                                 </div>
                                 <div class="sc-qgrid">
                                     <div class="sc-qf sc-qfull"><label>Source / Test topic<span class="opt">optional</span></label><input id="tm-source" type="text" placeholder="e.g. CEM Quiz · Hard"></div>
+                                    <div class="sc-qf sc-qfull"><label>Predicted accuracy<span class="opt">guess before you check · 0–100</span></label><input id="tm-pred" type="number" min="0" max="100" inputmode="numeric" placeholder="e.g. 70" style="border-color:rgba(135,141,255,0.32)"></div>
                                     <div class="sc-qf"><label>Correct</label><input id="tm-correct" type="number" min="0" inputmode="numeric" placeholder="0" oninput="scQRecalc('tm')"></div>
                                     <div class="sc-qf"><label>Total questions</label><input id="tm-total" type="number" min="0" inputmode="numeric" placeholder="0" oninput="scQRecalc('tm')"></div>
                                     <div class="sc-qf"><label>Incorrect<span class="opt">auto</span></label><input id="tm-incorrect" type="number" readonly tabindex="-1" placeholder="—"></div>
@@ -12563,6 +12564,7 @@
                                 <div class="field full">
   <div class="sc-qgrid">
     <div class="sc-qf sc-qfull"><label>Source / Test topic<span class="opt">optional</span></label><input id="mn-source" type="text" placeholder="e.g. CEM Quiz · Hard"></div>
+    <div class="sc-qf sc-qfull"><label>Predicted accuracy<span class="opt">guess before you check · 0–100</span></label><input id="mn-pred" type="number" min="0" max="100" inputmode="numeric" placeholder="e.g. 70" style="border-color:rgba(135,141,255,0.32)"></div>
     <div class="sc-qf"><label>Correct</label><input id="mn-correct" type="number" min="0" inputmode="numeric" placeholder="0" oninput="scQRecalc('mn')"></div>
     <div class="sc-qf"><label>Total questions</label><input id="mn-total" type="number" min="0" inputmode="numeric" placeholder="0" oninput="scQRecalc('mn')"></div>
     <div class="sc-qf"><label>Incorrect<span class="opt">auto</span></label><input id="mn-incorrect" type="number" readonly tabindex="-1" placeholder="—"></div>
@@ -27487,19 +27489,22 @@ function scComposeNote(p){
   var noteEl=document.getElementById(p==='tm'?'timer-notes':'inp-notes'); if(!noteEl) return;
   var src=(g('source').value||'').trim();
   var c=parseInt(g('correct').value,10), t=parseInt(g('total').value,10), w=parseFloat(g('weighted').value);
+  var pr=parseInt((g('pred')&&g('pred').value)||'',10);
   var base=(noteEl.value||'')
     .replace(/(?:\[[^\]]*\]\s*·?\s*)?Accuracy-\d+\/\d+=\d+%/ig,'')
     .replace(/·?\s*WScore-[\d.]+/ig,'')
+    .replace(/·?\s*Pred-\d+%/ig,'')
     .replace(/^\s*\[[^\]]*\]\s*·?\s*/,'')
     .replace(/^\s*·\s*|\s*·\s*$/g,'').trim();
   var parts=[];
   if(src) parts.push('['+src+']');
   if(!isNaN(c)&&!isNaN(t)&&t>0) parts.push('Accuracy-'+c+'/'+t+'='+Math.round(c/t*100)+'%');
+  if(!isNaN(pr)&&pr>=0&&pr<=100) parts.push('Pred-'+pr+'%');
   if(!isNaN(w)) parts.push('WScore-'+w);
   var tail=parts.join(' · ');
   noteEl.value=[base,tail].filter(Boolean).join(base&&tail?' · ':'');
 }
-function scClearQ(p){['source','correct','total','incorrect','acc','weighted'].forEach(function(s){var e=document.getElementById(p+'-'+s);if(e)e.value='';});}
+function scClearQ(p){['source','pred','correct','total','incorrect','acc','weighted'].forEach(function(s){var e=document.getElementById(p+'-'+s);if(e)e.value='';});}
 
 /* ── VERBAL (RC+CR) — TIMER TAB ── */
 function vbtIsVerbal(){var t=document.getElementById('timer-topic');return !!t&&t.value==='Verbal (RC+CR)';}
