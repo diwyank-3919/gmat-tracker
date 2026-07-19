@@ -12924,6 +12924,16 @@
                     </div>
                     <div style="position:relative;height:180px"><canvas id="monthlyChart"></canvas></div>
                 </div>
+                <div class="card" id="calib-card" style="margin-bottom:14px">
+                    <div class="card-head" style="margin-bottom:14px">
+                        <div class="card-title"><i class="ti ti-target-arrow"></i> Calibration — predicted vs. actual</div>
+                        <div style="font-size:11px;color:var(--text-tertiary)">How well your confidence matches reality</div>
+                    </div>
+                    <div id="calib-verdict" style="margin-bottom:14px"></div>
+                    <div id="calib-chart-wrap" style="position:relative;height:260px;margin-bottom:14px"><canvas id="calibChart"></canvas></div>
+                    <div id="calib-breakdown" style="display:flex;flex-direction:column;gap:7px"></div>
+                    <div id="calib-empty" style="display:none;text-align:center;color:var(--text-tertiary);font-size:12.5px;padding:20px 0"></div>
+                </div>
             </div>
 
             <!-- CALENDAR VIEW -->
@@ -14645,7 +14655,7 @@
             var allDates = Object.keys(byDate).sort(); var best = 0, cur2 = 0, prev = null;
             allDates.forEach(function (ds) { if (prev) { var diff = (parseLocal(ds) - parseLocal(prev)) / (1000 * 60 * 60 * 24); cur2 = diff === 1 ? cur2 + 1 : 1; } else { cur2 = 1; } if (cur2 > best) best = cur2; prev = ds; });
             document.getElementById("an-best-streak").textContent = best;
-            renderHeatmap(); renderDowChart(); renderTopicBarChart(); renderMonthlyChart();
+            renderHeatmap(); renderDowChart(); renderTopicBarChart(); renderMonthlyChart(); renderCalibChart();
         }
 
         function renderHeatmap() {
@@ -14713,6 +14723,64 @@
                 options: {
                     responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { ...CHART_COMMON_OPTS, callbacks: { label: function (ctx) { var v = ctx.parsed.y, h = Math.floor(v), m = Math.round((v - h) * 60); return h + "h" + (m ? " " + m + "m" : ""); } } } },
                     scales: { x: { grid: { display: false }, ticks: { font: { size: 11 }, color: "rgba(255,255,255,0.35)" }, border: { display: false } }, y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { font: { size: 11 }, color: "rgba(255,255,255,0.35)", callback: function (v) { return v + "h"; } }, border: { display: false }, min: 0 } }
+                }
+            });
+        }
+
+        var calibChartInst = null;
+        function renderCalibChart() {
+            var wrap = document.getElementById("calib-card"); if (!wrap) return;
+            var d = (typeof calibrationData === "function") ? calibrationData() : null;
+            var chartWrap = document.getElementById("calib-chart-wrap");
+            var vEl = document.getElementById("calib-verdict"), bEl = document.getElementById("calib-breakdown"), eEl = document.getElementById("calib-empty");
+            if (!d || !d.hasData) {
+                if (calibChartInst) { calibChartInst.destroy(); calibChartInst = null; }
+                if (chartWrap) chartWrap.style.display = "none";
+                if (vEl) vEl.innerHTML = ""; if (bEl) bEl.innerHTML = "";
+                if (eEl) { eEl.style.display = "block"; eEl.textContent = "Log a few sessions with a \u201CPredicted accuracy\u201D to see how your confidence matches your real results."; }
+                return;
+            }
+            if (eEl) eEl.style.display = "none";
+            if (chartWrap) chartWrap.style.display = "block";
+            var vv = d.overallVerdict, tone = vv ? vv.tone : "good";
+            var toneCol = tone === "warn" ? "#f0bd6a" : tone === "pos" ? "#9aa0ff" : "#46c98f";
+            var toneBg = tone === "warn" ? "rgba(240,189,106,0.12)" : tone === "pos" ? "rgba(135,141,255,0.12)" : "rgba(70,201,143,0.12)";
+            if (vEl) vEl.innerHTML = '<div style="display:flex;align-items:center;gap:11px;background:' + toneBg + ';border:1px solid ' + toneCol + '33;border-radius:11px;padding:12px 14px">'
+                + '<span style="font-family:\'Fraunces\',serif;font-size:22px;font-weight:600;color:' + toneCol + ';line-height:1;white-space:nowrap">' + (d.overall.avgGap > 0 ? "+" : "") + d.overall.avgGap + '<span style="font-size:12px"> pts</span></span>'
+                + '<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:700;color:var(--text-primary)">' + vv.label + '</div><div style="font-size:11px;color:var(--text-tertiary);margin-top:1px">' + vv.detail + ' · across ' + d.overall.n + ' predicted session' + (d.overall.n > 1 ? "s" : "") + '</div></div></div>';
+            if (bEl) {
+                bEl.innerHTML = Object.keys(d.byTopic).map(function (tp) {
+                    var a = d.byTopic[tp], vd = d.verdictFor(a.avgGap);
+                    var col = (typeof TC !== "undefined" && TC[tp]) ? TC[tp] : "#9aa0ff";
+                    var gcol = a.avgGap <= -5 ? "#f0bd6a" : a.avgGap >= 5 ? "#9aa0ff" : "#46c98f";
+                    return '<div style="display:flex;align-items:center;gap:9px;font-size:12px">'
+                        + '<span style="width:8px;height:8px;border-radius:50%;background:' + col + ';flex-shrink:0"></span>'
+                        + '<span style="font-weight:650;color:var(--text-primary);min-width:52px">' + tp + '</span>'
+                        + '<span style="color:' + gcol + ';font-weight:700">' + (a.avgGap > 0 ? "+" : "") + a.avgGap + ' pts</span>'
+                        + '<span style="color:var(--text-tertiary)">' + vd.label.toLowerCase() + '</span>'
+                        + '<span style="color:var(--text-muted);margin-left:auto;font-size:11px">' + a.n + '×</span></div>';
+                }).join("");
+            }
+            var byTopicPts = {};
+            d.points.forEach(function (p) { (byTopicPts[p.topic] = byTopicPts[p.topic] || []).push({ x: p.pred, y: p.actual }); });
+            var datasets = Object.keys(byTopicPts).map(function (tp) {
+                var col = (typeof TC !== "undefined" && TC[tp]) ? TC[tp] : "#9aa0ff";
+                return { type: "scatter", label: tp, data: byTopicPts[tp], backgroundColor: col, borderColor: col, pointRadius: 5, pointHoverRadius: 7 };
+            });
+            datasets.push({ type: "line", label: "_diag", data: [{ x: 0, y: 0 }, { x: 100, y: 100 }], borderColor: "rgba(255,255,255,0.22)", borderWidth: 1.5, borderDash: [5, 5], pointRadius: 0, fill: false, order: 99 });
+            if (calibChartInst) calibChartInst.destroy();
+            calibChartInst = new Chart(document.getElementById("calibChart"), {
+                data: { datasets: datasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: "bottom", labels: { filter: function (i) { return i.text !== "_diag"; }, color: "rgba(255,255,255,0.55)", font: { size: 10 }, boxWidth: 8, boxHeight: 8, usePointStyle: true } },
+                        tooltip: { ...CHART_COMMON_OPTS, filter: function (i) { return i.dataset.label !== "_diag"; }, callbacks: { label: function (ctx) { return ctx.dataset.label + ": predicted " + ctx.parsed.x + "%, actual " + ctx.parsed.y + "%"; } } }
+                    },
+                    scales: {
+                        x: { min: 0, max: 100, title: { display: true, text: "Predicted %", color: "rgba(255,255,255,0.35)", font: { size: 10 } }, grid: { color: "rgba(255,255,255,0.05)" }, ticks: { font: { size: 10 }, color: "rgba(255,255,255,0.35)", callback: function (v) { return v + "%"; } }, border: { display: false } },
+                        y: { min: 0, max: 100, title: { display: true, text: "Actual %", color: "rgba(255,255,255,0.35)", font: { size: 10 } }, grid: { color: "rgba(255,255,255,0.05)" }, ticks: { font: { size: 10 }, color: "rgba(255,255,255,0.35)", callback: function (v) { return v + "%"; } }, border: { display: false } }
+                    }
                 }
             });
         }
