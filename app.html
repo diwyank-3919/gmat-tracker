@@ -520,7 +520,38 @@
             background: rgba(135, 141, 255, 0.22);
             transform: scale(1.04);
         }
-        .t3-go .ti {
+       .t3-go .ti {
+            font-size: 13px;
+        }
+        .t3-count {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-tertiary);
+        }
+        .t3-count-all {
+            color: var(--green);
+        }
+        .t3-row-done {
+            opacity: .55;
+        }
+        .t3-row-done .t3-ic {
+            background: rgba(70, 201, 143, 0.14);
+            color: var(--green);
+        }
+        .t3-done {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 11px;
+            border-radius: 100px;
+            background: rgba(70, 201, 143, 0.12);
+            color: var(--green);
+            border: 1px solid rgba(70, 201, 143, 0.28);
+        }
+        .t3-done .ti {
             font-size: 13px;
         }
         /* timer prefill flash */
@@ -12336,7 +12367,7 @@
                     <div class="card t3-card" id="t3-card" style="margin-bottom:14px;display:none">
                         <div class="card-head" style="margin-bottom:12px">
                             <div class="card-title"><i class="ti ti-checklist"></i> Today's 3</div>
-                            <div style="font-size:11px;color:var(--text-tertiary)">Your best next moves right now</div>
+                            <div id="t3-count" class="t3-count">0/3 done today</div>
                         </div>
                         <div id="t3-list" style="display:flex;flex-direction:column;gap:8px"></div>
                     </div>
@@ -13332,20 +13363,46 @@
             for (var i = 0; i < cand.length && out.length < 3; i++) { var c = cand[i]; if (seen[c.topic]) continue; seen[c.topic] = 1; out.push(c); }
             return out;
         };
+        function today3State() {
+            var key = "sc_today3_v1", ds = dateStr(today), st = null;
+            try { var raw = localStorage.getItem(key); if (raw) { var p = JSON.parse(raw); if (p && p.date === ds) st = p; } } catch (e) {}
+            if (!st || !Array.isArray(st.tasks) || !st.tasks.length) {
+                st = { date: ds, tasks: (typeof todaysThree === "function") ? todaysThree() : [], celebrated: false };
+                try { localStorage.setItem(key, JSON.stringify(st)); } catch (e) {}
+            }
+            return st;
+        }
+        function today3Save(st) { try { localStorage.setItem("sc_today3_v1", JSON.stringify(st)); } catch (e) {} }
         function renderTodaysThree() {
             var card = document.getElementById("t3-card"), list = document.getElementById("t3-list");
             if (!card || !list) return;
-            var tasks = (typeof todaysThree === "function") ? todaysThree() : [];
+            var st = today3State(), tasks = st.tasks;
             if (!tasks.length) { card.style.display = "none"; return; }
+            var ds = dateStr(today), doneTopics = {};
+            (sessions || []).forEach(function (s) { if (s.date === ds) doneTopics[s.topic] = true; });
             var ICON = { new: "ti-player-play", stale: "ti-history", target: "ti-target", weak: "ti-trending-up", review: "ti-refresh" };
+            var doneCount = 0;
             list.innerHTML = tasks.map(function (t) {
+                var done = !!doneTopics[t.topic]; if (done) doneCount++;
                 var ic = ICON[t.kind] || "ti-point";
-                return '<div class="t3-row">'
-                    + '<span class="t3-ic"><i class="ti ' + ic + '"></i></span>'
+                var right = done
+                    ? '<span class="t3-done"><i class="ti ti-check"></i> Done</span>'
+                    : '<button class="t3-go" onclick="startFocus(\'' + t.topic.replace(/'/g, "\\'") + '\')">Start <i class="ti ti-arrow-right"></i></button>';
+                return '<div class="t3-row' + (done ? ' t3-row-done' : '') + '">'
+                    + '<span class="t3-ic">' + (done ? '<i class="ti ti-circle-check"></i>' : '<i class="ti ' + ic + '"></i>') + '</span>'
                     + '<div class="t3-body"><div class="t3-title">' + t.title + '</div><div class="t3-sub">' + t.sub + '</div></div>'
-                    + '<button class="t3-go" onclick="startFocus(\'' + t.topic.replace(/'/g, "\\'") + '\')">Start <i class="ti ti-arrow-right"></i></button>'
+                    + right
                     + '</div>';
             }).join("");
+            var badge = document.getElementById("t3-count");
+            if (badge) {
+                badge.textContent = doneCount + "/" + tasks.length + " done today";
+                badge.classList.toggle("t3-count-all", doneCount === tasks.length);
+            }
+            if (doneCount === tasks.length && !st.celebrated) {
+                st.celebrated = true; today3Save(st);
+                if (typeof showToast === "function") showToast("✅", "Today's 3 complete", "All three done — momentum locked in for today");
+            }
             card.style.display = "";
         }
 
