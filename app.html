@@ -20788,6 +20788,49 @@
             window.renderErrorView = function () {
                 elLoadHistory();
             };
+            window.errResurfaceData = function () {
+                var SRS_KEY = "sc_err_srs_v1", INTERVALS = [3, 7, 21, 45];
+                var srs = {}; try { srs = JSON.parse(localStorage.getItem(SRS_KEY) || "{}") || {}; } catch (e) {}
+                return supa.auth.getUser().then(function (r) {
+                    var uid = r && r.data && r.data.user && r.data.user.id;
+                    if (!uid) return { data: [] };
+                    return supa.from("error_analyses").select("sheldon_analysis,created_at").eq("user_id", uid).order("created_at", { ascending: false }).limit(30);
+                }).then(function (res) {
+                    if (!res || res.error || !res.data) return { due: [], total: 0, upcoming: 0, mastered: 0 };
+                    var byKey = {};
+                    res.data.forEach(function (row) {
+                        var a = row.sheldon_analysis || {}, dna = a.errorDNA || [];
+                        dna.forEach(function (d) {
+                            if (!d || !d.category) return;
+                            var key = (d.section || "") + "|" + d.category;
+                            if (!byKey[key]) byKey[key] = { key: key, category: d.category, section: d.section || "", pct: d.pct || 0, identifiedAt: row.created_at };
+                        });
+                    });
+                    var now = Date.now(), due = [], upcoming = 0, mastered = 0;
+                    Object.keys(byKey).forEach(function (key) {
+                        var item = byKey[key], st = srs[key] || { box: 0, reviewedAt: null };
+                        var base = st.reviewedAt || item.identifiedAt;
+                        var interval = INTERVALS[Math.min(st.box, INTERVALS.length - 1)];
+                        var dueMs = new Date(base).getTime() + interval * 86400000;
+                        item.box = st.box; item.reviewedAt = st.reviewedAt;
+                        item.daysSinceId = Math.floor((now - new Date(item.identifiedAt).getTime()) / 86400000);
+                        if (now >= dueMs) due.push(item); else upcoming++;
+                        if (st.box >= INTERVALS.length - 1) mastered++;
+                    });
+                    due.sort(function (a, b) { return (b.pct - a.pct) || (new Date(a.identifiedAt) - new Date(b.identifiedAt)); });
+                    return { due: due, total: Object.keys(byKey).length, upcoming: upcoming, mastered: mastered };
+                }).catch(function () { return { due: [], total: 0, upcoming: 0, mastered: 0 }; });
+            };
+            window.errReview = function (key, fixed) {
+                var SRS_KEY = "sc_err_srs_v1";
+                var srs = {}; try { srs = JSON.parse(localStorage.getItem(SRS_KEY) || "{}") || {}; } catch (e) {}
+                var st = srs[key] || { box: 0, reviewedAt: null };
+                st.box = fixed ? Math.min(st.box + 1, 3) : 0;
+                st.reviewedAt = new Date().toISOString();
+                srs[key] = st;
+                try { localStorage.setItem(SRS_KEY, JSON.stringify(srs)); } catch (e) {}
+                return st;
+            };
 
             /* ── init ── */
             document.addEventListener('DOMContentLoaded', function () {
