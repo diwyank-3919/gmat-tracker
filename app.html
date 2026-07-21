@@ -11672,6 +11672,7 @@
                     Error log
                 </div>
                 <div class="sb-item" onclick="switchView('reads')" id="nav-reads"><i class="ti ti-book-2"></i> Daily Reads</div>
+                <div class="sb-item" onclick="switchView('pods')" id="nav-pods"><i class="ti ti-users-group"></i> Study Pods</div>
                 <div class="sb-item" onclick="window.location='/quant.html#entry'" id="nav-quant-drill"
                     title="Log a Quant attempt"><i class="ti ti-math-symbols"></i> Quant drills</div>
             </div>
@@ -11955,6 +11956,35 @@
  
   </div>
 </div>
+               <div id="view-pods" style="display:none">
+                    <div class="card" style="margin-bottom:14px">
+                        <div class="card-head" style="margin-bottom:2px">
+                            <div class="card-title"><i class="ti ti-users-group"></i> Study Pods</div>
+                            <div style="font-size:11px;color:var(--text-tertiary)">Stay accountable with up to 6 people · streaks &amp; weekly hours only, never scores</div>
+                        </div>
+                    </div>
+                    <div id="pods-container"></div>
+                    <div class="card" style="margin-bottom:14px">
+                        <div class="card-head" style="margin-bottom:12px"><div class="card-title"><i class="ti ti-plus"></i> Start or join a pod</div></div>
+                        <div style="display:flex;gap:14px;flex-wrap:wrap">
+                            <div style="flex:1;min-width:230px">
+                                <label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-tertiary);margin-bottom:6px">Create a new pod</label>
+                                <div style="display:flex;gap:8px">
+                                    <input id="pod-name-inp" type="text" placeholder="Pod name (e.g. Morning Grinders)" style="flex:1;min-width:0;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text-primary);font-family:inherit;font-size:13px">
+                                    <button onclick="podCreateUI()" style="flex-shrink:0;padding:9px 16px;background:#878dff;color:#0f1118;border:none;border-radius:9px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">Create</button>
+                                </div>
+                            </div>
+                            <div style="flex:1;min-width:230px">
+                                <label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-tertiary);margin-bottom:6px">Join with a code</label>
+                                <div style="display:flex;gap:8px">
+                                    <input id="pod-code-inp" type="text" placeholder="invite code" style="flex:1;min-width:0;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text-primary);font-family:inherit;font-size:13px">
+                                    <button onclick="podJoinUI()" style="flex-shrink:0;padding:9px 16px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer">Join</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="pod-action-status" style="font-size:12px;margin-top:10px;min-height:15px;color:var(--text-tertiary)"></div>
+                    </div>
+                </div>
                 <div id="view-dashboard" class="view-enter">
                     <!-- WEEKLY WRAPPED PROMPT -->
                     <div id="wrapped-prompt" style="display:none;align-items:center;gap:14px;background:radial-gradient(120% 200% at 0% 0%, rgba(135,141,255,0.14), rgba(135,141,255,0.03));border:1px solid rgba(135,141,255,0.28);border-radius:14px;padding:14px 16px;margin-bottom:14px">
@@ -13635,6 +13665,65 @@
                 return order.map(function (id) { return pods[id]; });
             });
         };
+        function _podEsc(s) { var d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; }
+        function _podStatus(msg, tone) { var el = document.getElementById("pod-action-status"); if (!el) return; el.textContent = msg; el.style.color = tone === "ok" ? "var(--green)" : tone === "err" ? "var(--red)" : "var(--text-tertiary)"; }
+        function podCardHTML(p) {
+            var maxW = Math.max.apply(null, p.members.map(function (m) { return m.wmins; }).concat([1]));
+            var rows = p.members.map(function (m, i) {
+                var pct = Math.round(m.wmins / maxW * 100), rank = i + 1;
+                var medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : (rank + ".");
+                var initials = (m.name || "?").trim().charAt(0).toUpperCase();
+                return '<div style="display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:11px;margin-bottom:6px;background:' + (m.isMe ? "rgba(135,141,255,0.08)" : "rgba(255,255,255,0.025)") + ';border:1px solid ' + (m.isMe ? "rgba(135,141,255,0.22)" : "rgba(255,255,255,0.06)") + '">'
+                    + '<div style="width:20px;text-align:center;font-size:13px;flex-shrink:0">' + medal + '</div>'
+                    + '<div style="width:30px;height:30px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(135,141,255,0.15);color:#9aa0ff;font-weight:700;font-size:13px">' + _podEsc(initials) + '</div>'
+                    + '<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:650;color:var(--text-primary)">' + _podEsc(m.name) + (m.isMe ? ' <span style="font-size:10px;color:#9aa0ff;font-weight:600">(you)</span>' : '') + '</div>'
+                    + '<div style="height:4px;border-radius:3px;background:rgba(255,255,255,0.06);margin-top:5px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:#878dff;border-radius:3px"></div></div></div>'
+                    + '<div style="text-align:right;flex-shrink:0"><div style="font-size:13px;font-weight:700;color:#f0bd6a">' + m.streak + ' 🔥</div><div style="font-size:10.5px;color:var(--text-tertiary);margin-top:1px">' + fmtH(m.wmins) + ' this wk</div></div></div>';
+            }).join("");
+            return '<div class="card" style="margin-bottom:14px">'
+                + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">'
+                + '<div><div style="font-family:\'Fraunces\',serif;font-size:16px;font-weight:600;color:var(--text-primary)">' + _podEsc(p.name) + '</div>'
+                + '<div style="font-size:11px;color:var(--text-tertiary);margin-top:1px">' + p.members.length + ' member' + (p.members.length > 1 ? "s" : "") + '</div></div>'
+                + '<div style="display:flex;align-items:center;gap:7px">'
+                + '<button onclick="podCopyInvite(\'' + p.code + '\')" title="Copy invite code" style="display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:12px;font-weight:700;color:#9aa0ff;background:rgba(135,141,255,0.12);border:1px solid rgba(135,141,255,0.28);border-radius:8px;padding:7px 11px;cursor:pointer"><i class="ti ti-link"></i> ' + p.code + '</button>'
+                + '<button onclick="podLeaveUI(\'' + p.id + '\')" title="Leave pod" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;cursor:pointer;color:var(--text-tertiary);font-size:14px"><i class="ti ti-logout"></i></button>'
+                + '</div></div>' + rows + '</div>';
+        }
+        function renderPods() {
+            var box = document.getElementById("pods-container"); if (!box) return;
+            box.innerHTML = '<div class="card" style="margin-bottom:14px;text-align:center;color:var(--text-tertiary);font-size:12.5px;padding:20px 0">Loading your pods…</div>';
+            (window.podSyncStats ? podSyncStats(true) : Promise.resolve()).then(function () { return podFetchFeed(); }).then(function (pods) {
+                if (!pods.length) {
+                    box.innerHTML = '<div class="card" style="margin-bottom:14px;text-align:center;padding:30px 20px">'
+                        + '<div style="font-size:34px;margin-bottom:10px">🤝</div>'
+                        + '<div style="font-family:\'Fraunces\',serif;font-size:16px;font-weight:600;color:var(--text-primary);margin-bottom:6px">No pods yet</div>'
+                        + '<div style="font-size:12.5px;color:var(--text-tertiary);max-width:360px;margin:0 auto">Create a pod and share the code with study partners, or join one with a friend\u2019s code. You\u2019ll see each other\u2019s streaks and weekly hours — never scores.</div></div>';
+                    return;
+                }
+                box.innerHTML = pods.map(function (p) { return podCardHTML(p); }).join("");
+            }).catch(function (e) {
+                box.innerHTML = '<div class="card" style="margin-bottom:14px;text-align:center;color:var(--red);font-size:12.5px;padding:20px 0">Couldn\u2019t load pods. ' + _podEsc(e && e.message ? e.message : "") + '</div>';
+            });
+        }
+        window.podCopyInvite = function (code) { try { navigator.clipboard.writeText(code); } catch (e) {} _podStatus("Invite code " + code + " copied — share it with your study partners.", "ok"); };
+        window.podCreateUI = function () {
+            var name = (document.getElementById("pod-name-inp") || {}).value || "";
+            _podStatus("Creating…", "");
+            podCreate(name).then(function (code) { var i = document.getElementById("pod-name-inp"); if (i) i.value = ""; _podStatus("Pod created! Invite code: " + code, "ok"); renderPods(); })
+                .catch(function (e) { _podStatus("Couldn't create pod. " + (e.message || ""), "err"); });
+        };
+        window.podJoinUI = function () {
+            var code = (document.getElementById("pod-code-inp") || {}).value || "";
+            if (!code.trim()) { _podStatus("Enter an invite code first.", "err"); return; }
+            _podStatus("Joining…", "");
+            podJoin(code).then(function (nm) { var i = document.getElementById("pod-code-inp"); if (i) i.value = ""; _podStatus("Joined " + (nm || "pod") + "!", "ok"); renderPods(); })
+                .catch(function (e) { _podStatus("Couldn't join. " + (e.message || "Check the code."), "err"); });
+        };
+        window.podLeaveUI = function (podId) {
+            var go = function () { podLeave(podId).then(function () { renderPods(); }).catch(function (e) { _podStatus("Couldn't leave. " + (e.message || ""), "err"); }); };
+            if (typeof scConfirm === "function") scConfirm({ title: "Leave pod?", message: "You'll stop sharing your streak and hours with this pod. You can rejoin later with the code.", confirmLabel: "Leave", onConfirm: go });
+            else go();
+        };
 
         // ── ANIMATED COUNTER ──
         function animateCount(el, fromVal, toVal, suffix, duration) {
@@ -14657,7 +14746,7 @@
         var dowChartInst = null, topicBarChartInst = null, monthlyChartInst = null;
 
         function switchView(view) {
-            var views = ["dashboard", "analytics", "calendar", "sessions", "mock", "errors", "reads"];
+            var views = ["dashboard", "analytics", "calendar", "sessions", "mock", "errors", "reads", "pods"];
             var current = document.querySelector(".view-enter");
             if (current) {
                 current.classList.remove("view-enter");
@@ -14678,13 +14767,14 @@
                 }
             });
             currentView = view;
-            var titles = { dashboard: "Dashboard", analytics: "Analytics", calendar: "Calendar", sessions: "Session log", mock: "Mock Scores", errors: "Error Log" };
+            var titles = { dashboard: "Dashboard", analytics: "Analytics", calendar: "Calendar", sessions: "Session log", mock: "Mock Scores", errors: "Error Log", pods: "Study Pods" };
             document.querySelector(".topbar-title").textContent = titles[view] || view;
             if (view === "analytics") renderAnalytics();
             if (view === "calendar") renderBigCalendar();
             if (view === "sessions") renderFullLog();
             if (view === "mock") renderMockView();
             if (view === "errors") renderErrorView();
+            if (view === "pods") renderPods();
         }
 
         function renderAnalytics() {
