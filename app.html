@@ -20604,7 +20604,7 @@
                         + '}\n\n'
                         + 'Student context: ' + JSON.stringify(studyCtx) + '\n\n'
                         + (window.__elStats ? 'Verified stats (use these EXACT numbers; do NOT recount; OMIT totalErrors, accuracy and errorDNA from your own JSON): ' + JSON.stringify(window.__elStats) + '\n\n' : '')
-                        + 'Error log (first 12000 chars):\n' + rawText.slice(0, 12000);
+                        + 'Error log (first 12000 chars):\n' + rawText.slice(0, 40000);
 
                     var res = await supa.functions.invoke('sheldon', {
                         body: {
