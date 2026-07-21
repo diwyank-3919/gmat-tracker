@@ -13677,23 +13677,51 @@
             var chip = function (html) { return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;color:var(--text-secondary);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:100px;padding:3px 9px">' + html + '</span>'; };
             var rows = p.members.map(function (m, i) {
                 var pct = Math.round(m.wmins / maxW * 100), rank = i + 1;
-                var medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : (rank + ".");
                 var initials = (m.name || "?").trim().charAt(0).toUpperCase();
                 var ds = _podDaysSince(m.lastActive);
-                var dotCol = ds < 1 ? "#46c98f" : ds < 7 ? "#f0bd6a" : "rgba(255,255,255,0.22)";
-                var seen = ds < 1 ? "active today" : ds === 1 ? "seen yesterday" : ds < 7 ? "seen " + ds + "d ago" : "quiet " + (ds > 30 ? "30+" : ds) + "d";
-                var stale = ds >= 7, leader = (!solo && i === 0 && (m.streak > 0 || m.wmins > 0));
+                var justJoined = (m.streak || 0) === 0 && (m.wmins || 0) === 0 && ds < 2;
+                var stale = ds >= 7 && !justJoined;
+                var leader = (!solo && i === 0 && (m.streak > 0 || m.wmins > 0));
+                var medal = justJoined ? "·" : rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : (rank + ".");
+                var dotCol = justJoined ? "#9aa0ff" : ds < 1 ? "#46c98f" : ds < 7 ? "#f0bd6a" : "rgba(255,255,255,0.22)";
+                var seen = justJoined ? "just joined" : ds < 1 ? "active today" : ds === 1 ? "seen yesterday" : ds < 7 ? "seen " + ds + "d ago" : "quiet " + (ds > 30 ? "30+" : ds) + "d";
+                var flame = (m.streak || 0) >= 21 ? "#ff8a4c" : (m.streak || 0) >= 1 ? "#f0bd6a" : "rgba(255,255,255,0.3)";
                 var bg = m.isMe ? "rgba(135,141,255,0.08)" : "rgba(255,255,255,0.025)";
                 var bd = leader ? "rgba(240,189,106,0.35)" : m.isMe ? "rgba(135,141,255,0.22)" : "rgba(255,255,255,0.06)";
                 var glow = leader ? ";box-shadow:0 0 0 1px rgba(240,189,106,0.12),0 4px 18px rgba(240,189,106,0.07)" : "";
+                var mid, right;
+                if (justJoined) {
+                    mid = '<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:650;color:var(--text-primary)">' + _podEsc(m.name) + (m.isMe ? ' <span style="font-size:10px;color:#9aa0ff;font-weight:600">(you)</span>' : '') + '</div>'
+                        + '<div style="font-size:10.5px;color:var(--text-tertiary);margin-top:3px">No sessions yet' + (m.isMe ? ' — log one to get on the board' : ' — cheer them on 👋') + '</div></div>';
+                    right = '<div style="flex-shrink:0"><span style="font-size:10.5px;color:#9aa0ff;background:rgba(135,141,255,0.12);border:1px solid rgba(135,141,255,0.25);padding:3px 9px;border-radius:100px;font-weight:600">just joined</span></div>';
+                } else {
+                    mid = '<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:650;color:var(--text-primary)">' + (leader ? '👑 ' : '') + _podEsc(m.name) + (m.isMe ? ' <span style="font-size:10px;color:#9aa0ff;font-weight:600">(you)</span>' : '') + '</div>'
+                        + '<div style="height:5px;border-radius:3px;background:rgba(255,255,255,0.06);margin-top:6px;overflow:hidden"><div class="pod-bar-fill" data-w="' + pct + '" style="height:100%;background:linear-gradient(90deg,#6b71e6,#878dff);border-radius:3px"></div></div></div>';
+                    right = '<div style="text-align:right;flex-shrink:0"><div style="font-size:14px;font-weight:700;color:' + flame + '"><span class="pod-streak-num" data-v="' + (m.streak || 0) + '">0</span> 🔥</div><div style="font-size:10.5px;color:var(--text-tertiary);margin-top:1px">' + fmtH(m.wmins) + ' this wk</div></div>';
+                }
                 return '<div class="pod-row' + (leader ? ' pod-leader' : '') + '" title="' + seen + '" style="animation-delay:' + (i * 70) + 'ms;display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:11px;margin-bottom:6px;opacity:' + (stale ? "0.55" : "1") + ';background:' + bg + ';border:1px solid ' + bd + glow + '">'
-                    + '<div style="width:22px;text-align:center;font-size:14px;flex-shrink:0">' + medal + '</div>'
+                    + '<div style="width:22px;text-align:center;font-size:14px;flex-shrink:0;color:var(--text-tertiary)">' + medal + '</div>'
                     + '<div style="position:relative;flex-shrink:0"><div style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:rgba(135,141,255,0.15);color:#9aa0ff;font-weight:700;font-size:14px">' + _podEsc(initials) + '</div>'
                     + '<span class="' + (ds < 1 ? "pod-dot-live" : "") + '" style="position:absolute;right:-2px;bottom:-2px;width:9px;height:9px;border-radius:50%;background:' + dotCol + ';border:2px solid #12141d"></span></div>'
-                    + '<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:650;color:var(--text-primary)">' + (leader ? '👑 ' : '') + _podEsc(m.name) + (m.isMe ? ' <span style="font-size:10px;color:#9aa0ff;font-weight:600">(you)</span>' : '') + '</div>'
-                    + '<div style="height:5px;border-radius:3px;background:rgba(255,255,255,0.06);margin-top:6px;overflow:hidden"><div class="pod-bar-fill" data-w="' + pct + '" style="height:100%;background:linear-gradient(90deg,#6b71e6,#878dff);border-radius:3px"></div></div></div>'
-                    + '<div style="text-align:right;flex-shrink:0"><div style="font-size:14px;font-weight:700;color:#f0bd6a"><span class="pod-streak-num" data-v="' + (m.streak || 0) + '">0</span> 🔥</div><div style="font-size:10.5px;color:var(--text-tertiary);margin-top:1px">' + fmtH(m.wmins) + ' this wk</div></div></div>';
+                    + mid + right + '</div>';
             }).join("");
+            var selfNote = "";
+            if (!solo) {
+                var meIdx = -1; for (var k = 0; k < p.members.length; k++) { if (p.members[k].isMe) { meIdx = k; break; } }
+                if (meIdx >= 0) {
+                    var me = p.members[meIdx];
+                    if ((me.streak || 0) === 0 && (me.wmins || 0) === 0) {
+                        selfNote = '🌱 You\u2019re in — log a session to get on the board.';
+                    } else if (meIdx === 0) {
+                        selfNote = '👑 You\u2019re leading ' + _podEsc(p.name) + ' — keep the crown.';
+                    } else {
+                        var ahead = p.members[meIdx - 1], sgap = (ahead.streak || 0) - (me.streak || 0);
+                        if (sgap > 0) selfNote = '🎯 ' + _podEsc(ahead.name) + ' is ' + sgap + ' day' + (sgap > 1 ? 's' : '') + ' ahead on streak — catch up.';
+                        else { var hgap = (ahead.wmins || 0) - (me.wmins || 0); selfNote = hgap > 0 ? ('🎯 ' + _podEsc(ahead.name) + ' logged ' + fmtH(hgap) + ' more this week — close the gap.') : ('🔥 Neck and neck with ' + _podEsc(ahead.name) + ' — push ahead.'); }
+                    }
+                }
+            }
+            var selfBand = selfNote ? '<div style="font-size:11.5px;font-weight:600;color:var(--text-secondary);background:rgba(135,141,255,0.06);border:1px solid rgba(135,141,255,0.16);border-radius:10px;padding:9px 13px;margin-bottom:12px">' + selfNote + '</div>' : '';
             var soloCTA = solo ? '<div style="display:flex;align-items:center;gap:12px;background:linear-gradient(120deg, rgba(135,141,255,0.10), rgba(135,141,255,0.02));border:1px dashed rgba(135,141,255,0.30);border-radius:12px;padding:13px 15px;margin-top:8px">'
                 + '<div style="font-size:20px">🚀</div>'
                 + '<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:700;color:var(--text-primary)">Flying solo — invite your crew</div><div style="font-size:11px;color:var(--text-tertiary);margin-top:1px">Pods only work with people. Share your code to make it real accountability.</div></div>'
@@ -13709,7 +13737,7 @@
                 + '<div style="display:flex;align-items:center;gap:7px;flex-shrink:0">'
                 + '<button class="pod-copy-btn" onclick="podCopyInvite(\'' + p.code + '\',this)" title="Copy invite code" style="display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:12px;font-weight:700;color:#9aa0ff;background:rgba(135,141,255,0.12);border:1px solid rgba(135,141,255,0.28);border-radius:8px;padding:7px 11px;cursor:pointer"><i class="ti ti-link"></i> ' + p.code + '</button>'
                 + '<button onclick="podLeaveUI(\'' + p.id + '\')" title="Leave pod" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;cursor:pointer;color:var(--text-tertiary);font-size:14px"><i class="ti ti-logout"></i></button>'
-                + '</div></div>' + rows + soloCTA + '</div>';
+                + '</div></div>' + selfBand + rows + soloCTA + '</div>';
         }
         function _podInjectCSS() {
             if (document.getElementById("pod-anim-css")) return;
