@@ -13592,6 +13592,50 @@
             };
         };
 
+        // ── ACCOUNTABILITY PODS (client) ──
+        var _podSyncAt = 0;
+        function _podMyStats() {
+            var streak = (typeof computeStreak === "function") ? computeStreak() : 0;
+            var ws = (typeof startOfWeek === "function") ? startOfWeek(today) : today, wmins = 0;
+            if (typeof _wkAgg === "function") wmins = _wkAgg(dateStr(ws), dateStr(addDays(ws, 6))).mins;
+            else for (var i = 0; i < 7; i++) wmins += minsOn(dateStr(addDays(ws, i)));
+            return { streak: streak, wmins: wmins, name: (window.scUserFirstName || "Studier") };
+        }
+        window.podSyncStats = function (force) {
+            if (!force && Date.now() - _podSyncAt < 180000) return Promise.resolve();
+            _podSyncAt = Date.now();
+            var s = _podMyStats();
+            return supa.rpc("upsert_pod_stats", { p_streak: s.streak, p_week_mins: s.wmins, p_display: s.name });
+        };
+        window.podCreate = function (name) {
+            var s = _podMyStats();
+            return supa.rpc("create_pod", { p_name: name || "Study Pod", p_display: s.name }).then(function (r) {
+                if (r.error) throw r.error;
+                return window.podSyncStats(true).then(function () { return r.data; });
+            });
+        };
+        window.podJoin = function (code) {
+            var s = _podMyStats();
+            return supa.rpc("join_pod", { p_code: (code || "").trim().toLowerCase(), p_display: s.name }).then(function (r) {
+                if (r.error) throw r.error;
+                return window.podSyncStats(true).then(function () { return r.data; });
+            });
+        };
+        window.podLeave = function (podId) {
+            return supa.rpc("leave_pod", { p_pod: podId }).then(function (r) { if (r.error) throw r.error; });
+        };
+        window.podFetchFeed = function () {
+            return supa.rpc("get_pod_feed").then(function (r) {
+                if (r.error) throw r.error;
+                var rows = r.data || [], pods = {}, order = [];
+                rows.forEach(function (row) {
+                    if (!pods[row.pod_id]) { pods[row.pod_id] = { id: row.pod_id, name: row.pod_name, code: row.code, members: [] }; order.push(row.pod_id); }
+                    pods[row.pod_id].members.push({ id: row.member_id, name: row.display_name, streak: row.streak, wmins: row.week_mins, lastActive: row.last_active, isMe: row.is_me });
+                });
+                return order.map(function (id) { return pods[id]; });
+            });
+        };
+
         // ── ANIMATED COUNTER ──
         function animateCount(el, fromVal, toVal, suffix, duration) {
             if (!el) return;
@@ -14272,6 +14316,7 @@
             syncShields();
             renderTodaysThree();
             maybeShowWrappedPrompt();
+            if (typeof podSyncStats === "function") podSyncStats();
             document.getElementById("mom-week-pct").textContent = wpct + "%";
             var byDate2 = {}; sessions.forEach(function (s) { byDate2[s.date] = (byDate2[s.date] || 0) + s.mins; });
             var bestDayMins = Object.values(byDate2).reduce(function (a, b) { return Math.max(a, b); }, 0);
