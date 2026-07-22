@@ -12412,6 +12412,16 @@
                         </div>
                     </div>
 
+                    <!-- MINIMUM VIABLE SESSION -->
+                    <div id="mvs-band" style="display:none;align-items:center;gap:13px;background:radial-gradient(130% 200% at 0% 0%, rgba(70,201,143,0.12), rgba(70,201,143,0.02));border:1px solid rgba(70,201,143,0.24);border-radius:14px;padding:13px 16px;margin-bottom:14px">
+                        <div style="width:36px;height:36px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(70,201,143,0.14);color:#46c98f;font-size:18px">🌱</div>
+                        <div style="flex:1;min-width:0">
+                            <div id="mvs-title" style="font-size:13px;font-weight:700;color:var(--text-primary)"></div>
+                            <div id="mvs-sub" style="font-size:11.5px;color:var(--text-tertiary);margin-top:1px"></div>
+                        </div>
+                        <button onclick="startMVS()" id="mvs-btn" style="flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:#46c98f;color:#0b1410;border:none;border-radius:9px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer"><i class="ti ti-player-play"></i> Start 15 min</button>
+                    </div>
+
                     <!-- TODAY'S 3 -->
                     <div class="card t3-card" id="t3-card" style="margin-bottom:14px;display:none">
                         <div class="card-head" style="margin-bottom:12px">
@@ -13476,6 +13486,46 @@
             }
             card.style.display = "";
         }
+
+        // ── MINIMUM VIABLE SESSION ──
+        var MVS_MINS = 15;
+        window.mvsPick = function () {
+            try { var t3 = (typeof todaysThree === "function") ? todaysThree() : []; if (t3.length && t3[0].topic && t3[0].topic !== "Review") return t3[0].topic; } catch (e) {}
+            var AREAS = ["Quant", "RC", "CR", "DI"], tot = {};
+            AREAS.forEach(function (a) { tot[a] = 0; });
+            (sessions || []).forEach(function (s) { if (tot.hasOwnProperty(s.topic)) tot[s.topic] += s.mins; });
+            var touched = AREAS.filter(function (a) { return tot[a] > 0; });
+            if (!touched.length) return "Quant";
+            return touched.sort(function (x, y) { return tot[x] - tot[y]; })[0];
+        };
+        window.startMVS = function () {
+            var topic = window.mvsPick();
+            var sel = document.getElementById("timer-topic");
+            if (sel) { for (var i = 0; i < sel.options.length; i++) { if (sel.options[i].value === topic) { sel.value = sel.options[i].value; break; } } }
+            var panel = document.getElementById("timer-panel");
+            if (panel) { panel.scrollIntoView({ behavior: "smooth", block: "center" }); panel.classList.remove("tp-flash"); void panel.offsetWidth; panel.classList.add("tp-flash"); }
+            if (typeof timerStart === "function") timerStart();
+            if (typeof showToast === "function") showToast("🌱", "15 minutes. That's all.", topic + " timer running — stop whenever you like.");
+        };
+        function renderMVS() {
+            var band = document.getElementById("mvs-band"); if (!band) return;
+            var mins = minsOn(dateStr(today));
+            if (mins >= MVS_MINS) { band.style.display = "none"; return; }
+            var streak = (typeof computeStreak === "function") ? computeStreak() : 0;
+            var T = document.getElementById("mvs-title"), S = document.getElementById("mvs-sub"), B = document.getElementById("mvs-btn");
+            if (mins > 0) {
+                var left = MVS_MINS - mins;
+                if (T) T.textContent = "You're " + mins + " min in — " + left + " to go";
+                if (S) S.textContent = "Just " + left + " more minute" + (left > 1 ? "s" : "") + " and today counts. Almost there.";
+                if (B) B.innerHTML = '<i class="ti ti-player-play"></i> Keep going';
+            } else {
+                if (T) T.textContent = streak > 0 ? "Low on energy? Protect your " + streak + "-day streak" : "Low on energy? Start small";
+                if (S) S.textContent = "One short session keeps the chain alive. No pressure to do more.";
+                if (B) B.innerHTML = '<i class="ti ti-player-play"></i> Start ' + MVS_MINS + ' min';
+            }
+            band.style.display = "flex";
+        }
+        window.renderMVS = renderMVS;
 
         // ── WEEKLY WRAPPED (data) ──
         function _wkAgg(a, b) {
@@ -14639,6 +14689,7 @@
             document.getElementById("mom-xp").textContent = xp.toLocaleString();
            document.getElementById("mom-streak").textContent = streak;
             syncShields();
+            renderMVS();
             renderTodaysThree();
             maybeShowWrappedPrompt();
             if (typeof podSyncStats === "function") podSyncStats();
