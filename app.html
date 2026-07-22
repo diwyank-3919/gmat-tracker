@@ -15456,6 +15456,45 @@
             var st = document.getElementById("mock-reveal-status"); if (st) st.textContent = "";
         }
         window.closeMockReveal = function () { var m = document.getElementById("mock-reveal-modal"); if (m) m.style.display = "none"; };
+        var MDB_KEY = "sc_mock_debrief_v1";
+        function _mdbAll() { try { return JSON.parse(localStorage.getItem(MDB_KEY) || "{}") || {}; } catch (e) { return {}; } }
+        window.mockDebriefGet = function (id) { return _mdbAll()[id] || null; };
+        window.mockDebriefSave = function (id, obj) {
+            var all = _mdbAll();
+            all[id] = Object.assign({}, all[id] || {}, obj, { savedAt: new Date().toISOString() });
+            try { localStorage.setItem(MDB_KEY, JSON.stringify(all)); } catch (e) {}
+            return all[id];
+        };
+        window.mockDebriefDelete = function (id) { var all = _mdbAll(); delete all[id]; try { localStorage.setItem(MDB_KEY, JSON.stringify(all)); } catch (e) {} };
+        window.mockDebriefMarkdown = function (m, d) {
+            if (!m) return "";
+            d = d || {};
+            var all = (window.mockScores || []).slice().sort(function (a, b) { return a.date.localeCompare(b.date); });
+            var earlier = all.filter(function (x) { return x.date < m.date; });
+            var prev = earlier.length ? earlier[earlier.length - 1] : null;
+            var target = (typeof TARGET_SCORE !== "undefined" ? TARGET_SCORE : 735);
+            var PACE = { "ran-out": "Ran out of time", "on-pace": "Finished on pace", "early": "Finished with time to spare" };
+            var L = [];
+            L.push("**Mock debrief — " + m.score + "** (" + new Date(m.date + "T00:00:00").toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }) + ")");
+            L.push("");
+            L.push("| | Score |");
+            L.push("|---|---|");
+            L.push("| **Total** | **" + m.score + "**" + (prev ? " (" + (m.score - prev.score >= 0 ? "+" : "") + (m.score - prev.score) + " vs last)" : " (first mock)") + " |");
+            if (m.quant != null) L.push("| Quant | " + m.quant + " |");
+            if (m.verbal != null) L.push("| Verbal | " + m.verbal + " |");
+            if (m.di != null) L.push("| DI | " + m.di + " |");
+            L.push("| Target | " + target + (m.score >= target ? " ✅" : " (" + (target - m.score) + " to go)") + " |");
+            L.push("");
+            if (d.pace) L.push("**Timing:** " + (PACE[d.pace] || d.pace));
+            if (d.energy) L.push("**Focus/energy:** " + d.energy + "/5");
+            if (d.pace || d.energy) L.push("");
+            if (d.went) { L.push("**What went well**"); L.push(d.went); L.push(""); }
+            if (d.broke) { L.push("**What broke down**"); L.push(d.broke); L.push(""); }
+            if (d.fixes) { L.push("**Next three fixes**"); L.push(d.fixes); L.push(""); }
+            L.push("---");
+            L.push("*Tracked with ScoreConsole*");
+            return L.join("\n");
+        };
         async function captureMockReveal() {
             var se = document.getElementById("mr-score"); if (se && _lastMockScore != null) se.textContent = _lastMockScore;
             return await html2canvas(document.getElementById("mock-reveal-card"), { backgroundColor: "#12101c", scale: 2, useCORS: true, logging: false });
