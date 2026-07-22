@@ -15860,6 +15860,11 @@
             function stopTick() { if (tickInt) { clearInterval(tickInt); tickInt = null; } }
             function paint() {
                 var active = state.running || state.accMs > 0;
+                var _mvsMs = (window.MVS_MINS || 15) * 60000;
+                if (state.running && !state.mvsHit && elapsedMs() >= _mvsMs) {
+                    state.mvsHit = true; persist();
+                    if (typeof showToast === "function") showToast("🌱", (window.MVS_MINS || 15) + " minutes done — today counts", "Stop guilt-free, or keep the momentum going.");
+                }
                 var disp = document.getElementById("timer-display"); if (disp) { renderTimerPlate(disp, fmtClock(elapsedMs())); disp.classList.toggle("running", state.running); }
                 var st = document.getElementById("timer-status"); if (st) { st.textContent = state.running ? "Recording" : active ? "Paused" : "Idle"; st.className = "timer-status" + (state.running ? " running" : active ? " paused" : ""); }
                 var sel = document.getElementById("timer-topic"); if (sel) { sel.disabled = active; if (active) sel.value = state.topic; }
@@ -15877,7 +15882,7 @@
                 if (oB) oB.style.display = active ? "inline-flex" : "none";
                 if (dB) dB.style.display = active ? "inline-flex" : "none";
             }
-            window.timerStart = function () { var sel = document.getElementById("timer-topic"); if (!state.running) { if (state.accMs === 0) { if (sel) state.topic = sel.value; state.firstStart = Date.now(); } state.running = true; state.startedAt = Date.now(); persist(); startTick(); paint(); } };
+            window.timerStart = function () { var sel = document.getElementById("timer-topic"); if (!state.running) { if (state.accMs === 0) { if (sel) state.topic = sel.value; state.firstStart = Date.now(); state.mvsHit = false; } state.running = true; state.startedAt = Date.now(); persist(); startTick(); paint(); } };
             window.timerPause = function () { if (state.running) { state.accMs = (state.accMs || 0) + (Date.now() - state.startedAt); state.running = false; state.startedAt = null; persist(); stopTick(); paint(); } };
             window.timerDiscard = function () {
                 var elapsed = Math.max(1, Math.round(elapsedMs() / 60000));
