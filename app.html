@@ -12439,8 +12439,8 @@
                     <div id="win-band" style="display:none;align-items:center;gap:13px;background:radial-gradient(130% 200% at 0% 0%, rgba(240,189,106,0.10), rgba(240,189,106,0.02));border:1px solid rgba(240,189,106,0.22);border-radius:14px;padding:12px 15px;margin-bottom:14px">
                         <div style="width:34px;height:34px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(240,189,106,0.14);color:#f0bd6a;font-size:17px">✨</div>
                         <div style="flex:1;min-width:0">
-                            <div style="font-size:12.5px;font-weight:700;color:var(--text-primary);margin-bottom:6px">What went <em style="color:#f0bd6a;font-style:normal">well</em> today?</div>
-                            <input id="win-inp" type="text" maxlength="240" placeholder="Something that improved — mistakes go in the Error log"
+                            <div style="font-size:12.5px;font-weight:700;color:var(--text-primary);margin-bottom:6px">What clicked today?</div>
+                            <input id="win-inp" type="text" maxlength="240" placeholder="One line — a concept that landed, a trap you spotted…" onkeydown="if(event.key==='Enter')winSaveUI()" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--text-primary);font-family:inherit;font-size:12.5px">
                         </div>
                         <button onclick="winSaveUI()" style="flex-shrink:0;padding:9px 15px;background:rgba(240,189,106,0.16);color:#f0bd6a;border:1px solid rgba(240,189,106,0.32);border-radius:9px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer">Save</button>
                         <button onclick="winDismissToday()" title="Not today" style="flex-shrink:0;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--text-tertiary);font-size:15px">&times;</button>
@@ -13612,12 +13612,6 @@
             var inp = document.getElementById("win-inp"); if (!inp) return;
             var t = (inp.value || "").trim();
             if (!t) { inp.focus(); return; }
-            if (/\b(mistake|careless|failed|bad at|struggle|struggled|couldn't|can't|worst|stupid|terrible|keep messing|weak)\b/i.test(t) && !inp.dataset.confirmed) {
-                inp.dataset.confirmed = "1";
-                if (typeof showToast === "function") showToast("💭", "Is this a win?", "You'll see this on a hard day — phrase it as progress, or log it in the Error log. Press Save again to keep it.");
-                return;
-            }
-            delete inp.dataset.confirmed;
             winAdd(t); inp.value = "";
             if (typeof showToast === "function") showToast("✨", "Win logged", "Saved — you'll see this again when you need it.");
             renderWinBand();
