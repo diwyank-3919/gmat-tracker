@@ -13669,10 +13669,64 @@
                 if (r.error) throw r.error;
                 var rows = r.data || [], pods = {}, order = [];
                 rows.forEach(function (row) {
-                    if (!pods[row.pod_id]) { pods[row.pod_id] = { id: row.pod_id, name: row.pod_name, code: row.code, members: [] }; order.push(row.pod_id); }
-                    pods[row.pod_id].members.push({ id: row.member_id, name: row.display_name, streak: row.streak, wmins: row.week_mins, lastActive: row.last_active, isMe: row.is_me });
+                    if (!pods[row.pod_id]) {
+                        pods[row.pod_id] = { id: row.pod_id, name: row.pod_name, code: row.code, kind: row.kind || "pod", startsAt: row.starts_at || null, endsAt: row.ends_at || null, members: [] };
+                        order.push(row.pod_id);
+                    }
+                    pods[row.pod_id].members.push({ id: row.member_id, name: row.display_name, streak: row.streak, wmins: row.week_mins, daysDone: row.days_done || 0, lastActive: row.last_active, isMe: row.is_me });
                 });
                 return order.map(function (id) { return pods[id]; });
+            });
+        };
+        window.challengeDaysDone = function (startsAt, endsAt) {
+            if (!startsAt) return 0;
+            var n = 0, d = new Date(startsAt + "T00:00:00"), end = new Date((endsAt || startsAt) + "T00:00:00");
+            while (d <= end && d <= today) { if (minsOn(dateStr(d)) > 0) n++; d = addDays(d, 1); }
+            return n;
+        };
+        window.challengeDayLeft = function (endsAt) {
+            if (!endsAt) return 0;
+            return Math.max(0, Math.round((new Date(endsAt + "T00:00:00") - today) / 86400000) + 1);
+        };
+        window.challengeCreate = function (name) {
+            var s = _podMyStats();
+            return supa.rpc("create_challenge", { p_name: name || "7-Day Challenge", p_display: s.name }).then(function (r) {
+                if (r.error) throw r.error;
+                return window.podSyncStats(true).then(function () { return r.data; });
+            });
+        };
+        window.challengeSyncProgress = function (feed) {
+            var nm = (window.scUserFirstName || "Studier");
+            var jobs = (feed || []).filter(function (p) { return p.kind === "challenge"; }).map(function (p) {
+                var days = window.challengeDaysDone(p.startsAt, p.endsAt);
+                p.members.forEach(function (m) { if (m.isMe) m.daysDone = days; });
+                return supa.rpc("upsert_challenge_progress", { p_pod: p.id, p_days: days, p_display: nm });
+            });
+            return Promise.all(jobs).then(function () { return feed; });
+        };
+        window.challengeLink = function (code) { return "https://scoreconsole.com/app.html?join=" + code; };
+        (function () {
+            try {
+                var u = new URL(location.href), code = u.searchParams.get("join");
+                if (code) {
+                    localStorage.setItem("sc_pending_join", code.toLowerCase());
+                    u.searchParams.delete("join");
+                    history.replaceState(null, "", u.pathname + (u.search || "") + (u.hash || ""));
+                }
+            } catch (e) {}
+        })();
+        window.processPendingJoin = function () {
+            var code = null;
+            try { code = localStorage.getItem("sc_pending_join"); } catch (e) {}
+            if (!code) return Promise.resolve(null);
+            try { localStorage.removeItem("sc_pending_join"); } catch (e) {}
+            return podJoin(code).then(function (nm) {
+                if (typeof showToast === "function") showToast("🤝", "You're in!", "Joined " + (nm || "the challenge") + " — let's go.");
+                if (typeof switchView === "function") switchView("pods");
+                return nm;
+            }).catch(function (e) {
+                if (typeof showToast === "function") showToast("⚠️", "Couldn't join", (e && e.message) || "That invite link may have expired.");
+                return null;
             });
         };
         function _podEsc(s) { var d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; }
@@ -15759,6 +15813,7 @@
             loadSessions();
             checkLocalMigration();
             loadExamSettings();
+            setTimeout(function () { if (typeof processPendingJoin === "function") processPendingJoin(); }, 1200);
         }
         function signInWithGoogle() {
             supa.auth.signInWithOAuth({
