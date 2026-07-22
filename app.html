@@ -13538,6 +13538,53 @@
         }
         window.renderMVS = renderMVS;
 
+        // ── WIN JOURNAL ──
+        var WIN_KEY = "sc_wins_v1";
+        function _winAll() { try { var a = JSON.parse(localStorage.getItem(WIN_KEY) || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+        window.winList = function () { return _winAll().slice().sort(function (a, b) { return b.date.localeCompare(a.date); }); };
+        window.winAdd = function (text, date) {
+            var t = (text || "").trim(); if (!t) return null;
+            var all = _winAll(), ds = date || dateStr(today);
+            var entry = { date: ds, text: t.slice(0, 240), at: new Date().toISOString() };
+            all.push(entry);
+            try { localStorage.setItem(WIN_KEY, JSON.stringify(all.slice(-300))); } catch (e) {}
+            return entry;
+        };
+        window.winDelete = function (at) {
+            var all = _winAll().filter(function (w) { return w.at !== at; });
+            try { localStorage.setItem(WIN_KEY, JSON.stringify(all)); } catch (e) {}
+        };
+        window.winHasToday = function () { var ds = dateStr(today); return _winAll().some(function (w) { return w.date === ds; }); };
+        window.winEvidence = function () {
+            var out = [];
+            var cur = _wkAgg(dateStr(addDays(today, -29)), dateStr(today));
+            var prev = _wkAgg(dateStr(addDays(today, -59)), dateStr(addDays(today, -30)));
+            if (cur.acc != null && prev.acc != null && cur.acc > prev.acc) out.push({ icon: "📈", text: "Your accuracy is " + (cur.acc - prev.acc) + " points higher than a month ago (" + prev.acc + "% → " + cur.acc + "%)." });
+            var mocks = (window.mockScores || []).slice().sort(function (a, b) { return a.date.localeCompare(b.date); });
+            if (mocks.length >= 2) {
+                var first = mocks[0], last = mocks[mocks.length - 1];
+                if (last.score > first.score) out.push({ icon: "🎯", text: "Your mock score has climbed " + (last.score - first.score) + " points since your first (" + first.score + " → " + last.score + ")." });
+            }
+            var total = (sessions || []).reduce(function (a, s) { return a + s.mins; }, 0);
+            if (total > 0) out.push({ icon: "🏔️", text: fmtH(total) + " of study time is already behind you." });
+            if (cur.mins > 0) out.push({ icon: "⏱️", text: "You've logged " + fmtH(cur.mins) + " in the last 30 days alone." });
+            var streak = (typeof computeStreak === "function") ? computeStreak() : 0;
+            if (streak >= 3) out.push({ icon: "🔥", text: "You're on a " + streak + "-day streak right now." });
+            var days = {}; (sessions || []).forEach(function (s) { if (s.mins > 0) days[s.date] = 1; });
+            var nDays = Object.keys(days).length;
+            if (nDays >= 10) out.push({ icon: "📆", text: "You've shown up on " + nDays + " separate days. That's the whole game." });
+            return out;
+        };
+        window.winIsDip = function () {
+            var streak = (typeof computeStreak === "function") ? computeStreak() : 0;
+            if (streak === 0) return true;
+            var cur = _wkAgg(dateStr(addDays(today, -6)), dateStr(today));
+            var prev = _wkAgg(dateStr(addDays(today, -13)), dateStr(addDays(today, -7)));
+            if (prev.mins > 60 && cur.mins < prev.mins * 0.6) return true;
+            if (cur.acc != null && prev.acc != null && cur.acc <= prev.acc - 6) return true;
+            return false;
+        };
+
         // ── WEEKLY WRAPPED (data) ──
         function _wkAgg(a, b) {
             var mins = 0, cnt = 0, byTopic = {}, byDay = {}, c = 0, t = 0;
