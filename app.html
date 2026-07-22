@@ -12422,6 +12422,17 @@
                         <button onclick="startMVS()" id="mvs-btn" style="flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:#46c98f;color:#0b1410;border:none;border-radius:9px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer"><i class="ti ti-player-play"></i> Start 15 min</button>
                     </div>
 
+                    <!-- WIN JOURNAL CAPTURE -->
+                    <div id="win-band" style="display:none;align-items:center;gap:13px;background:radial-gradient(130% 200% at 0% 0%, rgba(240,189,106,0.10), rgba(240,189,106,0.02));border:1px solid rgba(240,189,106,0.22);border-radius:14px;padding:12px 15px;margin-bottom:14px">
+                        <div style="width:34px;height:34px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(240,189,106,0.14);color:#f0bd6a;font-size:17px">✨</div>
+                        <div style="flex:1;min-width:0">
+                            <div style="font-size:12.5px;font-weight:700;color:var(--text-primary);margin-bottom:6px">What clicked today?</div>
+                            <input id="win-inp" type="text" maxlength="240" placeholder="One line — a concept that landed, a trap you spotted…" onkeydown="if(event.key==='Enter')winSaveUI()" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--text-primary);font-family:inherit;font-size:12.5px">
+                        </div>
+                        <button onclick="winSaveUI()" style="flex-shrink:0;padding:9px 15px;background:rgba(240,189,106,0.16);color:#f0bd6a;border:1px solid rgba(240,189,106,0.32);border-radius:9px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer">Save</button>
+                        <button onclick="winDismissToday()" title="Not today" style="flex-shrink:0;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--text-tertiary);font-size:15px">&times;</button>
+                    </div>
+
                     <!-- TODAY'S 3 -->
                     <div class="card t3-card" id="t3-card" style="margin-bottom:14px;display:none">
                         <div class="card-head" style="margin-bottom:12px">
@@ -13584,6 +13595,25 @@
             if (cur.acc != null && prev.acc != null && cur.acc <= prev.acc - 6) return true;
             return false;
         };
+        window.winSaveUI = function () {
+            var inp = document.getElementById("win-inp"); if (!inp) return;
+            var t = (inp.value || "").trim();
+            if (!t) { inp.focus(); return; }
+            winAdd(t); inp.value = "";
+            if (typeof showToast === "function") showToast("✨", "Win logged", "Saved — you'll see this again when you need it.");
+            renderWinBand();
+        };
+        window.winDismissToday = function () {
+            try { localStorage.setItem("sc_win_skip", dateStr(today)); } catch (e) {}
+            renderWinBand();
+        };
+        function renderWinBand() {
+            var band = document.getElementById("win-band"); if (!band) return;
+            var skip = null; try { skip = localStorage.getItem("sc_win_skip"); } catch (e) {}
+            var show = minsOn(dateStr(today)) > 0 && !winHasToday() && skip !== dateStr(today);
+            band.style.display = show ? "flex" : "none";
+        }
+        window.renderWinBand = renderWinBand;
 
         // ── WEEKLY WRAPPED (data) ──
         function _wkAgg(a, b) {
@@ -14748,6 +14778,7 @@
            document.getElementById("mom-streak").textContent = streak;
             syncShields();
             renderMVS();
+            renderWinBand();
             renderTodaysThree();
             maybeShowWrappedPrompt();
             if (typeof podSyncStats === "function") podSyncStats();
