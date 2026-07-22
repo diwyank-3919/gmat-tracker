@@ -11982,6 +11982,11 @@
                                 </div>
                             </div>
                         </div>
+                        <div style="display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border-subtle);flex-wrap:wrap">
+                            <div style="font-size:20px">⚡</div>
+                            <div style="flex:1;min-width:190px"><div style="font-size:12.5px;font-weight:700;color:var(--text-primary)">Or run a 7-day challenge</div><div style="font-size:11px;color:var(--text-tertiary);margin-top:1px">A one-week sprint with a shareable link — study every day, compare day counts.</div></div>
+                            <button onclick="challengeCreateUI()" style="flex-shrink:0;padding:9px 16px;background:rgba(135,141,255,0.14);color:#9aa0ff;border:1px solid rgba(135,141,255,0.30);border-radius:9px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer">Start challenge</button>
+                        </div>
                         <div id="pod-action-status" style="font-size:12px;margin-top:10px;min-height:15px;color:var(--text-tertiary)"></div>
                     </div>
                 </div>
@@ -13732,6 +13737,73 @@
         function _podEsc(s) { var d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; }
         function _podStatus(msg, tone) { var el = document.getElementById("pod-action-status"); if (!el) return; el.textContent = msg; el.style.color = tone === "ok" ? "var(--green)" : tone === "err" ? "var(--red)" : "var(--text-tertiary)"; }
         function _podDaysSince(iso) { if (!iso) return 999; var t = new Date(iso).getTime(); if (isNaN(t)) return 999; return Math.floor((Date.now() - t) / 86400000); }
+        function challengeCardHTML(p) {
+            var TOTAL = 7;
+            var left = (typeof challengeDayLeft === "function") ? challengeDayLeft(p.endsAt) : 0;
+            var ended = left <= 0, dayNum = Math.min(TOTAL, Math.max(1, TOTAL - left + 1));
+            var solo = p.members.length === 1;
+            var mem = p.members.slice().sort(function (a, b) { return (b.daysDone || 0) - (a.daysDone || 0); });
+            var me = null; p.members.forEach(function (m) { if (m.isMe) me = m; });
+            var myDays = me ? (me.daysDone || 0) : 0;
+            var todayDone = (typeof minsOn === "function") && minsOn(dateStr(today)) > 0;
+            var top = mem.length ? (mem[0].daysDone || 0) : 0;
+            var winners = mem.filter(function (m) { return (m.daysDone || 0) === top && top > 0; });
+            var chip = function (h, c) { return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;color:' + (c || "var(--text-secondary)") + ';background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:100px;padding:3px 9px">' + h + '</span>'; };
+            var rows = mem.map(function (m, i) {
+                var dd = m.daysDone || 0, initials = (m.name || "?").trim().charAt(0).toUpperCase();
+                var perfect = dd >= TOTAL, lead = !solo && i === 0 && dd > 0;
+                var boxes = "";
+                for (var b = 0; b < TOTAL; b++) {
+                    var on = b < dd;
+                    boxes += '<span style="width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;'
+                        + (on ? 'background:linear-gradient(160deg,#6b71e6,#878dff);color:#0f1118;border:1px solid rgba(135,141,255,0.5)' : 'background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.20);border:1px dashed rgba(255,255,255,0.12)')
+                        + '">' + (on ? '✓' : (b + 1)) + '</span>';
+                }
+                return '<div class="pod-row" style="animation-delay:' + (i * 70) + 'ms;display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:11px;margin-bottom:6px;background:' + (m.isMe ? "rgba(135,141,255,0.08)" : "rgba(255,255,255,0.025)") + ';border:1px solid ' + (lead ? "rgba(240,189,106,0.32)" : m.isMe ? "rgba(135,141,255,0.22)" : "rgba(255,255,255,0.06)") + '">'
+                    + '<div style="width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(135,141,255,0.15);color:#9aa0ff;font-weight:700;font-size:14px">' + _podEsc(initials) + '</div>'
+                    + '<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:650;color:var(--text-primary);margin-bottom:6px">' + (perfect ? '🏆 ' : lead ? '👑 ' : '') + _podEsc(m.name) + (m.isMe ? ' <span style="font-size:10px;color:#9aa0ff;font-weight:600">(you)</span>' : '') + '</div>'
+                    + '<div style="display:flex;gap:4px;flex-wrap:wrap">' + boxes + '</div></div>'
+                    + '<div style="text-align:right;flex-shrink:0"><div style="font-family:\'Fraunces\',serif;font-size:19px;font-weight:600;color:' + (perfect ? "#46c98f" : "#f4eee2") + ';line-height:1">' + dd + '<span style="font-size:11px;color:rgba(255,255,255,0.40)">/' + TOTAL + '</span></div>'
+                    + '<div style="font-size:10px;color:var(--text-tertiary);margin-top:3px">days</div></div></div>';
+            }).join("");
+            var banner;
+            if (ended) {
+                banner = '<div style="display:flex;align-items:center;gap:12px;background:linear-gradient(120deg, rgba(70,201,143,0.12), rgba(70,201,143,0.02));border:1px solid rgba(70,201,143,0.28);border-radius:12px;padding:13px 15px;margin-bottom:12px">'
+                    + '<div style="font-size:22px">🏁</div><div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:700;color:var(--text-primary)">Challenge complete</div>'
+                    + '<div style="font-size:11px;color:var(--text-tertiary);margin-top:1px">' + (top === 0 ? "No days logged — run it back?" : (winners.length > 1 ? "Tied at " + top + "/7: " + winners.map(function (w) { return _podEsc(w.name); }).join(" & ") : _podEsc(winners[0].name) + " took it with " + top + "/7")) + '</div></div></div>';
+            } else {
+                banner = '<div style="display:flex;align-items:center;gap:12px;background:rgba(135,141,255,0.06);border:1px solid rgba(135,141,255,0.16);border-radius:12px;padding:11px 14px;margin-bottom:12px">'
+                    + '<div style="font-size:18px">' + (todayDone ? "✅" : "⏳") + '</div>'
+                    + '<div style="flex:1;min-width:0;font-size:11.5px;font-weight:600;color:var(--text-secondary)">' + (todayDone ? "Today's logged — " + myDays + "/7 done, " + left + " day" + (left > 1 ? "s" : "") + " left." : "Today isn't logged yet — keep the challenge alive.") + '</div></div>';
+            }
+            var soloCTA = solo && !ended ? '<div style="display:flex;align-items:center;gap:12px;background:linear-gradient(120deg, rgba(135,141,255,0.10), rgba(135,141,255,0.02));border:1px dashed rgba(135,141,255,0.30);border-radius:12px;padding:13px 15px;margin-top:8px">'
+                + '<div style="font-size:20px">⚡</div><div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:700;color:var(--text-primary)">Challenge someone</div>'
+                + '<div style="font-size:11px;color:var(--text-tertiary);margin-top:1px">Send the link — they join in one tap, no code to type.</div></div>'
+                + '<button class="pod-invite-cta pod-copy-btn" onclick="challengeCopyLink(\'' + p.code + '\',this)" style="flex-shrink:0;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:#878dff;color:#0f1118;border:none;border-radius:9px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer"><i class="ti ti-link"></i> Copy link</button></div>' : '';
+            return '<div class="card pod-card" style="margin-bottom:14px">'
+                + '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">'
+                + '<div style="min-width:0"><div style="font-family:\'Fraunces\',serif;font-size:17px;font-weight:600;color:var(--text-primary)">⚡ ' + _podEsc(p.name) + '</div>'
+                + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'
+                + chip(ended ? "🏁 finished" : "Day " + dayNum + " of " + TOTAL)
+                + chip(ended ? "" : "⏳ " + left + " day" + (left > 1 ? "s" : "") + " left")
+                + chip("👥 " + p.members.length)
+                + '</div></div>'
+                + '<div style="display:flex;align-items:center;gap:7px;flex-shrink:0">'
+                + '<button class="pod-copy-btn" onclick="challengeCopyLink(\'' + p.code + '\',this)" title="Copy challenge link" style="display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:12px;font-weight:700;color:#9aa0ff;background:rgba(135,141,255,0.12);border:1px solid rgba(135,141,255,0.28);border-radius:8px;padding:7px 11px;cursor:pointer"><i class="ti ti-link"></i> Copy link</button>'
+                + '<button onclick="podLeaveUI(\'' + p.id + '\')" title="Leave challenge" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;cursor:pointer;color:var(--text-tertiary);font-size:14px"><i class="ti ti-logout"></i></button>'
+                + '</div></div>' + banner + rows + soloCTA + '</div>';
+        }
+        window.challengeCopyLink = function (code, btn) {
+            var url = (typeof challengeLink === "function") ? challengeLink(code) : code;
+            try { navigator.clipboard.writeText(url); } catch (e) {}
+            _podStatus("Challenge link copied — send it to anyone.", "ok");
+            if (btn) { var oh = btn.innerHTML, ob = btn.style.background, oc = btn.style.color; btn.innerHTML = '<i class="ti ti-check"></i> Copied!'; btn.style.background = "#46c98f"; btn.style.color = "#0f1118"; setTimeout(function () { btn.innerHTML = oh; btn.style.background = ob; btn.style.color = oc; }, 1400); }
+        };
+        window.challengeCreateUI = function () {
+            _podStatus("Starting your 7-day challenge…", "");
+            challengeCreate("7-Day Challenge").then(function (code) { _podStatus("Challenge started! Share this link: " + challengeLink(code), "ok"); renderPods(); })
+                .catch(function (e) { _podStatus("Couldn't start challenge. " + (e.message || ""), "err"); });
+        };
         function podCardHTML(p) {
             var maxW = Math.max.apply(null, p.members.map(function (m) { return m.wmins; }).concat([1]));
             var activeCount = p.members.filter(function (m) { return _podDaysSince(m.lastActive) < 7; }).length;
@@ -13820,7 +13892,7 @@
             var box = document.getElementById("pods-container"); if (!box) return;
             _podInjectCSS();
             box.innerHTML = '<div class="card" style="margin-bottom:14px;text-align:center;color:var(--text-tertiary);font-size:12.5px;padding:20px 0">Loading your pods…</div>';
-            (window.podSyncStats ? podSyncStats(true) : Promise.resolve()).then(function () { return podFetchFeed(); }).then(function (pods) {
+            (window.podSyncStats ? podSyncStats(true) : Promise.resolve()).then(function () { return podFetchFeed(); }).then(function (feed) { return (typeof challengeSyncProgress === "function") ? challengeSyncProgress(feed) : feed; }).then(function (pods) {
                 if (!pods.length) {
                     box.innerHTML = '<div class="card" style="margin-bottom:14px;text-align:center;padding:34px 20px">'
                         + '<div style="font-size:36px;margin-bottom:10px">🤝</div>'
@@ -13828,7 +13900,7 @@
                         + '<div style="font-size:12.5px;color:var(--text-tertiary);max-width:360px;margin:0 auto">Create a pod and share the code with study partners, or join one with a friend\u2019s code. You\u2019ll see each other\u2019s streaks and weekly hours — never scores.</div></div>';
                     return;
                 }
-                box.innerHTML = pods.map(function (p) { return podCardHTML(p); }).join("");
+                box.innerHTML = pods.map(function (p) { return p.kind === "challenge" ? challengeCardHTML(p) : podCardHTML(p); }).join("");
                 setTimeout(function () {
                     box.querySelectorAll(".pod-bar-fill").forEach(function (el) { el.style.width = (el.getAttribute("data-w") || 0) + "%"; });
                     box.querySelectorAll(".pod-streak-num").forEach(function (el) { var v = parseInt(el.getAttribute("data-v"), 10) || 0; if (typeof animateCount === "function") animateCount(el, 0, v, "", 850); else el.textContent = v; });
