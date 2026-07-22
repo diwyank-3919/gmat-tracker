@@ -12422,6 +12422,19 @@
                         <button onclick="startMVS()" id="mvs-btn" style="flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:#46c98f;color:#0b1410;border:none;border-radius:9px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer"><i class="ti ti-player-play"></i> Start 15 min</button>
                     </div>
 
+                    <!-- WIN JOURNAL RECALL -->
+                    <div id="win-recall" style="display:none;background:radial-gradient(130% 200% at 100% 0%, rgba(135,141,255,0.12), rgba(135,141,255,0.02));border:1px solid rgba(135,141,255,0.24);border-radius:14px;padding:16px 18px;margin-bottom:14px">
+                        <div style="display:flex;align-items:flex-start;gap:13px">
+                            <div style="width:36px;height:36px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(135,141,255,0.15);color:#9aa0ff;font-size:18px">🪞</div>
+                            <div style="flex:1;min-width:0">
+                                <div style="font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--text-primary)">Rough patch? Look at the record.</div>
+                                <div id="win-recall-quote" style="display:none;font-size:12.5px;font-style:italic;color:#cdd2e6;background:rgba(255,255,255,0.03);border-left:2px solid #878dff;border-radius:0 8px 8px 0;padding:9px 12px;margin-top:10px"></div>
+                                <div id="win-recall-ev" style="display:flex;flex-direction:column;gap:6px;margin-top:10px"></div>
+                            </div>
+                            <button onclick="winRecallDismiss()" title="Dismiss" style="flex-shrink:0;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--text-tertiary);font-size:15px">&times;</button>
+                        </div>
+                    </div>
+
                     <!-- WIN JOURNAL CAPTURE -->
                     <div id="win-band" style="display:none;align-items:center;gap:13px;background:radial-gradient(130% 200% at 0% 0%, rgba(240,189,106,0.10), rgba(240,189,106,0.02));border:1px solid rgba(240,189,106,0.22);border-radius:14px;padding:12px 15px;margin-bottom:14px">
                         <div style="width:34px;height:34px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(240,189,106,0.14);color:#f0bd6a;font-size:17px">✨</div>
@@ -13614,6 +13627,33 @@
             band.style.display = show ? "flex" : "none";
         }
         window.renderWinBand = renderWinBand;
+        window.winRecallDismiss = function () {
+            try { localStorage.setItem("sc_win_recall_seen", dateStr(today)); } catch (e) {}
+            var el = document.getElementById("win-recall"); if (el) el.style.display = "none";
+        };
+        function renderWinRecall() {
+            var card = document.getElementById("win-recall"); if (!card) return;
+            var seen = null; try { seen = localStorage.getItem("sc_win_recall_seen"); } catch (e) {}
+            if (seen === dateStr(today) || !winIsDip()) { card.style.display = "none"; return; }
+            var ev = winEvidence();
+            if (!ev.length) { card.style.display = "none"; return; }
+            var wins = winList(), pick = null;
+            if (wins.length) pick = wins[Math.floor(Math.random() * Math.min(wins.length, 8))];
+            var q = document.getElementById("win-recall-quote");
+            if (q) {
+                if (pick) {
+                    var d = new Date(pick.date + "T00:00:00");
+                    q.style.display = "block";
+                    q.innerHTML = '“' + _podEsc(pick.text) + '”<div style="font-style:normal;font-size:10.5px;color:var(--text-tertiary);margin-top:5px">— you, ' + d.toLocaleDateString("en-US", { day: "numeric", month: "short" }) + '</div>';
+                } else q.style.display = "none";
+            }
+            var box = document.getElementById("win-recall-ev");
+            if (box) box.innerHTML = ev.slice(0, 2).map(function (e) {
+                return '<div style="display:flex;align-items:center;gap:9px;font-size:12px;color:var(--text-secondary)"><span style="font-size:14px">' + e.icon + '</span><span>' + e.text + '</span></div>';
+            }).join("");
+            card.style.display = "block";
+        }
+        window.renderWinRecall = renderWinRecall;
 
         // ── WEEKLY WRAPPED (data) ──
         function _wkAgg(a, b) {
@@ -14778,6 +14818,7 @@
            document.getElementById("mom-streak").textContent = streak;
             syncShields();
             renderMVS();
+            renderWinRecall();
             renderWinBand();
             renderTodaysThree();
             maybeShowWrappedPrompt();
