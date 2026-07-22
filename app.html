@@ -12763,6 +12763,17 @@
 
             <!-- MOCK SCORE VIEW -->
             <div id="view-mock" style="display:none">
+                <div class="card" id="premock-card" style="margin-bottom:14px">
+                    <div style="display:flex;align-items:center;gap:12px;cursor:pointer" onclick="togglePremock()">
+                        <div style="width:36px;height:36px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(240,189,106,0.14);color:#f0bd6a;font-size:18px">🎯</div>
+                        <div style="flex:1;min-width:0">
+                            <div style="font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--text-primary)">Sitting a mock today?</div>
+                            <div id="premock-sub" style="font-size:11.5px;color:var(--text-tertiary);margin-top:1px">Run the pre-mock ritual — it's worth 10–20 points on its own.</div>
+                        </div>
+                        <button id="premock-caret" style="flex-shrink:0;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--text-tertiary);font-size:14px"><i class="ti ti-chevron-down"></i></button>
+                    </div>
+                    <div id="premock-body" style="display:none;margin-top:14px"></div>
+                </div>
                 <div class="sec-header" style="margin-bottom:18px">
                     <div>
                         <div class="sec-title">Mock Scores</div>
@@ -15059,7 +15070,7 @@
             if (view === "analytics") renderAnalytics();
             if (view === "calendar") renderBigCalendar();
             if (view === "sessions") renderFullLog();
-            if (view === "mock") renderMockView();
+            if (view === "mock") { renderMockView(); if (typeof renderPremock === "function") renderPremock(); }
             if (view === "errors") renderErrorView();
             if (view === "pods") renderPods();
         }
@@ -15559,6 +15570,44 @@
             }
             closeMockReveal(); openDebrief(m);
         };
+        var PREMOCK = [
+            { id: "sleep", t: "Slept properly last night", s: "Fatigue costs more points than any content gap" },
+            { id: "time", t: "Starting at the same time as your real exam", s: "Train your focus for the actual test window" },
+            { id: "order", t: "Section order decided", s: "Lock it in now — don't improvise on test day" },
+            { id: "pace", t: "Pacing checkpoints in mind", s: "Know where you should be at the halfway mark" },
+            { id: "setup", t: "Scratch pad, water, phone away", s: "Simulate real conditions or the score won't mean much" },
+            { id: "mindset", t: "Accepted you'll miss some questions", s: "It's adaptive — hard questions mean it's working" }
+        ];
+        function _pmKey() { return "sc_premock_" + dateStr(today); }
+        function _pmState() { try { return JSON.parse(localStorage.getItem(_pmKey()) || "{}") || {}; } catch (e) { return {}; } }
+        window.pmToggle = function (id) {
+            var st = _pmState(); st[id] = !st[id];
+            try { localStorage.setItem(_pmKey(), JSON.stringify(st)); } catch (e) {}
+            renderPremock(true);
+        };
+        window.togglePremock = function () {
+            var b = document.getElementById("premock-body"), c = document.getElementById("premock-caret");
+            if (!b) return;
+            var open = b.style.display !== "none";
+            b.style.display = open ? "none" : "block";
+            if (c) c.innerHTML = '<i class="ti ti-chevron-' + (open ? "down" : "up") + '"></i>';
+            if (!open) renderPremock(true);
+        };
+        function renderPremock(keepOpen) {
+            var body = document.getElementById("premock-body"), sub = document.getElementById("premock-sub");
+            if (!body) return;
+            var st = _pmState(), done = PREMOCK.filter(function (i) { return st[i.id]; }).length;
+            if (sub) sub.textContent = done > 0 ? done + " of " + PREMOCK.length + " ready" + (done === PREMOCK.length ? " — you're set. Good luck. 🍀" : "") : "Run the pre-mock ritual — it's worth 10–20 points on its own.";
+            body.innerHTML = PREMOCK.map(function (i) {
+                var on = !!st[i.id];
+                return '<div onclick="pmToggle(\'' + i.id + '\')" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;margin-bottom:6px;cursor:pointer;background:' + (on ? "rgba(70,201,143,0.07)" : "rgba(255,255,255,0.025)") + ';border:1px solid ' + (on ? "rgba(70,201,143,0.22)" : "rgba(255,255,255,0.06)") + ';transition:all .15s">'
+                    + '<div style="width:20px;height:20px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;' + (on ? 'background:#46c98f;color:#0b1410' : 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.14);color:transparent') + '">✓</div>'
+                    + '<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:650;color:' + (on ? "var(--text-secondary)" : "var(--text-primary)") + ';' + (on ? "text-decoration:line-through;opacity:.7" : "") + '">' + i.t + '</div>'
+                    + '<div style="font-size:11px;color:var(--text-tertiary);margin-top:1px">' + i.s + '</div></div></div>';
+            }).join("");
+            if (keepOpen) body.style.display = "block";
+        }
+        window.renderPremock = renderPremock;
         async function captureMockReveal() {
             var se = document.getElementById("mr-score"); if (se && _lastMockScore != null) se.textContent = _lastMockScore;
             return await html2canvas(document.getElementById("mock-reveal-card"), { backgroundColor: "#12101c", scale: 2, useCORS: true, logging: false });
