@@ -15448,7 +15448,7 @@
             else if (prev && m.score < prev.score) line = "A dip this time — every mock is data. Review and reset.";
             else line = (target - m.score) + " points to your target. Keep stacking mocks.";
             S("mr-line", line);
-            _lastMockScore = m.score;
+            _lastMockScore = m.score; window._lastMockRef = m;
             var modal = document.getElementById("mock-reveal-modal"); if (modal) modal.style.display = "flex";
             var scoreEl = document.getElementById("mr-score");
             if (scoreEl) { scoreEl.textContent = "205"; card.style.animation = "none"; void card.offsetWidth; card.style.animation = "scdPop .5s cubic-bezier(.34,1.56,.64,1)"; }
@@ -15477,7 +15477,7 @@
             var L = [];
             L.push("**Mock debrief — " + m.score + "** (" + new Date(m.date + "T00:00:00").toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }) + ")");
             L.push("");
-            L.push("| | Score |");
+            L.push("| Section | Score |");
             L.push("|---|---|");
             L.push("| **Total** | **" + m.score + "**" + (prev ? " (" + (m.score - prev.score >= 0 ? "+" : "") + (m.score - prev.score) + " vs last)" : " (first mock)") + " |");
             if (m.quant != null) L.push("| Quant | " + m.quant + " |");
@@ -15494,6 +15494,70 @@
             L.push("---");
             L.push("*Tracked with ScoreConsole*");
             return L.join("\n");
+        };
+        var _dbfMock = null, _dbfState = {};
+        (function () {
+            if (document.getElementById("dbf-css")) return;
+            var s = document.createElement("style"); s.id = "dbf-css";
+            s.textContent = ".dbf-opt{font-family:inherit;font-size:12px;font-weight:600;color:var(--text-secondary);background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer;transition:all .15s}"
+                + ".dbf-opt:hover{border-color:rgba(135,141,255,0.35)}"
+                + ".dbf-opt.on{background:rgba(135,141,255,0.16);border-color:rgba(135,141,255,0.45);color:#9aa0ff}";
+            document.head.appendChild(s);
+        })();
+        window.dbfPick = function (field, btn) {
+            _dbfState[field] = btn.getAttribute("data-v");
+            var wrap = document.getElementById("dbf-" + field);
+            if (wrap) wrap.querySelectorAll(".dbf-opt").forEach(function (b) { b.classList.toggle("on", b === btn); });
+        };
+        window.openDebrief = function (mock) {
+            if (!mock) return;
+            _dbfMock = mock;
+            var d = mockDebriefGet(mock.id) || {};
+            _dbfState = { pace: d.pace || null, energy: d.energy ? String(d.energy) : null };
+            var sub = document.getElementById("dbf-sub");
+            if (sub) sub.textContent = mock.score + " · " + new Date(mock.date + "T00:00:00").toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" });
+            ["went", "broke", "fixes"].forEach(function (f) { var el = document.getElementById("dbf-" + f); if (el) el.value = d[f] || ""; });
+            ["pace", "energy"].forEach(function (f) {
+                var wrap = document.getElementById("dbf-" + f); if (!wrap) return;
+                wrap.querySelectorAll(".dbf-opt").forEach(function (b) { b.classList.toggle("on", _dbfState[f] === b.getAttribute("data-v")); });
+            });
+            var st = document.getElementById("dbf-status"); if (st) st.textContent = "";
+            var m = document.getElementById("mock-debrief-modal"); if (m) m.style.display = "flex";
+        };
+        window.closeDebrief = function () { var m = document.getElementById("mock-debrief-modal"); if (m) m.style.display = "none"; };
+        function _dbfCollect() {
+            return {
+                pace: _dbfState.pace || null,
+                energy: _dbfState.energy ? parseInt(_dbfState.energy, 10) : null,
+                went: (document.getElementById("dbf-went") || {}).value || "",
+                broke: (document.getElementById("dbf-broke") || {}).value || "",
+                fixes: (document.getElementById("dbf-fixes") || {}).value || ""
+            };
+        }
+        window.dbfSave = function () {
+            if (!_dbfMock) return;
+            mockDebriefSave(_dbfMock.id, _dbfCollect());
+            var st = document.getElementById("dbf-status"); if (st) { st.textContent = "✓ Debrief saved"; st.style.color = "var(--green)"; }
+            if (typeof renderMockView === "function") renderMockView();
+            setTimeout(closeDebrief, 700);
+        };
+        window.dbfCopy = function (btn) {
+            if (!_dbfMock) return;
+            var data = _dbfCollect();
+            mockDebriefSave(_dbfMock.id, data);
+            var md = mockDebriefMarkdown(_dbfMock, data);
+            try { navigator.clipboard.writeText(md); } catch (e) {}
+            var st = document.getElementById("dbf-status"); if (st) { st.textContent = "✓ Copied — paste into Reddit or GMAT Club"; st.style.color = "var(--green)"; }
+            if (btn) { var oh = btn.innerHTML; btn.innerHTML = '<i class="ti ti-check"></i> Copied!'; setTimeout(function () { btn.innerHTML = oh; }, 1500); }
+            if (typeof renderMockView === "function") renderMockView();
+        };
+        window.openDebriefFromReveal = function () {
+            var m = window._lastMockRef; if (!m) return;
+            if (!m.id) {
+                var match = (window.mockScores || []).filter(function (x) { return x.date === m.date && x.score === m.score; });
+                if (match.length) m = match[match.length - 1];
+            }
+            closeMockReveal(); openDebrief(m);
         };
         async function captureMockReveal() {
             var se = document.getElementById("mr-score"); if (se && _lastMockScore != null) se.textContent = _lastMockScore;
@@ -15586,8 +15650,10 @@
                 div.style.cssText = "display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);margin-bottom:4px";
                 div.innerHTML = '<div style="width:26px;height:26px;border-radius:7px;background:rgba(139,124,248,0.12);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--accent-bright);flex-shrink:0">M' + rank + '</div>'
                     + '<div style="flex:1"><div style="display:flex;align-items:center;gap:7px"><span style="font-family:\'Clash Display\',sans-serif;font-size:20px;font-weight:800;color:' + scoreColor + '">' + m.score + '</span><span style="font-size:11px;font-weight:600;color:' + gapColor + ';background:' + gapBg + ';padding:2px 8px;border-radius:100px">' + gapText + '</span></div><div style="font-size:10.5px;color:var(--text-tertiary);margin-top:2px">' + subLine + '</div></div>'
-                   + '<button class="mock-share-btn" title="Share this result" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.28);font-size:13px;padding:4px;border-radius:6px"><i class="ti ti-share"></i></button>'
+                   + '<button class="mock-dbf-btn" title="Mock debrief" style="background:none;border:none;cursor:pointer;color:' + (mockDebriefGet(m.id) ? '#46c98f' : 'rgba(255,255,255,0.28)') + ';font-size:13px;padding:4px;border-radius:6px"><i class="ti ti-notes"></i></button>'
+                    + '<button class="mock-share-btn" title="Share this result" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.28);font-size:13px;padding:4px;border-radius:6px"><i class="ti ti-share"></i></button>'
                     + '<button class="mock-del-btn" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.18);font-size:13px;padding:4px;border-radius:6px"><i class="ti ti-trash"></i></button>';
+                div.querySelector(".mock-dbf-btn").addEventListener("click", (function (mm) { return function () { openDebrief(mm); }; })(m));
                 div.querySelector(".mock-share-btn").addEventListener("click", (function (mm) { return function () { revealMock(mm); }; })(m));
                 div.querySelector(".mock-del-btn").addEventListener("click", (function (mid) { return function () { deleteMock(mid); }; })(m.id));
                 return div;
@@ -18570,6 +18636,49 @@
         </div>
     </div>
 
+    <!-- MOCK DEBRIEF -->
+    <div id="mock-debrief-modal" onclick="if(event.target===this)closeDebrief()"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);backdrop-filter:blur(16px);z-index:2300;align-items:center;justify-content:center;padding:20px">
+        <div style="max-width:440px;width:100%;max-height:92vh;overflow-y:auto;background:linear-gradient(160deg,#12141d,#171b28);border:1px solid var(--border);border-radius:18px;padding:22px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                <div style="font-family:'Fraunces',serif;font-size:17px;font-weight:600;color:#f4eee2">Mock debrief</div>
+                <button onclick="closeDebrief()" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--text-tertiary);font-size:16px">&times;</button>
+            </div>
+            <div id="dbf-sub" style="font-size:11.5px;color:var(--text-tertiary);margin-bottom:18px"></div>
+
+            <label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-tertiary);margin-bottom:7px">Timing</label>
+            <div id="dbf-pace" style="display:flex;gap:7px;margin-bottom:16px;flex-wrap:wrap">
+                <button type="button" data-v="ran-out" onclick="dbfPick('pace',this)" class="dbf-opt">Ran out of time</button>
+                <button type="button" data-v="on-pace" onclick="dbfPick('pace',this)" class="dbf-opt">On pace</button>
+                <button type="button" data-v="early" onclick="dbfPick('pace',this)" class="dbf-opt">Time to spare</button>
+            </div>
+
+            <label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-tertiary);margin-bottom:7px">Focus / energy</label>
+            <div id="dbf-energy" style="display:flex;gap:7px;margin-bottom:16px">
+                <button type="button" data-v="1" onclick="dbfPick('energy',this)" class="dbf-opt">1</button>
+                <button type="button" data-v="2" onclick="dbfPick('energy',this)" class="dbf-opt">2</button>
+                <button type="button" data-v="3" onclick="dbfPick('energy',this)" class="dbf-opt">3</button>
+                <button type="button" data-v="4" onclick="dbfPick('energy',this)" class="dbf-opt">4</button>
+                <button type="button" data-v="5" onclick="dbfPick('energy',this)" class="dbf-opt">5</button>
+            </div>
+
+            <label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-tertiary);margin-bottom:6px">What went well</label>
+            <textarea id="dbf-went" rows="2" placeholder="Anything that felt controlled or improved" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:9px;padding:9px 11px;color:var(--text-primary);font-family:inherit;font-size:12.5px;resize:vertical;margin-bottom:14px"></textarea>
+
+            <label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-tertiary);margin-bottom:6px">What broke down</label>
+            <textarea id="dbf-broke" rows="2" placeholder="Where you lost points or time" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:9px;padding:9px 11px;color:var(--text-primary);font-family:inherit;font-size:12.5px;resize:vertical;margin-bottom:14px"></textarea>
+
+            <label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-tertiary);margin-bottom:6px">Next three fixes</label>
+            <textarea id="dbf-fixes" rows="3" placeholder="1.&#10;2.&#10;3." style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:9px;padding:9px 11px;color:var(--text-primary);font-family:inherit;font-size:12.5px;resize:vertical;margin-bottom:16px"></textarea>
+
+            <div style="display:flex;gap:9px;flex-wrap:wrap">
+                <button onclick="dbfSave()" style="flex:1;min-width:120px;padding:10px;background:#878dff;color:#0f1118;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">Save debrief</button>
+                <button onclick="dbfCopy(this)" style="flex:1;min-width:120px;padding:10px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;gap:7px"><i class="ti ti-brand-reddit"></i> Copy for Reddit</button>
+            </div>
+            <div id="dbf-status" style="text-align:center;font-size:11.5px;margin-top:9px;min-height:14px;color:var(--text-tertiary)"></div>
+        </div>
+    </div>
+
     <!-- MOCK SCORE REVEAL -->
     <div id="mock-reveal-modal" onclick="if(event.target===this)closeMockReveal()"
         style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);backdrop-filter:blur(16px);z-index:2200;align-items:center;justify-content:center;padding:20px">
@@ -18607,7 +18716,8 @@
             </div>
             <div style="display:flex;gap:9px;margin-top:14px;flex-wrap:wrap">
                 <button onclick="mockRevealDownload()" style="flex:1;min-width:130px;padding:10px;background:#878dff;color:#0f1118;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px"><i class="ti ti-download"></i> Download PNG</button>
-                <button onclick="mockRevealCopy()" style="flex:1;min-width:130px;padding:10px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;gap:7px"><i class="ti ti-copy"></i> Copy image</button>
+               <button onclick="mockRevealCopy()" style="flex:1;min-width:130px;padding:10px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;gap:7px"><i class="ti ti-copy"></i> Copy image</button>
+                <button onclick="openDebriefFromReveal()" style="flex:1 0 100%;padding:10px;background:rgba(135,141,255,0.12);border:1px solid rgba(135,141,255,0.30);border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;color:#9aa0ff;display:flex;align-items:center;justify-content:center;gap:7px"><i class="ti ti-notes"></i> Write debrief</button>
             </div>
             <div id="mock-reveal-status" style="text-align:center;font-size:11.5px;margin-top:9px;min-height:14px;color:var(--text-tertiary)"></div>
         </div>
