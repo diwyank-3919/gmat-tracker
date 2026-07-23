@@ -25707,6 +25707,163 @@ function injectSndChip() {
                 min-width: 180px !important;
             }
         }
+   </style>
+
+    <style id="sheldon-premium">
+        /* ══ PANEL SURFACE — layered navy depth ══ */
+        #sheldonPanel {
+            background:
+                radial-gradient(120% 80% at 12% -12%, rgba(135, 141, 255, .15), transparent 56%),
+                radial-gradient(100% 70% at 98% 108%, rgba(70, 201, 143, .07), transparent 55%),
+                linear-gradient(168deg, #0f1220 0%, #0c0e15 52%, #11141f 100%) !important;
+            border: 1px solid rgba(135, 141, 255, .20) !important;
+            box-shadow: 0 40px 110px rgba(0, 0, 0, .70), 0 0 80px rgba(135, 141, 255, .09), inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+        }
+
+        /* ══ CENTERED READING COLUMN (kills the wide-screen void) ══ */
+        #sheldonPanel.sh-maximized .sheldon-messages {
+            padding-left: max(48px, calc((100% - 880px) / 2)) !important;
+            padding-right: max(48px, calc((100% - 880px) / 2)) !important;
+            padding-top: 30px !important;
+            gap: 22px !important;
+        }
+
+        #sheldonPanel.sh-maximized .sheldon-chips,
+        #sheldonPanel.sh-maximized .sheldon-input {
+            padding-left: max(18px, calc((100% - 880px) / 2)) !important;
+            padding-right: max(18px, calc((100% - 880px) / 2)) !important;
+        }
+
+        #sheldonPanel.sh-maximized .sheldon-msg.bot {
+            max-width: 82% !important;
+        }
+
+        #sheldonPanel.sh-maximized .sheldon-msg.user {
+            max-width: 72% !important;
+        }
+
+        /* ══ MESSAGE BUBBLES ══ */
+        #sheldonPanel .sheldon-msg.bot {
+            background: linear-gradient(158deg, rgba(31, 37, 56, .96), rgba(21, 26, 40, .96)) !important;
+            border: 1px solid rgba(255, 255, 255, .075) !important;
+            border-radius: 6px 20px 20px 20px !important;
+            padding: 14px 18px !important;
+            color: #e3e6ef !important;
+            box-shadow: 0 8px 26px rgba(0, 0, 0, .34), inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+        }
+
+        #sheldonPanel .sheldon-msg.user {
+            background: linear-gradient(158deg, #7d84ff, #666ee4) !important;
+            color: #0d0f18 !important;
+            border: 1px solid rgba(255, 255, 255, .18) !important;
+            border-radius: 20px 6px 20px 20px !important;
+            padding: 13px 18px !important;
+            font-weight: 550 !important;
+            box-shadow: 0 8px 24px rgba(135, 141, 255, .26) !important;
+        }
+
+        /* ══ HEADER — glass + gradient hairline ══ */
+        #sheldonPanel .sheldon-header {
+            position: relative !important;
+            background: linear-gradient(180deg, rgba(19, 23, 38, .94), rgba(14, 17, 28, .55)) !important;
+            backdrop-filter: blur(22px) saturate(150%) !important;
+            border-bottom: none !important;
+        }
+
+        #sheldonPanel .sheldon-header::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(135, 141, 255, .38), rgba(255, 255, 255, .10), transparent);
+            pointer-events: none;
+        }
+
+        /* ══ SUGGESTION CHIPS ══ */
+        #sheldonPanel .sheldon-chip {
+            background: rgba(255, 255, 255, .035) !important;
+            border: 1px solid rgba(255, 255, 255, .09) !important;
+            color: #c5cadb !important;
+            padding: 9px 15px !important;
+            font-size: 12.5px !important;
+            backdrop-filter: blur(10px) !important;
+        }
+
+        #sheldonPanel .sheldon-chip:hover {
+            background: rgba(135, 141, 255, .13) !important;
+            border-color: rgba(135, 141, 255, .42) !important;
+            color: #b9bdff !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 10px 24px rgba(135, 141, 255, .18) !important;
+        }
+
+        /* ══ INPUT DOCK — floating pill with focus glow ══ */
+        #sheldonPanel .sheldon-input {
+            position: relative !important;
+            background: transparent !important;
+            padding-top: 6px !important;
+            padding-bottom: 16px !important;
+        }
+
+        #sheldonPanel .sheldon-input::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -26px;
+            height: 26px;
+            background: linear-gradient(180deg, transparent, rgba(12, 14, 21, .85));
+            pointer-events: none;
+        }
+
+        #sheldonPanel .sh-dock-field {
+            background: rgba(255, 255, 255, .045) !important;
+            border: 1px solid rgba(255, 255, 255, .10) !important;
+            border-radius: 16px !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+            transition: border-color .2s ease, box-shadow .28s ease, background .2s ease !important;
+        }
+
+        #sheldonPanel .sh-dock-field:focus-within {
+            background: rgba(135, 141, 255, .07) !important;
+            border-color: rgba(135, 141, 255, .55) !important;
+            box-shadow: 0 0 0 4px rgba(135, 141, 255, .10), 0 10px 30px rgba(0, 0, 0, .34) !important;
+        }
+
+        #sheldonPanel .sheldon-send {
+            background: linear-gradient(160deg, #8b91ff, #656de3) !important;
+            border: none !important;
+            box-shadow: 0 8px 20px rgba(135, 141, 255, .34) !important;
+            transition: transform .15s cubic-bezier(.34, 1.56, .64, 1), box-shadow .2s ease !important;
+        }
+
+        #sheldonPanel .sheldon-send:hover {
+            transform: translateY(-1px) scale(1.05) !important;
+            box-shadow: 0 12px 28px rgba(135, 141, 255, .44) !important;
+        }
+
+        #sheldonPanel .sheldon-send:active {
+            transform: scale(.94) !important;
+        }
+
+        /* ══ SCROLLBAR ══ */
+        #sheldonPanel .sheldon-messages::-webkit-scrollbar {
+            width: 8px !important;
+        }
+
+        #sheldonPanel .sheldon-messages::-webkit-scrollbar-thumb {
+            background: rgba(135, 141, 255, .20) !important;
+            border-radius: 8px !important;
+            border: 2px solid transparent !important;
+            background-clip: content-box !important;
+        }
+
+        #sheldonPanel .sheldon-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(135, 141, 255, .38) !important;
+            background-clip: content-box !important;
+        }
     </style>
 
     <script id="sheldon-v2-fix">
