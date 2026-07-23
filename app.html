@@ -11990,7 +11990,25 @@
                         <div id="pod-action-status" style="font-size:12px;margin-top:10px;min-height:15px;color:var(--text-tertiary)"></div>
                     </div>
                 </div>
-                <div id="view-dashboard" class="view-enter">
+               <div id="view-dashboard" class="view-enter">
+                    <!-- PHASE BANNER -->
+                    <div id="phase-band" style="display:none;border-radius:14px;padding:15px 17px;margin-bottom:14px">
+                        <div style="display:flex;align-items:flex-start;gap:13px;flex-wrap:wrap">
+                            <div id="phase-ic" style="width:38px;height:38px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:19px"></div>
+                            <div style="flex:1;min-width:200px">
+                                <div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap">
+                                    <span id="phase-name" style="font-family:'Fraunces',serif;font-size:16px;font-weight:600"></span>
+                                    <span id="phase-days" style="font-size:11px;font-weight:700;color:var(--text-tertiary)"></span>
+                                </div>
+                                <div id="phase-focus" style="font-size:11.5px;color:var(--text-secondary);margin-top:2px"></div>
+                                <div id="phase-track" style="display:none;height:4px;border-radius:3px;background:rgba(255,255,255,0.07);margin-top:10px;overflow:hidden"><div id="phase-fill" style="height:100%;width:0;border-radius:3px;transition:width .9s cubic-bezier(.22,1,.36,1)"></div></div>
+                                <div id="phase-directive" style="font-size:11.5px;color:var(--text-tertiary);margin-top:10px;line-height:1.5"></div>
+                                <div id="phase-note" style="display:none;font-size:11.5px;font-weight:600;margin-top:8px;padding:8px 11px;border-radius:8px"></div>
+                            </div>
+                            <div id="phase-cadence" style="flex-shrink:0;font-size:10.5px;font-weight:700;padding:5px 11px;border-radius:100px;white-space:nowrap"></div>
+                        </div>
+                    </div>
+
                     <!-- WEEKLY WRAPPED PROMPT -->
                     <div id="wrapped-prompt" style="display:none;align-items:center;gap:14px;background:radial-gradient(120% 200% at 0% 0%, rgba(135,141,255,0.14), rgba(135,141,255,0.03));border:1px solid rgba(135,141,255,0.28);border-radius:14px;padding:14px 16px;margin-bottom:14px">
                         <div style="width:38px;height:38px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(135,141,255,0.15);color:#9aa0ff;font-size:19px">✦</div>
@@ -13691,8 +13709,30 @@
             else if (ph.key === "mock" && !mocks.length) ph.note = "No mocks logged yet — sit one this week to get a real baseline.";
             else if (ph.key === "drilling" && mocks.length === 0) ph.note = "Worth a diagnostic mock soon so your drilling targets real weaknesses.";
             else if (ph.key === "foundation" && daysLeft > 120) ph.note = "Plenty of runway — consistency now beats intensity later.";
-            return ph;
+           return ph;
         };
+        function renderPhase() {
+            var band = document.getElementById("phase-band"); if (!band) return;
+            var p = (typeof phaseData === "function") ? phaseData() : null; if (!p) { band.style.display = "none"; return; }
+            var c = p.color;
+            band.style.background = "radial-gradient(130% 220% at 0% 0%, " + c + "1f, " + c + "05)";
+            band.style.border = "1px solid " + c + "3d";
+            var S = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+            var ic = document.getElementById("phase-ic");
+            if (ic) { ic.textContent = p.icon; ic.style.background = c + "24"; }
+            var nm = document.getElementById("phase-name"); if (nm) { nm.textContent = p.name; nm.style.color = c; }
+            S("phase-days", p.hasDate ? (p.daysLeft === 0 ? "Exam day" : p.daysLeft + " day" + (p.daysLeft > 1 ? "s" : "") + " to exam") : "");
+            S("phase-focus", p.focus);
+            S("phase-directive", p.directive);
+            var tr = document.getElementById("phase-track"), fl = document.getElementById("phase-fill");
+            if (tr && fl) { tr.style.display = p.hasDate ? "block" : "none"; fl.style.background = c; setTimeout(function () { fl.style.width = (p.pct || 0) + "%"; }, 50); }
+            var cd = document.getElementById("phase-cadence");
+            if (cd) { if (p.mockCadence) { cd.style.display = "block"; cd.textContent = p.mockCadence; cd.style.color = c; cd.style.background = c + "1a"; cd.style.border = "1px solid " + c + "38"; } else cd.style.display = "none"; }
+            var nt = document.getElementById("phase-note");
+            if (nt) { if (p.note) { nt.style.display = "block"; nt.textContent = p.note; nt.style.color = c; nt.style.background = c + "14"; nt.style.border = "1px solid " + c + "2e"; } else nt.style.display = "none"; }
+            band.style.display = "block";
+        }
+        window.renderPhase = renderPhase;
 
         // ── WEEKLY WRAPPED (data) ──
         function _wkAgg(a, b) {
@@ -14856,6 +14896,7 @@
             document.getElementById("mom-xp").textContent = xp.toLocaleString();
            document.getElementById("mom-streak").textContent = streak;
             syncShields();
+            renderPhase();
             renderMVS();
             renderWinRecall();
             renderWinBand();
