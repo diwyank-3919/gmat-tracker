@@ -13655,6 +13655,45 @@
         }
         window.renderWinRecall = renderWinRecall;
 
+        // ── PHASE SYSTEM ──
+        window.phaseData = function () {
+            var ed = null; try { ed = localStorage.getItem("gmat_exam_date"); } catch (e) {}
+            if (!ed) return { key: "unset", name: "No exam date set", icon: "📅", color: "#9aa0ff", daysLeft: null,
+                focus: "Set your exam date to unlock a phase-based plan", directive: "A date turns 'study more' into a schedule. Set one in the Exam Command Center.", mockCadence: null, hasDate: false };
+            var p = ed.split("-").map(Number), exam = new Date(p[0], p[1] - 1, p[2]);
+            var daysLeft = Math.max(0, Math.ceil((exam - today) / 86400000));
+            var mocks = (window.mockScores || []).slice().sort(function (a, b) { return a.date.localeCompare(b.date); });
+            var last = mocks.length ? mocks[mocks.length - 1] : null;
+            var target = (typeof TARGET_SCORE !== "undefined" ? TARGET_SCORE : 735);
+            var gap = last ? (target - last.score) : null;
+            var ph;
+            if (daysLeft >= 60) ph = { key: "foundation", name: "Foundation", icon: "🧱", color: "#60a5fa", pct: 0,
+                focus: "Build content mastery — accuracy over speed",
+                directive: "Learn concepts properly now. Untimed practice is fine; you're buying accuracy you'll speed up later.",
+                mockCadence: "1 mock every 3–4 weeks" };
+            else if (daysLeft >= 30) ph = { key: "drilling", name: "Drilling", icon: "⚙️", color: "#878dff", pct: 0,
+                focus: "Volume under timing pressure",
+                directive: "Shift to timed sets and error-log discipline. This is where scores actually move.",
+                mockCadence: "1 mock every 1–2 weeks" };
+            else if (daysLeft >= 10) ph = { key: "mock", name: "Mock Season", icon: "🎯", color: "#f0bd6a", pct: 0,
+                focus: "Full-length practice and stamina",
+                directive: "Sit full mocks under real conditions, then debrief each one properly. Fix patterns, don't chase new content.",
+                mockCadence: "1–2 mocks per week" };
+            else ph = { key: "taper", name: "Taper", icon: "🌙", color: "#46c98f", pct: 0,
+                focus: "Rest, review, arrive fresh",
+                directive: "No new content. Light review of your error log, protect your sleep, trust the work you've done.",
+                mockCadence: "No mocks in the final 3 days" };
+            ph.daysLeft = daysLeft; ph.hasDate = true; ph.examDate = ed;
+            var span = daysLeft >= 60 ? [60, 200] : daysLeft >= 30 ? [30, 60] : daysLeft >= 10 ? [10, 30] : [0, 10];
+            ph.pct = Math.min(100, Math.max(0, Math.round((1 - (daysLeft - span[0]) / (span[1] - span[0])) * 100)));
+            ph.note = null;
+            if (ph.key === "taper" && gap != null && gap > 40) ph.note = "You're " + gap + " below target — taper anyway. Cramming now costs more than it adds.";
+            else if (ph.key === "mock" && !mocks.length) ph.note = "No mocks logged yet — sit one this week to get a real baseline.";
+            else if (ph.key === "drilling" && mocks.length === 0) ph.note = "Worth a diagnostic mock soon so your drilling targets real weaknesses.";
+            else if (ph.key === "foundation" && daysLeft > 120) ph.note = "Plenty of runway — consistency now beats intensity later.";
+            return ph;
+        };
+
         // ── WEEKLY WRAPPED (data) ──
         function _wkAgg(a, b) {
             var mins = 0, cnt = 0, byTopic = {}, byDay = {}, c = 0, t = 0;
