@@ -11473,14 +11473,14 @@
         <div class="mob-logo">
             <div class="mob-logo-icon"><svg class="brand-ring" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
                     <defs>
-                        <linearGradient id="brandGrad" x1="6" y1="26" x2="26" y2="6" gradientUnits="userSpaceOnUse">
+                        <linearGradient id="brandGradMob" x1="6" y1="26" x2="26" y2="6" gradientUnits="userSpaceOnUse">
                             <stop stop-color="#8b7cf8" />
                             <stop offset="0.55" stop-color="#7e9bf0" />
                             <stop offset="1" stop-color="#5fd9a8" />
                         </linearGradient>
                     </defs>
                     <circle cx="16" cy="16" r="11" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="3.4" />
-                    <path class="brand-arc" d="M22.3 7 A 11 11 0 1 1 9.7 7" fill="none" stroke="url(#brandGrad)"
+                    <path class="brand-arc" d="M22.3 7 A 11 11 0 1 1 9.7 7" fill="none" stroke="url(#brandGradMob)"
                         stroke-width="3.4" stroke-linecap="round" pathLength="100" />
                     <circle class="brand-dot" cx="22.3" cy="7" r="2.4" fill="#6fe7b6" />
                 </svg></div>
@@ -11789,7 +11789,6 @@
                     </div>
                     <div class="tb-chip green"><i class="ti ti-target"></i><span id="week-chip">0</span>% this week
                     </div>
-                    <div class="tb-chip amber"><i class="ti ti-trophy"></i><span id="total-chip">0h</span> total</div>
                     <div class="tb-chip amber"><i class="ti ti-trophy"></i><span id="total-chip">0h</span> total</div>
 
                     <!-- Daily Briefing bell -->
@@ -14807,7 +14806,6 @@
         }
 
         var _renderTimer = null;
-        var _renderTimer = null;
         function render() {
             if (!window._sessionsReady) return;
             clearTimeout(_renderTimer);
@@ -15212,31 +15210,6 @@
             }).join("");
 
             el.querySelectorAll(".sess-del").forEach(function (btn) { btn.addEventListener("click", function () { delSession(this.getAttribute("data-id")); }); });
-        }
-        function migrateFromLocalStorage() {
-            var OLD_KEYS = ["gmat_v3", "gmat_sessions_v2", "gmat_sessions"];
-            var found = null, foundKey = null;
-            OLD_KEYS.forEach(function (k) { var raw = localStorage.getItem(k); if (raw && !found) { try { found = JSON.parse(raw); foundKey = k; } catch (e) { } } });
-            if (!found || !found.length) { scNotify("No local session data found to migrate.", 'info'); return; }
-            var modal = document.getElementById("migrate-modal");
-            document.getElementById("migrate-count").textContent = found.length;
-            document.getElementById("migrate-preview").textContent = found.slice(0, 3).map(function (s) { return s.date + " - " + s.topic + " - " + fmtH(s.mins); }).join("\n") + (found.length > 3 ? "\n...and " + (found.length - 3) + " more" : "");
-            modal.style.display = "flex";
-            document.getElementById("migrate-confirm").onclick = function () {
-                modal.style.display = "none"; setStatus("saving");
-                var rows = found.map(function (s) { return { date: s.date, topic: s.topic, mins: s.mins, created_at: s.createdAt || s.created_at || Date.now() }; });
-                supa.from("sessions").insert(rows).then(function (res) {
-                    if (res.error) { setStatus("error"); scNotify("Migration failed — " + res.error.message, 'error'); return; }
-                    OLD_KEYS.forEach(function (k) { localStorage.removeItem(k); });
-                    showToast("✅", "Migration complete!", rows.length + " sessions imported successfully."); loadSessions();
-                }).catch(function (err) { setStatus("error"); scNotify("Migration failed — " + err.message, 'error'); });
-            };
-            document.getElementById("migrate-cancel").onclick = function () { modal.style.display = "none"; };
-        }
-        function checkLocalMigration() {
-            var OLD_KEYS = ["gmat_v3", "gmat_sessions_v2", "gmat_sessions"]; var found = false;
-            OLD_KEYS.forEach(function (k) { if (localStorage.getItem(k)) found = true; });
-            if (found) { var bar = document.getElementById("migrate-bar"); if (bar) bar.style.display = "flex"; }
         }
 
         var currentView = "dashboard"; var calOffset = 0;
@@ -16320,7 +16293,6 @@
             if (_appStarted) return;
             _appStarted = true;
             loadSessions();
-            checkLocalMigration();
             loadExamSettings();
             setTimeout(function () { if (typeof processPendingJoin === "function") processPendingJoin(); }, 1200);
         }
@@ -16679,29 +16651,6 @@
             });
         }
     </script>
-
-    <!-- MIGRATION MODAL -->
-    <div id="migrate-modal"
-        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.60);backdrop-filter:blur(12px);z-index:1000;align-items:center;justify-content:center">
-        <div
-            style="background:rgba(15,12,26,0.97);backdrop-filter:blur(40px);border:1px solid rgba(139,124,248,0.25);border-radius:20px;padding:26px 30px;max-width:400px;width:90%;box-shadow:0 32px 80px rgba(0,0,0,0.60)">
-            <div style="font-size:20px;margin-bottom:4px">📦 Migrate local data</div>
-            <div style="font-size:12.5px;color:var(--text-secondary);margin-bottom:14px">Found <strong
-                    id="migrate-count">0</strong> sessions in your browser storage</div>
-            <pre id="migrate-preview"
-                style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:11px;font-size:11.5px;color:var(--text-primary);margin-bottom:18px;white-space:pre-wrap"></pre>
-            <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:18px">These will be uploaded to Supabase
-                and
-                removed from local storage.</div>
-            <div style="display:flex;gap:9px">
-                <button id="migrate-confirm"
-                    style="flex:1;padding:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:650;cursor:pointer">Upload
-                    to Supabase</button>
-                <button id="migrate-cancel"
-                    style="padding:10px 16px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;font-size:13px;cursor:pointer;color:var(--text-secondary)">Cancel</button>
-            </div>
-        </div>
-    </div>
 
     <!-- TRASH MODAL -->
     <div id="trash-modal"
@@ -18290,20 +18239,6 @@
                 var btn = document.getElementById('rs-pace-action');
                 if (btn) btn.style.display = s.recover ? 'inline-flex' : 'none';
             }
-        }
-
-        /* Burnout takes a status string, not a number */
-        function decorateBurnout(level) { // 'ok' | 'moderate' | 'high'
-            var map = {
-                high: { verdict: 'High', color: '#fb7185', hint: 'Take a lighter day — recovery is progress.' },
-                moderate: { verdict: 'Moderate', color: '#fbbf24', hint: 'Watch the late nights this week.' },
-                ok: { verdict: 'Balanced', color: '#34d399', hint: 'Sustainable load. Keep the rhythm.' }
-            };
-            var s = map[level] || map.ok;
-            var d = document.getElementById('rs-burnout-desc');
-            if (d) { d.textContent = s.verdict; d.style.color = s.color; }
-            var h = document.getElementById('rs-burnout-hint');
-            if (h) h.textContent = s.hint;
         }
 
         function rsGenerateStudyPlan() {
@@ -21212,7 +21147,7 @@
                         + '}\n\n'
                         + 'Student context: ' + JSON.stringify(studyCtx) + '\n\n'
                         + (window.__elStats ? 'Verified stats (use these EXACT numbers; do NOT recount; OMIT totalErrors, accuracy and errorDNA from your own JSON): ' + JSON.stringify(window.__elStats) + '\n\n' : '')
-                        + 'Error log (first 12000 chars):\n' + rawText.slice(0, 40000);
+                        + 'Error log (first 12000 chars):\n' + rawText.slice(0, 12000);
 
                     var res = await supa.functions.invoke('sheldon', {
                         body: {
@@ -28526,7 +28461,12 @@ function injectSndChip() {
     });
   }
 
-  function askSheldon(q){ window._activeRead = currentRow; if (typeof window.openSheldon === 'function') window.openSheldon(q); }
+  function askSheldon(q){
+    window._activeRead = currentRow;
+    if (typeof window.openSheldon !== 'function') return;
+    window.openSheldon();
+    setTimeout(function(){ if (typeof sheldonAsk === 'function' && q) sheldonAsk(q); }, 350);
+  }
 
   function setMode(m){
     $('sr-today-mode').style.display   = (m==='today') ? 'block' : 'none';
