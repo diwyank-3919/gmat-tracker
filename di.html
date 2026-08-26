@@ -1393,21 +1393,15 @@
       </div>`;
             }
 
-            // Insight banner — only claims a pattern once there is one
-            const scoredTypes = TYPES.filter(t => byType[t] && byType[t].n > 0);
-            const worstT = scoredTypes.sort((a, b) => pct(byType[a].c, byType[a].n) - pct(byType[b].c, byType[b].n))[0];
-            const wAcc = worstT ? pct(byType[worstT].c, byType[worstT].n) : 0;
-            const weakest = worstT
-                ? ` Weakest type: <strong>${worstT}</strong> at <strong>${wAcc}%</strong> across ${byType[worstT].n} attempts.`
-                : '';
-            const insightText = !total
-                ? `No DI attempts logged yet. Add a few under <strong>Log Attempt</strong> — tag the question type, the data format, and whether you read the source cleanly — and this panel will start reporting where your points are going.`
-                : lift > 15
-                    ? `A clean data read gives you <strong>+${lift}pp</strong> accuracy — your biggest lever. Of ${solidA.length} clean-read attempts, ${solidA.filter(a => a.correct).length} were correct. Read the axes, units, and every source tab before you reason.${weakest}`
-                    : `The collapse is happening after the read. A clean read only gets you to ${solidAcc}% — prioritise the reasoning step and answer-checking discipline.${weakest}`;
+            // Insight banner
+            const worstT = TYPES.slice().sort((a, b) => pct(byType[a].c, byType[a].n) - pct(byType[b].c, byType[b].n))[0];
+            const wAcc = pct(byType[worstT].c, byType[worstT].n);
+            const insightText = lift > 15
+                ? `A clean data read gives you <strong>+${lift}pp</strong> accuracy — your biggest lever. Of ${solidA.length} clean-read attempts, ${solidA.filter(a => a.correct).length} were correct. Read the axes, units, and every source tab before you reason. Weakest type: <strong>${worstT}</strong> at <strong>${wAcc}%</strong>.`
+                : `The collapse is happening after the read. A clean read only gets you to ${solidAcc}% — prioritise the reasoning step and answer-checking discipline. Weakest type: <strong>${worstT}</strong> at <strong>${wAcc}%</strong> across ${byType[worstT].n} attempts.`;
             document.getElementById('insight-banner').innerHTML = `
-    <div class="sheldon-orb">${total ? '🔍' : '👋'}</div>
-    <div><div class="sheldon-label">${total ? 'Sheldon Analysis — Pattern Detected' : 'Sheldon — Ready When You Are'}</div><div class="sheldon-text">${insightText}</div></div>`;
+    <div class="sheldon-orb">🔍</div>
+    <div><div class="sheldon-label">Sheldon Analysis — Pattern Detected</div><div class="sheldon-text">${insightText}</div></div>`;
 
             // Hero cards
             document.getElementById('hero-cards').innerHTML = `
@@ -1677,7 +1671,7 @@
                 chips.push(`<div class="jc-chip peak" style="animation-delay:.05s"><i class="ti ti-trophy"></i>Peak ${peakVal}% on ${new Date(data[peakIdx].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>`);
                 if (bestStreak >= 3) chips.push(`<div class="jc-chip streak" style="animation-delay:.12s"><i class="ti ti-flame"></i>${bestStreak}-session climb</div>`);
                 if (latest >= TARGET_ACC) chips.push(`<div class="jc-chip peak" style="animation-delay:.19s"><i class="ti ti-target"></i>At target (${TARGET_ACC}%)</div>`);
-                chips.push(`<div class="jc-chip" style="animation-delay:.26s"><i class="ti ti-list-check"></i>${data.length} scored session${data.length === 1 ? '' : 's'}</div>`);
+                chips.push(`<div class="jc-chip" style="animation-delay:.26s"><i class="ti ti-list-check"></i>${data.length} scored sessions</div>`);
                 milestonesEl.innerHTML = chips.join('');
             }
 
@@ -1820,7 +1814,6 @@
                             ticks: { color: 'rgba(255,255,255,0.30)', font: { family: 'Hanken Grotesk', size: 9.5, weight: '500' }, padding: 10, callback: (v) => v + '%', stepSize: 25 }
                         },
                         x: {
-                            offset: data.length === 1,
                             grid: { display: false },
                             border: { display: false },
                             ticks: { color: 'rgba(255,255,255,0.30)', font: { family: 'Hanken Grotesk', size: 9.5, weight: '500' }, padding: 8, maxRotation: 0, autoSkip: true, maxTicksLimit: 10 }
