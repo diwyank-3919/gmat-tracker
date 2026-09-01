@@ -13438,11 +13438,13 @@
         function computeStreak(refToday) {
             var base = refToday || today, st = shieldState(), covered = st.covered, changed = false;
             function present(d) { var k = dateStr(d); return minsOn(k) > 0 || covered[k] === true; }
-            var cur = present(base) ? new Date(base) : addDays(base, -1), n = 0;
+                        var openToday = !present(base);
+            var cur = openToday ? addDays(base, -1) : new Date(base), n = 0;
             while (true) {
                 if (present(cur)) { n++; cur = addDays(cur, -1); continue; }
                 var prev = addDays(cur, -1);
-                if (n > 0 && st.count > 0 && present(prev)) {
+                var edge = openToday && n === 0 && dateStr(cur) === dateStr(addDays(base, -1));
+                if ((n > 0 || edge) && st.count > 0 && minsOn(dateStr(prev)) > 0) {
                     st.count -= 1; covered[dateStr(cur)] = true; st.lastSaved = dateStr(cur); changed = true;
                     n++; cur = prev; continue;
                 }
