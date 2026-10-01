@@ -28898,9 +28898,11 @@ function addVerbalSitting(){
   .mkd-panel{display:none;margin-top:12px}
   .mkd-panel.open{display:block}
   .mkd-gt{font-size:9.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--text-tertiary);margin:14px 0 7px}
-  .mkd-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-  .mkd-f{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 6px 6px 10px;border-radius:9px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06)}
-  .mkd-f span{font-size:11px;font-weight:600;color:var(--text-secondary);line-height:1.2}
+  .mkd-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.mkd-f{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;padding:6px 6px 6px 10px;border-radius:9px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06)}
+.mkd-f span{flex:1 1 auto;min-width:0;font-size:11px;font-weight:600;color:var(--text-secondary);line-height:1.25;overflow-wrap:anywhere}
+.mkd-f input{flex:0 0 52px}
+@media(max-width:420px){.mkd-grid{grid-template-columns:minmax(0,1fr)}}
   .mkd-f input{width:52px;height:28px;text-align:center;border:none;outline:none;border-radius:7px;background:rgba(255,255,255,.06);
     color:#f4eee2;font:600 14px 'Fraunces',serif;-moz-appearance:textfield}
   .mkd-f input::-webkit-outer-spin-button,.mkd-f input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
