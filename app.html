@@ -28891,6 +28891,145 @@ function addVerbalSitting(){
 })();
 </script>
 
+    <style id="mock-db-css">
+  .mkm-card{max-height:92vh;overflow-y:auto!important}
+  .mkd-toggle{margin-top:14px;width:100%;height:38px;border-radius:10px;cursor:pointer;font:650 12.5px 'Hanken Grotesk',sans-serif;
+    color:var(--accent-bright);background:rgba(135,141,255,.10);border:1px solid rgba(135,141,255,.28);display:flex;align-items:center;justify-content:center;gap:7px}
+  .mkd-panel{display:none;margin-top:12px}
+  .mkd-panel.open{display:block}
+  .mkd-gt{font-size:9.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--text-tertiary);margin:14px 0 7px}
+  .mkd-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .mkd-f{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 6px 6px 10px;border-radius:9px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06)}
+  .mkd-f span{font-size:11px;font-weight:600;color:var(--text-secondary);line-height:1.2}
+  .mkd-f input{width:52px;height:28px;text-align:center;border:none;outline:none;border-radius:7px;background:rgba(255,255,255,.06);
+    color:#f4eee2;font:600 14px 'Fraunces',serif;-moz-appearance:textfield}
+  .mkd-f input::-webkit-outer-spin-button,.mkd-f input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .mkd-f input:focus{box-shadow:0 0 0 2px rgba(135,141,255,.4)}
+  .mkd-hint{font-size:10.5px;color:var(--text-muted);margin-top:8px}
+</style>
+<script id="mock-db-js">
+(function () {
+  if (document.documentElement.classList.contains('sc-demo')) return;
+  var TBL = 'mock_scores';
+  var GROUPS = [
+    { t: 'Percentiles', k: 'pct', f: [['total', 'Total'], ['quant', 'Quant'], ['verbal', 'Verbal'], ['di', 'Data Insights']] },
+    { t: 'Quant · content domain', k: 'quant', f: [['arithmetic', 'Arithmetic'], ['algebra', 'Algebra']] },
+    { t: 'Quant · fundamental skills', k: 'quant', f: [['rates', 'Rates/Ratios/Percent'], ['value', 'Value/Order/Factors'], ['equal', 'Equal/Unequal/ALG'], ['counting', 'Counting/Sets/Series/Prob/Stats']] },
+    { t: 'Verbal · question type', k: 'verbal', f: [['cr', 'Critical Reasoning'], ['rc', 'Reading Comprehension']] },
+    { t: 'Verbal · fundamental skills', k: 'verbal', f: [['analysis', 'Analysis/Critique'], ['plan', 'Plan/Construct'], ['inferred', 'Identify Inferred Idea'], ['stated', 'Identify Stated Idea']] },
+    { t: 'DI · content domain', k: 'di', f: [['math', 'Math Related'], ['nonmath', 'Non-Math Related']] },
+    { t: 'DI · question type', k: 'di', f: [['ds', 'Data Sufficiency'], ['gt', 'Graphs and Tables'], ['msr', 'Multi-Source Reasoning'], ['tpa', 'Two-Part Analysis']] }
+  ];
+  var $ = function (id) { return document.getElementById(id); };
+  function fid(k, f) { return 'mkd-' + k + '-' + f; }
+ 
+  function uid() { return supa.auth.getUser().then(function (r) { return r && r.data && r.data.user && r.data.user.id; }); }
+  function fromRow(r) { return { id: r.id, date: r.test_date, score: r.score, quant: r.quant, verbal: r.verbal, di: r.di, notes: r.notes || '', details: r.details || {} }; }
+  function refresh() { window.mockScores = mockScores; renderMockView(); updateCommandCenter(); }
+ 
+  /* ── UI: collapsible breakdown inside the existing modal ── */
+  function buildPanel() {
+    if ($('mkd-panel')) return;
+    var card = document.querySelector('#add-mock-modal .mkm-card'), notes = card && card.querySelector('.mkm-notes');
+    if (!notes) return;
+    var html = '<button type="button" class="mkd-toggle" id="mkd-toggle"><i class="ti ti-chart-bar"></i> Detailed breakdown <span style="font-weight:500;opacity:.7">(optional)</span></button><div class="mkd-panel" id="mkd-panel">';
+    GROUPS.forEach(function (g) {
+      html += '<div class="mkd-gt">' + g.t + '</div><div class="mkd-grid">';
+      g.f.forEach(function (f) {
+        html += '<label class="mkd-f"><span>' + f[1] + '</span><input type="number" min="0" max="100" inputmode="numeric" placeholder="—" id="' + fid(g.k, f[0]) + '"></label>';
+      });
+      html += '</div>';
+    });
+    html += '<div class="mkd-hint">Enter percentile rankings (0–100) from your score report.</div></div>';
+    notes.insertAdjacentHTML('beforebegin', html);
+    $('mkd-toggle').addEventListener('click', function () { $('mkd-panel').classList.toggle('open'); });
+  }
+  function resetPanel() { GROUPS.forEach(function (g) { g.f.forEach(function (f) { var e = $(fid(g.k, f[0])); if (e) e.value = ''; }); }); var p = $('mkd-panel'); if (p) p.classList.remove('open'); }
+  function collect() {
+    var out = {}, bad = null;
+    GROUPS.forEach(function (g) {
+      g.f.forEach(function (f) {
+        var e = $(fid(g.k, f[0])); if (!e || e.value === '') return;
+        var v = parseInt(e.value, 10);
+        if (isNaN(v) || v < 0 || v > 100) { bad = f[1]; return; }
+        (out[g.k] = out[g.k] || {})[f[0]] = v;
+      });
+    });
+    return bad ? { error: bad } : out;
+  }
+  var _open = window.openAddMock;
+  window.openAddMock = function () { _open.apply(this, arguments); buildPanel(); resetPanel(); };
+ 
+  /* ── DB layer ── */
+  window.saveMockScores = function () { };   // localStorage persistence retired
+  window.saveMock = function () {
+    var date = $('mock-date-inp').value, score = parseInt($('mock-score-inp').value);
+    var quant = parseInt($('mock-quant-inp').value) || null, verbal = parseInt($('mock-verbal-inp').value) || null, di = parseInt($('mock-di-inp').value) || null;
+    var notes = $('mock-notes-inp').value.trim();
+    if (!date || !score || score < 205 || score > 805) { scNotify('Enter a valid date and a score between 205–805.', 'warning'); return; }
+    var badSec = [['Quant', quant], ['Verbal', verbal], ['DI', di]].filter(function (p) { return p[1] !== null && (p[1] < 60 || p[1] > 90); });
+    if (badSec.length) { scNotify(badSec[0][0] + ' score must be between 60 and 90.', 'warning'); return; }
+    var details = collect();
+    if (details.error) { scNotify(details.error + ' percentile must be between 0 and 100.', 'warning'); return; }
+    var btn = document.querySelector('.mkm-save'); if (btn) btn.disabled = true;
+    setStatus('saving');
+    uid().then(function (u) {
+      if (!u) throw new Error('Not signed in');
+      return supa.from(TBL).insert({ user_id: u, test_date: date, score: score, quant: quant, verbal: verbal, di: di, notes: notes || null, details: details }).select().single();
+    }).then(function (res) {
+      if (res.error) throw res.error;
+      var m = fromRow(res.data);
+      mockScores.push(m); mockScores.sort(function (a, b) { return a.date.localeCompare(b.date); });
+      setStatus('synced'); closeAddMock(); refresh(); revealMock(m);
+    }).catch(function (err) {
+      setStatus('error'); scNotify('Mock NOT saved — ' + (err.message || 'check your connection'), 'error');
+    }).then(function () { if (btn) btn.disabled = false; });
+  };
+  window.deleteMock = function (id) {
+    scConfirm({
+      title: 'Delete mock score?', message: 'This score will be removed from your history.',
+      icon: '<i class="ti ti-clipboard-x" style="font-size:22px;color:var(--red)"></i>',
+      confirmLabel: 'Delete', cancelLabel: 'Cancel', danger: true,
+      onConfirm: function () {
+        supa.from(TBL).delete().eq('id', id).then(function (res) {
+          if (res.error) { scNotify('Delete failed — ' + res.error.message, 'error'); return; }
+          var i = mockScores.findIndex(function (m) { return m.id === id; });
+          if (i > -1) mockScores.splice(i, 1);
+          refresh();
+        });
+      }
+    });
+  };
+ 
+  function loadMocks() {
+    return uid().then(function (u) {
+      if (!u) return;
+      return supa.from(TBL).select('*').order('test_date', { ascending: true }).then(function (res) {
+        if (res.error) { console.warn('mock_scores load failed:', res.error.message); return; }
+        var rows = (res.data || []).map(fromRow);
+        // one-time migration of old localStorage mocks
+        var raw = null; try { raw = JSON.parse(localStorage.getItem('gmat_mock_scores') || '[]'); } catch (e) { raw = []; }
+        var todo = raw.filter(function (l) { return !rows.some(function (r) { return r.date === l.date && r.score === l.score; }); })
+          .map(function (l) { return { user_id: u, test_date: l.date, score: l.score, quant: l.quant || null, verbal: l.verbal || null, di: l.di || null, notes: l.notes || null, details: {} }; });
+        var done = todo.length ? supa.from(TBL).insert(todo).select() : Promise.resolve({ data: [] });
+        return done.then(function (ins) {
+          if (ins.error) { console.warn('mock migration failed:', ins.error.message); }
+          else {
+            if (raw.length) { try { localStorage.setItem('gmat_mock_scores_migrated', JSON.stringify(raw)); localStorage.removeItem('gmat_mock_scores'); } catch (e) { } }
+            rows = rows.concat((ins.data || []).map(fromRow));
+          }
+          rows.sort(function (a, b) { return a.date.localeCompare(b.date); });
+          mockScores.length = 0; rows.forEach(function (r) { mockScores.push(r); });
+          refresh();
+        });
+      });
+    });
+  }
+  supa.auth.getSession().then(function (r) { if (r.data && r.data.session) loadMocks(); });
+  supa.auth.onAuthStateChange(function (ev, s) { if (ev === 'SIGNED_IN' && s) loadMocks(); });
+})();
+</script>
+
 </body>
 
 </html>
