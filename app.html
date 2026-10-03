@@ -29032,6 +29032,387 @@ function addVerbalSitting(){
 })();
 </script>
 
+    <!-- ════════════════════════════════════════════════════════════════
+  SCORECONSOLE — DAILY SUMMARY PATCH
+  Paste this whole block immediately BEFORE the closing </body> tag
+  of app.html (after all existing scripts). Purely additive.
+═════════════════════════════════════════════════════════════════ -->
+<style id="dsum-css">
+#dsum-card{margin-bottom:14px}
+.dsum-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.dsum-datebar{display:flex;align-items:center;gap:6px}
+.dsum-nav{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s}
+.dsum-nav:hover{border-color:rgba(135,141,255,.45);color:var(--accent-bright)}
+.dsum-nav:disabled{opacity:.3;cursor:not-allowed}
+.dsum-date{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 12px;border-radius:8px;cursor:pointer;font-size:12.5px;font-weight:700;color:var(--text-primary);background:rgba(135,141,255,.10);border:1px solid rgba(135,141,255,.28);transition:all .15s}
+.dsum-date:hover{background:rgba(135,141,255,.18)}
+.dsum-date .ti{color:var(--accent-bright);font-size:14px}
+.dsum-open{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:12px;font-weight:700;padding:7px 13px;border-radius:9px;cursor:pointer;color:#0f1118;background:#878dff;border:none;transition:filter .15s}
+.dsum-open:hover{filter:brightness(1.1)}
+.dsum-strip{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:12px}
+.dsum-chip{flex:0 0 auto;min-width:54px;text-align:center;padding:6px 9px;border-radius:10px;cursor:pointer;background:rgba(255,255,255,.035);border:1px solid var(--border-subtle);transition:all .15s}
+.dsum-chip:hover{border-color:rgba(135,141,255,.4);transform:translateY(-1px)}
+.dsum-chip.sel{background:rgba(135,141,255,.14);border-color:rgba(135,141,255,.45)}
+.dsum-chip .dw{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary)}
+.dsum-chip .dn{font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--text-primary);line-height:1.2}
+.dsum-chip .dm{font-size:9.5px;color:var(--text-muted)}
+.dsum-chip.met .dm{color:var(--green)}
+.dsum-tw{overflow-x:auto}
+.dsum-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.dsum-table th{text-align:left;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-tertiary);padding:8px 10px;border-bottom:1px solid var(--border-subtle);white-space:nowrap}
+.dsum-table th.r,.dsum-table td.r{text-align:right}
+.dsum-table td{padding:10px;border-bottom:1px solid var(--border-subtle);color:var(--text-secondary);white-space:nowrap}
+.dsum-table tbody tr:hover td{background:rgba(255,255,255,.025)}
+.dsum-sec{display:flex;align-items:center;gap:8px;font-weight:650;color:var(--text-primary)}
+.dsum-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dsum-note{font-size:10px;color:var(--text-muted);font-weight:500;margin-left:4px}
+.dsum-acc{font-family:'Fraunces',serif;font-weight:600}
+.dsum-delta{font-size:10px;font-weight:700;margin-left:6px}
+.dsum-table tr.tot td{border-top:1px solid rgba(255,255,255,.14);border-bottom:none;font-weight:700;color:var(--text-primary);background:rgba(135,141,255,.05)}
+.dsum-empty{text-align:center;padding:26px 10px;color:var(--text-muted);font-size:12.5px}
+.dsum-blurb{display:flex;gap:9px;margin-top:12px;padding:10px 13px;border-radius:12px;background:linear-gradient(155deg,rgba(135,141,255,.09),rgba(70,201,143,.05));border:1px solid rgba(135,141,255,.18);font-size:12px;line-height:1.5;color:var(--text-secondary)}
+.dsum-blurb b{color:var(--text-primary)}
+
+/* ── modal ── */
+#dsum-modal{display:none;position:fixed;inset:0;z-index:1300;background:rgba(5,8,16,.72);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);align-items:center;justify-content:center;padding:20px}
+#dsum-modal.open{display:flex}
+.dsm-card{width:min(760px,96vw);max-height:92vh;overflow-y:auto;border-radius:24px;background:radial-gradient(110% 60% at 90% -10%,rgba(135,141,255,.16),transparent 55%),radial-gradient(90% 50% at 0% 110%,rgba(70,201,143,.08),transparent 55%),linear-gradient(160deg,#141a2a,#0e121d);border:1px solid rgba(135,141,255,.25);box-shadow:0 40px 100px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.06);animation:scdPop .3s cubic-bezier(.34,1.56,.64,1)}
+.dsm-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:22px 26px 6px;position:sticky;top:0;z-index:3;background:linear-gradient(180deg,#141a2a 70%,transparent)}
+.dsm-eyebrow{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#9aa0ff}
+.dsm-title{font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:#f4eee2;letter-spacing:-.01em;margin-top:4px}
+.dsm-sub{font-size:12px;color:var(--text-tertiary);margin-top:3px}
+.dsm-tools{display:flex;align-items:center;gap:6px}
+.dsm-btn{width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s}
+.dsm-btn:hover{border-color:rgba(135,141,255,.45);color:var(--accent-bright)}
+.dsm-btn:disabled{opacity:.3;cursor:not-allowed}
+.dsm-body{padding:8px 26px 26px}
+.dsm-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:12px 0 16px}
+.dsm-kpi{padding:13px 13px 11px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)}
+.dsm-kv{font-family:'Fraunces',serif;font-size:23px;font-weight:600;color:#f4eee2;line-height:1}
+.dsm-kl{font-size:9px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--text-tertiary);margin-top:6px}
+.dsm-ks{font-size:10.5px;margin-top:4px;color:var(--text-muted)}
+.dsm-prog{height:6px;border-radius:100px;background:rgba(255,255,255,.07);overflow:hidden;margin:2px 0 16px}
+.dsm-prog>i{display:block;height:100%;border-radius:100px;background:linear-gradient(90deg,#878dff,#46c98f)}
+.dsm-sec-t{font-size:9.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--text-tertiary);margin:20px 0 9px}
+.dsm-sheldon{padding:15px 17px;border-radius:15px;background:linear-gradient(155deg,rgba(135,141,255,.11),rgba(70,201,143,.05));border:1px solid rgba(135,141,255,.22);font-size:13.5px;line-height:1.65;color:rgba(235,232,245,.88)}
+.dsm-sheldon p{margin:0 0 8px}.dsm-sheldon p:last-child{margin:0}
+.dsm-sheldon ul{margin:6px 0;padding-left:18px}
+.dsm-sheldon strong{color:#fff}
+.dsm-sh-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.dsm-sh-tag{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#9aa0ff}
+.dsm-regen{font-family:inherit;font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;cursor:pointer;color:#9aa0ff;background:rgba(135,141,255,.10);border:1px solid rgba(135,141,255,.26)}
+.dsm-regen:disabled{opacity:.5;cursor:default}
+.dsm-split{display:flex;height:10px;border-radius:100px;overflow:hidden;background:rgba(255,255,255,.06)}
+.dsm-split i{display:block;height:100%}
+.dsm-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:9px;font-size:11px;color:var(--text-secondary)}
+.dsm-legend span{display:flex;align-items:center;gap:6px}
+.dsm-tl{display:flex;flex-direction:column;gap:6px}
+.dsm-ses{display:flex;align-items:flex-start;gap:11px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+.dsm-ses-ic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.dsm-ses-b{flex:1;min-width:0}
+.dsm-ses-t{font-size:12.5px;font-weight:650;color:var(--text-primary)}
+.dsm-ses-m{font-size:11px;color:var(--text-tertiary);margin-top:2px;line-height:1.45;word-break:break-word}
+.dsm-ses-r{text-align:right;flex-shrink:0;font-size:12px;font-weight:700;color:var(--accent-bright)}
+.dsm-ses-r small{display:block;font-size:10px;color:var(--text-muted);font-weight:600;margin-top:2px}
+.dsm-cmp{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.dsm-foot{display:flex;gap:9px;margin-top:22px;flex-wrap:wrap}
+.dsm-foot button{flex:1;min-width:140px;padding:11px;border-radius:11px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+.dsm-foot .p{background:#878dff;color:#0f1118;border:none}
+.dsm-foot .g{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text-secondary)}
+@media(max-width:640px){.dsm-kpis{grid-template-columns:1fr 1fr}.dsm-cmp{grid-template-columns:1fr}.dsm-top,.dsm-body{padding-left:18px;padding-right:18px}}
+html.sc-light .dsm-card{background:linear-gradient(160deg,#fff,#f4f6fd);border-color:rgba(88,94,230,.2)}
+html.sc-light .dsm-top{background:linear-gradient(180deg,#fff 70%,transparent)}
+html.sc-light .dsm-title,html.sc-light .dsm-kv{color:#171B2E}
+html.sc-light .dsm-sheldon{color:#171B2E}html.sc-light .dsm-sheldon strong{color:#0e1020}
+html.sc-light .dsm-kpi,html.sc-light .dsm-ses{background:#f8f9fd;border-color:#e5e8f2}
+</style>
+
+<script id="dsum-js">
+(function(){
+  "use strict";
+  var cardDate = null, modalDate = null, aiBusy = false;
+  var ORDER = ["Quant","RC","CR","DI","Verbal","Mock test","Review"];
+  var ICON = {"Quant":"ti-math","RC":"ti-book-2","CR":"ti-brain","DI":"ti-chart-dots","Verbal":"ti-layers-intersect","Mock test":"ti-clipboard-check","Review":"ti-refresh"};
+
+  function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+  function col(t){return (typeof TC!=="undefined"&&TC[t])||"#878dff";}
+  function accColor(p){return p==null?"var(--text-muted)":p>=75?"#46c98f":p>=55?"#f0bd6a":"#fb7185";}
+  function pct(c,t){return t>0?Math.round(c/t*100):null;}
+  function t12(d){var h=d.getHours(),m=d.getMinutes(),ap=h<12?"AM":"PM";h=h%12||12;return h+":"+String(m).padStart(2,"0")+" "+ap;}
+
+  function parseNote(n){
+    n=n||"";
+    var a=n.match(/Accuracy-(\d+)\s*\/\s*(\d+)/i)||n.match(/(\d+)\s*\/\s*(\d+)\s*=\s*\d+\s*%/);
+    var p=n.match(/Pred-(\d+)%/i), w=n.match(/WScore-([\d.]+)/i), s=n.match(/\[([^\]]+)\]/);
+    var c=a?parseInt(a[1],10):null, t=a?parseInt(a[2],10):null;
+    if(t!=null&&(t<=0||c>t)){c=null;t=null;}
+    return {c:c,t:t,pred:p?parseInt(p[1],10):null,w:w?parseFloat(w[1]):null,src:s?s[1].replace(/^Verbal sitting\s*·?\s*/,"").trim():""};
+  }
+
+  function aggregate(ds){
+    var rows={}, list=[], totalMins=0;
+    (window.sessions||sessions||[]).forEach(function(s){
+      if(s.date!==ds) return;
+      var info=parseNote(s.notes), sitting=(s.topic==="Verbal"&&/\[Verbal sitting/.test(s.notes||""));
+      var r=rows[s.topic]||(rows[s.topic]={topic:s.topic,n:0,mins:0,c:0,t:0,counted:!sitting,preds:[]});
+      r.n++; r.mins+=s.mins||0; totalMins+=s.mins||0;
+      if(info.t!=null){r.c+=info.c;r.t+=info.t;}
+      if(info.pred!=null&&info.t!=null) r.preds.push({pred:info.pred,act:pct(info.c,info.t)});
+      list.push({s:s,info:info});
+    });
+    var arr=Object.keys(rows).map(function(k){return rows[k];}).sort(function(a,b){
+      var ia=ORDER.indexOf(a.topic),ib=ORDER.indexOf(b.topic);return (ia<0?99:ia)-(ib<0?99:ib);});
+    var tc=0,tt=0,preds=[];
+    arr.forEach(function(r){ if(r.counted){tc+=r.c;tt+=r.t;} r.preds.forEach(function(p){preds.push(p);}); });
+    var tgt=(typeof targetFor==="function")?targetFor(parseLocal(ds)):180;
+    return {ds:ds,rows:arr,list:list,mins:totalMins,sessions:list.length,c:tc,t:tt,acc:pct(tc,tt),target:tgt,preds:preds};
+  }
+
+  function baseline(ds,topic){
+    var c=0,t=0, end=parseLocal(ds);
+    for(var i=1;i<=14;i++){
+      var d=dateStr(addDays(end,-i));
+      (sessions||[]).forEach(function(s){
+        if(s.date!==d||s.topic!==topic) return;
+        if(s.topic==="Verbal"&&/\[Verbal sitting/.test(s.notes||"")) return;
+        var x=parseNote(s.notes); if(x.t!=null){c+=x.c;t+=x.t;}
+      });
+    }
+    return pct(c,t);
+  }
+
+  function streakAt(ds){
+    var n=0, d=parseLocal(ds);
+    while(minsOn(dateStr(d))>0){n++;d=addDays(d,-1);}
+    return n;
+  }
+
+  function dateLabel(ds,long){
+    var d=parseLocal(ds), t=dateStr(today), y=dateStr(addDays(today,-1));
+    if(!long){ if(ds===t) return "Today"; if(ds===y) return "Yesterday"; }
+    return d.toLocaleDateString("en-IN",long?{weekday:"long",day:"numeric",month:"long",year:"numeric"}:{weekday:"short",day:"numeric",month:"short"});
+  }
+
+  function tableHTML(d){
+    if(!d.rows.length) return '<div class="dsum-empty">No sessions logged on this day.</div>';
+    var body=d.rows.map(function(r){
+      var p=pct(r.c,r.t), b=baseline(d.ds,r.topic), delta="";
+      if(r.counted&&p!=null&&b!=null&&p!==b){var df=p-b;delta='<span class="dsum-delta" style="color:'+(df>0?"#46c98f":"#fb7185")+'" title="vs your prior 14-day accuracy ('+b+'%)">'+(df>0?"▲":"▼")+Math.abs(df)+'</span>';}
+      var qs=r.t>0?r.t:"—", cc=r.t>0?r.c:"—";
+      var note=r.counted?"":'<span class="dsum-note">sitting · counted in RC/CR</span>';
+      return '<tr><td><div class="dsum-sec"><span class="dsum-dot" style="background:'+col(r.topic)+'"></span>'+esc(r.topic)+note+'</div></td>'
+        +'<td class="r">'+r.n+'</td><td class="r">'+fmtH(r.mins)+'</td><td class="r">'+qs+'</td><td class="r">'+cc+'</td>'
+        +'<td class="r"><span class="dsum-acc" style="color:'+accColor(p)+'">'+(p!=null?p+"%":"—")+'</span>'+delta+'</td></tr>';
+    }).join("");
+    var tot='<tr class="tot"><td>Total</td><td class="r">'+d.sessions+'</td><td class="r">'+fmtH(d.mins)+'</td><td class="r">'+(d.t||"—")+'</td><td class="r">'+(d.t?d.c:"—")+'</td><td class="r"><span class="dsum-acc" style="color:'+accColor(d.acc)+'">'+(d.acc!=null?d.acc+"%":"—")+'</span></td></tr>';
+    return '<div class="dsum-tw"><table class="dsum-table"><thead><tr><th>Section</th><th class="r">Sessions</th><th class="r">Time</th><th class="r">Questions</th><th class="r">Correct</th><th class="r">Accuracy</th></tr></thead><tbody>'+body+tot+'</tbody></table></div>';
+  }
+
+  // ── local (rule-based) narrative — always available, AI upgrades it ──
+  function localSummary(d){
+    if(!d.sessions) return "Nothing logged on "+dateLabel(d.ds,true)+". A rest day is fine — just don't let it become two in a row.";
+    var L=[], met=d.mins>=d.target;
+    L.push("**"+fmtH(d.mins)+"** studied across **"+d.sessions+" session"+(d.sessions>1?"s":"")+"** — "+(met?"daily target hit ✅":Math.round(d.mins/d.target*100)+"% of the "+fmtH(d.target)+" target")+".");
+    if(d.t){
+      var sc=d.rows.filter(function(r){return r.counted&&r.t>=3;}).map(function(r){return {t:r.topic,p:pct(r.c,r.t)};}).sort(function(a,b){return b.p-a.p;});
+      L.push("**"+d.t+" questions** at **"+d.acc+"%** accuracy."+(sc.length>1?" Strongest: **"+sc[0].t+"** ("+sc[0].p+"%), weakest: **"+sc[sc.length-1].t+"** ("+sc[sc.length-1].p+"%).":""));
+    }
+    if(d.preds.length){
+      var g=0;d.preds.forEach(function(p){g+=p.act-p.pred;});g=Math.round(g/d.preds.length);
+      L.push(g<=-5?"You were overconfident by ~"+Math.abs(g)+" pts versus your predictions.":g>=5?"You beat your own predictions by ~"+g+" pts.":"Your predictions matched reality closely.");
+    }
+    var y=aggregate(dateStr(addDays(parseLocal(d.ds),-1)));
+    if(y.mins>0){var df=d.mins-y.mins;L.push(df>0?"That's "+fmtH(df)+" more than the day before.":df<0?"That's "+fmtH(-df)+" less than the day before.":"Same volume as the day before.");}
+    return L.join(" ");
+  }
+
+  function aiKey(d){
+    var sig=d.rows.map(function(r){return r.topic+r.n+r.mins+r.c+r.t;}).join("|");
+    return "sc_dsum_ai_"+d.ds+"_"+sig;
+  }
+
+  function renderCard(){
+    var host=document.getElementById("dsum-card"); if(!host) return;
+    var ds=cardDate||dateStr(today), d=aggregate(ds);
+    var isToday=ds===dateStr(today);
+    // 7-day strip
+    var strip="";
+    for(var i=6;i>=0;i--){
+      var sd=dateStr(addDays(today,-i)), m=minsOn(sd), tg=targetFor(addDays(today,-i));
+      strip+='<div class="dsum-chip'+(sd===ds?" sel":"")+(m>=tg&&m>0?" met":"")+'" data-ds="'+sd+'" title="Open full summary">'
+        +'<div class="dw">'+parseLocal(sd).toLocaleDateString("en-US",{weekday:"short"})+'</div><div class="dn">'+parseLocal(sd).getDate()+'</div><div class="dm">'+(m>0?fmtH(m):"—")+'</div></div>';
+    }
+    host.innerHTML='<div class="dsum-head"><div><div class="card-title"><i class="ti ti-report-analytics"></i> Daily summary</div></div>'
+      +'<div class="dsum-datebar"><button class="dsum-nav" data-go="-1" title="Previous day"><i class="ti ti-chevron-left"></i></button>'
+      +'<div class="dsum-date" data-open="1" title="Open full summary"><i class="ti ti-calendar-event"></i>'+esc(dateLabel(ds))+'</div>'
+      +'<button class="dsum-nav" data-go="1" '+(isToday?"disabled":"")+' title="Next day"><i class="ti ti-chevron-right"></i></button></div>'
+      +'<button class="dsum-open" data-open="1"><i class="ti ti-sparkles"></i> Full summary</button></div>'
+      +'<div class="dsum-strip">'+strip+'</div>'+tableHTML(d)
+      +'<div class="dsum-blurb"><span>✦</span><span><b>Sheldon</b> — '+esc(localSummary(d)).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")+'</span></div>';
+  }
+
+  function injectCard(){
+    if(document.getElementById("dsum-card")) return true;
+    var dash=document.getElementById("view-dashboard"); if(!dash) return false;
+    var card=document.createElement("div"); card.className="card"; card.id="dsum-card";
+    var anchor=document.getElementById("t3-card")||dash.querySelector(".main-grid");
+    if(anchor&&anchor.parentNode===dash) dash.insertBefore(card,anchor.nextSibling&&anchor.id==="t3-card"?anchor.nextSibling:anchor);
+    else dash.appendChild(card);
+    card.addEventListener("click",function(e){
+      var t=e.target.closest?e.target:null; if(!t) return;
+      var go=t.closest("[data-go]"); if(go&&!go.disabled){
+        var nd=addDays(parseLocal(cardDate||dateStr(today)),parseInt(go.getAttribute("data-go"),10));
+        if(nd>today) return; cardDate=dateStr(nd); renderCard(); return; }
+      var ch=t.closest(".dsum-chip"); if(ch){cardDate=ch.getAttribute("data-ds");renderCard();openModal(cardDate);return;}
+      if(t.closest("[data-open]")) openModal(cardDate||dateStr(today));
+    });
+    return true;
+  }
+
+  // ── modal ──
+  function ensureModal(){
+    if(document.getElementById("dsum-modal")) return;
+    var m=document.createElement("div"); m.id="dsum-modal";
+    m.innerHTML='<div class="dsm-card" id="dsm-card"></div>';
+    m.addEventListener("click",function(e){if(e.target===m) closeModal();});
+    document.body.appendChild(m);
+    document.addEventListener("keydown",function(e){
+      if(!m.classList.contains("open")) return;
+      if(e.key==="Escape") closeModal();
+      if(e.key==="ArrowLeft") navModal(-1);
+      if(e.key==="ArrowRight") navModal(1);
+    });
+  }
+  function closeModal(){var m=document.getElementById("dsum-modal");if(m)m.classList.remove("open");}
+  function navModal(n){
+    var nd=addDays(parseLocal(modalDate),n); if(nd>today) return;
+    openModal(dateStr(nd));
+  }
+
+  function summaryText(d){
+    var L=["Daily summary — "+dateLabel(d.ds,true),"Time: "+fmtH(d.mins)+" / target "+fmtH(d.target)+" · Sessions: "+d.sessions];
+    if(d.t) L.push("Questions: "+d.t+" · Correct: "+d.c+" · Accuracy: "+d.acc+"%");
+    L.push("");
+    d.rows.forEach(function(r){L.push(r.topic+": "+fmtH(r.mins)+(r.t?" · "+r.c+"/"+r.t+" ("+pct(r.c,r.t)+"%)":""));});
+    L.push("","Tracked with ScoreConsole — https://scoreconsole.com");
+    return L.join("\n");
+  }
+
+  function openModal(ds){
+    ensureModal(); modalDate=ds;
+    var d=aggregate(ds), y=aggregate(dateStr(addDays(parseLocal(ds),-1)));
+    var isToday=ds===dateStr(today), met=d.mins>=d.target&&d.mins>0;
+    var p=Math.min(100,Math.round(d.mins/d.target*100));
+    var streak=streakAt(ds);
+    var kpi=function(v,l,s,c){return '<div class="dsm-kpi"><div class="dsm-kv"'+(c?' style="color:'+c+'"':"")+'>'+v+'</div><div class="dsm-kl">'+l+'</div><div class="dsm-ks">'+s+'</div></div>';};
+    var html='<div class="dsm-top"><div><div class="dsm-eyebrow">✦ Daily summary</div><div class="dsm-title">'+esc(dateLabel(ds,true))+'</div>'
+      +'<div class="dsm-sub">'+(d.sessions?d.sessions+" session"+(d.sessions>1?"s":"")+" · "+fmtH(d.mins)+" logged":"No sessions logged")+'</div></div>'
+      +'<div class="dsm-tools"><button class="dsm-btn" id="dsm-prev" title="Previous day (←)"><i class="ti ti-chevron-left"></i></button>'
+      +'<button class="dsm-btn" id="dsm-next" '+(isToday?"disabled":"")+' title="Next day (→)"><i class="ti ti-chevron-right"></i></button>'
+      +'<button class="dsm-btn" id="dsm-x" title="Close (Esc)"><i class="ti ti-x"></i></button></div></div><div class="dsm-body">';
+    html+='<div class="dsm-kpis">'
+      +kpi(d.mins?fmtH(d.mins):"0m","Study time",met?"Target hit ✓":"Target "+fmtH(d.target),met?"#46c98f":null)
+      +kpi(d.t||"—","Questions",d.t?d.c+" correct · "+(d.t-d.c)+" wrong":"none scored")
+      +kpi(d.acc!=null?d.acc+"%":"—","Accuracy",d.acc!=null?(d.acc>=75?"Strong day":d.acc>=55?"Decent":"Needs review"):"—",d.acc!=null?accColor(d.acc):null)
+      +kpi(streak?streak+"🔥":"—","Streak","as of this day")+'</div>';
+    html+='<div class="dsm-prog"><i style="width:'+p+'%"></i></div>';
+
+    html+='<div class="dsm-sec-t" style="margin-top:6px">Section breakdown</div>'+tableHTML(d);
+
+    // Sheldon
+    var cached=null; try{cached=localStorage.getItem(aiKey(d));}catch(e){}
+    html+='<div class="dsm-sec-t">Sheldon\'s read</div><div class="dsm-sheldon"><div class="dsm-sh-head"><span class="dsm-sh-tag"><i class="ti ti-sparkles"></i> Sheldon</span>'
+      +'<button class="dsm-regen" id="dsm-regen"'+(d.sessions?"":" disabled")+'>'+(cached?"Regenerate":"Generate with AI")+'</button></div>'
+      +'<div id="dsm-ai">'+(typeof sheldonFormat==="function"?sheldonFormat(cached||localSummary(d)):esc(cached||localSummary(d)))+'</div></div>';
+
+    if(d.rows.length){
+      var totM=d.mins||1;
+      html+='<div class="dsm-sec-t">Time split</div><div class="dsm-split">'
+        +d.rows.filter(function(r){return r.mins>0;}).map(function(r){return '<i style="width:'+(r.mins/totM*100)+'%;background:'+col(r.topic)+'" title="'+esc(r.topic)+' '+fmtH(r.mins)+'"></i>';}).join("")
+        +'</div><div class="dsm-legend">'+d.rows.filter(function(r){return r.mins>0;}).map(function(r){return '<span><span class="dsum-dot" style="background:'+col(r.topic)+'"></span>'+esc(r.topic)+' '+Math.round(r.mins/totM*100)+'% · '+fmtH(r.mins)+'</span>';}).join("")+'</div>';
+    }
+
+    // vs yesterday + calibration + best
+    if(d.sessions){
+      var dm=d.mins-y.mins, da=(d.acc!=null&&y.acc!=null)?d.acc-y.acc:null;
+      var cal="—",calS="no predictions logged";
+      if(d.preds.length){var g=0;d.preds.forEach(function(q){g+=q.act-q.pred;});g=Math.round(g/d.preds.length);cal=(g>0?"+":"")+g+" pts";calS=g<=-5?"overconfident":g>=5?"underconfident":"well calibrated";}
+      var best=null;d.list.forEach(function(x){if(!best||(x.s.mins||0)>(best.s.mins||0))best=x;});
+      html+='<div class="dsm-sec-t">Compared</div><div class="dsm-cmp">'
+        +kpi(y.mins?((dm>=0?"+":"−")+fmtH(Math.abs(dm))):"—","Time vs previous day",y.mins?"previous: "+fmtH(y.mins):"no data",y.mins?(dm>=0?"#46c98f":"#fb7185"):null)
+        +kpi(da!=null?((da>=0?"+":"−")+Math.abs(da)+" pts"):"—","Accuracy vs previous day",y.acc!=null?"previous: "+y.acc+"%":"no data",da!=null?(da>=0?"#46c98f":"#fb7185"):null)
+        +kpi(cal,"Prediction gap",calS)+'</div>';
+    }
+
+    // session timeline
+    if(d.list.length){
+      var sorted=d.list.slice().sort(function(a,b){return (a.s.started_at||"").localeCompare(b.s.started_at||"")||((a.s.created_at||0)-(b.s.created_at||0));});
+      html+='<div class="dsm-sec-t">Sessions</div><div class="dsm-tl">'+sorted.map(function(x){
+        var s=x.s,i=x.info,c=col(s.topic),when="";
+        if(s.started_at){var st=new Date(s.started_at);if(!isNaN(st))when=t12(st);}
+        var meta=[];if(i.src)meta.push(esc(i.src));
+        if(i.t!=null)meta.push(i.c+"/"+i.t+" = "+pct(i.c,i.t)+"%");
+        if(i.pred!=null)meta.push("predicted "+i.pred+"%");
+        if(i.w!=null)meta.push("weighted "+i.w);
+        var free=(s.notes||"").replace(/\[[^\]]*\]|Accuracy-\d+\/\d+=\d+%|WScore-[\d.]+|Pred-\d+%|·/g,"").replace(/\s+/g," ").trim();
+        if(free)meta.push('<i>'+esc(free)+'</i>');
+        return '<div class="dsm-ses"><span class="dsm-ses-ic" style="background:'+c+'1a;color:'+c+';box-shadow:inset 0 0 0 1px '+c+'33"><i class="ti '+(ICON[s.topic]||"ti-circle")+'"></i></span>'
+          +'<div class="dsm-ses-b"><div class="dsm-ses-t">'+esc(s.topic)+'</div><div class="dsm-ses-m">'+(meta.join(" · ")||"No notes")+'</div></div>'
+          +'<div class="dsm-ses-r">'+(s.mins?fmtH(s.mins):"—")+(when?'<small>'+when+'</small>':'')+'</div></div>';
+      }).join("")+'</div>';
+    }
+
+    html+='<div class="dsm-foot"><button class="p" id="dsm-copy"><i class="ti ti-copy"></i> Copy summary</button><button class="g" id="dsm-close2">Close</button></div></div>';
+    document.getElementById("dsm-card").innerHTML=html;
+    document.getElementById("dsum-modal").classList.add("open");
+
+    var $=function(id){return document.getElementById(id);};
+    $("dsm-x").onclick=$("dsm-close2").onclick=closeModal;
+    $("dsm-prev").onclick=function(){navModal(-1);};
+    var nx=$("dsm-next"); if(nx) nx.onclick=function(){navModal(1);};
+    $("dsm-copy").onclick=function(){
+      try{navigator.clipboard.writeText(summaryText(d));}catch(e){}
+      var b=$("dsm-copy"),o=b.innerHTML;b.innerHTML='<i class="ti ti-check"></i> Copied!';setTimeout(function(){b.innerHTML=o;},1400);
+    };
+    $("dsm-regen").onclick=function(){aiSummary(d);};
+    if(!cached&&d.sessions) aiSummary(d,true);   // auto-generate once per unique day-state
+  }
+
+  function aiSummary(d,auto){
+    if(aiBusy||typeof supa==="undefined"||!supa.functions) return;
+    var btn=document.getElementById("dsm-regen"), box=document.getElementById("dsm-ai");
+    aiBusy=true; if(btn){btn.disabled=true;btn.textContent="Thinking…";}
+    var payload={date:d.ds,minsStudied:d.mins,target:d.target,sessions:d.sessions,questions:d.t,correct:d.c,accuracy:d.acc,
+      sections:d.rows.map(function(r){return {section:r.topic,mins:r.mins,q:r.t,correct:r.c,acc:pct(r.c,r.t),priorAcc14d:baseline(d.ds,r.topic)};}),
+      notes:d.list.map(function(x){return x.s.notes;}).filter(Boolean).slice(0,8)};
+    var prompt="Write a concise end-of-day study recap for a GMAT student from this data. 4-6 sentences max, plain and specific: what went well, the single weakest area, and ONE concrete suggestion for tomorrow. Use **bold** for key numbers. No headings, no preamble.\n\n"+JSON.stringify(payload);
+    supa.functions.invoke("sheldon",{body:{message:prompt,context:{},history:[]}}).then(function(res){
+      var reply=res&&res.data&&res.data.reply;
+      if(reply){
+        try{localStorage.setItem(aiKey(d),reply);}catch(e){}
+        if(modalDate===d.ds&&box) box.innerHTML=typeof sheldonFormat==="function"?sheldonFormat(reply):esc(reply);
+      }else if(!auto&&typeof showToast==="function") showToast("✦","Using built-in summary","Sheldon couldn't be reached right now.");
+    }).catch(function(){}).then(function(){
+      aiBusy=false;var b=document.getElementById("dsm-regen");if(b){b.disabled=false;b.textContent="Regenerate";}
+    });
+  }
+
+  window.openDailySummary=openModal;
+
+  // ── hook into render() so the card stays live ──
+  function boot(){
+    if(!injectCard()) return setTimeout(boot,600);
+    renderCard();
+    if(typeof render==="function"&&!render.__dsum){
+      var _r=render;
+      render=function(){_r.apply(this,arguments);setTimeout(function(){if(injectCard())renderCard();},120);};
+      render.__dsum=1;
+    }
+  }
+  if(document.readyState!=="loading") setTimeout(boot,1500); else document.addEventListener("DOMContentLoaded",function(){setTimeout(boot,1500);});
+})();
+</script>
+
 </body>
 
 </html>
