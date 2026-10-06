@@ -29149,23 +29149,30 @@ html.sc-light .dsm-kpi,html.sc-light .dsm-ses{background:#f8f9fd;border-color:#e
     return {c:c,t:t,pred:p?parseInt(p[1],10):null,w:w?parseFloat(w[1]):null,src:s?s[1].replace(/^Verbal sitting\s*·?\s*/,"").trim():""};
   }
 
+  function isReview(s){
+    if(s.topic==="Review") return true;
+    var n=(s.notes||"").replace(/^\s*(\[[^\]]*\]\s*·?\s*)+/,"");
+    return /^\s*review(ed|ing|s)?\b/i.test(n);
+  }
   function aggregate(ds){
-    var rows={}, list=[], totalMins=0;
+    var rows={}, list=[], totalMins=0, revN=0, revMins=0;
     (window.sessions||sessions||[]).forEach(function(s){
       if(s.date!==ds) return;
       var info=parseNote(s.notes), sitting=(s.topic==="Verbal"&&/\[Verbal sitting/.test(s.notes||""));
-      var r=rows[s.topic]||(rows[s.topic]={topic:s.topic,n:0,mins:0,c:0,t:0,counted:!sitting,preds:[]});
-      r.n++; r.mins+=s.mins||0; totalMins+=s.mins||0;
+      var r=rows[s.topic]||(rows[s.topic]={topic:s.topic,n:0,mins:0,rn:0,rmins:0,c:0,t:0,counted:!sitting,preds:[]});
+      var rev=isReview(s);
+      if(rev){r.rn++;r.rmins+=s.mins||0;revN++;revMins+=s.mins||0;} else {r.n++;r.mins+=s.mins||0;}
+      totalMins+=s.mins||0;
       if(info.t!=null){r.c+=info.c;r.t+=info.t;}
       if(info.pred!=null&&info.t!=null) r.preds.push({pred:info.pred,act:pct(info.c,info.t)});
-      list.push({s:s,info:info});
+      list.push({s:s,info:info,rev:rev});
     });
     var arr=Object.keys(rows).map(function(k){return rows[k];}).sort(function(a,b){
       var ia=ORDER.indexOf(a.topic),ib=ORDER.indexOf(b.topic);return (ia<0?99:ia)-(ib<0?99:ib);});
     var tc=0,tt=0,preds=[];
     arr.forEach(function(r){ if(r.counted){tc+=r.c;tt+=r.t;} r.preds.forEach(function(p){preds.push(p);}); });
     var tgt=(typeof targetFor==="function")?targetFor(parseLocal(ds)):180;
-    return {ds:ds,rows:arr,list:list,mins:totalMins,sessions:list.length,c:tc,t:tt,acc:pct(tc,tt),target:tgt,preds:preds};
+    return {ds:ds,rows:arr,list:list,mins:totalMins,sessions:list.length-revN,reviews:revN,revMins:revMins,c:tc,t:tt,acc:pct(tc,tt),target:tgt,preds:preds};
   }
 
   function baseline(ds,topic){
@@ -29201,18 +29208,18 @@ html.sc-light .dsm-kpi,html.sc-light .dsm-ses{background:#f8f9fd;border-color:#e
       var qs=r.t>0?r.t:"—", cc=r.t>0?r.c:"—";
       var note=r.counted?"":'<span class="dsum-note">sitting · counted in RC/CR</span>';
       return '<tr><td><div class="dsum-sec"><span class="dsum-dot" style="background:'+col(r.topic)+'"></span>'+esc(r.topic)+note+'</div></td>'
-        +'<td class="r">'+r.n+'</td><td class="r">'+fmtH(r.mins)+'</td><td class="r">'+qs+'</td><td class="r">'+cc+'</td>'
+        +'<td class="r">'+r.n+'</td><td class="r">'+(r.mins?fmtH(r.mins):"—")+'</td><td class="r" style="color:var(--text-tertiary)">'+(r.rmins?fmtH(r.rmins):"—")+'</td><td class="r">'+qs+'</td><td class="r">'+cc+'</td>'
         +'<td class="r"><span class="dsum-acc" style="color:'+accColor(p)+'">'+(p!=null?p+"%":"—")+'</span>'+delta+'</td></tr>';
     }).join("");
-    var tot='<tr class="tot"><td>Total</td><td class="r">'+d.sessions+'</td><td class="r">'+fmtH(d.mins)+'</td><td class="r">'+(d.t||"—")+'</td><td class="r">'+(d.t?d.c:"—")+'</td><td class="r"><span class="dsum-acc" style="color:'+accColor(d.acc)+'">'+(d.acc!=null?d.acc+"%":"—")+'</span></td></tr>';
-    return '<div class="dsum-tw"><table class="dsum-table"><thead><tr><th>Section</th><th class="r">Sessions</th><th class="r">Time</th><th class="r">Questions</th><th class="r">Correct</th><th class="r">Accuracy</th></tr></thead><tbody>'+body+tot+'</tbody></table></div>';
+    var tot='<tr class="tot"><td>Total</td><td class="r">'+d.sessions+'</td><td class="r">'+fmtH(d.mins-d.revMins)+'</td><td class="r">'+(d.revMins?fmtH(d.revMins):"—")+'</td><td class="r">'+(d.t||"—")+'</td><td class="r">'+(d.t?d.c:"—")+'</td><td class="r"><span class="dsum-acc" style="color:'+accColor(d.acc)+'">'+(d.acc!=null?d.acc+"%":"—")+'</span></td></tr>';
+    return '<div class="dsum-tw"><table class="dsum-table"><thead><tr><th>Section</th><th class="r">Sessions</th><th class="r">Practice</th><th class="r">Review</th><th class="r">Questions</th><th class="r">Correct</th><th class="r">Accuracy</th></tr></thead><tbody>'+body+tot+'</tbody></table></div>';
   }
 
   // ── local (rule-based) narrative — always available, AI upgrades it ──
   function localSummary(d){
     if(!d.sessions) return "Nothing logged on "+dateLabel(d.ds,true)+". A rest day is fine — just don't let it become two in a row.";
     var L=[], met=d.mins>=d.target;
-    L.push("**"+fmtH(d.mins)+"** studied across **"+d.sessions+" session"+(d.sessions>1?"s":"")+"** — "+(met?"daily target hit ✅":Math.round(d.mins/d.target*100)+"% of the "+fmtH(d.target)+" target")+".");
+    L.push("**"+fmtH(d.mins)+"** studied (**"+fmtH(d.mins-d.revMins)+"** practice across "+d.sessions+" session"+(d.sessions!==1?"s":"")+(d.revMins?", **"+fmtH(d.revMins)+"** review":"")+") — "+(met?"daily target hit ✅":Math.round(d.mins/d.target*100)+"% of the "+fmtH(d.target)+" target")+".");
     if(d.t){
       var sc=d.rows.filter(function(r){return r.counted&&r.t>=3;}).map(function(r){return {t:r.topic,p:pct(r.c,r.t)};}).sort(function(a,b){return b.p-a.p;});
       L.push("**"+d.t+" questions** at **"+d.acc+"%** accuracy."+(sc.length>1?" Strongest: **"+sc[0].t+"** ("+sc[0].p+"%), weakest: **"+sc[sc.length-1].t+"** ("+sc[sc.length-1].p+"%).":""));
@@ -29306,12 +29313,12 @@ html.sc-light .dsm-kpi,html.sc-light .dsm-ses{background:#f8f9fd;border-color:#e
     var streak=streakAt(ds);
     var kpi=function(v,l,s,c){return '<div class="dsm-kpi"><div class="dsm-kv"'+(c?' style="color:'+c+'"':"")+'>'+v+'</div><div class="dsm-kl">'+l+'</div><div class="dsm-ks">'+s+'</div></div>';};
     var html='<div class="dsm-top"><div><div class="dsm-eyebrow">✦ Daily summary</div><div class="dsm-title">'+esc(dateLabel(ds,true))+'</div>'
-      +'<div class="dsm-sub">'+(d.sessions?d.sessions+" session"+(d.sessions>1?"s":"")+" · "+fmtH(d.mins)+" logged":"No sessions logged")+'</div></div>'
+      +'<div class="dsm-sub">'+(d.list.length?d.sessions+" practice session"+(d.sessions!==1?"s":"")+(d.reviews?" · "+d.reviews+" review"+(d.reviews>1?"s":""):"")+" · "+fmtH(d.mins)+" logged":"No sessions logged")+'</div></div>'
       +'<div class="dsm-tools"><button class="dsm-btn" id="dsm-prev" title="Previous day (←)"><i class="ti ti-chevron-left"></i></button>'
       +'<button class="dsm-btn" id="dsm-next" '+(isToday?"disabled":"")+' title="Next day (→)"><i class="ti ti-chevron-right"></i></button>'
       +'<button class="dsm-btn" id="dsm-x" title="Close (Esc)"><i class="ti ti-x"></i></button></div></div><div class="dsm-body">';
     html+='<div class="dsm-kpis">'
-      +kpi(d.mins?fmtH(d.mins):"0m","Study time",met?"Target hit ✓":"Target "+fmtH(d.target),met?"#46c98f":null)
+      +kpi(d.mins?fmtH(d.mins):"0m","Study time",(d.revMins?fmtH(d.mins-d.revMins)+" practice · "+fmtH(d.revMins)+" review · ":"")+(met?"target hit ✓":"target "+fmtH(d.target)),met?"#46c98f":null)
       +kpi(d.t||"—","Questions",d.t?d.c+" correct · "+(d.t-d.c)+" wrong":"none scored")
       +kpi(d.acc!=null?d.acc+"%":"—","Accuracy",d.acc!=null?(d.acc>=75?"Strong day":d.acc>=55?"Decent":"Needs review"):"—",d.acc!=null?accColor(d.acc):null)
       +kpi(streak?streak+"🔥":"—","Streak","as of this day")+'</div>';
@@ -29328,8 +29335,8 @@ html.sc-light .dsm-kpi,html.sc-light .dsm-ses{background:#f8f9fd;border-color:#e
     if(d.rows.length){
       var totM=d.mins||1;
       html+='<div class="dsm-sec-t">Time split</div><div class="dsm-split">'
-        +d.rows.filter(function(r){return r.mins>0;}).map(function(r){return '<i style="width:'+(r.mins/totM*100)+'%;background:'+col(r.topic)+'" title="'+esc(r.topic)+' '+fmtH(r.mins)+'"></i>';}).join("")
-        +'</div><div class="dsm-legend">'+d.rows.filter(function(r){return r.mins>0;}).map(function(r){return '<span><span class="dsum-dot" style="background:'+col(r.topic)+'"></span>'+esc(r.topic)+' '+Math.round(r.mins/totM*100)+'% · '+fmtH(r.mins)+'</span>';}).join("")+'</div>';
+        +d.rows.filter(function(r){return r.mins+r.rmins>0;}).map(function(r){return '<i style="width:'+((r.mins+r.rmins)/totM*100)+'%;background:'+col(r.topic)+'" title="'+esc(r.topic)+' '+fmtH(r.mins+r.rmins)+'"></i>';}).join("")
+        +'</div><div class="dsm-legend">'+d.rows.filter(function(r){return r.mins+r.rmins>0;}).map(function(r){var tm=r.mins+r.rmins;return '<span><span class="dsum-dot" style="background:'+col(r.topic)+'"></span>'+esc(r.topic)+' '+Math.round(tm/totM*100)+'% · '+fmtH(tm)+(r.rmins?' ('+fmtH(r.rmins)+' review)':'')+'</span>';}).join("")+'</div>';
     }
 
     // vs yesterday + calibration + best
@@ -29357,7 +29364,7 @@ html.sc-light .dsm-kpi,html.sc-light .dsm-ses{background:#f8f9fd;border-color:#e
         var free=(s.notes||"").replace(/\[[^\]]*\]|Accuracy-\d+\/\d+=\d+%|WScore-[\d.]+|Pred-\d+%|·/g,"").replace(/\s+/g," ").trim();
         if(free)meta.push('<i>'+esc(free)+'</i>');
         return '<div class="dsm-ses"><span class="dsm-ses-ic" style="background:'+c+'1a;color:'+c+';box-shadow:inset 0 0 0 1px '+c+'33"><i class="ti '+(ICON[s.topic]||"ti-circle")+'"></i></span>'
-          +'<div class="dsm-ses-b"><div class="dsm-ses-t">'+esc(s.topic)+'</div><div class="dsm-ses-m">'+(meta.join(" · ")||"No notes")+'</div></div>'
+          +'<div class="dsm-ses-b"><div class="dsm-ses-t">'+esc(s.topic)+(x.rev?' <span style="font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#f0bd6a;background:rgba(240,189,106,.12);border:1px solid rgba(240,189,106,.28);border-radius:100px;padding:1px 7px;margin-left:5px">Review</span>':'')+'</div><div class="dsm-ses-m">'+(meta.join(" · ")||"No notes")+'</div></div>'
           +'<div class="dsm-ses-r">'+(s.mins?fmtH(s.mins):"—")+(when?'<small>'+when+'</small>':'')+'</div></div>';
       }).join("")+'</div>';
     }
@@ -29382,10 +29389,10 @@ html.sc-light .dsm-kpi,html.sc-light .dsm-ses{background:#f8f9fd;border-color:#e
     if(aiBusy||typeof supa==="undefined"||!supa.functions) return;
     var btn=document.getElementById("dsm-regen"), box=document.getElementById("dsm-ai");
     aiBusy=true; if(btn){btn.disabled=true;btn.textContent="Thinking…";}
-    var payload={date:d.ds,minsStudied:d.mins,target:d.target,sessions:d.sessions,questions:d.t,correct:d.c,accuracy:d.acc,
-      sections:d.rows.map(function(r){return {section:r.topic,mins:r.mins,q:r.t,correct:r.c,acc:pct(r.c,r.t),priorAcc14d:baseline(d.ds,r.topic)};}),
+    var payload={date:d.ds,minsStudied:d.mins,practiceMins:d.mins-d.revMins,reviewMins:d.revMins,target:d.target,practiceSessions:d.sessions,reviewSessions:d.reviews,questions:d.t,correct:d.c,accuracy:d.acc,
+      sections:d.rows.map(function(r){return {section:r.topic,practiceMins:r.mins,reviewMins:r.rmins,q:r.t,correct:r.c,acc:pct(r.c,r.t),priorAcc14d:baseline(d.ds,r.topic)};}),
       notes:d.list.map(function(x){return x.s.notes;}).filter(Boolean).slice(0,8)};
-    var prompt="Write a concise end-of-day study recap for a GMAT student from this data. 4-6 sentences max, plain and specific: what went well, the single weakest area, and ONE concrete suggestion for tomorrow. Use **bold** for key numbers. No headings, no preamble.\n\n"+JSON.stringify(payload);
+    var prompt="Write a concise end-of-day study recap (review time is separate from practice; accuracy only reflects practice questions) for a GMAT student from this data. 4-6 sentences max, plain and specific: what went well, the single weakest area, and ONE concrete suggestion for tomorrow. Use **bold** for key numbers. No headings, no preamble.\n\n"+JSON.stringify(payload);
     supa.functions.invoke("sheldon",{body:{message:prompt,context:{},history:[]}}).then(function(res){
       var reply=res&&res.data&&res.data.reply;
       if(reply){
