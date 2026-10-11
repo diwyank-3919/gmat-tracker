@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sectional Mocks — ScoreConsole</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0c0e15;--card:#151a26;--card2:#1a2030;--bd:rgba(255,255,255,.07);--t1:rgba(255,255,255,.94);--t2:rgba(255,255,255,.66);--t3:rgba(255,255,255,.42);--ind:#878dff;--grn:#46c98f;--amb:#f0bd6a;--red:#fb7185}
+body{font-family:'Hanken Grotesk',system-ui,sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+.wrap{max-width:1100px;margin:0 auto;padding:22px 20px 60px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+h1{font-family:'Fraunces',serif;font-size:24px;font-weight:600;letter-spacing:-.01em}
+.sub{font-size:12px;color:var(--t3);margin-top:2px}
+a.back{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--t2);text-decoration:none;padding:7px 12px;border:1px solid var(--bd);border-radius:9px;background:rgba(255,255,255,.04)}
+a.back:hover{color:var(--ind);border-color:rgba(135,141,255,.4)}
+.tabs{display:inline-flex;gap:2px;background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:10px;padding:3px;margin-bottom:16px}
+.tab{font:600 12.5px 'Hanken Grotesk';padding:7px 18px;border-radius:8px;border:none;background:none;color:var(--t2);cursor:pointer}
+.tab.on{background:rgba(255,255,255,.1);color:var(--t1)}
+.grid{display:grid;grid-template-columns:360px 1fr;gap:14px;align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(155deg,var(--card),var(--card2));border:1px solid var(--bd);border-radius:14px;padding:18px;margin-bottom:14px}
+.ct{font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--t3);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+label.l{display:block;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
+input.f{width:100%;height:36px;background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:9px;color:var(--t1);font:600 13px 'Hanken Grotesk';padding:0 11px;outline:none;color-scheme:dark}
+input.f:focus{border-color:rgba(135,141,255,.5);box-shadow:0 0 0 3px rgba(135,141,255,.13)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.sr{display:grid;grid-template-columns:1fr 62px 62px 48px;gap:8px;align-items:center;margin-bottom:8px}
+.sr .n{font-size:12.5px;font-weight:600;color:var(--t2);display:flex;align-items:center;gap:7px}
+.sr .dot{width:7px;height:7px;border-radius:50%}
+.sr input{height:32px;text-align:center;padding:0 4px}
+.sr .a{font:600 13px 'Fraunces',serif;text-align:right;color:var(--t3)}
+.hd{display:grid;grid-template-columns:1fr 62px 62px 48px;gap:8px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:6px;text-align:center}
+.hd span:first-child{text-align:left}
+.tot{display:flex;justify-content:space-between;align-items:baseline;margin:12px 0;padding-top:12px;border-top:1px solid var(--bd);font-size:12px;color:var(--t2)}
+.tot b{font:600 20px 'Fraunces',serif;color:var(--grn)}
+.btn{width:100%;height:40px;border:none;border-radius:10px;background:var(--ind);color:#0f1118;font:700 13px 'Hanken Grotesk';cursor:pointer}
+.btn:disabled{opacity:.5}
+.btn:hover:not(:disabled){filter:brightness(1.08)}
+.msg{font-size:11.5px;margin-top:8px;min-height:14px;color:var(--t3)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.kpi{background:rgba(255,255,255,.035);border:1px solid var(--bd);border-radius:12px;padding:12px 14px}
+.kpi b{display:block;font:600 24px 'Fraunces',serif;line-height:1}
+.kpi span{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);display:block;margin-top:6px}
+.ch{position:relative;height:250px}
+.bar{display:grid;grid-template-columns:150px 1fr 44px 44px;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--bd);font-size:12px}
+.bar:last-child{border:none}
+.bt{height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.bt i{display:block;height:100%;border-radius:3px}
+.bar .p{font-weight:700;text-align:right}.bar .q{color:var(--t3);text-align:right;font-size:10.5px}
+.hist{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--bd);margin-bottom:6px}
+.hist .m{flex:1;min-width:0}.hist .m div:first-child{font-size:12.5px;font-weight:650}
+.hist .m div:last-child{font-size:10.5px;color:var(--t3);margin-top:3px}
+.hist .pc{font:600 18px 'Fraunces',serif}
+.hist button{background:none;border:none;color:var(--t3);cursor:pointer;font-size:14px;padding:4px;border-radius:6px}
+.hist button:hover{color:var(--red)}
+.empty{text-align:center;color:var(--t3);font-size:12px;padding:26px 0}
+.err{background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.3);color:var(--red);padding:12px 14px;border-radius:10px;font-size:12.5px;margin-bottom:14px;display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div><h1>Sectional Mocks</h1><div class="sub">Log right/wrong by subsection · track accuracy over time</div></div>
+    <a class="back" href="/app.html"><i class="ti ti-arrow-left"></i> Dashboard</a>
+  </div>
+  <div class="err" id="err"></div>
+  <div class="tabs" id="tabs"></div>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <div class="ct">Log a sectional <span id="f-sec"></span></div>
+        <div class="row2">
+          <div><label class="l">Date</label><input class="f" id="f-date" type="date"></div>
+          <div><label class="l">Mock / Source</label><input class="f" id="f-name" type="text" placeholder="e.g. GMAT Club Verbal 3"></div>
+        </div>
+        <div class="hd"><span>Subsection</span><span>Right</span><span>Wrong</span><span>Acc</span></div>
+        <div id="f-rows"></div>
+        <div class="tot"><span>Section total <span id="f-tc"></span></span><b id="f-tp">—</b></div>
+        <button class="btn" id="f-save">Save sectional</button>
+        <div class="msg" id="f-msg"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="kpis" id="kpis"></div>
+      <div class="card"><div class="ct">Section accuracy over time</div><div class="ch"><canvas id="c-sec"></canvas></div></div>
+      <div class="card"><div class="ct"><span id="c-sub-t">Subsection accuracy over time</span></div><div class="ch"><canvas id="c-sub"></canvas></div></div>
+      <div class="card"><div class="ct"><span id="bars-t">Subsection accuracy — overall</span></div><div id="bars"></div></div>
+      <div class="card"><div class="ct">History</div><div id="hist"></div></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/*
+ Run once in Supabase SQL editor:
+
+ create table if not exists sectional_attempts (
+   id uuid primary key default gen_random_uuid(),
+   user_id uuid not null references auth.users(id) on delete cascade,
+   mock_date date not null,
+   mock_name text,
+   section text not null,
+   subsection text not null,
+   correct int not null default 0,
+   wrong int not null default 0,
+   logged_at timestamptz not null default now()
+ );
+ alter table sectional_attempts enable row level security;
+ create policy "own rows" on sectional_attempts for all
+   using (auth.uid() = user_id) with check (auth.uid() = user_id);
+*/
+const supa = supabase.createClient('https://zglxfaarezgyibewtmbh.supabase.co','sb_publishable_24bSL5sfl-tRgRLtik1qNA_NdexORqM');
+const SECTIONS = {
+  Verbal:{color:'#7e9bf0',subs:['RC','CR']},
+  Quant:{color:'#8b7cf8',subs:['Algebra','Number Properties','Advanced Topics','Word Problems','Misc']},
+  DI:{color:'#60a5fa',subs:['Data Sufficiency','Two-Part Analysis','Multi-Source Reasoning','Graphs and Table Analysis']}
+};
+const PAL=['#878dff','#46c98f','#f0bd6a','#fb7185','#60a5fa'];
+let uid=null, rows=[], active='Verbal', charts={};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct=(c,w)=>(c+w)>0?Math.round(c/(c+w)*100):null;
+const col=p=>p==null?'var(--t3)':p>=75?'var(--grn)':p>=55?'var(--amb)':'var(--red)';
+const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+function fail(m){const e=$('err');e.textContent=m;e.style.display='block'}
+
+async function init(){
+  const {data:{session}}=await supa.auth.getSession();
+  if(!session){fail('Not signed in — redirecting to dashboard…');setTimeout(()=>location.href='/app.html',1200);return}
+  uid=session.user.id;
+  $('f-date').value=todayStr();
+  drawTabs(); drawForm(); await load();
+}
+async function load(){
+  const {data,error}=await supa.from('sectional_attempts').select('*').eq('user_id',uid).order('mock_date',{ascending:true}).order('logged_at',{ascending:true}).limit(5000);
+  if(error){fail('Database error: '+error.message+' — create the sectional_attempts table (SQL is at the top of the script).');return}
+  rows=data||[]; renderAll();
+}
+
+function drawTabs(){
+  $('tabs').innerHTML=Object.keys(SECTIONS).map(s=>`<button class="tab ${s===active?'on':''}" data-s="${s}">${s}</button>`).join('');
+  $('tabs').querySelectorAll('.tab').forEach(b=>b.onclick=()=>{active=b.dataset.s;drawTabs();drawForm();renderAll()});
+}
+function drawForm(){
+  const S=SECTIONS[active];
+  $('f-sec').textContent=active; $('f-sec').style.color=S.color;
+  $('f-rows').innerHTML=S.subs.map((n,i)=>`<div class="sr"><div class="n"><span class="dot" style="background:${PAL[i%5]}"></span>${n}</div>
+    <input class="f" type="number" min="0" inputmode="numeric" id="r${i}" placeholder="0"><input class="f" type="number" min="0" inputmode="numeric" id="w${i}" placeholder="0"><div class="a" id="a${i}">—</div></div>`).join('');
+  S.subs.forEach((_,i)=>{$('r'+i).oninput=$('w'+i).oninput=recalc});
+  recalc();
+}
+function vals(){return SECTIONS[active].subs.map((n,i)=>({n,c:parseInt($('r'+i).value,10)||0,w:parseInt($('w'+i).value,10)||0}))}
+function recalc(){
+  let C=0,W=0;
+  vals().forEach((v,i)=>{const p=pct(v.c,v.w);$('a'+i).textContent=p==null?'—':p+'%';$('a'+i).style.color=col(p);C+=v.c;W+=v.w});
+  const p=pct(C,W);$('f-tp').textContent=p==null?'—':p+'%';$('f-tc').textContent=(C+W)?`(${C}/${C+W})`:'';
+}
+$('f-save').onclick=async()=>{
+  const date=$('f-date').value,name=$('f-name').value.trim()||null;
+  const data=vals().filter(v=>v.c+v.w>0).map(v=>({user_id:uid,mock_date:date,mock_name:name,section:active,subsection:v.n,correct:v.c,wrong:v.w}));
+  if(!date){$('f-msg').textContent='Pick a date.';return}
+  if(!data.length){$('f-msg').textContent='Enter right/wrong for at least one subsection.';return}
+  $('f-save').disabled=true;$('f-msg').textContent='Saving…';
+  const {error}=await supa.from('sectional_attempts').insert(data);
+  $('f-save').disabled=false;
+  if(error){$('f-msg').textContent='Error: '+error.message;$('f-msg').style.color='var(--red)';return}
+  $('f-msg').style.color='var(--grn)';$('f-msg').textContent='✓ Saved';
+  drawForm();$('f-name').value='';await load();
+};
+
+function agg(list){return list.reduce((a,r)=>{a.c+=r.correct;a.w+=r.wrong;return a},{c:0,w:0})}
+// series: [{label,color,filter}] over unique dates of `list`
+function trend(list,series){
+  const dates=[...new Set(list.map(r=>r.mock_date))].sort();
+  return {labels:dates.map(d=>new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})),
+    datasets:series.map(s=>({label:s.label,borderColor:s.color,backgroundColor:s.color,borderWidth:2,tension:.35,spanGaps:true,pointRadius:3.5,pointHoverRadius:6,
+      data:dates.map(d=>{const a=agg(list.filter(r=>r.mock_date===d&&s.filter(r)));return pct(a.c,a.w)})}))};
+}
+function line(id,data){
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart($(id),{type:'line',data,options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{labels:{color:'rgba(255,255,255,.6)',boxWidth:9,boxHeight:9,usePointStyle:true,font:{size:11}}},
+      tooltip:{backgroundColor:'rgba(9,11,17,.97)',borderColor:'rgba(255,255,255,.12)',borderWidth:1,callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y}%`}}},
+    scales:{y:{min:0,max:100,grid:{color:'rgba(255,255,255,.05)'},border:{display:false},ticks:{color:'rgba(255,255,255,.35)',callback:v=>v+'%',stepSize:25}},
+      x:{grid:{display:false},border:{display:false},ticks:{color:'rgba(255,255,255,.35)',maxRotation:0,autoSkip:true,maxTicksLimit:8}}}}});
+}
+
+function renderAll(){
+  // KPIs for active section
+  const mine=rows.filter(r=>r.section===active),A=agg(mine);
+  const keys=[...new Set(mine.map(r=>r.mock_date+'|'+(r.mock_name||'')))];
+  const sit=keys.map(k=>{const a=agg(mine.filter(r=>r.mock_date+'|'+(r.mock_name||'')===k));return pct(a.c,a.w)});
+  const latest=sit.length?sit[sit.length-1]:null,best=sit.length?Math.max(...sit):null;
+  $('kpis').innerHTML=[[A.c+A.w?pct(A.c,A.w)+'%':'—','Overall '+active],[latest==null?'—':latest+'%','Latest sitting'],[best==null?'—':best+'%','Best sitting']]
+    .map((k,i)=>`<div class="kpi"><b style="color:${i==0?SECTIONS[active].color:'var(--t1)'}">${k[0]}</b><span>${k[1]}</span></div>`).join('');
+
+  line('c-sec',trend(rows,Object.keys(SECTIONS).map(s=>({label:s,color:SECTIONS[s].color,filter:r=>r.section===s}))));
+  $('c-sub-t').textContent=active+' — subsection accuracy over time';
+  line('c-sub',trend(mine,SECTIONS[active].subs.map((n,i)=>({label:n,color:PAL[i%5],filter:r=>r.subsection===n}))));
+
+  $('bars-t').textContent=active+' — subsection accuracy overall';
+  $('bars').innerHTML=SECTIONS[active].subs.map((n,i)=>{const a=agg(mine.filter(r=>r.subsection===n)),p=pct(a.c,a.w);
+    return `<div class="bar"><span>${n}</span><div class="bt"><i style="width:${p||0}%;background:${PAL[i%5]}"></i></div><span class="p" style="color:${col(p)}">${p==null?'—':p+'%'}</span><span class="q">${a.c+a.w}q</span></div>`}).join('');
+
+  // history (all sections, newest first)
+  const groups={},order=[];
+  rows.forEach(r=>{const k=r.section+'|'+r.mock_date+'|'+(r.mock_name||'');if(!groups[k]){groups[k]=[];order.push(k)}groups[k].push(r)});
+  order.reverse();
+  $('hist').innerHTML=order.length?order.map(k=>{const g=groups[k],a=agg(g),p=pct(a.c,a.w),f=g[0];
+    const chips=g.map(r=>`${esc(r.subsection)} ${r.correct}/${r.correct+r.wrong}`).join(' · ');
+    return `<div class="hist"><div class="m"><div><span style="color:${SECTIONS[f.section].color}">${f.section}</span> · ${esc(f.mock_name||'Untitled')} <span style="color:var(--t3);font-weight:500">· ${f.mock_date}</span></div><div>${chips}</div></div>
+      <div class="pc" style="color:${col(p)}">${p}%</div><button data-ids="${g.map(r=>r.id).join(',')}" title="Delete"><i class="ti ti-trash"></i></button></div>`}).join('')
+    :'<div class="empty">No sectionals logged yet</div>';
+  $('hist').querySelectorAll('button').forEach(b=>b.onclick=async()=>{
+    if(!confirm('Delete this sectional?'))return;
+    const {error}=await supa.from('sectional_attempts').delete().in('id',b.dataset.ids.split(','));
+    if(error)fail(error.message);else load();
+  });
+}
+init();
+</script>
+</body>
+</html>
