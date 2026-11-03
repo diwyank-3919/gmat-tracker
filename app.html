@@ -6582,6 +6582,20 @@
             height: 1px;
             background: rgba(255, 255, 255, 0.07);
         }
+        .freeze-badge{
+    display:inline-flex;align-items:center;gap:4px;margin-left:7px;
+    font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    padding:2px 8px;border-radius:100px;
+    color:#8fd3ff;background:rgba(96,165,250,.14);border:1px solid rgba(96,165,250,.32);
+    animation:fadeUp .35s cubic-bezier(.34,1.56,.64,1) both;
+}
+.freeze-badge .ti{font-size:11px}
+.s-dot.frozen{
+    background:rgba(96,165,250,.12);color:#8fd3ff;
+    border:1px solid rgba(96,165,250,.28);
+}
+html.sc-light .freeze-badge{color:#2563eb;background:rgba(37,99,235,.09);border-color:rgba(37,99,235,.24)}
+html.sc-light .s-dot.frozen{color:#2563eb;background:rgba(37,99,235,.08);border-color:rgba(37,99,235,.22)}
     </style>
     <style>
         html.sc-guest #auth-overlay {
@@ -11793,6 +11807,7 @@
                 </div>
                 <div class="topbar-right">
                     <div class="tb-chip purple"><i class="ti ti-flame"></i><span id="streak-chip">0</span> day streak<span id="shield-pips-tb" class="shield-pips" role="button" tabindex="0" aria-label="Streak shields — tap to learn more" onclick="event.stopPropagation();shieldExplain()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();shieldExplain()}"></span>
+                    <span id="freeze-badge" class="freeze-badge" style="display:none" title="Exam is tomorrow or today, so your streak and missed days are frozen"><i class="ti ti-snowflake"></i> Frozen</span>
                     </div>
                     <div class="tb-chip green"><i class="ti ti-target"></i><span id="week-chip">0</span>% this week
                     </div>
@@ -13372,6 +13387,23 @@
         function startOfWeek(d) { var r = new Date(d); r.setDate(r.getDate() - ((r.getDay() + 6) % 7)); r.setHours(0, 0, 0, 0); return r; }
         function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
         function minsOn(ds) { return sessions.filter(function (s) { return s.date === ds; }).reduce(function (a, s) { return a + s.mins; }, 0); }
+        // ── EXAM FREEZE: from (exam date − 1) onward, streak is pinned and no day counts as missed ──
+function examFreezeDate() {
+    var ed = null;
+    try { ed = localStorage.getItem("gmat_exam_date"); } catch (e) {}
+    if (!ed) return null;
+    var p = ed.split("-").map(Number);
+    if (p.length < 3 || p.some(isNaN)) return null;
+    return addDays(new Date(p[0], p[1] - 1, p[2]), -1);   // first frozen day
+}
+function isExamFrozen(d) {
+    var fz = examFreezeDate();
+    return !!fz && (d || today) >= fz;
+}
+function syncFreezeBadge() {
+    var b = document.getElementById("freeze-badge");
+    if (b) b.style.display = isExamFrozen(today) ? "inline-flex" : "none";
+}
 
         // ── STREAK SHIELDS (single source of truth) ──
         var SHIELD_CAP = 2, SHIELD_KEY = "sc_shields_v1";
@@ -13438,6 +13470,8 @@
         }
         function computeStreak(refToday) {
             var base = refToday || today, st = shieldState(), covered = st.covered, changed = false;
+var _fz = examFreezeDate();
+if (_fz && base > _fz) base = _fz;   // frozen: count as of the freeze day, never break after it
             function present(d) { var k = dateStr(d); return minsOn(k) > 0 || covered[k] === true; }
                         var openToday = !present(base);
             var cur = openToday ? addDays(base, -1) : new Date(base), n = 0;
@@ -14869,7 +14903,9 @@
             var PREP_START = new Date(2026, 3, 25); PREP_START.setHours(0, 0, 0, 0);
             var missedDays = 0, deficitMins = 0, consistentDays = 0, totalDaysSinceStart = 0;
             var cursor = new Date(PREP_START);
-            while (cursor <= today) {
+var _fzM = examFreezeDate();
+var _endM = (_fzM && today >= _fzM) ? addDays(_fzM, -1) : today;   // frozen days never count
+while (cursor <= _endM) {
                 totalDaysSinceStart++;
                 var dsMins = minsOn(dateStr(cursor)); var dsTgt = targetFor(cursor);
                 if (dsMins > 0) { if (dsMins < dsTgt) missedDays++; if (dsMins >= dsTgt * 0.8) { consistentDays++; } else { deficitMins += dsTgt - dsMins; } }
@@ -14903,6 +14939,7 @@
             document.getElementById("mom-xp").textContent = xp.toLocaleString();
            document.getElementById("mom-streak").textContent = streak;
             syncShields();
+            syncFreezeBadge();
             renderPhase();
             renderMVS();
             renderWinRecall();
@@ -15153,6 +15190,15 @@
 
         function renderStreak() {
             var grid, i, d, ds, mins, tgt, met, noData, below, dot;
+            dot = document.createElement("div");
+if (isExamFrozen(d) && mins === 0) {
+    dot.className = "s-dot frozen";
+    dot.title = ds + " — streak frozen";
+    dot.innerHTML = '<i class="ti ti-snowflake" style="font-size:8px"></i>';
+    grid.appendChild(dot);
+    continue;
+}
+dot.className = "s-dot " + (met ? "met" : below ? "below" : "nodata");
             grid = document.getElementById("streak-grid"); grid.innerHTML = "";
             for (i = 29; i >= 0; i--) {
                 d = addDays(today, -i); ds = dateStr(d); mins = minsOn(ds); tgt = targetFor(d);
@@ -19177,7 +19223,8 @@
                 var wpct = Math.min(100, Math.round(wm / wt * 100) || 0);
                 var PS = new Date(2026, 3, 25); PS.setHours(0, 0, 0, 0);
                 var consistent = 0, totalD = 0, cur = new Date(PS);
-                while (cur <= today) { totalD++; var dm = minsOn(dateStr(cur)), dt = targetFor(cur); if (dm > 0 && dm >= dt * 0.8) consistent++; cur = addDays(cur, 1); }
+var _fzR = examFreezeDate(), _endR = (_fzR && today >= _fzR) ? addDays(_fzR, -1) : today;
+while (cur <= _endR) { totalD++; var dm = minsOn(dateStr(cur)), dt = targetFor(cur); if (dm > 0 && dm >= dt * 0.8) consistent++; cur = addDays(cur, 1); }
                 var cons = totalD > 0 ? Math.min(100, Math.round(consistent / totalD * 100)) : 0;
                 var streak = computeStreak();
                 return Math.min(100, Math.round(cons * 0.4 + wpct * 0.3 + Math.min(100, streak * 10) * 0.3));
@@ -19231,8 +19278,9 @@
             sc2Num(document.getElementById("sc-h-streak"), streak, function (v) { return v + "🔥"; }, 800);
 
             var PREP_START_SC = new Date(2026, 3, 25); PREP_START_SC.setHours(0, 0, 0, 0);
-            var cD = 0, tD = 0, cc = new Date(PREP_START_SC);
-            while (cc <= today) { tD++; var m = minsOn(dateStr(cc)); if (m > 0 && m >= targetFor(cc) * 0.8) cD++; cc = addDays(cc, 1); }
+          var cD = 0, tD = 0, cc = new Date(PREP_START_SC);
+var _fzS = examFreezeDate(), _endS = (_fzS && today >= _fzS) ? addDays(_fzS, -1) : today;
+while (cc <= _endS) { tD++; var m = minsOn(dateStr(cc)); if (m > 0 && m >= targetFor(cc) * 0.8) cD++; cc = addDays(cc, 1); }
             if (tD > 0) sc2Num(document.getElementById("sc-h-cons"), Math.min(100, Math.round(cD / tD * 100)), function (v) { return v + "%"; }, 950);
             else document.getElementById("sc-h-cons").textContent = "—";
 
