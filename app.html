@@ -15188,29 +15188,26 @@ while (cursor <= _endM) {
             });
         }
 
-        function renderStreak() {
-            var grid, i, d, ds, mins, tgt, met, noData, below, dot;
-            dot = document.createElement("div");
-if (isExamFrozen(d) && mins === 0) {
-    dot.className = "s-dot frozen";
-    dot.title = ds + " — streak frozen";
-    dot.innerHTML = '<i class="ti ti-snowflake" style="font-size:8px"></i>';
-    grid.appendChild(dot);
-    continue;
-}
-dot.className = "s-dot " + (met ? "met" : below ? "below" : "nodata");
-            grid = document.getElementById("streak-grid"); grid.innerHTML = "";
-            for (i = 29; i >= 0; i--) {
-                d = addDays(today, -i); ds = dateStr(d); mins = minsOn(ds); tgt = targetFor(d);
-                met = mins >= tgt && mins > 0; noData = mins === 0; below = !met && !noData;
-                dot = document.createElement("div");
-                dot.className = "s-dot " + (met ? "met" : below ? "below" : "nodata");
-                dot.title = ds + (mins ? " - " + fmtH(mins) : " - No session logged");
-                dot.innerHTML = '<i class="ti ' + (met ? "ti-check" : "ti-x") + '" style="font-size:8px"></i>';
-                grid.appendChild(dot);
-            }
+       function renderStreak() {
+    var grid, i, d, ds, mins, tgt, met, noData, below, dot;
+    grid = document.getElementById("streak-grid"); grid.innerHTML = "";
+    for (i = 29; i >= 0; i--) {
+        d = addDays(today, -i); ds = dateStr(d); mins = minsOn(ds); tgt = targetFor(d);
+        met = mins >= tgt && mins > 0; noData = mins === 0; below = !met && !noData;
+        dot = document.createElement("div");
+        if (isExamFrozen(d) && mins === 0) {
+            dot.className = "s-dot frozen";
+            dot.title = ds + " — streak frozen";
+            dot.innerHTML = '<i class="ti ti-snowflake" style="font-size:8px"></i>';
+            grid.appendChild(dot);
+            continue;
         }
-
+        dot.className = "s-dot " + (met ? "met" : below ? "below" : "nodata");
+        dot.title = ds + (mins ? " - " + fmtH(mins) : " - No session logged");
+        dot.innerHTML = '<i class="ti ' + (met ? "ti-check" : "ti-x") + '" style="font-size:8px"></i>';
+        grid.appendChild(dot);
+    }
+}
         function renderSessions() {
             var el, ts, ws, we, filtered, total;
             el = document.getElementById("sessions-list");
